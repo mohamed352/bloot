@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="dark" dir="ltr" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Bloot - Messages</title>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#958ea0",
+                    "tertiary-fixed-dim": "#ffb869",
+                    "on-secondary-container": "#5b3800",
+                    "primary-container": "#a078ff",
+                    "on-tertiary-container": "#3f2300",
+                    "surface-container": "#211e27",
+                    "inverse-primary": "#6d3bd7",
+                    "surface-container-lowest": "#0f0d15",
+                    "border": "rgba(139, 92, 246, 0.15)",
+                    "surface-dim": "#15121b",
+                    "on-tertiary-fixed": "#2c1700",
+                    "primary-light": "#A78BFA",
+                    "on-surface": "#FFFFFF",
+                    "on-background": "#e7e0ed",
+                    "primary-dark": "#7C3AED",
+                    "surface-muted": "#1E1E2E",
+                    "on-secondary-fixed": "#2a1700",
+                    "inverse-on-surface": "#322f39",
+                    "live": "#FF1A1A",
+                    "surface-bright": "#3b3742",
+                    "secondary-fixed-dim": "#ffb95f",
+                    "border-gold": "rgba(245, 158, 11, 0.3)",
+                    "surface-variant": "#37333d",
+                    "error-container": "#93000a",
+                    "surface-container-highest": "#37333d",
+                    "on-secondary": "#472a00",
+                    "error": "#EF4444",
+                    "surface-hover": "#252538",
+                    "on-surface-muted": "#9CA3AF",
+                    "primary-fixed-dim": "#d0bcff",
+                    "surface-container-low": "#1d1a23",
+                    "on-secondary-fixed-variant": "#653e00",
+                    "on-tertiary": "#482900",
+                    "tertiary-fixed": "#ffdcbb",
+                    "on-primary-fixed": "#23005c",
+                    "surface-tint": "#d0bcff",
+                    "primary": "#8B5CF6",
+                    "on-surface-secondary": "#6B7280",
+                    "border-light": "rgba(139, 92, 246, 0.25)",
+                    "tertiary-container": "#ca801e",
+                    "outline-variant": "#494454",
+                    "surface-elevated": "#161622",
+                    "on-primary": "#3c0091",
+                    "tertiary": "#ffb869",
+                    "on-primary-fixed-variant": "#5516be",
+                    "background": "#0A0A0F",
+                    "secondary-fixed": "#ffddb8",
+                    "on-error": "#690005",
+                    "gold-dark": "#D97706",
+                    "primary-fixed": "#e9ddff",
+                    "on-surface-variant": "#cbc3d7",
+                    "gold-light": "#FBBF24",
+                    "secondary": "#ffb95f",
+                    "on-error-container": "#ffdad6",
+                    "on-primary-container": "#340080",
+                    "inverse-surface": "#e7e0ed",
+                    "surface-container-high": "#2c2832",
+                    "secondary-container": "#ee9800",
+                    "surface": "#0A0A0F",
+                    "success": "#22C55E",
+                    "on-tertiary-fixed-variant": "#673d00"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.5rem",
+                    "sm": "8px",
+                    "md": "12px",
+                    "lg": "16px",
+                    "xl": "24px",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xxl": "32px",
+                    "xs": "4px",
+                    "md": "12px",
+                    "sm": "8px",
+                    "lg": "16px",
+                    "xl": "24px"
+            },
+            "boxShadow": {
+                    "button": "0 4px 14px rgba(139, 92, 246, 0.25)",
+                    "buttonGold": "0 4px 14px rgba(245, 158, 11, 0.3)",
+                    "card": "0 2px 8px rgba(0, 0, 0, 0.2)",
+                    "elevated": "0 8px 24px rgba(0, 0, 0, 0.3)",
+                    "glow": "0 0 40px rgba(139, 92, 246, 0.15)"
+            },
+            "fontFamily": {
+                    "label": ["Inter", "sans-serif"],
+                    "body": ["Inter", "sans-serif"],
+                    "score": ["Inter", "sans-serif"],
+                    "display": ["Inter", "sans-serif"],
+                    "caption": ["Inter", "sans-serif"],
+                    "title": ["Inter", "sans-serif"],
+                    "headline": ["Inter", "sans-serif"]
+            },
+            "fontSize": {
+                    "label": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                    "body": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                    "score": ["24px", { "lineHeight": "1.1", "fontWeight": "700" }],
+                    "display": ["28px", { "lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "800" }],
+                    "caption": ["12px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                    "title": ["15px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                    "headline": ["22px", { "lineHeight": "1.3", "fontWeight": "700" }]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        /* Utility for hiding scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Safe area handling */
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body antialiased selection:bg-primary/30">
+<!-- Mobile Container (Max 448px width) -->
+<!-- RTL: dir="rtl" would be applied on the html tag. Use margin-inline-start/end accordingly. -->
+<div class="relative mx-auto w-full max-w-md min-h-screen bg-surface flex flex-col overflow-x-hidden pb-24">
+<!-- Header -->
+<header class="sticky top-0 z-20 flex items-center justify-between px-6 py-4 bg-surface/95 backdrop-blur border-b border-border">
+<h1 class="font-headline text-headline text-on-surface">Messages</h1>
+<button aria-label="New Message" class="flex items-center justify-center w-10 h-10 rounded-full bg-surface-muted hover:bg-surface-hover transition-colors border border-border group">
+<span class="material-symbols-outlined text-on-surface group-hover:text-primary transition-colors" data-icon="edit_square" data-weight="regular">edit_square</span>
+</button>
+</header>
+<!-- Tabs -->
+<!-- RTL: flex items should naturally reverse order in standard RTL flow -->
+<nav class="flex overflow-x-auto no-scrollbar border-b border-border px-4 py-1">
+<button class="px-5 py-3 border-b-[3px] border-primary text-primary font-label text-label whitespace-nowrap">All</button>
+<button class="px-5 py-3 border-b-[3px] border-transparent text-on-surface-muted hover:text-on-surface transition-colors font-label text-label whitespace-nowrap">Rooms</button>
+<button class="px-5 py-3 border-b-[3px] border-transparent text-on-surface-muted hover:text-on-surface transition-colors font-label text-label whitespace-nowrap">Direct</button>
+<button class="px-5 py-3 border-b-[3px] border-transparent text-on-surface-muted hover:text-on-surface transition-colors font-label text-label whitespace-nowrap">Tournaments</button>
+</nav>
+<!-- Chat List -->
+<main class="flex flex-col flex-1 pb-4">
+<!-- Standard Item (Unread) -->
+<div class="flex items-center gap-4 px-6 py-4 bg-surface hover:bg-surface-elevated transition-colors border-b border-border cursor-pointer group">
+<div class="relative shrink-0">
+<img alt="Ahmed" class="w-14 h-14 rounded-full object-cover border border-border group-hover:border-primary/50 transition-colors" data-alt="A close-up portrait of a young Middle Eastern man with a neat beard, wearing a stylish dark hoodie. The background is a moody, blurred neon-lit street at night. The lighting is cinematic with subtle purple and blue rim lights, matching a premium dark mode aesthetic. The mood is confident and modern." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdgvcBTH7CxabTHpH-dS4I18nQfAYtThInQsrw2UUmFPDnLZ45Vf-l9D7MDEfjD1-PWSZYCYkhZ5dpceAsq-7RYLYRImggZFLUZ7E3x9w3CeVWuVu4sRWpAe2SoB-NN39Syz8ziDaUMidL-VjsjMCKbxgUIaCbA4EXaSBqJYXEXWjDjDN3uaVn6xmhZW5k7DLoT70ncKRYreJCPMM_SOszdXxM-1BE9n87F060e6y8_Z9nSvBsT9JkNvda5VzGItk1MMs8hmvPpb8A"/>
+<div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-success rounded-full border-[2.5px] border-surface"></div>
+</div>
+<!-- RTL: text-align: start for flex-1 container texts -->
+<div class="flex-1 min-w-0 text-start">
+<div class="flex justify-between items-center mb-1">
+<h2 class="font-title text-title text-on-surface truncate pr-2">Ahmed</h2>
+<span class="font-caption text-caption text-primary shrink-0 font-medium">2m ago</span>
+</div>
+<p class="font-body text-body text-on-surface line-clamp-1 font-medium">Hey, are you ready for the tournament later? I've got my deck ready.</p>
+</div>
+<div class="shrink-0 flex flex-col items-end gap-1 pl-2">
+<div class="bg-primary text-white text-[11px] font-bold h-5 min-w-[20px] px-1.5 flex items-center justify-center rounded-full shadow-button">3</div>
+</div>
+</div>
+<!-- Room Item (LIVE) -->
+<div class="flex items-center gap-4 px-6 py-4 bg-surface hover:bg-surface-elevated transition-colors border-b border-border cursor-pointer group">
+<div class="relative shrink-0">
+<img alt="Friday Night Room" class="w-14 h-14 rounded-xl object-cover border border-primary/30 group-hover:border-primary transition-colors" data-alt="An abstract, moody composition of playing cards scattered on a dark, plush felt surface. The scene is illuminated by a dramatic overhead spotlight casting deep shadows. Deep purple and subtle gold hues dominate the color palette, conveying an exclusive, high-stakes gaming room atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKJtG4P-jjlAUqY5KgDa6HQWUVjX3WsOlrGWunE6rX0Ir-GCcgw8WIgExfX8P9l8x7EwcuNf28k-v59dGzLcvmXRk__peqVkzOr4wRETPPJxFVn0UWEuJcZziALKDJPD7p1zS3JSPD1ERPc8rFtgFdANHs5v3n9wF8uA_X3JltB4TvVtU-Hb3gfI2as6aLRj1UtE6ybmtorIhVrATV1dTWyvTrWIQRK36b_mb6RQWpKSJ_jo5qiTMVXHyM1Esy_aGG7mDj31com0mt"/>
+<div class="absolute -top-1 -right-1 bg-live text-white text-[9px] font-bold px-1.5 py-0.5 rounded animate-pulse shadow-glow">LIVE</div>
+</div>
+<div class="flex-1 min-w-0 text-start">
+<div class="flex justify-between items-center mb-1">
+<h2 class="font-title text-title text-on-surface truncate pr-2">Friday Night Room</h2>
+<span class="font-caption text-caption text-on-surface-muted shrink-0">14m ago</span>
+</div>
+<p class="font-body text-body text-on-surface-muted line-clamp-1"><span class="text-on-surface">Sarah:</span> Let's start the game! Who is dealing next?</p>
+</div>
+</div>
+<!-- Swipe Action Item (Visual Demonstration) -->
+<!-- RTL: In RTL, swipe actions would typically slide from the left side. The structure here mimics a right-to-left swipe revealing right-side actions in LTR. -->
+<div class="relative bg-surface-muted border-b border-border overflow-hidden">
+<!-- Action Buttons (Background layer) -->
+<div class="absolute inset-y-0 right-0 flex z-0">
+<button class="w-[72px] bg-surface-muted hover:bg-surface-elevated flex flex-col items-center justify-center text-on-surface-muted transition-colors border-l border-border">
+<span class="material-symbols-outlined text-xl mb-1" data-icon="volume_off" data-weight="regular">volume_off</span>
+<span class="text-[11px] font-medium">Mute</span>
+</button>
+<button class="w-[72px] bg-error hover:bg-error/90 flex flex-col items-center justify-center text-white transition-colors">
+<span class="material-symbols-outlined text-xl mb-1" data-icon="archive" data-weight="regular">archive</span>
+<span class="text-[11px] font-medium">Archive</span>
+</button>
+</div>
+<!-- Slid Content Layer -->
+<div class="relative flex items-center gap-4 px-6 py-4 bg-surface shadow-[-4px_0_12px_rgba(0,0,0,0.2)] -translate-x-[144px] cursor-pointer">
+<div class="relative shrink-0">
+<img alt="Tariq" class="w-14 h-14 rounded-full object-cover border border-border" data-alt="A portrait of a person laughing, taken in a dimly lit, high-end lounge setting. The background features blurred, glowing ambient lights in deep violet and gold tones. The subject is casually dressed but looks sophisticated. The overall aesthetic is dark, warm, and highly social." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxBT3XcK5AomZoBUsGfP3MrAut-e73lerNEzVXlTH3kDSKCnal5TgZd07h9VSH4nixckZxsD56sV9mZwDIoZpQc7d-X_906_RpaAaRYHU4uZrteyh9Wx6FrmOt3dH9p47zXy5O-RCycnaEVbQWDh6k_DArtCnFR8J3TvyyDAm3C6i6cskWnDsyW9SwfvtXtczetTlvAmfkKwswpzzg0vkZbLnsUJIoA4W5idaq6sqmsQPi-dBaYvizdLRck5K9ZsoHx8NUt3BJ_QLz"/>
+</div>
+<div class="flex-1 min-w-0 text-start opacity-70">
+<div class="flex justify-between items-center mb-1">
+<h2 class="font-title text-title text-on-surface truncate pr-2">Tariq</h2>
+<span class="font-caption text-caption text-on-surface-muted shrink-0">1h ago</span>
+</div>
+<p class="font-body text-body text-on-surface-muted line-clamp-1">Good game yesterday! Rematch?</p>
+</div>
+</div>
+</div>
+<!-- Tournament Item (Gold Badge) -->
+<div class="flex items-center gap-4 px-6 py-4 bg-surface hover:bg-surface-elevated transition-colors border-b border-border cursor-pointer group">
+<div class="relative shrink-0 flex items-center justify-center w-14 h-14 rounded-xl bg-surface-muted border border-border-gold">
+<span class="material-symbols-outlined text-gold text-3xl drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" data-icon="emoji_events" data-weight="regular">emoji_events</span>
+</div>
+<div class="flex-1 min-w-0 text-start">
+<div class="flex justify-between items-center mb-1">
+<h2 class="font-title text-title text-on-surface truncate pr-2">Weekend Clash</h2>
+<span class="font-caption text-caption text-on-surface-muted shrink-0">Yesterday</span>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<span class="bg-gold/10 border border-border-gold text-warning text-[11px] font-semibold px-2 py-0.5 rounded-full inline-block">Invitation</span>
+<p class="font-body text-body text-on-surface-muted line-clamp-1 flex-1">You've been invited to join Team Alpha.</p>
+</div>
+</div>
+</div>
+<!-- Read Item -->
+<div class="flex items-center gap-4 px-6 py-4 bg-surface hover:bg-surface-elevated transition-colors border-b border-border cursor-pointer group opacity-80">
+<div class="relative shrink-0">
+<img alt="Khalid" class="w-14 h-14 rounded-full object-cover border border-border" data-alt="A close-up of a smiling man with short hair in a dark, atmospheric room. Soft purple ambient lighting catches the side of his face, while the background falls off into deep blackness. The mood is relaxed and authentic, fitting a premium social networking environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMlASP9gyyE8ecY30OFonTaGn8A0sNi1460J9XBzltlUbWuhbb7TjnJQJ9NFPAipvYQHJ4RDKYJjwbuKmsdLLaW5R8Rroa5ZXOtX5N6ocF3ArgYLJkz2SFCsg5-HpIMkAH80kz4khoaqKgIE7eSVx_MDh5EsGZSeins7SKWWq5Njr1aJ5UQoin03xUFNOHCKaJ3D6aPVSTzymgUNBoFbFk9c3fhciGr0IRwni8-Ukob3ook5b8f3Ex-daKSSEEG_-5f7gMGArhlfcJ"/>
+</div>
+<div class="flex-1 min-w-0 text-start">
+<div class="flex justify-between items-center mb-1">
+<h2 class="font-title text-title text-on-surface truncate pr-2">Khalid</h2>
+<span class="font-caption text-caption text-on-surface-muted shrink-0">Yesterday</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="done_all" data-weight="regular">done_all</span>
+<p class="font-body text-body text-on-surface-muted line-clamp-1">See you there.</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation -->
+<!-- RTL: Directionality is generally handled by flex-row, keeping standard icon placement. -->
+<nav class="fixed bottom-0 w-full max-w-md bg-surface-elevated border-t border-border pb-safe pt-2 px-6 flex justify-between items-center z-50">
+<a class="flex flex-col items-center justify-center gap-1 text-on-surface-muted hover:text-on-surface transition-colors w-16" href="#">
+<span class="material-symbols-outlined text-[24px]" data-icon="home" data-weight="regular">home</span>
+<span class="text-[10px] font-medium tracking-wide">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 text-on-surface-muted hover:text-on-surface transition-colors w-16" href="#">
+<span class="material-symbols-outlined text-[24px]" data-icon="sports_esports" data-weight="regular">sports_esports</span>
+<span class="text-[10px] font-medium tracking-wide">Games</span>
+</a>
+<!-- Central Play Action -->
+<div class="relative -top-5 flex flex-col items-center justify-center">
+<button class="w-[52px] h-[52px] rounded-full bg-gradient-to-b from-gold-light to-gold-dark text-surface shadow-buttonGold flex items-center justify-center border-4 border-surface active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[28px] font-bold" data-icon="play_arrow" data-weight="fill" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+<!-- Active State -->
+<a class="flex flex-col items-center justify-center gap-1 text-primary w-16" href="#">
+<span class="material-symbols-outlined text-[24px]" data-icon="chat" data-weight="fill" style="font-variation-settings: 'FILL' 1;">chat</span>
+<span class="text-[10px] font-medium tracking-wide">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 text-on-surface-muted hover:text-on-surface transition-colors w-16" href="#">
+<span class="material-symbols-outlined text-[24px]" data-icon="person" data-weight="regular">person</span>
+<span class="text-[10px] font-medium tracking-wide">Profile</span>
+</a>
+</nav>
+</div>
+</body></html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloot Admin — Reports</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: {
+                    'b-purple': '#8B5CF6', 'b-purple-dark': '#7C3AED', 'b-purple-light': '#A78BFA',
+                    'b-gold': '#F59E0B', 'b-gold-light': '#FBBF24', 'b-gold-dark': '#D97706',
+                    'b-black': '#0A0A0F', 'b-surface': '#0A0A0F', 'b-surface-elevated': '#161622',
+                    'b-surface-muted': '#1E1E2E', 'b-surface-hover': '#252538',
+                    'b-on-surface': '#FFFFFF', 'b-on-surface-muted': '#9CA3AF', 'b-on-surface-secondary': '#6B7280',
+                    'b-border': 'rgba(139, 92, 246, 0.15)', 'b-live': '#FF1A1A',
+                },
+                fontFamily: { 'sans': ['Inter', 'sans-serif'] }
+            }}
+        }
+    </script>
+    <style>
+        body { background: #0A0A0F; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.3); border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(139,92,246,0.5); }
+    </style>
+</head>
+<body class="font-sans text-b-on-surface min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-b-surface-elevated border-r border-b-border flex flex-col z-30 transition-transform duration-300 -translate-x-full lg:translate-x-0">
+        <div class="p-6 border-b border-b-border">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-b-purple flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-xl">casino</span>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-b-on-surface">Bloot</h1>
+                    <span class="text-xs font-semibold text-b-gold">Admin</span>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4 custom-scrollbar">
+            <ul class="space-y-1 px-3">
+                <li><a href="../01_dashboard/01_home_stats.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">dashboard</span>Dashboard</a></li>
+                <li><a href="../02_users/01_user_management.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">person</span>Users</a></li>
+                <li><a href="../03_reports/01_report_review.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 bg-purple-500/10 text-purple-400"><span class="material-symbols-outlined text-xl">flag</span>Reports</a></li>
+                <li><a href="../04_tournaments/01_tournament_management.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">emoji_events</span>Tournaments</a></li>
+                <li><a href="../05_games/01_game_monitor.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">casino</span>Games</a></li>
+                <li><a href="../06_rooms/01_room_monitor.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">meeting_room</span>Rooms</a></li>
+                <li><a href="../07_streams/01_stream_moderation.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">videocam</span>Streams</a></li>
+                <li><a href="../08_economy/01_coin_transactions.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">payments</span>Economy</a></li>
+                <li><a href="../09_achievements/01_achievement_management.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">military_tech</span>Achievements</a></li>
+                <li><a href="../10_leaderboards/01_leaderboard_management.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">leaderboard</span>Leaderboards</a></li>
+                <li><a href="../11_notifications/01_notification_broadcast.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">notifications</span>Notifications</a></li>
+                <li><a href="../12_analytics/01_reports_analytics.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">analytics</span>Analytics</a></li>
+                <li><a href="../13_settings/01_system_settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">settings</span>Settings</a></li>
+            </ul>
+        </nav>
+        <div class="p-4 border-t border-b-border">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-b-purple/30 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-b-purple text-lg">person</span>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-b-on-surface">Admin User</p>
+                    <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-b-gold/20 text-b-gold">Super Admin</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <button onclick="toggleSidebar()" class="lg:hidden fixed top-4 left-4 z-40 p-2 rounded-lg bg-b-surface-elevated border border-b-border">
+        <span class="material-symbols-outlined text-b-on-surface">menu</span>
+    </button>
+
+    <div id="reviewModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="absolute inset-0 bg-black/60" onclick="closeModal()"></div>
+        <div class="relative bg-b-surface-elevated rounded-2xl border border-b-border max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl">
+            <div class="flex items-center justify-between p-6 border-b border-b-border">
+                <h3 class="text-lg font-semibold text-b-on-surface">Report Review</h3>
+                <button onclick="closeModal()" class="text-b-on-surface-muted hover:text-b-on-surface transition-colors"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[60vh] custom-scrollbar" id="modalContent"></div>
+            <div class="flex items-center justify-end gap-3 p-6 border-t border-b-border">
+                <button onclick="closeModal(); showToast('Report dismissed', 'info')" class="px-4 py-2 rounded-lg border border-b-border text-b-on-surface-muted text-sm font-medium hover:bg-b-surface-muted transition-colors">Dismiss</button>
+                <button onclick="closeModal(); showToast('Report escalated', 'warning')" class="px-4 py-2 rounded-lg border border-orange-500/30 text-orange-400 text-sm font-medium hover:bg-orange-500/10 transition-colors flex items-center gap-1"><span class="material-symbols-outlined text-base">arrow_upward</span>Escalate</button>
+                <button onclick="closeModal(); showToast('User banned', 'error')" class="px-4 py-2 rounded-lg border border-red-500/30 text-red-400 text-sm font-medium hover:bg-red-500/10 transition-colors flex items-center gap-1"><span class="material-symbols-outlined text-base">block</span>Ban User</button>
+                <button onclick="closeModal(); showToast('Report resolved', 'success')" class="px-4 py-2 rounded-lg bg-b-purple text-white text-sm font-medium hover:bg-b-purple-dark transition-colors flex items-center gap-1"><span class="material-symbols-outlined text-base">check_circle</span>Resolve</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="lg:ml-64 min-h-screen p-6 lg:p-8">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-b-on-surface">Reports</h1>
+                <p class="text-sm text-b-on-surface-muted mt-1">Review and manage user reports</p>
+            </div>
+        </div>
+
+        <div id="tabsContainer" class="mb-6">
+            <div class="flex items-center gap-2 overflow-x-auto pb-2">
+                <button data-tab="pending" class="px-4 py-2 rounded-lg text-sm font-medium bg-b-purple text-white flex items-center gap-2 whitespace-nowrap">
+                    Pending <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-white/20">7</span>
+                </button>
+                <button data-tab="inreview" class="px-4 py-2 rounded-lg text-sm font-medium text-b-on-surface-muted hover:text-b-on-surface hover:bg-b-surface-muted transition-colors flex items-center gap-2 whitespace-nowrap">
+                    In Review <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-b-surface-muted">3</span>
+                </button>
+                <button data-tab="resolved" class="px-4 py-2 rounded-lg text-sm font-medium text-b-on-surface-muted hover:text-b-on-surface hover:bg-b-surface-muted transition-colors flex items-center gap-2 whitespace-nowrap">
+                    Resolved <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-b-surface-muted">142</span>
+                </button>
+                <button data-tab="dismissed" class="px-4 py-2 rounded-lg text-sm font-medium text-b-on-surface-muted hover:text-b-on-surface hover:bg-b-surface-muted transition-colors flex items-center gap-2 whitespace-nowrap">
+                    Dismissed <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-b-surface-muted">28</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-b-surface-elevated rounded-xl border border-b-border mb-6">
+            <div class="p-4 flex flex-wrap items-center gap-3 border-b border-b-border">
+                <select id="typeFilter" onchange="applyFilters()" class="px-3 py-2 rounded-lg bg-b-surface border border-b-border text-sm text-b-on-surface focus:outline-none focus:border-b-purple">
+                    <option value="">All Types</option>
+                    <option value="User">User</option>
+                    <option value="Room">Room</option>
+                    <option value="Stream">Stream</option>
+                    <option value="Message">Message</option>
+                </select>
+                <select id="severityFilter" onchange="applyFilters()" class="px-3 py-2 rounded-lg bg-b-surface border border-b-border text-sm text-b-on-surface focus:outline-none focus:border-b-purple">
+                    <option value="">All Severity</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Critical">Critical</option>
+                </select>
+                <input type="date" class="px-3 py-2 rounded-lg bg-b-surface border border-b-border text-sm text-b-on-surface focus:outline-none focus:border-b-purple" value="2026-04-11">
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-b-border">
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-b-on-surface-muted uppercase tracking-wide">ID</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-b-on-surface-muted uppercase tracking-wide">Reporter</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-b-on-surface-muted uppercase tracking-wide">Reported</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-b-on-surface-muted uppercase tracking-wide">Type</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-b-on-surface-muted uppercase tracking-wide">Reason</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-b-on-surface-muted uppercase tracking-wide">Severity</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-b-on-surface-muted uppercase tracking-wide">Date</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-b-on-surface-muted uppercase tracking-wide">Status</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-b-on-surface-muted uppercase tracking-wide">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="../shared.js"></script>
+    <script>
+const reports = [
+    { id: 'RPT-1853', reporter: '@محمد_العلي', reported: '@فهد_2024', type: 'User', reason: 'Abusive language in chat', severity: 'High', date: '2026-05-11', status: 'pending', context: 'Game room #428 — player used offensive language toward opponent after losing a match.' },
+    { id: 'RPT-1852', reporter: '@سارة_الحربي', reported: '@خالد', type: 'Message', reason: 'Spam messages in lobby', severity: 'Medium', date: '2026-05-11', status: 'pending', context: 'User sent 47 identical messages in the main lobby within 2 minutes.' },
+    { id: 'RPT-1851', reporter: '@نورة_سعيد', reported: 'Room VIP #12', type: 'Room', reason: 'Inappropriate room name', severity: 'Low', date: '2026-05-10', status: 'pending', context: 'Room name contains offensive language that violates community guidelines.' },
+    { id: 'RPT-1850', reporter: '@عبدالله', reported: '@ريم_بث', type: 'Stream', reason: 'Inappropriate content on stream', severity: 'Critical', date: '2026-05-10', status: 'pending', context: 'Streamer displayed content that violates the platform content policy during a live broadcast with 120 viewers.' },
+    { id: 'RPT-1849', reporter: '@يوسف', reported: '@فهد_2024', type: 'User', reason: 'Cheating / exploiting', severity: 'Critical', date: '2026-05-09', status: 'pending', context: 'Suspected use of third-party tools to manipulate game outcomes. Win rate anomaly detected.' },
+    { id: 'RPT-1848', reporter: '@مريم_الحربي', reported: '@أحمد_ز', type: 'User', reason: 'Harassment via private messages', severity: 'High', date: '2026-05-09', status: 'pending', context: 'User sent threatening private messages after a tournament elimination.' },
+    { id: 'RPT-1847', reporter: '@أحمد_ز', reported: '@محمد_العلي', type: 'Message', reason: 'Hate speech in group chat', severity: 'Critical', date: '2026-05-08', status: 'pending', context: 'User used hate speech targeting a religious group in the Saudi chat room.' },
+    { id: 'RPT-1846', reporter: '@محمد_العلي', reported: 'Stream #1847', type: 'Stream', reason: 'Copyrighted music in stream', severity: 'Medium', date: '2026-05-08', status: 'inreview', context: 'Streamer played copyrighted music for extended period during broadcast.' }
+];
+
+const typeColors = { User: 'bg-blue-500/20 text-blue-400', Room: 'bg-purple-500/20 text-purple-400', Stream: 'bg-red-500/20 text-red-400', Message: 'bg-gray-500/20 text-gray-400' };
+const severityColors = { Low: 'bg-green-500/20 text-green-400', Medium: 'bg-yellow-500/20 text-yellow-400', High: 'bg-orange-500/20 text-orange-400', Critical: 'bg-red-500/20 text-red-400' };
+const statusColors = { pending: 'bg-yellow-500/20 text-yellow-400', inreview: 'bg-blue-500/20 text-blue-400', resolved: 'bg-green-500/20 text-green-400', dismissed: 'bg-gray-500/20 text-gray-400' };
+
+let currentTab = 'pending';
+
+function renderReports() {
+    const typeFilter = document.getElementById('typeFilter').value;
+    const severityFilter = document.getElementById('severityFilter').value;
+    let filtered = reports.filter(r => {
+        if (currentTab === 'pending') return r.status === 'pending';
+        if (currentTab === 'inreview') return r.status === 'inreview';
+        if (currentTab === 'resolved') return r.status === 'resolved';
+        if (currentTab === 'dismissed') return r.status === 'dismissed';
+        return true;
+    });
+    if (typeFilter) filtered = filtered.filter(r => r.type === typeFilter);
+    if (severityFilter) filtered = filtered.filter(r => r.severity === severityFilter);
+
+    const tbody = document.getElementById('reportsBody');
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-b-on-surface-muted">No reports found</td></tr>';
+        return;
+    }
+    tbody.innerHTML = filtered.map((r, i) => `
+        <tr class="border-b border-b-border/50 hover:bg-b-surface-muted/50 transition-colors" data-type="${r.type}" data-severity="${r.severity}">
+            <td class="px-4 py-3 text-sm font-mono text-b-purple">${r.id}</td>
+            <td class="px-4 py-3 text-sm text-b-on-surface-muted">${r.reporter}</td>
+            <td class="px-4 py-3 text-sm font-medium text-b-on-surface">${r.reported}</td>
+            <td class="px-4 py-3"><span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${typeColors[r.type]}">${r.type}</span></td>
+            <td class="px-4 py-3 text-sm text-b-on-surface-muted max-w-[200px] truncate">${r.reason}</td>
+            <td class="px-4 py-3"><span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${severityColors[r.severity]}">${r.severity}</span></td>
+            <td class="px-4 py-3 text-sm text-b-on-surface-secondary">${r.date}</td>
+            <td class="px-4 py-3"><span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${statusColors[r.status]}">${r.status === 'inreview' ? 'In Review' : r.status}</span></td>
+            <td class="px-4 py-3">
+                <div class="flex items-center gap-1">
+                    <button onclick="openReview(${reports.indexOf(r)})" class="p-1.5 rounded-lg hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-purple transition-colors" title="Review"><span class="material-symbols-outlined text-base">visibility</span></button>
+                    <button onclick="dismissReport(${reports.indexOf(r)})" class="p-1.5 rounded-lg hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface transition-colors" title="Dismiss"><span class="material-symbols-outlined text-base">close</span></button>
+                    <button onclick="escalateReport(${reports.indexOf(r)})" class="p-1.5 rounded-lg hover:bg-b-surface-hover text-b-on-surface-muted hover:text-orange-400 transition-colors" title="Escalate"><span class="material-symbols-outlined text-base">arrow_upward</span></button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function applyFilters() { renderReports(); }
+
+function openReview(index) {
+    const r = reports[index];
+    document.getElementById('modalContent').innerHTML = `
+        <div class="space-y-6">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="px-2 py-0.5 rounded-full text-xs font-medium ${typeColors[r.type]}">${r.type}</span>
+                <span class="px-2 py-0.5 rounded-full text-xs font-medium ${severityColors[r.severity]}">${r.severity} Severity</span>
+                <span class="px-2 py-0.5 rounded-full text-xs font-medium capitalize ${statusColors[r.status]}">${r.status === 'inreview' ? 'In Review' : r.status}</span>
+                <span class="text-xs text-b-on-surface-secondary">${r.date}</span>
+            </div>
+
+            <div class="bg-b-surface rounded-lg p-4 border border-b-border">
+                <h4 class="text-sm font-semibold text-b-on-surface mb-2">Report Details</h4>
+                <p class="text-sm text-b-on-surface-muted"><strong>Report ID:</strong> ${r.id}</p>
+                <p class="text-sm text-b-on-surface-muted mt-1"><strong>Reason:</strong> ${r.reason}</p>
+                <p class="text-sm text-b-on-surface-muted mt-1"><strong>Context:</strong> ${r.context}</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-b-surface rounded-lg p-4 border border-b-border">
+                    <h4 class="text-xs font-semibold text-b-on-surface-muted uppercase tracking-wide mb-2">Reporter</h4>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-sm font-bold text-blue-400">${r.reporter[1].toUpperCase()}</div>
+                        <div><p class="text-sm font-medium text-b-on-surface">${r.reporter}</p><p class="text-xs text-b-on-surface-secondary">Member since 2025</p></div>
+                    </div>
+                    <div class="mt-3 space-y-1">
+                        <p class="text-xs text-b-on-surface-muted">Reports filed: 3</p>
+                        <p class="text-xs text-b-on-surface-muted">Account status: <span class="text-green-400">Active</span></p>
+                    </div>
+                </div>
+                <div class="bg-b-surface rounded-lg p-4 border border-b-border">
+                    <h4 class="text-xs font-semibold text-b-on-surface-muted uppercase tracking-wide mb-2">Reported User / Entity</h4>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-sm font-bold text-red-400">${r.reported[0] === '@' ? r.reported[1].toUpperCase() : r.reported[0]}</div>
+                        <div><p class="text-sm font-medium text-b-on-surface">${r.reported}</p><p class="text-xs text-b-on-surface-secondary">Reports against: ${Math.floor(Math.random() * 5) + 1}</p></div>
+                    </div>
+                    <div class="mt-3 space-y-1">
+                        <p class="text-xs text-b-on-surface-muted">Prior warnings: ${Math.floor(Math.random() * 3)}</p>
+                        <p class="text-xs text-b-on-surface-muted">Account status: <span class="text-yellow-400">Under Review</span></p>
+                    </div>
+                </div>
+            </div>
+
+            ${r.type === 'Stream' || r.type === 'Room' ? `
+            <div class="bg-b-surface rounded-lg p-4 border border-b-border">
+                <h4 class="text-xs font-semibold text-b-on-surface-muted uppercase tracking-wide mb-2">${r.type} Context</h4>
+                <p class="text-sm text-b-on-surface-muted">${r.type === 'Stream' ? 'Stream was live at time of report with an estimated 120 viewers. Recording has been flagged for review.' : 'Room had 8 participants at time of report. Chat logs have been preserved.'}</p>
+                <button class="mt-2 px-3 py-1.5 rounded-lg text-xs bg-b-surface-muted text-b-on-surface-muted hover:text-b-on-surface transition-colors flex items-center gap-1"><span class="material-symbols-outlined text-sm">open_in_new</span>View ${r.type === 'Stream' ? 'Recording' : 'Room Logs'}</button>
+            </div>
+            ` : ''}
+
+            <div>
+                <label class="text-sm font-semibold text-b-on-surface mb-2 block">Resolution Notes</label>
+                <textarea id="resolutionNotes" rows="3" placeholder="Add notes about how this report should be resolved..." class="w-full px-4 py-3 rounded-lg bg-b-surface border border-b-border text-sm text-b-on-surface placeholder-b-on-surface-secondary focus:outline-none focus:border-b-purple resize-none"></textarea>
+            </div>
+        </div>
+    `;
+    document.getElementById('reviewModal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('reviewModal').classList.add('hidden');
+}
+
+function dismissReport(index) {
+    confirmDialog('Dismiss this report? This action cannot be undone.', () => {
+        reports[index].status = 'dismissed';
+        showToast('Report dismissed', 'info');
+        renderReports();
+    });
+}
+
+function escalateReport(index) {
+    confirmDialog('Escalate this report to senior moderators?', () => {
+        reports[index].status = 'inreview';
+        showToast('Report escalated', 'warning');
+        renderReports();
+    });
+}
+
+initTabs('#tabsContainer', (tab) => {
+    currentTab = tab;
+    renderReports();
+});
+
+renderReports();
+    </script>
+</body>
+</html>

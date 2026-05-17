@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>Live Stream - High Stakes Friday Night</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#a078ff",
+                    "border": "rgba(139, 92, 246, 0.15)",
+                    "on-tertiary-fixed-variant": "#673d00",
+                    "tertiary-fixed-dim": "#ffb869",
+                    "on-secondary-container": "#5b3800",
+                    "on-error": "#690005",
+                    "gold-light": "#FBBF24",
+                    "tertiary-container": "#ca801e",
+                    "surface-dim": "#15121b",
+                    "inverse-primary": "#6d3bd7",
+                    "surface-container-lowest": "#0f0d15",
+                    "on-surface-secondary": "#6B7280",
+                    "surface-elevated": "#161622",
+                    "outline": "#958ea0",
+                    "surface-container-high": "#2c2832",
+                    "secondary": "#ffb95f",
+                    "surface-bright": "#3b3742",
+                    "surface-tint": "#d0bcff",
+                    "on-surface-muted": "#9CA3AF",
+                    "primary-dark": "#7C3AED",
+                    "surface-container-low": "#1d1a23",
+                    "primary-light": "#A78BFA",
+                    "on-secondary-fixed": "#2a1700",
+                    "on-surface": "#FFFFFF",
+                    "tertiary-fixed": "#ffdcbb",
+                    "primary": "#d0bcff",
+                    "on-surface-variant": "#cbc3d7",
+                    "border-gold": "rgba(245, 158, 11, 0.3)",
+                    "on-primary-fixed": "#23005c",
+                    "error-container": "#93000a",
+                    "surface-hover": "#252538",
+                    "secondary-container": "#ee9800",
+                    "success": "#22C55E",
+                    "background": "#15121b",
+                    "on-primary-container": "#340080",
+                    "surface-muted": "#1E1E2E",
+                    "primary-fixed": "#e9ddff",
+                    "error": "#EF4444",
+                    "on-tertiary": "#482900",
+                    "on-primary": "#3c0091",
+                    "surface-container": "#211e27",
+                    "surface": "#0A0A0F",
+                    "on-secondary-fixed-variant": "#653e00",
+                    "surface-variant": "#37333d",
+                    "tertiary": "#ffb869",
+                    "on-error-container": "#ffdad6",
+                    "live": "#FF1A1A",
+                    "on-tertiary-container": "#3f2300",
+                    "on-background": "#e7e0ed",
+                    "on-primary-fixed-variant": "#5516be",
+                    "secondary-fixed": "#ffddb8",
+                    "primary-fixed-dim": "#d0bcff",
+                    "on-secondary": "#472a00",
+                    "gold-dark": "#D97706",
+                    "outline-variant": "#494454",
+                    "border-light": "rgba(139, 92, 246, 0.25)",
+                    "surface-container-highest": "#37333d",
+                    "secondary-fixed-dim": "#ffb95f",
+                    "inverse-on-surface": "#322f39",
+                    "on-tertiary-fixed": "#2c1700",
+                    "inverse-surface": "#e7e0ed"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xxl": "32px",
+                    "lg": "16px",
+                    "xl": "24px",
+                    "xs": "4px",
+                    "sm": "8px",
+                    "md": "12px"
+            },
+            "fontFamily": {
+                    "title": ["Inter"],
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"],
+                    "score": ["Inter"],
+                    "caption": ["Inter"],
+                    "display": ["Inter"]
+            },
+            "fontSize": {
+                    "title": ["15px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "headline": ["22px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                    "body": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "label": ["13px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "score": ["24px", {"lineHeight": "1.1", "fontWeight": "700"}],
+                    "caption": ["12px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "display": ["28px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "800"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+          font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Custom Scrollbar for Chat */
+        .chat-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .chat-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .chat-scroll::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.3);
+            border-radius: 4px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body overflow-hidden h-screen w-screen flex flex-col relative">
+<!-- Top Overlay Bar -->
+<!-- RTL Note: Switch flex-row to flex-row-reverse or use standard Tailwind RTL utilities -->
+<div class="absolute top-0 w-full z-50 pt-safe px-lg py-md flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent">
+<div class="flex items-center gap-sm">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-elevated/50 border border-border backdrop-blur-sm text-on-surface hover:bg-surface-hover transition-colors">
+<span class="material-symbols-outlined text-[20px]">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<h1 class="font-title text-title text-on-surface drop-shadow-md">High Stakes Friday Night</h1>
+<div class="flex items-center gap-xs">
+<span class="bg-live text-white font-label text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded flex items-center gap-1 animate-pulse">
+<span class="w-1.5 h-1.5 bg-white rounded-full"></span> LIVE
+                    </span>
+<span class="flex items-center gap-1 text-on-surface-variant font-caption text-caption bg-surface-elevated/50 px-2 py-0.5 rounded-full border border-border backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px]">visibility</span> 4,281
+                    </span>
+</div>
+</div>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-elevated/50 border border-border backdrop-blur-sm text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">flag</span>
+</button>
+</div>
+<!-- Main Content Area - Portrait Layout 448px max -->
+<div class="flex-1 w-full max-w-[448px] mx-auto flex flex-col pt-20 relative z-10">
+<!-- Player Grid (2x2) -->
+<div class="grid grid-cols-2 gap-sm px-lg mb-4">
+<!-- Player 1 - Team A (Purple) -->
+<div class="relative aspect-square rounded-xl overflow-hidden border border-primary-dark shadow-[0_0_15px_rgba(124,58,237,0.2)] bg-surface-muted group">
+<img class="w-full h-full object-cover" data-alt="A portrait of a confident young woman with dark hair in a sleek gaming chair, lit by soft purple and blue neon lights in a premium dark room setting. The vibe is intense but social." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGtUf17vQEzaw8SQruww5_1WQlov_-9omthPhwEMAuIcQ8sI8AuiCKOFy8CQgqvV5jfacOG9OljgsQDF0gB9jESVxcCiTBvTtSYVbKMdZmg0gMHiie4sMHUBpNC37trluLOYkjgoI5vZS-WyYla2KzMq4Sm79zKnWXmly9cyYZVpSYDoTJZ78Owoq5Bmr4z0gRKpB34KSbnvroU-LVKzyttt9zxFd29c2v34XVWXE8Nx17Onfu0g0UUJosqTSLGyvE6WN2o-jgh3I-"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-2 left-2 flex flex-col">
+<span class="font-label text-label text-on-surface drop-shadow-md">Sarah M.</span>
+</div>
+<div class="absolute bottom-2 right-2 flex gap-1">
+<span class="material-symbols-outlined fill text-[16px] text-white drop-shadow-md">mic</span>
+</div>
+</div>
+<!-- Player 2 - Team B (Gold) -->
+<div class="relative aspect-square rounded-xl overflow-hidden border border-gold-light shadow-[0_0_15px_rgba(251,191,36,0.15)] bg-surface-muted group">
+<img class="w-full h-full object-cover" data-alt="A portrait of a focused man in his 30s with a neat beard, wearing a dark hoodie. He is illuminated by a warm golden glow from his monitor in a sophisticated dark room." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDP0RqE-x3owY476E0B-HQkLTx_CNrn1-HPUagy5M0ksTfQP7a_OVwUcfLmba4q8edGv9GATTobCgYYlLwLnGeJc2trabjJajc2OwrVJho1yUgk_AbD6GurGf9SP3kHY4VU6ArlPcm-A9IHrNPs46bgh-xlPb8T7EzRff3g-n0nTQbOQhEN5FR4xvF_97sPvaUBoAwH5fOILa0cf5blqtxAMxqG-dDgeU_cdVHKd3TjMSrE2ouXf_jPuMo7tT7JFr3k9B1CzgdI1f62"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-2 left-2 flex flex-col">
+<span class="font-label text-label text-on-surface drop-shadow-md">Khalid A.</span>
+</div>
+<div class="absolute bottom-2 right-2 flex gap-1">
+<span class="material-symbols-outlined fill text-[16px] text-error drop-shadow-md">mic_off</span>
+</div>
+</div>
+<!-- Player 3 - Team B (Gold) -->
+<div class="relative aspect-square rounded-xl overflow-hidden border border-gold-light shadow-[0_0_15px_rgba(251,191,36,0.15)] bg-surface-muted group">
+<img class="w-full h-full object-cover" data-alt="A portrait of a young man laughing, wearing a premium black t-shirt. The lighting features warm amber and gold tones against a deep black background, conveying a high-end social gaming atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUnY9qsZs4Q26CKAgFWdwax95Yn8qBtVfGuliaHyjqVo0wq868F7rsPPDCy2P0RCLMjWIfmzg7vZCsfjvHvJAmBOXpM4hezIVG-s86lLuLxJe3zgNdRpEt_TDoopTqPv_DMz_ruZyt9VIlDgx_bB_io4dG4mYgZgMa27Px3HsXCLFdSAYA_ug40Q-gmiQQlXekRL5V1VFC0z-wPnLvP4Og52tkDHrEgE8_lSN0yp29mplDuBrWCx5ZghADPW4wom7ypo0_utbEJGA_"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-2 left-2 flex flex-col">
+<span class="font-label text-label text-on-surface drop-shadow-md">Faisal R.</span>
+</div>
+<div class="absolute bottom-2 right-2 flex gap-1">
+<span class="material-symbols-outlined fill text-[16px] text-white drop-shadow-md">mic</span>
+</div>
+</div>
+<!-- Player 4 - Team A (Purple) -->
+<div class="relative aspect-square rounded-xl overflow-hidden border border-primary-dark shadow-[0_0_15px_rgba(124,58,237,0.2)] bg-surface-muted group">
+<div class="w-full h-full flex items-center justify-center bg-surface-elevated">
+<span class="material-symbols-outlined text-[48px] text-on-surface-muted">person</span>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-2 left-2 flex flex-col">
+<span class="font-label text-label text-on-surface drop-shadow-md">Guest_88</span>
+</div>
+<div class="absolute bottom-2 right-2 flex gap-1">
+<span class="material-symbols-outlined fill text-[16px] text-error drop-shadow-md">videocam_off</span>
+<span class="material-symbols-outlined fill text-[16px] text-error drop-shadow-md">mic_off</span>
+</div>
+</div>
+</div>
+<!-- Middle Section: Game Table & Scoreboard -->
+<div class="px-lg mb-4 flex-1 flex flex-col relative">
+<!-- Scoreboard -->
+<div class="flex justify-center mb-4">
+<div class="bg-surface-elevated border border-border rounded-full px-xl py-sm flex items-center gap-4 shadow-lg shadow-black/50">
+<div class="flex flex-col items-center">
+<span class="font-caption text-caption text-primary-light">Us</span>
+<span class="font-score text-score text-on-surface">8</span>
+</div>
+<div class="h-6 w-px bg-border-light"></div>
+<div class="flex flex-col items-center">
+<span class="font-caption text-caption text-gold-light">Them</span>
+<span class="font-score text-score text-gold-light drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">12</span>
+</div>
+</div>
+</div>
+<!-- Game Table Felt -->
+<div class="flex-1 rounded-2xl border border-success/30 bg-gradient-to-b from-[#064E3B] to-[#022C22] relative shadow-inner overflow-hidden flex items-center justify-center min-h-[160px]">
+<!-- Center Cards -->
+<div class="relative w-32 h-32">
+<!-- Card 1 -->
+<div class="absolute top-2 left-4 w-12 h-16 bg-white rounded flex items-center justify-center shadow-md transform -rotate-12 border border-gray-200">
+<span class="text-black font-bold">10♠</span>
+</div>
+<!-- Card 2 -->
+<div class="absolute top-4 right-4 w-12 h-16 bg-white rounded flex items-center justify-center shadow-md transform rotate-6 border border-gray-200">
+<span class="text-red-600 font-bold">A♥</span>
+</div>
+<!-- Card 3 (Winning card glow) -->
+<div class="absolute bottom-2 left-1/2 -translate-x-1/2 w-14 h-20 bg-white rounded flex items-center justify-center shadow-[0_0_20px_rgba(251,191,36,0.6)] transform -rotate-3 border border-gold-light z-10">
+<span class="text-red-600 font-bold text-lg">K♦</span>
+</div>
+</div>
+<!-- Turn Indicator -->
+<div class="absolute bottom-3 bg-surface-container/80 backdrop-blur-sm px-4 py-1.5 rounded-full border border-border-light shadow-md flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-gold-light animate-pulse"></span>
+<span class="font-caption text-caption text-on-surface">Ahmed's Turn</span>
+</div>
+</div>
+</div>
+<!-- Bottom Section: Chat Area -->
+<div class="h-[220px] bg-gradient-to-t from-surface via-surface/95 to-transparent px-lg flex flex-col justify-end pb-safe mb-4">
+<!-- Chat Messages -->
+<div class="flex-1 overflow-y-auto chat-scroll flex flex-col justify-end gap-3 pb-4 mask-image: linear-gradient(to top, black 80%, transparent 100%);">
+<div class="flex items-start gap-2">
+<img class="w-6 h-6 rounded-full object-cover border border-border" data-alt="A tiny circular avatar portrait of a man with short hair on a dark purple background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkKAE4vhwBNDJ50TBuaIhcq2lAsRPDlEPQV-G1x8l65lOOrwUuou43P9ULONH5qlAZuSxuXZ4jrEgRc8ZXkLg19HoDFBvbZdCUOaDNXQRPymXW3FOCCuEYXB8QUpRCTdHt2Z1D_qGdtwesm1l_KM1fRNn75OtHePu2fHqvHt0lCeZy1TTieBoSp-W-JVn9pMZqjaxD2NUY3PW-MwwgB8f0FOyXlWPb_htluoSDhU7jHap0ZotwR7-4j98a5ooG_L-mlM77j0pIT3_G"/>
+<div class="flex flex-col">
+<span class="font-caption text-caption text-on-surface-variant/70">Mohammed</span>
+<span class="font-body text-body text-on-surface text-[13px]">Great play there!</span>
+</div>
+</div>
+<div class="flex items-start gap-2">
+<div class="w-6 h-6 rounded-full bg-gold-dark flex items-center justify-center border border-gold-light">
+<span class="font-caption text-[10px] text-white">N</span>
+</div>
+<div class="flex flex-col">
+<span class="font-caption text-caption text-gold-light">Noura 👑</span>
+<span class="font-body text-body text-on-surface text-[13px]">They didn't see that coming lol</span>
+</div>
+</div>
+<div class="flex items-start gap-2">
+<img class="w-6 h-6 rounded-full object-cover border border-border" data-alt="A tiny circular avatar portrait of a smiling man." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6L7WiMOJ9InTAenlpc7sX-HZLwBB8qRFMRCcuLg0Xz8b2hcIoyFTw-BtN-MulSv03teprvsaFZUKU4hlfGQcxnowyNIppK3ASlp3sejdNsBCxUC8X2RGlq7OtkReTfjxfVbQ-mFqIFuVEiURh1ZkONAoaQgBgHdSDGV2RHB9Bv4lp8nspy5nrLQAER3_jXHJnel1llTDxo8kpGf_nnNPeg_BmIWNtQ8rBS_BT6RRbrHSst1Ht0wUdYsnpplCL_71VgHCwBMEM0FBq"/>
+<div class="flex flex-col">
+<span class="font-caption text-caption text-primary-light">Yousef</span>
+<span class="font-body text-body text-on-surface text-[13px]">Focus guys, we need 4 points.</span>
+</div>
+</div>
+</div>
+<!-- Chat Input -->
+<div class="flex items-center gap-2 relative z-20">
+<div class="flex-1 relative">
+<input class="w-full bg-surface-elevated border border-border rounded-full py-2.5 pl-4 pr-10 font-body text-body text-on-surface placeholder-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-colors" placeholder="Say something..." type="text"/>
+</div>
+<button class="w-10 h-10 rounded-full bg-primary-dark text-white flex items-center justify-center shadow-[0_4px_12px_rgba(124,58,237,0.4)] hover:bg-primary-light transition-colors">
+<span class="material-symbols-outlined text-[18px] ml-0.5">send</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Floating Interaction Bar (Right Side) -->
+<!-- RTL Note: absolute right-4 becomes absolute left-4 -->
+<div class="absolute right-4 bottom-32 flex flex-col gap-4 z-40">
+<!-- Avatar/Follow -->
+<div class="relative flex justify-center mb-2">
+<img class="w-10 h-10 rounded-full border-2 border-primary object-cover" data-alt="A portrait of a male host with a neat beard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsrfz6fuwsgq5PMClWfaKLahTS1cBu-KvqGdrz0_7BRSpazigLlc6-l9W_i50n8Giird94PMZNGAWs2YGE_umWPkmC4r5OZYe-9ej9OEp2IgonASxk8tm0rtVA3TQ1bkAikKCEv1tUS0Mo_2xiPFnyYvDV5ikcMIg79vFpHMZF3voB9CEpYJcatNIWPgldp2k2meVCczuvyJTYtHeHj4Mac5aL71SLF6KoKhGGJT441EbhuUl6bylbNN3eyRhGdUwQskepGuR3kcYQ"/>
+<button class="absolute -bottom-2 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center border-2 border-surface">
+<span class="material-symbols-outlined text-[14px]">add</span>
+</button>
+</div>
+<!-- Like -->
+<button class="flex flex-col items-center gap-1 group">
+<div class="w-10 h-10 rounded-full bg-surface-elevated/80 border border-border backdrop-blur-sm flex items-center justify-center text-on-surface group-hover:text-error transition-colors shadow-lg">
+<span class="material-symbols-outlined text-[24px]">favorite</span>
+</div>
+<span class="font-caption text-[10px] text-on-surface-variant drop-shadow-md">12.4k</span>
+</button>
+<!-- Gift -->
+<button class="flex flex-col items-center gap-1 group">
+<div class="w-10 h-10 rounded-full bg-surface-elevated/80 border border-border backdrop-blur-sm flex items-center justify-center text-gold-light group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(251,191,36,0.2)]">
+<span class="material-symbols-outlined text-[24px] fill">diamond</span>
+</div>
+<span class="font-caption text-[10px] text-on-surface-variant drop-shadow-md">Gift</span>
+</button>
+<!-- Share -->
+<button class="flex flex-col items-center gap-1 group">
+<div class="w-10 h-10 rounded-full bg-surface-elevated/80 border border-border backdrop-blur-sm flex items-center justify-center text-on-surface group-hover:text-primary transition-colors shadow-lg">
+<span class="material-symbols-outlined text-[24px]">share</span>
+</div>
+<span class="font-caption text-[10px] text-on-surface-variant drop-shadow-md">Share</span>
+</button>
+</div>
+</body></html>

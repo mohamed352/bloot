@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bloot - Create Room</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "success": "#22C55E",
+                        "primary-container": "#a078ff",
+                        "on-error": "#690005",
+                        "on-primary-fixed": "#23005c",
+                        "surface-container-high": "#2c2832",
+                        "on-primary-fixed-variant": "#5516be",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "inverse-primary": "#6d3bd7",
+                        "on-surface-muted": "#9CA3AF",
+                        "secondary-container": "#ee9800",
+                        "outline-variant": "#494454",
+                        "border": "rgba(139, 92, 246, 0.15)",
+                        "tertiary-fixed": "#ffdcbb",
+                        "on-tertiary": "#482900",
+                        "primary-light": "#A78BFA",
+                        "error": "#EF4444",
+                        "inverse-on-surface": "#322f39",
+                        "secondary": "#ffb95f",
+                        "surface-bright": "#3b3742",
+                        "border-gold": "rgba(245, 158, 11, 0.3)",
+                        "primary-fixed": "#e9ddff",
+                        "surface-muted": "#1E1E2E",
+                        "surface-container": "#211e27",
+                        "primary-dark": "#7C3AED",
+                        "on-surface": "#e7e0ed",
+                        "tertiary": "#ffb869",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "border-light": "rgba(139, 92, 246, 0.25)",
+                        "background": "#15121b",
+                        "error-container": "#93000a",
+                        "on-primary-container": "#340080",
+                        "primary-fixed-dim": "#d0bcff",
+                        "on-surface-variant": "#cbc3d7",
+                        "surface-container-highest": "#37333d",
+                        "on-secondary-container": "#5b3800",
+                        "on-surface-secondary": "#6B7280",
+                        "surface-hover": "#252538",
+                        "surface-variant": "#37333d",
+                        "primary": "#d0bcff",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "surface-tint": "#d0bcff",
+                        "secondary-fixed": "#ffddb8",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "surface-container-low": "#1d1a23",
+                        "gold-dark": "#D97706",
+                        "outline": "#958ea0",
+                        "on-tertiary-fixed": "#2c1700",
+                        "inverse-surface": "#e7e0ed",
+                        "on-secondary-fixed": "#2a1700",
+                        "gold-light": "#FBBF24",
+                        "on-background": "#e7e0ed",
+                        "on-secondary": "#472a00",
+                        "live": "#FF1A1A",
+                        "on-primary": "#3c0091",
+                        "surface": "#0A0A0F",
+                        "tertiary-container": "#ca801e",
+                        "surface-elevated": "#161622",
+                        "surface-container-lowest": "#0f0d15",
+                        "on-tertiary-container": "#3f2300",
+                        "surface-dim": "#15121b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "24px",
+                        "md": "12px",
+                        "xxl": "32px",
+                        "sm": "8px",
+                        "lg": "16px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "caption": ["Inter"],
+                        "title": ["Inter"],
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "display": ["Inter"],
+                        "score": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    "fontSize": {
+                        "caption": ["12px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "title": ["15px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "headline": ["22px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "body": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "display": ["28px", { "lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "800" }],
+                        "score": ["24px", { "lineHeight": "1.1", "fontWeight": "700" }],
+                        "label": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom scrollbar for webkit to match the dark theme */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(139, 92, 246, 0.3);
+            border-radius: 10px;
+        }
+        .bg-gold-gradient {
+            background: linear-gradient(135deg, #FBBF24 0%, #D97706 100%);
+        }
+        .glow-purple {
+            box-shadow: 0 0 40px rgba(139, 92, 246, 0.15);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col mx-auto max-w-[448px] relative overflow-hidden">
+<!-- RTL Implementation Note:
+         - Add `dir="rtl"` to the HTML tag.
+         - Update flex layouts (e.g., `flex-row-reverse` where appropriate, or rely on logical properties).
+         - Ensure margins and paddings are logically flipped (e.g., `ml-auto` to `mr-auto` or use `ms-auto`/`me-auto`).
+         - Ensure icons like the back arrow point the right way (e.g., `arrow_forward` instead of `arrow_back`).
+    -->
+<!-- TopAppBar (Customized for Sub-page) -->
+<header class="fixed top-0 w-full z-50 flex items-center px-lg py-md max-w-[448px] mx-auto bg-surface/80 backdrop-blur-xl border-b border-border-light shadow-md shadow-primary-dark/5">
+<button class="text-on-surface-variant hover:bg-surface-hover p-2 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline text-headline flex-1 text-center pr-[40px] text-primary">Create Room</h1>
+</header>
+<!-- Main Scrollable Content -->
+<main class="flex-1 overflow-y-auto mt-[72px] pb-[140px] px-lg space-y-xl">
+<!-- Room Name Section -->
+<section class="space-y-sm">
+<label class="font-title text-title text-on-surface block">Room Name</label>
+<div class="relative">
+<input class="w-full bg-surface-elevated border border-border rounded-xl px-lg py-md font-body text-body text-on-surface placeholder:text-on-surface-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Friday Night Baloot" type="text"/>
+<span class="absolute right-md top-1/2 -translate-y-1/2 font-caption text-caption text-on-surface-muted">0/30</span>
+</div>
+</section>
+<!-- Room Type Selection -->
+<section class="space-y-md">
+<label class="font-title text-title text-on-surface block">Room Type</label>
+<div class="grid grid-cols-1 gap-md">
+<!-- Private Room -->
+<div class="bg-surface-elevated border border-primary rounded-xl p-md flex items-center gap-md cursor-pointer hover:bg-surface-hover transition-colors">
+<div class="w-10 h-10 rounded-full bg-surface-hover flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+<div class="flex-1">
+<h3 class="font-title text-title text-on-surface">Private Room</h3>
+<p class="font-caption text-caption text-on-surface-muted">Invite only, closed to public</p>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-primary flex items-center justify-center shrink-0">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+</div>
+</div>
+<!-- Public Room -->
+<div class="bg-surface-elevated border border-border rounded-xl p-md flex items-center gap-md cursor-pointer hover:bg-surface-hover transition-colors">
+<div class="w-10 h-10 rounded-full bg-surface-hover flex items-center justify-center text-on-surface-variant shrink-0">
+<span class="material-symbols-outlined" data-icon="public">public</span>
+</div>
+<div class="flex-1">
+<h3 class="font-title text-title text-on-surface">Public Room</h3>
+<p class="font-caption text-caption text-on-surface-muted">Anyone can join and play</p>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-outline shrink-0"></div>
+</div>
+<!-- Live Stream Room -->
+<div class="bg-surface-elevated border border-border-gold shadow-[0_0_15px_rgba(245,158,11,0.1)] rounded-xl p-md flex items-center gap-md cursor-pointer hover:bg-surface-hover transition-colors relative overflow-hidden">
+<div class="absolute top-0 right-0 bg-live text-on-error-container font-label text-[10px] tracking-widest px-2 py-0.5 rounded-bl-lg uppercase animate-pulse">Live</div>
+<div class="w-10 h-10 rounded-full bg-surface-hover flex items-center justify-center text-gold-light shrink-0">
+<span class="material-symbols-outlined" data-icon="sensors" style="font-variation-settings: 'FILL' 1;">sensors</span>
+</div>
+<div class="flex-1">
+<h3 class="font-title text-title text-gold-light">Live Stream</h3>
+<p class="font-caption text-caption text-on-surface-muted">Broadcast your game to spectators</p>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-outline shrink-0"></div>
+</div>
+</div>
+</section>
+<!-- Game Settings -->
+<section class="space-y-md">
+<label class="font-title text-title text-on-surface block">Features</label>
+<div class="bg-surface-elevated border border-border-light rounded-xl overflow-hidden divide-y divide-border-light">
+<!-- Voice Chat Toggle -->
+<div class="flex items-center justify-between p-md">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="mic">mic</span>
+<span class="font-body text-body text-on-surface">Voice Chat</span>
+</div>
+<!-- Toggle Switch On -->
+<div class="w-12 h-6 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-1 top-1 w-4 h-4 bg-on-primary rounded-full shadow-sm"></div>
+</div>
+</div>
+<!-- Camera Toggle -->
+<div class="flex items-center justify-between p-md">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="videocam">videocam</span>
+<span class="font-body text-body text-on-surface">Camera</span>
+</div>
+<!-- Toggle Switch Off -->
+<div class="w-12 h-6 bg-surface-hover rounded-full relative cursor-pointer border border-outline">
+<div class="absolute left-1 top-1 w-4 h-4 bg-on-surface-muted rounded-full shadow-sm"></div>
+</div>
+</div>
+<!-- Allow Spectators Toggle -->
+<div class="flex items-center justify-between p-md">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="visibility">visibility</span>
+<span class="font-body text-body text-on-surface">Allow Spectators</span>
+</div>
+<!-- Toggle Switch Off -->
+<div class="w-12 h-6 bg-surface-hover rounded-full relative cursor-pointer border border-outline">
+<div class="absolute left-1 top-1 w-4 h-4 bg-on-surface-muted rounded-full shadow-sm"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Advanced Settings (Collapsible) -->
+<section class="bg-surface-elevated border border-border-light rounded-xl p-md">
+<div class="flex items-center justify-between cursor-pointer">
+<h3 class="font-title text-title text-on-surface">Advanced Settings</h3>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="expand_more">expand_more</span>
+</div>
+<div class="mt-md space-y-lg border-t border-border-light pt-md">
+<!-- Minimum Level -->
+<div class="space-y-sm">
+<label class="font-caption text-caption text-on-surface-muted block">Minimum Level</label>
+<div class="bg-surface border border-border rounded-lg px-md py-sm flex items-center justify-between cursor-pointer">
+<span class="font-body text-body text-on-surface">Level 1 (Anyone)</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="arrow_drop_down">arrow_drop_down</span>
+</div>
+</div>
+<!-- Game Speed -->
+<div class="space-y-sm">
+<label class="font-caption text-caption text-on-surface-muted block">Game Speed</label>
+<div class="flex gap-sm">
+<button class="flex-1 py-xs rounded-full border border-primary text-primary font-label text-label bg-primary/10">Normal</button>
+<button class="flex-1 py-xs rounded-full border border-border text-on-surface-variant font-label text-label bg-surface">Fast</button>
+<button class="flex-1 py-xs rounded-full border border-border text-on-surface-variant font-label text-label bg-surface">Relaxed</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Room Preview Card -->
+<section class="space-y-sm">
+<label class="font-title text-title text-on-surface block">Lobby Preview</label>
+<div class="bg-surface-elevated border border-border-light rounded-xl p-md shadow-md shadow-black/20 flex flex-col gap-sm">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-title text-title text-on-surface">Friday Night Baloot</h4>
+<div class="flex items-center gap-xs mt-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span class="font-caption text-caption text-primary">Private</span>
+</div>
+</div>
+<div class="bg-surface-hover px-2 py-1 rounded-md flex items-center gap-xs border border-border">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant" data-icon="group">group</span>
+<span class="font-label text-label text-on-surface">2/4</span>
+</div>
+</div>
+<div class="flex gap-2 mt-sm">
+<div class="w-8 h-8 rounded-full bg-surface-hover flex items-center justify-center border border-border-light overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="Close up portrait of a male gamer in a dark room with neon purple lighting illuminating his face." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBxQJ6cjU-toz3LFco_rS_MYzShrZrVATab_DXqFlnvvEzx05ueZrjYuSzFRcG4ZWsFMW-h68E8vHztKiBE7KfeiNECoNKllUc5pxTbeuMdnR9oNL4ulbhWBTBcbUDBRq4d9BM8oow50i5i_8uv5XNtpNWIoJKoEeXqetIfI29jmdXy-VCCVRqDfOyn0Q0KXVSbmpOuAmVHqa97BFbUFEDnGhBeZ9T5q3AofXIWAVYZrk61l909B8CG1dt38GhcXXkrrYiDx53EJoZ"/>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-hover border border-dashed border-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="add">add</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Action Area -->
+<div class="fixed bottom-0 w-full bg-surface/90 backdrop-blur-lg border-t border-border px-xl pb-[40px] pt-lg max-w-[448px] mx-auto z-50 flex flex-col gap-md">
+<button class="font-label text-label text-on-surface-muted text-center hover:text-on-surface transition-colors">Cancel</button>
+<button class="w-full h-[52px] rounded-full bg-gold-gradient text-on-tertiary font-headline text-[18px] shadow-lg shadow-gold-dark/20 flex items-center justify-center gap-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="add_circle" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+            Create Room
+        </button>
+</div>
+</body></html>

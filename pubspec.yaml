@@ -1,0 +1,69 @@
+name: bloot
+description: A new Flutter project.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_bloc: ^9.1.1
+
+  # Immutability & Serialization
+  freezed_annotation: ^3.1.0
+
+  # Dependency Injection
+  get_it: ^9.2.0
+  injectable: ^2.5.0
+
+  # Navigation
+  go_router: ^17.0.1
+
+  # Localization
+  easy_localization: ^3.0.8
+
+  # UI
+  google_fonts: ^8.0.0
+  cached_network_image: ^3.4.1
+  auto_size_text: ^3.0.0
+  cupertino_icons: ^1.0.8
+
+  # Storage
+  shared_preferences: ^2.5.4
+  flutter_secure_storage: ^10.0.0
+
+  # Utilities
+  logger: ^2.6.2
+  connectivity_plus: ^6.1.5
+  image_picker: ^1.2.1
+  intl: ^0.20.2
+
+  # Firebase
+  firebase_core: ^4.7.0
+  firebase_auth: ^6.4.0
+  cloud_firestore: ^6.3.0
+  firebase_storage: ^13.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.4.13
+  injectable_generator: ^2.6.2
+  freezed: ^3.2.3
+  bloc_test: any
+  mocktail: any
+  integration_test:
+    sdk: flutter
+  test: ^1.29.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/translations/
+    - assets/images/
+    - assets/icons/

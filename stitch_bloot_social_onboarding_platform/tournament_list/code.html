@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bloot - Tournaments</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-fixed": "#ffdcbb",
+                        "on-primary": "#3c0091",
+                        "tertiary-container": "#ca801e",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed": "#2a1700",
+                        "on-tertiary-container": "#3f2300",
+                        "secondary": "#ffb95f",
+                        "surface-tint": "#d0bcff",
+                        "surface-container-low": "#1d1a23",
+                        "on-surface-muted": "#9CA3AF",
+                        "inverse-surface": "#e7e0ed",
+                        "primary-dark": "#7C3AED",
+                        "secondary-container": "#ee9800",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "border-light": "rgba(139, 92, 246, 0.25)",
+                        "live": "#FF1A1A",
+                        "inverse-on-surface": "#322f39",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "surface-container-high": "#2c2832",
+                        "surface": "#0A0A0F",
+                        "on-background": "#e7e0ed",
+                        "surface-variant": "#37333d",
+                        "inverse-primary": "#6d3bd7",
+                        "surface-hover": "#252538",
+                        "border": "rgba(139, 92, 246, 0.15)",
+                        "success": "#22C55E",
+                        "primary-fixed-dim": "#d0bcff",
+                        "on-error": "#690005",
+                        "surface-bright": "#3b3742",
+                        "on-surface-variant": "#cbc3d7",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "primary-container": "#a078ff",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "background": "#15121b",
+                        "border-gold": "rgba(245, 158, 11, 0.3)",
+                        "surface-elevated": "#161622",
+                        "primary-light": "#A78BFA",
+                        "surface-container-lowest": "#0f0d15",
+                        "surface-muted": "#1E1E2E",
+                        "on-surface": "#FFFFFF",
+                        "on-surface-secondary": "#6B7280",
+                        "on-secondary-container": "#5b3800",
+                        "primary": "#d0bcff",
+                        "on-tertiary": "#482900",
+                        "on-primary-fixed-variant": "#5516be",
+                        "gold-dark": "#D97706",
+                        "primary-fixed": "#e9ddff",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed": "#23005c",
+                        "error": "#EF4444",
+                        "outline": "#958ea0",
+                        "outline-variant": "#494454",
+                        "on-secondary": "#472a00",
+                        "gold-light": "#FBBF24",
+                        "tertiary": "#ffb869",
+                        "surface-container-highest": "#37333d",
+                        "on-primary-container": "#340080",
+                        "surface-dim": "#15121b",
+                        "surface-container": "#211e27",
+                        "secondary-fixed": "#ffddb8",
+                        "on-tertiary-fixed": "#2c1700"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "xl": "24px",
+                        "sm": "8px",
+                        "lg": "16px",
+                        "xxl": "32px",
+                        "xs": "4px",
+                        "md": "12px"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "score": ["Inter"],
+                        "title": ["Inter"],
+                        "display": ["Inter"],
+                        "label": ["Inter"],
+                        "body": ["Inter"],
+                        "caption": ["Inter"]
+                    },
+                    fontSize: {
+                        "headline": ["22px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "score": ["24px", { "lineHeight": "1.1", "fontWeight": "700" }],
+                        "title": ["15px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "display": ["28px", { "lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "800" }],
+                        "label": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "body": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "caption": ["12px", { "lineHeight": "1.4", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .glow-gold {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+        }
+        .glow-primary {
+            box-shadow: 0 0 40px rgba(139, 92, 246, 0.15);
+        }
+        .live-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body antialiased min-h-screen pb-[100px]">
+<!-- TopAppBar -->
+<header class="bg-surface-container/80 backdrop-blur-md fixed top-0 w-full z-50 border-b border-border-light shadow-md flex items-center justify-between px-xl h-16 w-full max-w-[448px] mx-auto left-0 right-0">
+<button class="text-primary hover:text-primary transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-display text-display text-primary tracking-wider">Bloot</h1>
+<button class="text-on-surface-variant hover:text-primary transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<!-- Main Container -->
+<main class="pt-20 px-lg w-full max-w-[448px] mx-auto">
+<!-- Header & Filter Tabs -->
+<div class="mb-lg">
+<h2 class="font-headline text-headline text-on-surface mb-md">Tournaments</h2>
+<div class="flex overflow-x-auto hide-scrollbar gap-sm pb-sm">
+<button class="whitespace-nowrap px-lg py-sm rounded-full bg-primary-container text-on-primary-container font-label text-label">All</button>
+<button class="whitespace-nowrap px-lg py-sm rounded-full bg-surface-muted text-on-surface-variant font-label text-label border border-border hover:bg-surface-hover transition-colors">Active Now</button>
+<button class="whitespace-nowrap px-lg py-sm rounded-full bg-surface-muted text-on-surface-variant font-label text-label border border-border hover:bg-surface-hover transition-colors">Upcoming</button>
+<button class="whitespace-nowrap px-lg py-sm rounded-full bg-surface-muted text-on-surface-variant font-label text-label border border-border hover:bg-surface-hover transition-colors">Completed</button>
+<button class="whitespace-nowrap px-lg py-sm rounded-full bg-surface-muted text-on-surface-variant font-label text-label border border-border hover:bg-surface-hover transition-colors">My Tournaments</button>
+</div>
+</div>
+<!-- Tournament List -->
+<div class="flex flex-col gap-lg">
+<!-- Premium Live Tournament -->
+<div class="bg-surface-elevated rounded-xl border border-border-gold p-md relative glow-gold overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-gold-dark/10 to-transparent pointer-events-none"></div>
+<div class="flex justify-between items-start mb-md relative z-10">
+<div class="flex items-center gap-sm">
+<div class="bg-live/20 border border-live px-sm py-[2px] rounded flex items-center gap-[4px]">
+<div class="w-2 h-2 rounded-full bg-live live-pulse"></div>
+<span class="text-live font-label text-caption uppercase tracking-wider">Live</span>
+</div>
+<span class="bg-surface-muted text-gold-light border border-border-gold px-sm py-[2px] rounded font-label text-caption flex items-center gap-[4px]">
+<span class="material-symbols-outlined text-[14px]">star</span> Premium
+                        </span>
+</div>
+<div class="text-on-surface-variant font-caption text-caption flex items-center gap-[4px]">
+<span class="material-symbols-outlined text-[14px]">group</span> 56/64
+                    </div>
+</div>
+<div class="flex items-center gap-md mb-md relative z-10">
+<div class="w-16 h-16 rounded-lg bg-surface-muted flex items-center justify-center border border-border-gold">
+<span class="material-symbols-outlined text-gold-light text-[32px]">emoji_events</span>
+</div>
+<div>
+<h3 class="font-title text-title text-on-surface mb-[2px]">Riyadh Masters Cup</h3>
+<p class="font-body text-body text-on-surface-secondary">Pro Division • Knockout</p>
+</div>
+</div>
+<div class="flex justify-between items-end relative z-10">
+<div>
+<p class="font-caption text-caption text-on-surface-secondary mb-[2px]">Prize Pool</p>
+<p class="font-score text-score text-gold-light">10,000</p>
+</div>
+<div class="flex items-center gap-md">
+<div class="text-right">
+<p class="font-caption text-caption text-on-surface-secondary mb-[2px]">Entry Fee</p>
+<p class="font-title text-title text-gold-light">500</p>
+</div>
+<button class="h-10 px-lg bg-gradient-to-r from-gold-light to-gold-dark text-on-secondary-fixed font-title text-title rounded-lg shadow-[0_4px_12px_rgba(245,158,11,0.3)] active:scale-95 transition-transform">
+                            View
+                        </button>
+</div>
+</div>
+</div>
+<!-- Upcoming Standard Tournament -->
+<div class="bg-surface-elevated rounded-xl border border-border p-md relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-light/5 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex justify-between items-start mb-md relative z-10">
+<div class="flex items-center gap-sm">
+<span class="bg-surface-muted text-primary border border-border px-sm py-[2px] rounded font-label text-caption uppercase tracking-wider">Upcoming</span>
+<span class="text-on-surface-secondary font-caption text-caption">Starts in 2h 30m</span>
+</div>
+<div class="text-on-surface-variant font-caption text-caption flex items-center gap-[4px]">
+<span class="material-symbols-outlined text-[14px]">group</span> 12/32
+                    </div>
+</div>
+<div class="flex items-center gap-md mb-md relative z-10">
+<div class="w-16 h-16 rounded-lg bg-surface-muted flex items-center justify-center border border-border">
+<span class="material-symbols-outlined text-primary text-[32px]">sports_esports</span>
+</div>
+<div>
+<h3 class="font-title text-title text-on-surface mb-[2px]">Weekly Challenger</h3>
+<p class="font-body text-body text-on-surface-secondary">Amateur Division • Swiss</p>
+</div>
+</div>
+<div class="flex justify-between items-end relative z-10">
+<div>
+<p class="font-caption text-caption text-on-surface-secondary mb-[2px]">Prize Pool</p>
+<p class="font-score text-score text-gold-light">2,500</p>
+</div>
+<div class="flex items-center gap-md">
+<div class="text-right">
+<p class="font-caption text-caption text-on-surface-secondary mb-[2px]">Entry Fee</p>
+<p class="font-title text-title text-success">Free</p>
+</div>
+<button class="h-10 px-lg bg-primary text-on-primary-fixed font-title text-title rounded-lg shadow-[0_4px_12px_rgba(139,92,246,0.2)] active:scale-95 transition-transform">
+                            Join
+                        </button>
+</div>
+</div>
+</div>
+<!-- Upcoming Premium Tournament -->
+<div class="bg-surface-elevated rounded-xl border border-border-gold p-md relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-gold-dark/5 to-transparent pointer-events-none"></div>
+<div class="flex justify-between items-start mb-md relative z-10">
+<div class="flex items-center gap-sm">
+<span class="bg-surface-muted text-primary border border-border px-sm py-[2px] rounded font-label text-caption uppercase tracking-wider">Upcoming</span>
+<span class="bg-surface-muted text-gold-light border border-border-gold px-sm py-[2px] rounded font-label text-caption flex items-center gap-[4px]">
+<span class="material-symbols-outlined text-[14px]">star</span> Premium
+                        </span>
+<span class="text-on-surface-secondary font-caption text-caption">Starts Tomorrow</span>
+</div>
+<div class="text-on-surface-variant font-caption text-caption flex items-center gap-[4px]">
+<span class="material-symbols-outlined text-[14px]">group</span> 120/128
+                    </div>
+</div>
+<div class="flex items-center gap-md mb-md relative z-10">
+<div class="w-16 h-16 rounded-lg bg-surface-muted flex items-center justify-center border border-border-gold">
+<span class="material-symbols-outlined text-gold-light text-[32px]">diamond</span>
+</div>
+<div>
+<h3 class="font-title text-title text-on-surface mb-[2px]">Desert Diamond Elite</h3>
+<p class="font-body text-body text-on-surface-secondary">Invite Only • Round Robin</p>
+</div>
+</div>
+<div class="flex justify-between items-end relative z-10">
+<div>
+<p class="font-caption text-caption text-on-surface-secondary mb-[2px]">Prize Pool</p>
+<p class="font-score text-score text-gold-light">50,000</p>
+</div>
+<div class="flex items-center gap-md">
+<div class="text-right">
+<p class="font-caption text-caption text-on-surface-secondary mb-[2px]">Entry Fee</p>
+<p class="font-title text-title text-gold-light">1,000</p>
+</div>
+<button class="h-10 px-lg bg-surface-muted text-primary border border-primary font-title text-title rounded-lg hover:bg-primary/10 active:scale-95 transition-transform">
+                            Details
+                        </button>
+</div>
+</div>
+</div>
+<!-- Ongoing Standard Tournament -->
+<div class="bg-surface-elevated rounded-xl border border-border p-md relative overflow-hidden">
+<div class="flex justify-between items-start mb-md relative z-10">
+<div class="flex items-center gap-sm">
+<div class="bg-live/20 border border-live px-sm py-[2px] rounded flex items-center gap-[4px]">
+<div class="w-2 h-2 rounded-full bg-live live-pulse"></div>
+<span class="text-live font-label text-caption uppercase tracking-wider">Live</span>
+</div>
+</div>
+<div class="text-on-surface-variant font-caption text-caption flex items-center gap-[4px]">
+<span class="material-symbols-outlined text-[14px]">group</span> 16/16
+                    </div>
+</div>
+<div class="flex items-center gap-md mb-md relative z-10">
+<div class="w-16 h-16 rounded-lg bg-surface-muted flex items-center justify-center border border-border">
+<span class="material-symbols-outlined text-primary text-[32px]">playing_cards</span>
+</div>
+<div>
+<h3 class="font-title text-title text-on-surface mb-[2px]">Night Owl Brawl</h3>
+<p class="font-body text-body text-on-surface-secondary">Open Division • Fast Play</p>
+</div>
+</div>
+<div class="flex justify-between items-end relative z-10">
+<div>
+<p class="font-caption text-caption text-on-surface-secondary mb-[2px]">Prize Pool</p>
+<p class="font-score text-score text-gold-light">1,000</p>
+</div>
+<div class="flex items-center gap-md">
+<div class="text-right">
+<p class="font-caption text-caption text-on-surface-secondary mb-[2px]">Entry Fee</p>
+<p class="font-title text-title text-gold-light">100</p>
+</div>
+<button class="h-10 px-lg bg-surface-muted text-primary border border-border font-title text-title rounded-lg hover:border-primary transition-colors active:scale-95">
+                            Watch
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="bg-surface-container/95 backdrop-blur-lg border-t border-border-light shadow-[0_-4px_24px_rgba(139,92,246,0.1)] fixed bottom-0 w-full z-50 pb-safe flex justify-around items-center h-20 px-lg w-full max-w-[448px] mx-auto left-0 right-0 md:hidden">
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all active:scale-90 w-16 h-full rounded-xl">
+<span class="material-symbols-outlined mb-1">style</span>
+<span class="font-label text-caption">Lobby</span>
+</button>
+<button class="flex flex-col items-center justify-center text-primary bg-primary/10 rounded-xl px-md py-xs hover:bg-surface-variant/50 transition-all active:scale-90 w-20 h-[80%]">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+<span class="font-label text-caption font-bold">Tournaments</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all active:scale-90 w-16 h-full rounded-xl">
+<span class="material-symbols-outlined mb-1">group</span>
+<span class="font-label text-caption">Clubs</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 transition-all active:scale-90 w-16 h-full rounded-xl">
+<span class="material-symbols-outlined mb-1">person</span>
+<span class="font-label text-caption">Profile</span>
+</button>
+</nav>
+</body></html>

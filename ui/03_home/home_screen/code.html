@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+
+<html class="dark" dir="ltr" lang="en"><!-- RTL: Add dir="rtl" to html tag, swap start/end margins and paddings --><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bloot - Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=Cairo:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8B5CF6",
+                        "primary-dark": "#7C3AED",
+                        "primary-light": "#A78BFA",
+                        "gold": "#F59E0B",
+                        "gold-light": "#FBBF24",
+                        "gold-dark": "#D97706",
+                        "surface": "#0A0A0F",
+                        "surface-elevated": "#161622",
+                        "surface-muted": "#1E1E2E",
+                        "surface-hover": "#252538",
+                        "on-surface": "#FFFFFF",
+                        "on-surface-muted": "#9CA3AF",
+                        "on-surface-secondary": "#6B7280",
+                        "border": "rgba(139, 92, 246, 0.15)",
+                        "border-light": "rgba(139, 92, 246, 0.25)",
+                        "border-gold": "rgba(245, 158, 11, 0.3)",
+                        "success": "#22C55E",
+                        "warning": "#F59E0B",
+                        "error": "#EF4444",
+                        "info": "#3B82F6",
+                        "live": "#FF1A1A"
+                    },
+                    borderRadius: {
+                        "sm": "8px",
+                        "md": "12px",
+                        "lg": "16px",
+                        "xl": "24px",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        "button": "0 4px 14px rgba(139, 92, 246, 0.25)",
+                        "button-gold": "0 4px 14px rgba(245, 158, 11, 0.3)",
+                        "card": "0 2px 8px rgba(0, 0, 0, 0.2)",
+                        "elevated": "0 8px 24px rgba(0, 0, 0, 0.3)",
+                        "glow": "0 0 40px rgba(139, 92, 246, 0.15)"
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #0A0A0F; color: #FFFFFF; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .fill-icon { font-variation-settings: 'FILL' 1; }
+        
+        /* Premium Card Suit Pattern */
+        .pattern-bg {
+            background-image: 
+                radial-gradient(circle at center, rgba(139, 92, 246, 0.05) 0%, transparent 70%),
+                url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 5l5 10 10 5-10 5-5 10-5-10-10-5 10-5z' fill='rgba(139, 92, 246, 0.03)' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+        
+        /* Hide scrollbar for horizontal scroll */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased min-h-screen flex justify-center bg-[#000]">
+<div class="relative w-full max-w-[448px] bg-surface min-h-screen flex flex-col overflow-x-hidden pb-20 shadow-2xl">
+<!-- Top Bar -->
+<header class="flex items-center justify-between px-6 py-4 sticky top-0 bg-surface/90 backdrop-blur-md z-50 border-b border-border">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-muted overflow-hidden border border-border-light">
+<!-- RTL: Use margin-inline-end instead of margin-right if applicable -->
+<img alt="Ahmed's Avatar" class="w-full h-full object-cover" data-alt="A close-up portrait of a modern young man with a neat beard, wearing a casual stylish dark jacket. The lighting is soft and moody, fitting a premium dark social gaming app environment. The image is cropped to a perfect circle for an avatar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQQbihfPS_OM07VhTD1HxYk04dH9Wd4hI4Ve7OXDeJVdvM0b2_RFgJASHbv-bAo0jDpKd0ptQIi6Y3-XHpyxMlar3uUrbppKOb-X0cI5WEtBlZJaltNlgpBEESGYUuu7IYL9QpKd_1XSHsAjd4Q3MzTo4aNXjDuiV6oqVCn4CLogLoGruJi1rQ7jIT9EmsjFe8K3W7Z7dwHsbcDtwRtUe7eXxpbaJ5jdgYQKWNV80KoP6_v-5XedTPvG7LYirUQEEp7rPkx8EvnNaP"/>
+</div>
+<div>
+<h2 class="text-[15px] font-semibold text-on-surface leading-tight">Ahmed</h2>
+<p class="text-[12px] text-primary-light font-medium">Level 5</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5 bg-surface-muted px-2.5 py-1 rounded-full border border-border">
+<span class="material-symbols-outlined text-gold fill-icon text-[18px]" data-icon="monetization_on">monetization_on</span>
+<span class="text-[13px] font-bold text-gold">1.2M</span>
+</div>
+<div class="relative w-10 h-10 flex items-center justify-center bg-surface-elevated rounded-full border border-border">
+<span class="material-symbols-outlined text-on-surface" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2.5 h-2.5 bg-live rounded-full border-2 border-surface-elevated"></span>
+</div>
+</div>
+</header>
+<main class="flex-1 flex flex-col gap-6 pt-2 pb-6">
+<!-- Hero Banner -->
+<section class="px-6">
+<div class="relative w-full h-[180px] rounded-xl overflow-hidden shadow-glow">
+<!-- Background Image & Gradient -->
+<div class="absolute inset-0 bg-cover bg-center" data-alt="A stylized, premium dark-themed image of playing cards scattered on a dark felt surface. The lighting is moody with subtle purple and gold glowing highlights. The focus is on the intricate details of the card designs, creating an atmosphere of an exclusive, high-stakes card room." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAOFs0FZM5jFGTrO0Bat4idC_zfEvNyz8-InkVAQ7CeV27m3pFOy2AQ3E6G--FyEC1F3XS05Ibf-qmKdt_nv1cDi2vi5XYQKh8ehlxszC6PRQJ-DVBGmxyTYGA-2WMAgulN8Wj5zNCUmgiCzaMOktRQ9AQaoRg64UPksitIR4u7G1y1Yq9nfBGJACljSWPqOziTpy0rwL_ncaXB_H0lGQsvKzuCeqazEeB5E4LVLeDl2YBy1Md7XmncLNTbM7O76L7Zh0ncpZwsuRr0');"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-primary-dark/80 to-transparent mix-blend-multiply"></div>
+<div class="absolute inset-0 pattern-bg"></div>
+<!-- Content -->
+<div class="absolute inset-0 flex flex-col justify-end p-5">
+<h1 class="text-[28px] font-extrabold text-on-surface leading-tight tracking-wide mb-1 drop-shadow-lg">Baloot Live</h1>
+<p class="text-[14px] text-on-surface/90 font-medium mb-4 drop-shadow-md">Your voice, your passion, your table</p>
+<button class="self-start px-5 py-2.5 bg-primary text-white text-[13px] font-semibold rounded-full shadow-button hover:bg-primary-dark transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="explore">explore</span>
+                            Discover Streams
+                        </button>
+</div>
+</div>
+</section>
+<!-- Quick Actions (Horizontal Scroll) -->
+<section>
+<div class="flex overflow-x-auto gap-4 px-6 pb-4 no-scrollbar snap-x">
+<!-- Card 1 -->
+<a class="snap-start shrink-0 w-[140px] bg-surface-elevated border border-border rounded-lg p-4 flex flex-col gap-3 hover:border-border-light transition-colors group" href="#">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+</div>
+<div>
+<h3 class="text-[14px] font-semibold text-on-surface">Play with Friends</h3>
+<p class="text-[12px] text-on-surface-muted mt-1 leading-tight">Create private tables</p>
+</div>
+</a>
+<!-- Card 2 -->
+<a class="snap-start shrink-0 w-[140px] bg-surface-elevated border border-border rounded-lg p-4 flex flex-col gap-3 hover:border-border-light transition-colors group" href="#">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="mic">mic</span>
+</div>
+<div>
+<h3 class="text-[14px] font-semibold text-on-surface">Voice Tables</h3>
+<p class="text-[12px] text-on-surface-muted mt-1 leading-tight">Join live audio rooms</p>
+</div>
+</a>
+<!-- Card 3 -->
+<a class="snap-start shrink-0 w-[140px] bg-surface-elevated border border-border rounded-lg p-4 flex flex-col gap-3 hover:border-border-light transition-colors group" href="#">
+<div class="w-10 h-10 rounded-full bg-live/20 flex items-center justify-center text-live group-hover:bg-live group-hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="videocam">videocam</span>
+</div>
+<div>
+<h3 class="text-[14px] font-semibold text-on-surface">Live Stream</h3>
+<p class="text-[12px] text-on-surface-muted mt-1 leading-tight">Watch pro players</p>
+</div>
+</a>
+<!-- Card 4 -->
+<a class="snap-start shrink-0 w-[140px] bg-surface-elevated border border-gold-dark rounded-lg p-4 flex flex-col gap-3 hover:border-gold transition-colors group relative overflow-hidden" href="#">
+<div class="absolute -right-4 -top-4 w-12 h-12 bg-gold/10 rounded-full blur-xl"></div>
+<div class="w-10 h-10 rounded-full bg-gold/20 flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-surface transition-colors relative z-10">
+<span class="material-symbols-outlined fill-icon" data-icon="emoji_events">emoji_events</span>
+</div>
+<div class="relative z-10">
+<h3 class="text-[14px] font-semibold text-gold">Tournaments</h3>
+<p class="text-[12px] text-on-surface-muted mt-1 leading-tight">Compete for gold</p>
+</div>
+</a>
+</div>
+</section>
+<!-- Live Now Section -->
+<section class="px-6 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h2 class="text-[22px] font-bold text-on-surface flex items-center gap-2">
+                        Live Now
+                        <span class="w-2 h-2 bg-live rounded-full animate-pulse"></span>
+</h2>
+<a class="text-[13px] font-semibold text-primary-light hover:text-primary transition-colors" href="#">See All</a>
+</div>
+<div class="flex flex-col gap-4">
+<!-- Stream Card 1 -->
+<div class="bg-surface-elevated border border-border rounded-lg overflow-hidden hover:border-border-light transition-colors group cursor-pointer shadow-card">
+<!-- Thumbnail -->
+<div class="relative h-[160px] bg-surface-muted w-full overflow-hidden">
+<img alt="Stream Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A professional live streaming setup focused on a gaming table. The scene is illuminated with atmospheric purple and blue neon lights against a dark background. Multiple screens and a high-end microphone are visible in the blurred foreground, setting a premium, energetic esports broadcasting mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOzQnvjjr_cCg0VLRimGnKjYztSbNH_kcRhTcTj_3xBAOnnpTywiyo320DkiYLF3aPbgHfbUKgBMT39dJcFuURd2t6OPuLKkY8tV3ObUiK2K36aAk3etksxhr_iChxvp19drK1qlgh-F8JXmht2zDa25nrOu5Vx_de_t9j55ew4PTkLV0MLiuuTplcANc_h0EXoYkS_FvoZBNPOUTBq4ebDZe5bnut_iTzeddyTkP1gdBDIdNBbeKC5UPrVM1xvbS8mKlMZ0FYfo4p"/>
+<!-- Overlays -->
+<div class="absolute top-3 left-3 bg-live text-white text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-sm animate-pulse shadow-md">Live</div>
+<div class="absolute top-3 right-3 bg-surface/80 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1.5 border border-surface-hover">
+<span class="material-symbols-outlined text-[14px] text-on-surface-muted" data-icon="visibility">visibility</span>
+<span class="text-[12px] font-medium text-white">1,245</span>
+</div>
+</div>
+<!-- Info -->
+<div class="p-4 flex gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-primary-light">
+<img alt="Host Avatar" class="w-full h-full object-cover" data-alt="A portrait of a confident young man in a dark hoodie, set against a dark, moody background with a subtle purple rim light. The image is cropped to a circle, representing a profile picture in a premium dark social app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA468SvjudAMMWR1_S2TCxKL5uBQjAOoqzk-CYAYeegGjTgob47_pbl0_rYFWfJ29VyzqCZf80cO_KQUFVsFFqhM00NvLzbUKk764Wt3Zc5u4VCABeVIzIfo3EeqVF7DMn0NlR5wj_FoODGiGkPxSKrKFjQ6YILwcJp-XfdVxzyKI2CqjlLfnzLEKXrMHZ1RdAsoE59b-NtPClhN3tDk2ojo4-f_O3hweuJOywZU0S6hR9gFUCKYSBqWyHMy7qtUFzpvnEq7msg8SUS"/>
+</div>
+<div class="flex-1 min-w-0 flex flex-col justify-center">
+<h3 class="text-[15px] font-semibold text-on-surface truncate">Ahmed &amp; Khalid vs Faisal Band</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-[12px] text-on-surface-muted truncate">Hosted by Ahmed_Pro</span>
+<span class="w-1 h-1 bg-on-surface-secondary rounded-full"></span>
+<span class="text-[12px] text-gold font-medium">Baloot</span>
+<span class="w-1 h-1 bg-on-surface-secondary rounded-full"></span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-success" data-icon="person">person</span>
+<span class="text-[12px] text-on-surface-muted">4/4</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Stream Card 2 -->
+<div class="bg-surface-elevated border border-border rounded-lg overflow-hidden hover:border-border-light transition-colors group cursor-pointer shadow-card">
+<!-- Thumbnail -->
+<div class="relative h-[160px] bg-surface-muted w-full overflow-hidden">
+<img alt="Stream Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A moody, high-contrast shot of hands dealing premium playing cards on a dark green felt table. Cinematic lighting casts long shadows, highlighting the gold edges of the cards. The atmosphere is intense, focused, and luxurious, matching the aesthetic of a high-stakes card game app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2LKsinLonHOh-joAZr5n7LTZRSpzTILp0zXd-Zy5XKs-kdESQW4wx1z5HN1XnoZ8IJEF4WsAugZP8R-k-PC41GdexUNo3wAkNT8lTsLtMEf7IB5HfktuyOmCTGscPKL3YQUiahFxmwY0mLXCGf-0LZ8NescyDSTGZOKpcQD-JYOUcnPny_2J-CUNk_BXpNbgv1JhI0PVmKvih86Kdwjo-zvIjjj_MSRKdatufsvpsk4rkzGQvBoDW__A7tSlC4-9qpYG71fRr7jqi"/>
+<!-- Overlays -->
+<div class="absolute top-3 left-3 bg-live text-white text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-sm animate-pulse shadow-md">Live</div>
+<div class="absolute top-3 right-3 bg-surface/80 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1.5 border border-surface-hover">
+<span class="material-symbols-outlined text-[14px] text-on-surface-muted" data-icon="visibility">visibility</span>
+<span class="text-[12px] font-medium text-white">892</span>
+</div>
+</div>
+<!-- Info -->
+<div class="p-4 flex gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-primary-light">
+<img alt="Host Avatar" class="w-full h-full object-cover" data-alt="A stylish portrait of a woman with dramatic lighting, emphasizing strong contrasts. She is against a deep dark background, with a soft cool-toned light illuminating her face. Cropped as a circular avatar for a premium gaming platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwQAdsw5cr2uv2fEVKZ_MujCTuW2G5v11Qoys9G8fZwLCN3Va0Cfpd67fve1naoobgO6LhK7APZP_cx4kF8l2_I7_uBztPxhnImZg1Hf0co5HMLzWDlLPBNgwq1tF5JhEk1shZ54_lAFG-qdtZKxWqLaeemzoqJkAGRJsbj81yGfyS5FPhhSbhCRLZXaq9VZ4TD9UZXA8meNm9xOxHYJ6MXQygIynAz1zx8sXN_JGbm-hGegzwE4XWS8_gKG_UfRBur_YJYthv8K6x"/>
+</div>
+<div class="flex-1 min-w-0 flex flex-col justify-center">
+<h3 class="text-[15px] font-semibold text-on-surface truncate">Late Night High Stakes ♠️</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-[12px] text-on-surface-muted truncate">Hosted by Sara_VIP</span>
+<span class="w-1 h-1 bg-on-surface-secondary rounded-full"></span>
+<span class="text-[12px] text-gold font-medium">Baloot</span>
+<span class="w-1 h-1 bg-on-surface-secondary rounded-full"></span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-warning" data-icon="person">person</span>
+<span class="text-[12px] text-on-surface-muted">2/4</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Upcoming Tournaments -->
+<section class="px-6 mt-2 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h2 class="text-[22px] font-bold text-on-surface">Upcoming Tournaments</h2>
+<a class="text-[13px] font-semibold text-primary-light hover:text-primary transition-colors" href="#">View All</a>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Tournament Card 1 (Premium) -->
+<div class="bg-surface-elevated border border-border-gold rounded-lg p-4 flex flex-col gap-3 relative overflow-hidden shadow-button-gold">
+<!-- Premium Glow Background -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+<div class="flex justify-between items-start relative z-10">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-gold/20 text-gold text-[10px] font-bold px-2 py-0.5 rounded-sm border border-gold/30">PREMIUM</span>
+<span class="text-[12px] text-on-surface-muted">Today, 9:00 PM</span>
+</div>
+<h3 class="text-[15px] font-semibold text-on-surface">Weekend Millionaire Cup</h3>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-[12px] text-on-surface-muted">Prize Pool</span>
+<div class="flex items-center gap-1 text-gold">
+<span class="material-symbols-outlined text-[16px] fill-icon" data-icon="monetization_on">monetization_on</span>
+<span class="text-[15px] font-bold">5.0M</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between mt-2 relative z-10">
+<div class="flex items-center gap-2">
+<div class="flex -space-x-2">
+<img alt="Player" class="w-6 h-6 rounded-full border-2 border-surface-elevated" data-alt="Tiny circular avatar of a male player for a participant list in a dark UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_Zxlmy7Ba5eRzM4dnhwv1vY4mo4U3LVBm9bzVss2NynxuUSJ_P6ItOHCmQizjOkZOsnngno-qyH4cIoqgs9d5rjyRORnqHMdYI1Nwiup2V_sm0fHLTrLAUVNsBo_p4W4s5TFrja6rby2uaB04b0c8HRJckNaPAyiNIaBzQfKiQQqk8u-TY85JKUszfdA5kO6XoYG4Nve1Qx2apdslHh-mXtdR3tONgqxUe6uhQvh7utZRFUxEov6ZT3EeYm2RM8VbE25nFnLrectK"/>
+<img alt="Player" class="w-6 h-6 rounded-full border-2 border-surface-elevated" data-alt="Tiny circular avatar of a female player for a participant list in a dark UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgoCEpJFuVew_EtAsy7rgQy51L6Z9mebM0j-DMeE7Sw3bj2wayRYVZky71AM2fd-mfOvZZCx435Ejz-agRs6w3dkv-ykRGrDdZj7VhVflz9mkr0uIEYHrp8YM0YKE_V2Xix4WT0Bs-qs_OIYIaY1njur5NcAN6ZWfdRmcrVr0Fjyer6DF-VxIglfod9iarEtt3JgNSvcGVMwlNZ66fPzrHSxun93pibVGixCXNMF9HgV9FS6A8nCM2ZUxZawgfCjePZryftQT_O-Rj"/>
+<div class="w-6 h-6 rounded-full border-2 border-surface-elevated bg-surface-muted flex items-center justify-center text-[10px] text-on-surface-muted font-medium">+21</div>
+</div>
+<span class="text-[12px] text-on-surface-muted">23/64 Registered</span>
+</div>
+<button class="px-4 py-1.5 bg-gradient-to-r from-gold to-gold-light text-surface text-[13px] font-bold rounded-full hover:scale-95 transition-transform shadow-sm">
+                                Join
+                            </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Spacer for bottom nav -->
+<div class="h-10"></div>
+</main>
+<!-- Shared BottomNavBar Strict Application -->
+<div class="fixed bottom-0 w-full max-w-[448px] z-50">
+<div class="flex gap-2 border-t border-border bg-surface-elevated px-4 pb-safe-bottom pt-2 h-[68px]">
+<!-- Home (Active) -->
+<a class="just flex flex-1 flex-col items-center justify-center gap-1 rounded-full text-primary" href="#">
+<div class="flex h-8 items-center justify-center" data-icon="home" data-weight="fill">
+<span class="material-symbols-outlined text-[24px] fill-icon">home</span>
+</div>
+<p class="text-[10px] font-medium leading-none">Home</p>
+</a>
+<!-- Discover -->
+<a class="just flex flex-1 flex-col items-center justify-center gap-1 text-on-surface-muted hover:text-primary-light transition-colors" href="#">
+<div class="flex h-8 items-center justify-center" data-icon="search" data-weight="regular">
+<span class="material-symbols-outlined text-[24px]">search</span>
+</div>
+<p class="text-[10px] font-medium leading-none">Discover</p>
+</a>
+<!-- Play (Central Prominent) -->
+<div class="flex flex-1 items-start justify-center relative -mt-6">
+<a class="flex flex-col items-center justify-center w-14 h-14 bg-primary rounded-full border-4 border-surface text-white shadow-button hover:bg-primary-dark hover:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined text-[28px] fill-icon" data-icon="play_arrow">play_arrow</span>
+</a>
+</div>
+<!-- Chat -->
+<a class="just flex flex-1 flex-col items-center justify-center gap-1 text-on-surface-muted hover:text-primary-light transition-colors" href="#">
+<div class="flex h-8 items-center justify-center relative" data-icon="chat" data-weight="regular">
+<span class="material-symbols-outlined text-[24px]">chat</span>
+<span class="absolute top-1 right-[-4px] w-2 h-2 bg-live rounded-full border border-surface-elevated"></span>
+</div>
+<p class="text-[10px] font-medium leading-none">Chat</p>
+</a>
+<!-- Profile -->
+<a class="just flex flex-1 flex-col items-center justify-center gap-1 text-on-surface-muted hover:text-primary-light transition-colors" href="#">
+<div class="flex h-8 items-center justify-center" data-icon="person" data-weight="regular">
+<span class="material-symbols-outlined text-[24px]">person</span>
+</div>
+<p class="text-[10px] font-medium leading-none">Profile</p>
+</a>
+</div>
+<!-- iOS Safe Area Bottom padding equivalent -->
+<div class="h-safe-area-bottom bg-surface-elevated"></div>
+</div>
+</div>
+</body></html>

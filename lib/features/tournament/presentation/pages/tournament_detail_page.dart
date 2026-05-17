@@ -1,0 +1,325 @@
+import 'package:flutter/material.dart';
+
+import 'package:easy_localization/easy_localization.dart';
+
+import 'package:bloot/core/components/app_button.dart';
+import 'package:bloot/core/style/colors.dart';
+
+class TournamentDetailPage extends StatelessWidget {
+  const TournamentDetailPage({super.key, required this.id});
+  final String id;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: ColorManager.darkCanvas,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 200,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      ColorManager.secondary.withValues(alpha: 0.3),
+                      ColorManager.darkSurface,
+                    ],
+                    begin: AlignmentDirectional.topStart,
+                    end: AlignmentDirectional.bottomEnd,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Center(
+                      child: Icon(
+                        Icons.emoji_events_rounded,
+                        size: 100,
+                        color: ColorManager.secondary.withValues(alpha: 0.15),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 16,
+                      left: 16,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsetsDirectional.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: ColorManager.live.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: ColorManager.live.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Text(
+                              'live'.tr(),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: ColorManager.live,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'gulf_champions_cup'.tr(),
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              color: ColorManager.darkTextPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                // Prize pool
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: ColorManager.darkSurface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: ColorManager.secondary.withValues(alpha: 0.3),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'prize_pool'.tr(),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: ColorManager.darkTextSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.monetization_on_rounded,
+                            color: ColorManager.secondary,
+                            size: 32,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            '10,000',
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w800,
+                              color: ColorManager.secondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Details
+                _buildSection(
+                  title: 'details'.tr(),
+                  child: Column(
+                    children: [
+                      _buildDetailRow(Icons.calendar_today_rounded, 'date'.tr(), 'tomorrow_8pm'.tr()),
+                      _buildDetailRow(Icons.videogame_asset_rounded, 'game_type'.tr(), 'khaleeji_baloot'.tr()),
+                      _buildDetailRow(Icons.format_list_numbered_rounded, 'format'.tr(), 'single_elimination'.tr()),
+                      _buildDetailRow(Icons.repeat_rounded, 'rounds'.tr(), '6_rounds'.tr()),
+                      _buildDetailRow(Icons.login_rounded, 'entry'.tr(), '500_coins'.tr()),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Rules
+                _buildSection(
+                  title: 'rules'.tr(),
+                  child: Text(
+                    'standard_rules'.tr(),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: ColorManager.darkTextSecondary,
+                      height: 1.6,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Participants
+                _buildSection(
+                  title: 'participants_23_64'.tr(),
+                  child: SizedBox(
+                    height: 48,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: 12,
+                      separatorBuilder: (_, _) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        return CircleAvatar(
+                          radius: 20,
+                          backgroundImage: NetworkImage(
+                            'https://i.pravatar.cc/150?img=${index + 10}',
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Bracket preview
+                _buildSection(
+                  title: 'bracket'.tr(),
+                  child: Container(
+                    height: 160,
+                    decoration: BoxDecoration(
+                      color: ColorManager.darkSectionGray,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.account_tree_rounded,
+                            size: 48,
+                            color: ColorManager.primary.withValues(alpha: 0.3),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'bracket_visualization'.tr(),
+                            style: const TextStyle(
+                              color: ColorManager.darkTextMuted,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Prize distribution
+                _buildSection(
+                  title: 'prize_distribution'.tr(),
+                  child: Column(
+                    children: [
+                      _buildPrizeRow('1st'.tr(), '4,000', ColorManager.secondary, Icons.emoji_events_rounded),
+                      _buildPrizeRow('2nd'.tr(), '2,500', ColorManager.darkTextSecondary, Icons.emoji_events_rounded),
+                      _buildPrizeRow('3rd'.tr(), '1,500', ColorManager.secondaryDark, Icons.emoji_events_rounded),
+                      _buildPrizeRow('4th'.tr(), '500', ColorManager.darkTextMuted, Icons.emoji_events_rounded),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                AppButton(
+                  text: 'join_tournament'.tr(),
+                  onPressed: () {},
+                ),
+                const SizedBox(height: 24),
+              ]),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection({required String title, required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: ColorManager.darkSurface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: ColorManager.darkBorderSoft,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: ColorManager.darkTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 18,
+            color: ColorManager.darkTextMuted.withValues(alpha: 0.7),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              color: ColorManager.darkTextSecondary,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: ColorManager.darkTextPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrizeRow(String place, String amount, Color color, IconData icon) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: color),
+          const SizedBox(width: 12),
+          Text(
+            place,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            amount,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: ColorManager.darkTextPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

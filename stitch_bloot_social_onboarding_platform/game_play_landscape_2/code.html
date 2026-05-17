@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>Baloot - Game Play (Landscape)</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#2a1700",
+                        "surface-elevated": "#161622",
+                        "on-surface": "#e7e0ed",
+                        "surface-container": "#211e27",
+                        "primary-fixed": "#e9ddff",
+                        "error-container": "#93000a",
+                        "background": "#15121b",
+                        "on-error": "#690005",
+                        "on-tertiary-container": "#3f2300",
+                        "surface-hover": "#252538",
+                        "primary-fixed-dim": "#d0bcff",
+                        "primary-light": "#A78BFA",
+                        "surface-dim": "#15121b",
+                        "surface-muted": "#1E1E2E",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "surface-variant": "#37333d",
+                        "surface-tint": "#d0bcff",
+                        "tertiary": "#ffb869",
+                        "surface-container-lowest": "#0f0d15",
+                        "on-tertiary": "#482900",
+                        "border-light": "rgba(139, 92, 246, 0.25)",
+                        "secondary-container": "#ee9800",
+                        "on-secondary": "#472a00",
+                        "gold-light": "#FBBF24",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "gold-dark": "#D97706",
+                        "secondary-fixed": "#ffddb8",
+                        "surface-container-highest": "#37333d",
+                        "outline": "#958ea0",
+                        "inverse-surface": "#e7e0ed",
+                        "primary": "#d0bcff",
+                        "outline-variant": "#494454",
+                        "on-secondary-container": "#5b3800",
+                        "on-surface-muted": "#9CA3AF",
+                        "primary-container": "#a078ff",
+                        "on-primary-fixed": "#23005c",
+                        "on-background": "#e7e0ed",
+                        "tertiary-fixed": "#ffdcbb",
+                        "surface-bright": "#3b3742",
+                        "on-surface-variant": "#cbc3d7",
+                        "on-surface-secondary": "#6B7280",
+                        "error": "#EF4444",
+                        "on-primary": "#3c0091",
+                        "success": "#22C55E",
+                        "inverse-primary": "#6d3bd7",
+                        "on-tertiary-fixed": "#2c1700",
+                        "live": "#FF1A1A",
+                        "primary-dark": "#7C3AED",
+                        "inverse-on-surface": "#322f39",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "on-primary-fixed-variant": "#5516be",
+                        "surface-container-high": "#2c2832",
+                        "tertiary-container": "#ca801e",
+                        "on-primary-container": "#340080",
+                        "border": "rgba(139, 92, 246, 0.15)",
+                        "border-gold": "rgba(245, 158, 11, 0.3)",
+                        "surface": "#0A0A0F",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "secondary": "#ffb95f",
+                        "surface-container-low": "#1d1a23",
+                        "on-error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "md": "12px",
+                        "lg": "16px",
+                        "xl": "24px",
+                        "xxl": "32px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "score": ["Inter"],
+                        "label": ["Inter"],
+                        "title": ["Inter"],
+                        "caption": ["Inter"],
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "display": ["Inter"]
+                    },
+                    "fontSize": {
+                        "score": ["24px", {"lineHeight": "1.1", "fontWeight": "700"}],
+                        "label": ["13px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "title": ["15px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "caption": ["12px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "headline": ["22px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "body": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "display": ["28px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "800"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Landscape specific base setup */
+        @media (orientation: landscape) {
+            body {
+                overflow: hidden; /* Prevent scrolling during gameplay */
+            }
+        }
+        
+        /* Ambient Glow Utilities */
+        .glow-primary {
+            box-shadow: 0 0 40px rgba(139, 92, 246, 0.15);
+        }
+        .glow-gold {
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.15);
+        }
+        
+        /* Game Table Felt Gradient */
+        .bg-felt {
+            background: radial-gradient(circle, #064E3B 0%, #022c22 100%);
+        }
+
+        /* Card fanning and lifting */
+        .card-fan {
+            transform-origin: bottom center;
+        }
+        .card-raised {
+            transform: translateY(-20px) scale(1.05);
+            z-index: 20;
+            box-shadow: 0 -10px 20px rgba(139, 92, 246, 0.3);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface h-screen w-screen flex flex-col font-body selection:bg-primary-dark/30">
+<!-- Top HUD Area -->
+<header class="w-full flex justify-between items-center px-lg py-sm z-50 absolute top-0 left-0 right-0">
+<!-- Back & Info -->
+<div class="flex items-center gap-sm">
+<button class="w-10 h-10 rounded-full bg-surface-elevated/80 border border-border flex items-center justify-center text-primary-light hover:bg-surface-hover transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back_ios_new</span>
+</button>
+<div class="bg-surface-elevated/80 backdrop-blur-sm border border-border rounded-xl px-4 py-2 flex flex-col justify-center">
+<span class="font-label text-label text-on-surface">Friday Night</span>
+<div class="flex items-center gap-xs">
+<span class="font-caption text-caption text-primary-light">Round 3/8</span>
+<span class="w-1 h-1 rounded-full bg-gold-light"></span>
+<span class="font-caption text-caption text-gold-light flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">diamond</span> Hokm
+                    </span>
+</div>
+</div>
+</div>
+<!-- Scoreboard -->
+<div class="bg-surface-elevated/90 backdrop-blur-md border border-border-gold rounded-full px-6 py-2 flex items-center gap-4 glow-gold">
+<div class="flex flex-col items-end">
+<span class="font-caption text-caption text-on-surface-variant">Us</span>
+<span class="font-score text-score text-primary-light">8</span>
+</div>
+<div class="h-8 w-px bg-border-light"></div>
+<div class="flex flex-col items-start">
+<span class="font-caption text-caption text-on-surface-variant">Them</span>
+<span class="font-score text-score text-gold-light">12</span>
+</div>
+</div>
+<!-- Settings -->
+<button class="w-10 h-10 rounded-full bg-surface-elevated/80 border border-border flex items-center justify-center text-on-surface-variant hover:text-primary-light hover:bg-surface-hover transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+</button>
+</header>
+<!-- Main Game Area -->
+<main class="flex-1 relative flex items-center justify-center overflow-hidden w-full max-w-[1200px] mx-auto px-[120px]">
+<!-- Game Table Felt -->
+<div class="absolute inset-y-xl inset-x-[150px] bg-felt rounded-[40px] border border-success/30 shadow-2xl flex items-center justify-center">
+<!-- Played Cards (Center) -->
+<div class="relative w-[180px] h-[180px] flex items-center justify-center">
+<!-- Top Card -->
+<div class="absolute top-0 w-[70px] h-[98px] bg-white rounded-lg border border-gray-200 shadow-md flex flex-col justify-between p-1 z-10">
+<span class="text-error font-bold text-sm leading-none">K<br/><span class="material-symbols-outlined text-[14px]">favorite</span></span>
+<div class="flex-1 flex items-center justify-center">
+<span class="material-symbols-outlined text-error text-[28px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+</div>
+<!-- Right Card -->
+<div class="absolute right-0 w-[70px] h-[98px] bg-white rounded-lg border border-gray-200 shadow-md flex flex-col justify-between p-1 z-10 transform rotate-6">
+<span class="text-black font-bold text-sm leading-none">10<br/><span class="material-symbols-outlined text-[14px]">playing_cards</span></span>
+<div class="flex-1 flex items-center justify-center">
+<span class="material-symbols-outlined text-black text-[28px]" style="font-variation-settings: 'FILL' 1;">playing_cards</span>
+</div>
+</div>
+<!-- Bottom Card -->
+<div class="absolute bottom-0 w-[70px] h-[98px] bg-white rounded-lg border border-gray-200 shadow-md flex flex-col justify-between p-1 z-20 transform -rotate-3 glow-primary">
+<span class="text-error font-bold text-sm leading-none">A<br/><span class="material-symbols-outlined text-[14px]">diamond</span></span>
+<div class="flex-1 flex items-center justify-center">
+<span class="material-symbols-outlined text-error text-[28px]" style="font-variation-settings: 'FILL' 1;">diamond</span>
+</div>
+</div>
+<!-- Left Card -->
+<div class="absolute left-0 w-[70px] h-[98px] bg-white rounded-lg border border-gray-200 shadow-md flex flex-col justify-between p-1 z-10 transform -rotate-12">
+<span class="text-black font-bold text-sm leading-none">J<br/><span class="material-symbols-outlined text-[14px]">cruelty_free</span></span>
+<div class="flex-1 flex items-center justify-center">
+<span class="material-symbols-outlined text-black text-[28px]" style="font-variation-settings: 'FILL' 1;">cruelty_free</span>
+</div>
+</div>
+</div>
+<!-- Turn Indicator -->
+<div class="absolute bottom-8 px-4 py-1.5 bg-primary/20 border border-primary-light rounded-full backdrop-blur-sm glow-primary">
+<span class="font-label text-label text-primary-light">Your Turn</span>
+</div>
+</div>
+<!-- Players Positioning -->
+<!-- Partner (Top Center) -->
+<div class="absolute top-sm left-1/2 -translate-x-1/2 flex flex-col items-center gap-xs z-30">
+<div class="w-24 h-[54px] rounded-xl border-2 border-primary-light bg-surface-muted overflow-hidden relative shadow-[0_4px_12px_rgba(139,92,246,0.2)]">
+<img alt="Partner Avatar" class="w-full h-full object-cover" data-alt="A stylized portrait of a female avatar in a sophisticated dark, moody lighting setup. She wears elegant evening attire, set against a deep purple and black background that matches a premium gaming UI aesthetic. High contrast, sharp focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzuGtTsewRCK3duo7RQnnxsnXDfxSqSGtIc-1UV3JnxTxkWX5DANmOqKYAzPcataYcmepy_8HH-ouDSDuxAuGl6nQ4pRouyh4-aOZ0cIMDJ8gINQo0GDXyZEknjCqCwABBtvYkHtbwmoKt2_LeJN5P8P69s6HfK4Br1R8rJ_8jbySS_yTYvoq_XKjNgSi9bzhsNXwSFXZZByADH5W4qU5iH2U9kSsTLJLdWe6egE1YwAXjlVrnOPTARgkV6OCe7ERwvP4PQFrscte_"/>
+<div class="absolute bottom-1 right-1 w-5 h-5 bg-surface/80 rounded-full flex items-center justify-center backdrop-blur-md">
+<span class="material-symbols-outlined text-[12px] text-success">mic</span>
+</div>
+</div>
+<span class="font-label text-label text-on-surface bg-surface-elevated/80 px-2 py-0.5 rounded backdrop-blur-sm border border-border">Sarah</span>
+</div>
+<!-- Opponent 1 (Left) -->
+<div class="absolute left-lg top-1/2 -translate-y-1/2 flex flex-col items-center gap-xs z-30">
+<div class="w-24 h-[54px] rounded-xl border-2 border-gold-light bg-surface-muted overflow-hidden relative shadow-[0_4px_12px_rgba(245,158,11,0.2)]">
+<img alt="Opponent 1 Avatar" class="w-full h-full object-cover" data-alt="A cinematic portrait of a male avatar looking focused and competitive. The lighting features warm gold rim-lights against a very dark, premium black background. The overall tone is intense and luxurious, fitting a high-stakes card room environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7PP1KW75rtB3CHGXCmelmBiRYclHfBsJ1ukJCA1POO4Jfjp0ud-3E0IwN2ddn5tpsmbNyBF78r9SyaODEJDYmS1zP3fTYfMBFUhgFjxSsBKnbHQTaYYrKg1oE5u2mO_FfqHeNIs9xMwtfd9Nw19cyu1qhsAKOZT0jQfVoDcyglFPORKpa7XGHspfV61ABYbCFC526m9O7PwBj6V-Lj1KRz-9zsQQX6kQEbPwFtFxz8F3QmLWmUYxGHjhsK34Vekgdmc9ZGBZMVNpj"/>
+<div class="absolute bottom-1 right-1 w-5 h-5 bg-surface/80 rounded-full flex items-center justify-center backdrop-blur-md">
+<span class="material-symbols-outlined text-[12px] text-error">mic_off</span>
+</div>
+</div>
+<span class="font-label text-label text-on-surface bg-surface-elevated/80 px-2 py-0.5 rounded backdrop-blur-sm border border-border-gold">Ahmad</span>
+</div>
+<!-- Opponent 2 (Right) -->
+<div class="absolute right-lg top-1/2 -translate-y-1/2 flex flex-col items-center gap-xs z-30">
+<div class="w-24 h-[54px] rounded-xl border-2 border-gold-light bg-surface-muted overflow-hidden relative shadow-[0_4px_12px_rgba(245,158,11,0.2)]">
+<img alt="Opponent 2 Avatar" class="w-full h-full object-cover" data-alt="A portrait of a sophisticated older gentleman looking intensely at the camera. He is illuminated by a subtle mix of gold and ambient purple light against a void-like black background. The mood is serious, premium, and indicative of a master card player." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxNK_jZtNOCpQ-y4jn9NrSCub6dBiSlzUFmoG5gRM-bYG96xA_FOUdYG8T-nd7LvDuelr6q0nZrdfLNgUnvG6Pp0Wgh22QLz6EEQ4zcY3dP78C-LlRMzZCJXPIts29FFW-fPfswq1oG5rd92YUbgjQNdKyFbbowK8YDy2Bl831H-5KrsmCg2Vz9_4QvmkrdMnvdIW9Kw10tgSsYis3VnLew1TaJ7KSzDuzrWjDwf5gn01iEGX40LtUSrRbZ5YOxgrr7wZTLye2tRq_"/>
+<div class="absolute bottom-1 right-1 w-5 h-5 bg-surface/80 rounded-full flex items-center justify-center backdrop-blur-md">
+<span class="material-symbols-outlined text-[12px] text-success">mic</span>
+</div>
+</div>
+<span class="font-label text-label text-on-surface bg-surface-elevated/80 px-2 py-0.5 rounded backdrop-blur-sm border border-border-gold">Fahad</span>
+</div>
+<!-- You (Bottom Center Player Area) -->
+<div class="absolute bottom-sm left-1/2 -translate-x-1/2 flex items-end gap-md z-40 w-full max-w-3xl px-xl justify-between pointer-events-none">
+<!-- Bottom Controls (Left Side) -->
+<div class="flex items-center gap-sm pointer-events-auto pb-sm">
+<button class="w-11 h-11 rounded-full bg-surface-elevated border border-border flex items-center justify-center text-on-surface-variant hover:bg-surface-hover hover:text-primary-light transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">chat</span>
+</button>
+<div class="flex items-center bg-surface-elevated border border-border rounded-full p-1">
+<button class="w-9 h-9 rounded-full bg-primary/20 text-primary-light flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">mic</span>
+</button>
+<button class="w-9 h-9 rounded-full text-on-surface-variant hover:text-on-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 0;">videocam</span>
+</button>
+<button class="w-9 h-9 rounded-full text-on-surface-variant hover:text-on-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 0;">volume_up</span>
+</button>
+</div>
+</div>
+<!-- Your Hand (Center) -->
+<div class="flex items-end justify-center pointer-events-auto h-[120px] relative w-[400px]">
+<!-- Hand of Cards (Simulated Fan) -->
+<!-- Card 1 -->
+<div class="absolute bottom-0 w-[80px] h-[112px] bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-between p-1.5 transform -translate-x-[120px] rotate-[-15deg] card-fan">
+<span class="text-black font-bold text-sm leading-none">7<br/><span class="material-symbols-outlined text-[14px]">playing_cards</span></span>
+</div>
+<!-- Card 2 -->
+<div class="absolute bottom-0 w-[80px] h-[112px] bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-between p-1.5 transform -translate-x-[90px] rotate-[-10deg] card-fan">
+<span class="text-error font-bold text-sm leading-none">8<br/><span class="material-symbols-outlined text-[14px]">favorite</span></span>
+</div>
+<!-- Card 3 -->
+<div class="absolute bottom-0 w-[80px] h-[112px] bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-between p-1.5 transform -translate-x-[60px] rotate-[-5deg] card-fan">
+<span class="text-error font-bold text-sm leading-none">9<br/><span class="material-symbols-outlined text-[14px]">diamond</span></span>
+</div>
+<!-- Card 4 (Raised/Selected) -->
+<div class="absolute bottom-0 w-[80px] h-[112px] bg-white rounded-lg border-2 border-primary-light shadow-xl flex flex-col justify-between p-1.5 transform -translate-x-[30px] rotate-0 card-raised">
+<span class="text-black font-bold text-sm leading-none">A<br/><span class="material-symbols-outlined text-[14px]">cruelty_free</span></span>
+<div class="flex-1 flex items-center justify-center">
+<span class="material-symbols-outlined text-black text-[32px]" style="font-variation-settings: 'FILL' 1;">cruelty_free</span>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="absolute bottom-0 w-[80px] h-[112px] bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-between p-1.5 transform translate-x-[0px] rotate-[5deg] card-fan">
+<span class="text-error font-bold text-sm leading-none">J<br/><span class="material-symbols-outlined text-[14px]">favorite</span></span>
+</div>
+<!-- Card 6 -->
+<div class="absolute bottom-0 w-[80px] h-[112px] bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-between p-1.5 transform translate-x-[30px] rotate-[10deg] card-fan">
+<span class="text-black font-bold text-sm leading-none">Q<br/><span class="material-symbols-outlined text-[14px]">playing_cards</span></span>
+</div>
+<!-- Card 7 -->
+<div class="absolute bottom-0 w-[80px] h-[112px] bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-between p-1.5 transform translate-x-[60px] rotate-[15deg] card-fan">
+<span class="text-error font-bold text-sm leading-none">K<br/><span class="material-symbols-outlined text-[14px]">diamond</span></span>
+</div>
+</div>
+<!-- You Identity & Leave (Right Side) -->
+<div class="flex items-end gap-md pointer-events-auto pb-sm">
+<div class="flex flex-col items-center gap-xs">
+<div class="w-24 h-[54px] rounded-xl border-2 border-primary-light bg-surface-muted overflow-hidden relative shadow-[0_4px_12px_rgba(139,92,246,0.2)]">
+<img alt="Your Avatar" class="w-full h-full object-cover" data-alt="A portrait of a young man looking directly at the viewer with a confident expression. The lighting is heavily styled with vibrant purple and deep black tones, creating a neon-lit, premium gaming atmosphere. The visual aesthetic is modern, crisp, and high-fidelity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMp6VlNJPAN6ktc2p3rlKKXM2SjBzPJXS7uoyPYZSZ8fetj5linzPDwBidJgsZBfBoFyy39jlKfOfL68SYo-OLJodufXNJSbHXSIUw6pD0H4sHMPehRTMQj-yibx0OhUjmnsxwZ2ysExNQ_QXuBqbsFNKV-NV3dL9hhhbCDkfcEVg1U_m0EHLEXG2svPq_OlVRQfKtdJosx2AsM1KislFt5e62RH1uWD-to0W7KLT2zzjtL3ZyB8IwEMncHbhmIHQiHcR1xAhd-kSL"/>
+<div class="absolute bottom-1 right-1 flex gap-1">
+<div class="w-4 h-4 bg-surface/80 rounded-full flex items-center justify-center backdrop-blur-md">
+<span class="material-symbols-outlined text-[10px] text-success">mic</span>
+</div>
+<div class="w-4 h-4 bg-surface/80 rounded-full flex items-center justify-center backdrop-blur-md">
+<span class="material-symbols-outlined text-[10px] text-success">videocam</span>
+</div>
+</div>
+</div>
+<span class="font-label text-label text-primary-light bg-surface-elevated/80 px-2 py-0.5 rounded backdrop-blur-sm border border-border">You</span>
+</div>
+<button class="h-11 px-4 rounded-xl border border-error/50 bg-error/10 text-error font-title text-title hover:bg-error/20 transition-colors flex items-center gap-sm">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+<span class="hidden sm:inline">Leave</span>
+</button>
+</div>
+</div>
+</main>
+</body></html>

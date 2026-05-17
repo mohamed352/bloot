@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bloot - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "gold-dark": "#D97706",
+                        "secondary-fixed": "#ffddb8",
+                        "inverse-surface": "#e7e0ed",
+                        "surface-container-highest": "#37333d",
+                        "outline": "#958ea0",
+                        "primary-container": "#a078ff",
+                        "primary": "#d0bcff",
+                        "outline-variant": "#494454",
+                        "on-secondary-container": "#5b3800",
+                        "on-surface-muted": "#9CA3AF",
+                        "tertiary-fixed": "#ffdcbb",
+                        "surface-bright": "#3b3742",
+                        "on-primary-fixed": "#23005c",
+                        "on-background": "#e7e0ed",
+                        "on-surface-variant": "#cbc3d7",
+                        "on-surface-secondary": "#6B7280",
+                        "error": "#EF4444",
+                        "on-tertiary-fixed": "#2c1700",
+                        "live": "#FF1A1A",
+                        "on-primary": "#3c0091",
+                        "success": "#22C55E",
+                        "inverse-primary": "#6d3bd7",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "on-primary-fixed-variant": "#5516be",
+                        "primary-dark": "#7C3AED",
+                        "inverse-on-surface": "#322f39",
+                        "tertiary-container": "#ca801e",
+                        "surface-container-high": "#2c2832",
+                        "border": "rgba(139, 92, 246, 0.15)",
+                        "on-primary-container": "#340080",
+                        "border-gold": "rgba(245, 158, 11, 0.3)",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "surface": "#0A0A0F",
+                        "secondary": "#ffb95f",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-low": "#1d1a23",
+                        "on-secondary-fixed": "#2a1700",
+                        "surface-elevated": "#161622",
+                        "surface-container": "#211e27",
+                        "primary-fixed": "#e9ddff",
+                        "on-surface": "#e7e0ed",
+                        "error-container": "#93000a",
+                        "on-error": "#690005",
+                        "on-tertiary-container": "#3f2300",
+                        "background": "#15121b",
+                        "primary-fixed-dim": "#d0bcff",
+                        "surface-hover": "#252538",
+                        "surface-dim": "#15121b",
+                        "primary-light": "#A78BFA",
+                        "surface-muted": "#1E1E2E",
+                        "surface-variant": "#37333d",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "surface-tint": "#d0bcff",
+                        "surface-container-lowest": "#0f0d15",
+                        "on-tertiary": "#482900",
+                        "tertiary": "#ffb869",
+                        "secondary-container": "#ee9800",
+                        "border-light": "rgba(139, 92, 246, 0.25)",
+                        "on-secondary": "#472a00",
+                        "gold-light": "#FBBF24",
+                        "on-secondary-fixed-variant": "#653e00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "24px",
+                        "xs": "4px",
+                        "md": "12px",
+                        "lg": "16px",
+                        "sm": "8px",
+                        "xxl": "32px"
+                    },
+                    "fontFamily": {
+                        "title": ["Inter"],
+                        "caption": ["Inter"],
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "display": ["Inter"],
+                        "score": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    "fontSize": {
+                        "title": ["15px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "caption": ["12px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "headline": ["22px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "body": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "display": ["28px", { "lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "800" }],
+                        "score": ["24px", { "lineHeight": "1.1", "fontWeight": "700" }],
+                        "label": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body antialiased min-h-screen flex flex-col items-center justify-center p-xl">
+<!-- RTL Note: For RTL support, add dir="rtl" to the html tag and ensure flexbox directions and margins/paddings are correctly flipped (e.g., ms/me instead of ml/mr if using logical properties, though standard tailwind here is ltr by default unless explicitly adjusted). -->
+<main class="w-full max-w-[448px] mx-auto flex flex-col gap-xxl">
+<!-- Header Section -->
+<div class="flex flex-col items-center text-center gap-md">
+<h1 class="text-display font-display text-primary tracking-wider mb-sm">Bloot</h1>
+<h2 class="text-headline font-headline text-on-surface">Welcome Back</h2>
+<p class="text-body font-body text-on-surface-variant">Sign in to continue playing</p>
+</div>
+<!-- Form Section -->
+<form class="flex flex-col gap-xl">
+<!-- Phone Input -->
+<div class="flex flex-col gap-sm">
+<label class="text-label font-label text-on-surface-variant" for="phone">Phone Number</label>
+<div class="flex bg-surface-muted border border-border-light rounded-xl overflow-hidden focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-200 shadow-md shadow-primary-dark/5">
+<button class="flex items-center gap-xs px-md py-md bg-surface-elevated text-on-surface border-r border-border-light hover:bg-surface-hover transition-colors" type="button">
+<span class="text-body font-body">+966</span>
+<span class="material-symbols-outlined text-[20px]" data-icon="expand_more">expand_more</span>
+</button>
+<input class="flex-1 bg-transparent border-none text-on-surface text-body font-body px-md py-md focus:ring-0 placeholder:text-on-surface-muted" id="phone" placeholder="5X XXX XXXX" type="tel"/>
+</div>
+</div>
+<!-- Primary Button -->
+<button class="w-full h-[52px] rounded-full bg-gradient-to-r from-primary-dark to-primary-light text-on-primary-fixed flex items-center justify-center shadow-[0_0_24px_rgba(139,92,246,0.25)] hover:shadow-[0_0_32px_rgba(139,92,246,0.4)] active:scale-95 transition-all duration-200" type="button">
+<span class="text-title font-title">Send Code</span>
+</button>
+</form>
+<!-- Divider -->
+<div class="flex items-center gap-md w-full">
+<div class="flex-1 h-px bg-border-light"></div>
+<span class="text-caption font-caption text-on-surface-variant uppercase tracking-wider">or continue with</span>
+<div class="flex-1 h-px bg-border-light"></div>
+</div>
+<!-- Social Logins -->
+<div class="flex flex-col gap-md">
+<!-- Apple Login (Dark Style) -->
+<button class="w-full h-[52px] rounded-full bg-surface-container-high border border-border text-on-surface flex items-center justify-center gap-sm hover:bg-surface-hover transition-colors" type="button">
+<span class="material-symbols-outlined" data-icon="apple" data-weight="fill" style="font-variation-settings: 'FILL' 1;">ios</span>
+<span class="text-title font-title">Continue with Apple</span>
+</button>
+<!-- Google Login (Outlined Style) -->
+<button class="w-full h-[52px] rounded-full bg-transparent border border-outline text-on-surface flex items-center justify-center gap-sm hover:bg-surface-hover transition-colors" type="button">
+<span class="material-symbols-outlined text-[#EA4335]" data-icon="account_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+<span class="text-title font-title">Continue with Google</span>
+</button>
+</div>
+<!-- Footer Link -->
+<div class="text-center mt-sm">
+<p class="text-body font-body text-on-surface-variant">
+                Don't have an account? 
+                <a class="text-primary hover:text-primary-light font-bold transition-colors" href="#">Sign Up</a>
+</p>
+</div>
+</main>
+</body></html>

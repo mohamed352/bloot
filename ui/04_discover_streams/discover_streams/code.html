@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Discover Streams - Bloot</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-dark": "#7C3AED",
+                        "outline": "#958ea0",
+                        "inverse-primary": "#6d3bd7",
+                        "surface": "#0A0A0F",
+                        "on-primary-container": "#340080",
+                        "primary-light": "#A78BFA",
+                        "outline-variant": "#494454",
+                        "surface-container-lowest": "#0f0d15",
+                        "gold-light": "#FBBF24",
+                        "on-tertiary": "#482900",
+                        "on-background": "#e7e0ed",
+                        "on-secondary-container": "#5b3800",
+                        "border-gold": "rgba(245, 158, 11, 0.3)",
+                        "surface-muted": "#1E1E2E",
+                        "on-primary-fixed-variant": "#5516be",
+                        "success": "#22C55E",
+                        "on-surface": "#e7e0ed",
+                        "on-secondary-fixed": "#2a1700",
+                        "surface-container-low": "#1d1a23",
+                        "secondary-container": "#ee9800",
+                        "live": "#FF1A1A",
+                        "secondary": "#ffb95f",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "tertiary-container": "#ca801e",
+                        "on-primary": "#3c0091",
+                        "primary-container": "#a078ff",
+                        "on-surface-muted": "#9CA3AF",
+                        "on-error": "#690005",
+                        "surface-variant": "#37333d",
+                        "gold-dark": "#D97706",
+                        "surface-hover": "#252538",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "border": "rgba(139, 92, 246, 0.15)",
+                        "surface-container": "#211e27",
+                        "inverse-on-surface": "#322f39",
+                        "tertiary": "#ffb869",
+                        "on-secondary": "#472a00",
+                        "surface-tint": "#d0bcff",
+                        "surface-elevated": "#161622",
+                        "surface-dim": "#15121b",
+                        "error-container": "#93000a",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "on-tertiary-container": "#3f2300",
+                        "primary-fixed-dim": "#d0bcff",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "surface-container-highest": "#37333d",
+                        "surface-bright": "#3b3742",
+                        "on-tertiary-fixed": "#2c1700",
+                        "on-primary-fixed": "#23005c",
+                        "primary": "#d0bcff",
+                        "on-surface-variant": "#cbc3d7",
+                        "tertiary-fixed": "#ffdcbb",
+                        "primary-fixed": "#e9ddff",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed": "#ffddb8",
+                        "on-surface-secondary": "#6B7280",
+                        "inverse-surface": "#e7e0ed",
+                        "surface-container-high": "#2c2832",
+                        "border-light": "rgba(139, 92, 246, 0.25)",
+                        "background": "#15121b",
+                        "error": "#EF4444"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "16px",
+                        "md": "12px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "xl": "24px",
+                        "xxl": "32px",
+                        "safe": "env(safe-area-inset-bottom)"
+                    },
+                    "fontFamily": {
+                        "score": ["Inter"],
+                        "caption": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"],
+                        "display": ["Inter"],
+                        "title": ["Inter"],
+                        "headline": ["Inter"]
+                    },
+                    "fontSize": {
+                        "score": ["24px", { "lineHeight": "1.1", "fontWeight": "700" }],
+                        "caption": ["12px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "body": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "label": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "display": ["28px", { "lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "800" }],
+                        "title": ["15px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "headline": ["22px", { "lineHeight": "1.3", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Hide scrollbar for horizontal scroll areas but keep functionality */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .pulse-live {
+            animation: pulse-live 2s infinite;
+        }
+        @keyframes pulse-live {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body antialiased selection:bg-primary/30 selection:text-primary">
+<!-- Top Navigation App Bar (Contextual: Task-focused sub-page) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-lg py-md max-w-[448px] mx-auto bg-surface/90 backdrop-blur-xl border-b border-border-light shadow-md shadow-primary-dark/5">
+<div class="flex items-center gap-md">
+<!-- Back Action -->
+<button aria-label="Go back" class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-hover active:scale-95 transition-all duration-200 text-primary dark:text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<h1 class="font-headline text-headline text-on-surface tracking-wide">Discover Streams</h1>
+</div>
+<div class="flex items-center">
+<!-- Advanced Filter -->
+<button aria-label="Advanced Filters" class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-hover active:scale-95 transition-all duration-200 text-primary dark:text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">tune</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-[72px] pb-[90px] max-w-[448px] mx-auto w-full min-h-screen">
+<!-- Search Section -->
+<div class="px-lg py-sm sticky top-[72px] z-40 bg-surface/95 backdrop-blur-md">
+<div class="relative flex items-center w-full">
+<span class="material-symbols-outlined absolute left-sm text-outline-variant" style="font-variation-settings: 'FILL' 0;">search</span>
+<input class="w-full bg-surface-muted text-on-surface placeholder:text-outline-variant rounded-full py-md pl-10 pr-sm border border-border-light focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all font-body text-body shadow-inner" placeholder="Search players, rooms, or streams" type="text"/>
+</div>
+</div>
+<!-- Filter Tabs -->
+<div class="px-lg pb-md pt-sm sticky top-[128px] z-30 bg-surface/95 backdrop-blur-md border-b border-border-light/50">
+<nav aria-label="Stream Categories" class="flex overflow-x-auto hide-scrollbar gap-lg">
+<!-- Active Tab -->
+<button class="relative pb-xs whitespace-nowrap text-primary font-title text-title flex flex-col items-center">
+                    Popular
+                    <div class="absolute bottom-[-4px] w-full h-[2px] bg-primary rounded-t-full shadow-[0_0_8px_rgba(208,188,255,0.5)]"></div>
+</button>
+<button class="pb-xs whitespace-nowrap text-on-surface-variant hover:text-on-surface transition-colors font-title text-title">New</button>
+<button class="pb-xs whitespace-nowrap text-on-surface-variant hover:text-on-surface transition-colors font-title text-title">Top Rated</button>
+<button class="pb-xs whitespace-nowrap text-on-surface-variant hover:text-on-surface transition-colors font-title text-title flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">emoji_events</span> Tournaments
+                </button>
+<button class="pb-xs whitespace-nowrap text-on-surface-variant hover:text-on-surface transition-colors font-title text-title">Voice Only</button>
+<button class="pb-xs whitespace-nowrap text-on-surface-variant hover:text-on-surface transition-colors font-title text-title">Following</button>
+</nav>
+</div>
+<!-- Stream Grid -->
+<div class="p-lg grid grid-cols-2 gap-md">
+<!-- Stream Card 1 (Baloot) -->
+<article class="bg-surface-elevated border border-border rounded-xl overflow-hidden flex flex-col shadow-[0_8px_24px_rgba(0,0,0,0.3)] hover:border-primary-dark transition-colors duration-300 relative group cursor-pointer">
+<!-- Thumbnail Area -->
+<div class="relative w-full aspect-video bg-surface-muted overflow-hidden">
+<img alt="Stream Thumbnail" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" data-alt="A stylized, cinematic shot of a digital card game interface on a screen, glowing with deep purple and gold accents in a dark, atmospheric room. The Premium Dark Social aesthetic is evident with soft ambient backlighting and sharp contrast. The mood is tense and competitive." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAc8yBp_qBTch4DAcm4SlY5F6QIJ4tlVncO-RAVb64JNUN71ka55PkrPhiC7zSnb1z2VqfnTyvJACuXyuFZd5yXXASJNyKzBQWY7LqL5xSP6PV_hg4hs-GMPdkWspoDQuQLMLBEuapbi020JtNHuvHFvuSJEY8ai2F_NQIGqw7nb4MKp0iVh1-VCJOUGwDVdLjkjjYjJoTz-RHpnPHMaFsItpg87bulu8aU3PsHCHrSLgKPm7vCtwJgpb0dQzDUnotMNxRWC0hFqCkp"/>
+<!-- Overlays -->
+<div class="absolute top-sm left-sm flex gap-xs">
+<span class="bg-live/20 border border-live text-live font-label text-[10px] uppercase tracking-wider px-xs py-[2px] rounded-sm pulse-live flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-live rounded-full"></span> LIVE
+                        </span>
+<span class="bg-primary-dark/80 backdrop-blur-sm text-on-surface font-label text-[10px] px-xs py-[2px] rounded-sm border border-primary/30">
+                            Baloot
+                        </span>
+</div>
+<div class="absolute top-sm right-sm bg-surface-dark/80 backdrop-blur-md px-1.5 py-0.5 rounded flex items-center gap-1 text-on-surface">
+<span class="material-symbols-outlined text-[12px]">visibility</span>
+<span class="font-caption text-[11px] font-bold">1.2k</span>
+</div>
+</div>
+<!-- Info Area -->
+<div class="p-md flex flex-col flex-1 gap-sm">
+<div class="flex items-start gap-sm">
+<div class="relative w-8 h-8 rounded-full overflow-hidden border border-border shrink-0">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A sleek, high-contrast portrait of a gamer wearing a headset, illuminated by purple rim lighting against a pitch-black background. Premium dark social aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAx_PdsCKIljYND1YWlxRTEckZqZknMgkjuxuP8VVWeP18TUY2S_Zm9I4oeZED85f6-lv1fbqB5nSYGATCFrC-scc-pPCQNsiRSt9qMH-WQ0bol1z3HQ4k_z0825hsL8myu8TiCcwoY3prPKe9_LexRT06RKD4wu8g5mFGKbDa6ktfJ9omxEAQUTV7s0fmrTCOPG6sPrD33iKndzK0CRm4k2zwuOllJ3uW9dwPx8rOI5rmlOkx1qu0RukASWqFr9n9YQDjpLaIDSua"/>
+</div>
+<div class="flex flex-col min-w-0">
+<h3 class="font-title text-title text-on-surface truncate">High Stakes Final Hand!</h3>
+<span class="font-caption text-caption text-on-surface-variant truncate">@SaudMaster</span>
+</div>
+</div>
+<div class="flex items-center justify-between mt-auto pt-sm border-t border-border-light/30">
+<div class="flex items-center gap-1 text-gold-light">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-caption text-caption font-semibold">450</span>
+</div>
+<button class="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 px-sm py-1 rounded-md font-label text-[11px] transition-colors">
+                            Join
+                        </button>
+</div>
+</div>
+</article>
+<!-- Stream Card 2 (Tournament) -->
+<article class="bg-surface-elevated border border-border rounded-xl overflow-hidden flex flex-col shadow-[0_8px_24px_rgba(0,0,0,0.3)] hover:border-success/50 transition-colors duration-300 relative group cursor-pointer">
+<div class="relative w-full aspect-video bg-surface-muted overflow-hidden">
+<img alt="Stream Thumbnail" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500 opacity-80" data-alt="A dark, luxurious gaming lounge setting showing an empty felt table illuminated by a dramatic overhead spotlight. Rich purple and gold ambient light spills from the edges. Premium dark social aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAO-0MwSEEAY1sBYHEBPxJAVGtCZfLwofvxPjC0SyeJdl2HiBBKzYMjF4-UqB8GOwBGRJlZcdXEmKFm13e8MLzBfRVCZMiIycz8X9CadK7_0n3B3bUtl83yFHTjt0nqGfx6AmoLzilNI0lSMHGjBFB_mKzoB0lpH_Mtj_f3M98JRFTRdytcdfe-QaIxeTVfa2io1JFgYXIrCMLwqKdpfpFjuru72D7gWf3EiTwBWM86tao1ASi512DCq9KdjKwcrUdi_W_N0yhmpuwI"/>
+<div class="absolute top-sm left-sm flex gap-xs">
+<span class="bg-live/20 border border-live text-live font-label text-[10px] uppercase tracking-wider px-xs py-[2px] rounded-sm pulse-live flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-live rounded-full"></span> LIVE
+                        </span>
+<span class="bg-success/20 text-success font-label text-[10px] px-xs py-[2px] rounded-sm border border-success/30">
+                            Tournament
+                        </span>
+</div>
+<div class="absolute top-sm right-sm bg-surface-dark/80 backdrop-blur-md px-1.5 py-0.5 rounded flex items-center gap-1 text-on-surface">
+<span class="material-symbols-outlined text-[12px]">visibility</span>
+<span class="font-caption text-[11px] font-bold">5.8k</span>
+</div>
+</div>
+<div class="p-md flex flex-col flex-1 gap-sm">
+<div class="flex items-start gap-sm">
+<div class="relative w-8 h-8 rounded-full overflow-hidden border border-border shrink-0 p-0.5 bg-gradient-to-br from-gold-light to-gold-dark">
+<img alt="Avatar" class="w-full h-full object-cover rounded-full" data-alt="A professional gamer headshot with a subtle gold halo effect, set against a dark void background. Premium aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXE0WJF9lA3UFIMLMFTgb6MZSXu0IubXILYPYCE2oIttzGUnmZIcACQfH6APmGGigc6eTWqCLo-TL-5kWZ91Go0OSAGbKs_0Xt6H0-2lUlNaaobWF3C6PbYsFAabVwSWcgPsiSdyu5gHjaZaa2U8haCblsiuia4jRL7VMH_KfXaOK8q1DC2wFwIiEAx01VYfPpe829E9C-8a8VhDcYwyo72TM_rJHBrVyRA2Pm-y7xrcRwuyiWVpA0HUajX58gwECAvzEbiytEHAVA"/>
+</div>
+<div class="flex flex-col min-w-0">
+<h3 class="font-title text-title text-on-surface truncate">Gulf Cup Semi-Finals</h3>
+<span class="font-caption text-caption text-on-surface-variant truncate">OfficialBloot</span>
+</div>
+</div>
+<div class="flex items-center justify-between mt-auto pt-sm border-t border-border-light/30">
+<div class="flex items-center gap-1 text-gold-light">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-caption text-caption font-semibold">2.1k</span>
+</div>
+<button class="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 px-sm py-1 rounded-md font-label text-[11px] transition-colors">
+                            Join
+                        </button>
+</div>
+</div>
+</article>
+<!-- Stream Card 3 (Stream) -->
+<article class="bg-surface-elevated border border-border rounded-xl overflow-hidden flex flex-col shadow-[0_8px_24px_rgba(0,0,0,0.3)] hover:border-gold-light/50 transition-colors duration-300 relative group cursor-pointer">
+<div class="relative w-full aspect-video bg-surface-muted overflow-hidden">
+<img alt="Stream Thumbnail" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500 opacity-90" data-alt="A vintage microphone sitting on a desk bathed in deep purple and soft gold neon lighting. The background is a dark, out-of-focus studio setting reflecting a premium social gaming vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKBaQW3btuoS-vES8LVU_HQiwsJFe21uuRHMZ0Tx9glq-akPtLPAAVgSElLB-4swIul3W4IX53Iec_lgiW4MVs4wL4a7VgnkMV1ksr2IblhW-4CSPeOAYgsZSp7RYnTRHzDA5sG0Mp9B1zBdZwHhMKokZhmbo7QoNGO6FY5JKcL1yftsDpFnf8LAijjO21kP87T7PQ4OmsEc_-pEuAqBGBgg_xeZyeFUuJQ6-X5_Geu2Hc477PKE_ZpVXQXpFw5nb-75FaMYWnfcq7"/>
+<div class="absolute top-sm left-sm flex gap-xs">
+<span class="bg-live/20 border border-live text-live font-label text-[10px] uppercase tracking-wider px-xs py-[2px] rounded-sm pulse-live flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-live rounded-full"></span> LIVE
+                        </span>
+<span class="bg-gold-dark/20 text-gold-light font-label text-[10px] px-xs py-[2px] rounded-sm border border-gold-dark/30">
+                            Stream
+                        </span>
+</div>
+<div class="absolute top-sm right-sm bg-surface-dark/80 backdrop-blur-md px-1.5 py-0.5 rounded flex items-center gap-1 text-on-surface">
+<span class="material-symbols-outlined text-[12px]">visibility</span>
+<span class="font-caption text-[11px] font-bold">892</span>
+</div>
+</div>
+<div class="p-md flex flex-col flex-1 gap-sm">
+<div class="flex items-start gap-sm">
+<div class="relative w-8 h-8 rounded-full overflow-hidden border border-border shrink-0">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A dimly lit portrait of a female host with glowing purple reflections on her face, set against a completely dark background. Premium dark social styling." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB33MvrbHB9zDzWpHXzLN1wH1ESkBf0cvwP1kR6aEP7Zf7dsgZN0cReszqci--G1ZF3mJgVgzmleyJyD5LEcFn_swGtWU0sHlwo-A-djaoYq2hwJhGosqdBasyVAMSRoBh381qNh_Rn2BD5rPnylShsLdUb62jIf6CUfHFz3_dj4URSwvRB1KLCK8f6AVdrKpCtJXm-0hCQ2dQBWq3D6oOs10qinFwD8Upkx-SataVa2cA2UvPDIchGotWxBtw-9_WJDNXSAIaXiNkK"/>
+</div>
+<div class="flex flex-col min-w-0">
+<h3 class="font-title text-title text-on-surface truncate">Late Night Chat &amp; Cards</h3>
+<span class="font-caption text-caption text-on-surface-variant truncate">@Nour_Plays</span>
+</div>
+</div>
+<div class="flex items-center justify-between mt-auto pt-sm border-t border-border-light/30">
+<div class="flex items-center gap-1 text-gold-light">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-caption text-caption font-semibold">120</span>
+</div>
+<button class="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 px-sm py-1 rounded-md font-label text-[11px] transition-colors">
+                            Join
+                        </button>
+</div>
+</div>
+</article>
+<!-- Stream Card 4 (Baloot - Offline/VOD Example for variety, though prompt requested Live badge, I will stick strictly to prompt requirements) -->
+<article class="bg-surface-elevated border border-border rounded-xl overflow-hidden flex flex-col shadow-[0_8px_24px_rgba(0,0,0,0.3)] hover:border-primary-dark transition-colors duration-300 relative group cursor-pointer">
+<div class="relative w-full aspect-video bg-surface-muted overflow-hidden">
+<div class="w-full h-full bg-gradient-to-br from-surface-muted to-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-outline/30 text-4xl">playing_cards</span>
+</div>
+<div class="absolute top-sm left-sm flex gap-xs">
+<span class="bg-live/20 border border-live text-live font-label text-[10px] uppercase tracking-wider px-xs py-[2px] rounded-sm pulse-live flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-live rounded-full"></span> LIVE
+                        </span>
+<span class="bg-primary-dark/80 backdrop-blur-sm text-on-surface font-label text-[10px] px-xs py-[2px] rounded-sm border border-primary/30">
+                            Baloot
+                        </span>
+</div>
+<div class="absolute top-sm right-sm bg-surface-dark/80 backdrop-blur-md px-1.5 py-0.5 rounded flex items-center gap-1 text-on-surface">
+<span class="material-symbols-outlined text-[12px]">visibility</span>
+<span class="font-caption text-[11px] font-bold">34</span>
+</div>
+</div>
+<div class="p-md flex flex-col flex-1 gap-sm">
+<div class="flex items-start gap-sm">
+<div class="relative w-8 h-8 rounded-full overflow-hidden border border-border shrink-0 bg-surface-muted flex items-center justify-center">
+<span class="material-symbols-outlined text-outline text-[16px]">person</span>
+</div>
+<div class="flex flex-col min-w-0">
+<h3 class="font-title text-title text-on-surface truncate">Casual Matches</h3>
+<span class="font-caption text-caption text-on-surface-variant truncate">@NewPlayer99</span>
+</div>
+</div>
+<div class="flex items-center justify-between mt-auto pt-sm border-t border-border-light/30">
+<div class="flex items-center gap-1 text-gold-light">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-caption text-caption font-semibold">2</span>
+</div>
+<button class="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 px-sm py-1 rounded-md font-label text-[11px] transition-colors">
+                            Join
+                        </button>
+</div>
+</div>
+</article>
+</div>
+</main>
+<!-- Bottom Navigation Bar Shell (Global Dest) -->
+<!-- Note: While instructions say suppress shell if task-focused, the prompt explicitly requested: "Bottom navigation bar: Include the standard 5-item bar with the central gold-outlined 'Play' button." -->
+<nav class="fixed bottom-0 left-0 right-0 w-full z-50 flex justify-around items-center px-xl pb-safe pt-sm max-w-[448px] mx-auto bg-surface-container/90 backdrop-blur-lg border-t border-border shadow-[0_-8px_24px_rgba(0,0,0,0.3)] rounded-t-xl md:hidden">
+<!-- Home -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:text-primary transition-colors active:scale-90 transition-transform duration-150 w-16">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">home</span>
+<span class="font-label text-[10px]">Home</span>
+</button>
+<!-- Social -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:text-primary transition-colors active:scale-90 transition-transform duration-150 w-16">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">group</span>
+<span class="font-label text-[10px]">Social</span>
+</button>
+<!-- Play (Central Gold Button requested in prompt) -->
+<!-- Note: Overriding JSON slightly here to meet the specific prompt requirement of a 'central gold-outlined Play button' while keeping JSON labels/icons -->
+<button class="relative -top-4 flex flex-col items-center justify-center w-14 h-14 bg-surface rounded-full border-2 border-gold-light shadow-[0_0_15px_rgba(251,191,36,0.3)] hover:scale-105 active:scale-95 transition-all duration-200 z-10 text-gold-light">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">playing_cards</span>
+</button>
+<!-- Live (Active State because we are discovering streams) -->
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-1.5 active:scale-90 transition-transform duration-150 w-16">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">live_tv</span>
+<span class="font-label text-[10px] font-bold">Live</span>
+</button>
+<!-- Me -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:text-primary transition-colors active:scale-90 transition-transform duration-150 w-16">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">person</span>
+<span class="font-label text-[10px]">Me</span>
+</button>
+</nav>
+</body></html>

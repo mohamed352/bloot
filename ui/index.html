@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بلوت — نظام التصميم</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --purple:#8B5CF6;--purple-dark:#7C3AED;--purple-light:#A78BFA;
+            --gold:#F59E0B;--gold-light:#FBBF24;--gold-dark:#D97706;
+            --surface:#0A0A0F;--surface-el:#161622;--surface-muted:#1E1E2E;
+            --on-surface:#FFFFFF;--on-surface-muted:#9CA3AF;--on-surface-sec:#6B7280;
+            --border:rgba(139,92,246,0.15);--border-light:rgba(139,92,246,0.25);
+        }
+        html{scroll-behavior:smooth}
+        body{background:var(--surface);color:var(--on-surface);font-family:'Cairo','Inter',sans-serif;overflow-x:hidden;direction:rtl}
+        
+        .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px;position:relative;overflow:hidden}
+        .hero::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(139,92,246,0.15) 0%,rgba(139,92,246,0) 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+        .hero::after{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(245,158,11,0.08) 0%,rgba(245,158,11,0) 70%);top:30%;left:10%;pointer-events:none}
+        .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(139,92,246,0.1);border:1px solid var(--border-light);border-radius:100px;padding:8px 20px;margin-bottom:24px;font-size:13px;font-weight:500;color:var(--purple-light)}
+        .hero-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--purple);animation:pulse-dot 2s infinite}
+        @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+        .hero h1{font-size:clamp(48px,8vw,80px);font-weight:900;letter-spacing:0px;line-height:1.1;background:linear-gradient(135deg,var(--on-surface) 0%,var(--purple) 50%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px}
+        .hero p{font-size:18px;color:var(--on-surface-muted);max-width:600px;line-height:1.8;margin-bottom:40px}
+        .hero-stats{display:flex;gap:40px;flex-wrap:wrap;justify-content:center}
+        .hero-stat{text-align:center}
+        .hero-stat .num{font-size:36px;font-weight:700;color:var(--gold);display:block}
+        .hero-stat .label{font-size:13px;color:var(--on-surface-sec);letter-spacing:0}
+        .scroll-cue{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);color:var(--on-surface-sec);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:8px;animation:bounce 2s infinite}
+        @keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+        
+        .section-nav{position:sticky;top:0;z-index:100;background:rgba(10,10,15,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 24px;transition:box-shadow .3s}
+        .section-nav.scrolled{box-shadow:0 4px 30px rgba(0,0,0,0.5)}
+        .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;direction:rtl}
+        .nav-inner::-webkit-scrollbar{display:none}
+        .nav-item{flex-shrink:0;padding:16px 18px;font-size:13px;font-weight:600;color:var(--on-surface-sec);text-decoration:none;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;cursor:pointer}
+        .nav-item:hover{color:var(--on-surface-muted)}
+        .nav-item.active{color:var(--purple-light);border-bottom-color:var(--purple)}
+        
+        .section{max-width:1200px;margin:0 auto;padding:80px 24px 40px}
+        .section-header{margin-bottom:48px}
+        .section-number{font-size:13px;font-weight:600;color:var(--gold);letter-spacing:1px;margin-bottom:12px}
+        .section-title{font-size:36px;font-weight:700;color:var(--on-surface);margin-bottom:12px}
+        .section-desc{font-size:16px;color:var(--on-surface-muted);max-width:700px;line-height:1.8}
+        
+        .screen-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:32px}
+        .screen-card{background:var(--surface-el);border:1px solid var(--border);border-radius:20px;overflow:hidden;cursor:pointer;transition:transform .3s,border-color .3s,box-shadow .3s;text-decoration:none;display:block}
+        .screen-card:hover{transform:translateY(-6px);border-color:var(--border-light);box-shadow:0 20px 60px rgba(139,92,246,0.15)}
+        .screen-card.landscape-card{grid-column:span 2}
+        @media(max-width:640px){.screen-card.landscape-card{grid-column:span 1}}
+        .screen-thumb{position:relative;overflow:hidden;background:var(--surface-muted)}
+        .screen-thumb img{width:100%;height:auto;display:block;transition:transform .4s}
+        .screen-card:hover .screen-thumb img{transform:scale(1.03)}
+        .screen-thumb .landscape-badge{position:absolute;top:12px;left:12px;background:rgba(139,92,246,0.9);color:white;font-size:10px;font-weight:700;padding:4px 10px;border-radius:100px;text-transform:uppercase;letter-spacing:1px}
+        .screen-info{padding:20px}
+        .screen-info h3{font-size:15px;font-weight:600;color:var(--on-surface);margin-bottom:6px}
+        .screen-info p{font-size:12px;color:var(--on-surface-sec);line-height:1.5}
+        .screen-info .screen-type{display:inline-block;font-size:10px;font-weight:600;color:var(--purple-light);background:rgba(139,92,246,0.1);border:1px solid var(--border);padding:2px 10px;border-radius:100px;letter-spacing:0;margin-top:8px}
+        
+        .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(10px)}
+        .modal-overlay.active{display:flex}
+        .modal-close{position:fixed;top:20px;left:20px;z-index:201;width:48px;height:48px;border-radius:50%;background:var(--surface-el);border:1px solid var(--border);color:var(--on-surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:24px;transition:background .2s}
+        .modal-close:hover{background:var(--surface-muted)}
+        .modal-prev{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:201;width:48px;height:48px;border-radius:50%;background:var(--surface-el);border:1px solid var(--border);color:var(--on-surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:24px;transition:background .2s}
+        .modal-prev:hover,.modal-next:hover{background:var(--surface-muted)}
+        .modal-next{position:fixed;left:20px;top:50%;transform:translateY(-50%);z-index:201;width:48px;height:48px;border-radius:50%;background:var(--surface-el);border:1px solid var(--border);color:var(--on-surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:24px;transition:background .2s}
+        .modal-counter{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:201;color:var(--on-surface-muted);font-size:14px;background:var(--surface-el);padding:8px 20px;border-radius:100px;border:1px solid var(--border)}
+        .modal-content{max-width:95vw;max-height:90vh;overflow:hidden;border-radius:16px;border:1px solid var(--border)}
+        .modal-content iframe{width:390px;height:844px;border:none;transform-origin:top left}
+        .modal-content.landscape iframe{width:844px;height:390px}
+        @media(max-width:500px){.modal-content iframe{width:100vw;height:calc(100vw * 2.164)}.modal-content.landscape iframe{width:100vw;height:calc(100vw * 0.462)}}
+        
+        .footer{text-align:center;padding:80px 24px;border-top:1px solid var(--border)}
+        .footer-logo{font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px}
+        .footer p{color:var(--on-surface-sec);font-size:13px}
+        
+        .fade-in{opacity:0;transform:translateY(30px);transition:opacity .6s,transform .6s}
+        .fade-in.visible{opacity:1;transform:translateY(0)}
+    </style>
+</head>
+<body>
+
+<section class="hero" id="top">
+    <div class="hero-badge">
+        <span class="dot"></span>
+        نظام التصميم v1.0
+    </div>
+    <h1>بلوت</h1>
+    <p>منصة بلوت الاجتماعية المتميزة — صوت وفيديو مباشر، بث، بطولات. نظام تصميم متكامل بشاشات أنيقة بثيم داكن بألوان البنفسجي والذهبي.</p>
+    <div class="hero-stats">
+        <div class="hero-stat">
+            <span class="num">25</span>
+            <span class="label">شاشة</span>
+        </div>
+        <div class="hero-stat">
+            <span class="num">13</span>
+            <span class="label">قسم</span>
+        </div>
+        <div class="hero-stat">
+            <span class="num">٢</span>
+            <span class="label">اتجاه عرض</span>
+        </div>
+    </div>
+    <div class="scroll-cue">
+        <span>مرّر للاستكشاف</span>
+        <span class="material-symbols-outlined">keyboard_arrow_down</span>
+    </div>
+</section>
+
+<nav class="section-nav" id="sectionNav">
+    <div class="nav-inner" id="navInner">
+        <a class="nav-item active" href="#onboarding">الترحيب</a>
+        <a class="nav-item" href="#auth">تسجيل الدخول</a>
+        <a class="nav-item" href="#home">الرئيسية</a>
+        <a class="nav-item" href="#discover">استكشاف</a>
+        <a class="nav-item" href="#stream">البث</a>
+        <a class="nav-item" href="#room">الغرفة</a>
+        <a class="nav-item" href="#game">اللعب</a>
+        <a class="nav-item" href="#create">إنشاء غرفة</a>
+        <a class="nav-item" href="#tournaments">البطولات</a>
+        <a class="nav-item" href="#profile">الملف الشخصي</a>
+        <a class="nav-item" href="#chat">المحادثة</a>
+        <a class="nav-item" href="#settings">الإعدادات</a>
+        <a class="nav-item" href="#edge">الحالات الخاصة</a>
+    </div>
+</nav>
+
+<div class="modal-overlay" id="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <button class="modal-prev" onclick="prevScreen()">&#8250;</button>
+    <button class="modal-next" onclick="nextScreen()">&#8249;</button>
+    <div class="modal-counter" id="modalCounter"></div>
+    <div class="modal-content" id="modalContent"></div>
+</div>
+
+<div class="footer">
+    <div class="footer-logo">بلوت</div>
+    <p>نظام تصميم منصة بلوت الاجتماعية &middot; ثيم داكن &middot; بنفسجي وذهبي</p>
+    <p style="margin-top:8px;color:var(--on-surface-sec);font-size:11px">Cairo + Inter &middot; Material Symbols &middot; Tailwind CSS</p>
+</div>
+
+<script>
+const screens = [
+    { section: "01_onboarding", id: "onboarding", num: "٠١", title: "الترحيب", desc: "شاشات البداية والترحيب والعلامة التجارية — الانطباع الأول لتجربة بلوت المتميزة.", items: [
+        { folder: "splash_screen", name: "شاشة البداية", desc: "عرض شعار التطبيق مع أشكال الأوراق المتحركة", type: "عمودي" },
+        { folder: "welcome_screen", name: "شاشة الترحيب", desc: "أبرز المميزات مع معاينة البث المباشر لبلوت", type: "عمودي" },
+    ]},
+    { section: "02_authentication", id: "auth", num: "٠٢", title: "تسجيل الدخول", desc: "تسجيل الدخول والتحقق وإعداد الملف الشخصي — بناء الثقة من أول تفاعل.", items: [
+        { folder: "login_screen", name: "تسجيل الدخول", desc: "الدخول برقم الهاتف مع خيارات تسجيل الدخول الاجتماعي", type: "عمودي" },
+        { folder: "otp_verification_screen", name: "التحقق من الرمز", desc: "تحقق برمز ٤ أرقام مع التركيز التلقائي", type: "عمودي" },
+        { folder: "complete_profile_screen", name: "إكمال الملف الشخصي", desc: "الاسم المعروض واسم المستخدم والصورة الشخصية وقبول الشروط", type: "عمودي" },
+    ]},
+    { section: "03_home", id: "home", num: "٠٣", title: "الشاشة الرئيسية", desc: "المركز الرئيسي — البث المباشر والإجراءات السريعة والبطولات والاكتشاف.", items: [
+        { folder: "home_screen", name: "الشاشة الرئيسية", desc: "بانر رئيسي وإجراءات سريعة وبث مباشر وبطولات", type: "عمودي" },
+    ]},
+    { section: "04_discover_streams", id: "discover", num: "٠٤", title: "استكشاف البث", desc: "تصفح وتصفية بثات بلوت المباشرة — محرك الاكتشاف الاجتماعي.", items: [
+        { folder: "discover_streams", name: "استكشاف البث", desc: "بحث وتبويبات تصفية وبطاقات بث وشارات نوع", type: "عمودي" },
+    ]},
+    { section: "05_watch_stream", id: "stream", num: "٠٥", title: "مشاهدة البث المباشر", desc: "تجربة المشاهدة — ٤ مربعات فيديو وطاولة اللعب والمحادثة والتفاعلات.", items: [
+        { folder: "watch_live_stream", name: "مشاهدة البث المباشر", desc: "فيديو ٤ لاعبين وطاولة اللعب والمحادثة وأزرار الإعجاب والهدايا", type: "عمودي" },
+    ]},
+    { section: "06_private_room", id: "room", num: "٠٦", title: "غرفة خاصة", desc: "لوبي ٤ لاعبين مع حالة الميكروفون والكاميرا والاستعداد قبل بدء اللعبة.", items: [
+        { folder: "private_room_lobby", name: "لوبي الغرفة الخاصة", desc: "٤ مقاعد ومؤشرات الميكروفون والكاميرا وشارات الاستعداد ورابط الدعوة", type: "عمودي" },
+    ]},
+    { section: "07_game_play", id: "game", num: "٠٧", title: "اللعب", desc: "التجربة الأساسية — لعب بلوت بالعرض مع الصوت والفيديو والتفاعل المباشر بالأوراق.", items: [
+        { folder: "game_play_landscape_1", name: "شاشة اللعب", desc: "عرض أفقي مع ٤ مربعات فيديو وطاولة الأوراق", type: "أفقي" },
+    ]},
+    { section: "08_create_room", id: "create", num: "٠٨", title: "إنشاء غرفة", desc: "نموذج إنشاء الغرفة — الاسم والنوع وإعدادات الصوت والكاميرا وخيارات الدعوة.", items: [
+        { folder: "create_room", name: "إنشاء غرفة", desc: "اختيار نوع الغرفة وإعدادات التبديل وخيارات الدعوة", type: "عمودي" },
+    ]},
+    { section: "09_tournaments", id: "tournaments", num: "٠٩", title: "البطولات", desc: "تصفح والانضمام وإدارة بطولات بلوت مع الجوائز والأدوار.", items: [
+        { folder: "tournament_list", name: "قائمة البطولات", desc: "بطولات نشطة وقادمة ومنتهية مع تصفية", type: "عمودي" },
+        { folder: "tournament_detail", name: "تفاصيل البطولة", desc: "التفاصيل والجوائز والمشاركين ومعاينة الأدوار", type: "عمودي" },
+    ]},
+    { section: "10_profile", id: "profile", num: "١٠", title: "الملف الشخصي", desc: "هوية اللاعب — الإحصائيات والإنجازات وسجل الألعاب والتأثير الاجتماعي.", items: [
+        { folder: "user_profile", name: "الملف الشخصي", desc: "الإحصائيات ونسبة الفوز والإنجازات وتبويبات سجل الألعاب", type: "عمودي" },
+        { folder: "edit_profile", name: "تعديل الملف الشخصي", desc: "الصورة والاسم المعروض واسم المستخدم والنبذة", type: "عمودي" },
+    ]},
+    { section: "11_chat", id: "chat", num: "١١", title: "المحادثة", desc: "الرسائل المباشرة ودعوات الغرف والمحادثات السريعة.", items: [
+        { folder: "chat_list", name: "قائمة المحادثات", desc: "قائمة المحادثات مع شارات غير المقروء ودعوات الغرف", type: "عمودي" },
+        { folder: "direct_message", name: "رسالة مباشرة", desc: "محادثة مباشرة مع أزرار الإجراءات السريعة ومعلومات الغرفة", type: "عمودي" },
+        { folder: "room_invitation_modal", name: "دعوة الغرفة", desc: "نافذة دعوة الغرفة مع أزرار الانضمام والرفض", type: "عمودي" },
+    ]},
+    { section: "12_settings", id: "settings", num: "١٢", title: "الإعدادات", desc: "إعدادات التطبيق والحساب والشروط.", items: [
+        { folder: "settings", name: "الإعدادات", desc: "إعدادات الحساب واللعب والصوت والكاميرا والإشعارات", type: "عمودي" },
+        { folder: "terms_of_service", name: "شروط الخدمة", desc: "قواعد اللعب والبث وسياسات الحساب", type: "عمودي" },
+    ]},
+    { section: "13_edge_cases", id: "edge", num: "١٣", title: "الحالات الخاصة", desc: "حالات الخطأ وعدم الاتصال والتحميل والنجاح — معالجة سلسة للأعطال.", items: [
+        { folder: "error_state", name: "حالة الخطأ", desc: "خطأ في الاتصال مع إجراء إعادة المحاولة", type: "عمودي" },
+        { folder: "offline_screen", name: "حالة عدم الاتصال", desc: "لا يوجد اتصال مع تأكيد البيانات المحفوظة", type: "عمودي" },
+        { folder: "loading_state", name: "حالة التحميل", desc: "مؤشر تحميل سياقي مع رسائل ذات طابع اللعب", type: "عمودي" },
+        { folder: "success_state", name: "حالة النجاح", desc: "علامة تأكيد ذهبية للعمليات الناجحة", type: "عمودي" },
+    ]},
+];
+
+let allScreenItems = [];
+screens.forEach(section => {
+    section.items.forEach(item => {
+        allScreenItems.push({...item, sectionPath: section.section});
+    });
+});
+
+let currentModalIndex = -1;
+
+const main = document.querySelector('body');
+let sectionsHTML = '';
+screens.forEach(section => {
+    sectionsHTML += `<section class="section fade-in" id="${section.id}">
+        <div class="section-header">
+            <div class="section-number">${section.num} — ${section.title}</div>
+            <h2 class="section-title">${section.title}</h2>
+            <p class="section-desc">${section.desc}</p>
+        </div>
+        <div class="screen-grid">`;
+    section.items.forEach((item, idx) => {
+        const globalIdx = allScreenItems.findIndex(s => s.folder === item.folder && s.sectionPath === section.section);
+        const isLandscape = item.type === "أفقي";
+        sectionsHTML += `<a class="screen-card${isLandscape ? ' landscape-card' : ''}" href="#" onclick="openModal(${globalIdx}); return false;">
+            <div class="screen-thumb">
+                <img src="${section.section}/${item.folder}/screen.png" alt="${item.name}" loading="lazy">
+                ${isLandscape ? '<span class="landscape-badge">أفقي</span>' : ''}
+            </div>
+            <div class="screen-info">
+                <h3>${item.name}</h3>
+                <p>${item.desc}</p>
+                <span class="screen-type">${item.type}</span>
+            </div>
+        </a>`;
+    });
+    sectionsHTML += `</div></section>`;
+});
+
+const footer = document.querySelector('.footer');
+footer.insertAdjacentHTML('beforebegin', sectionsHTML);
+
+function openModal(index) {
+    currentModalIndex = index;
+    const item = allScreenItems[index];
+    const isLandscape = item.type === "أفقي";
+    const content = document.getElementById('modalContent');
+    content.className = `modal-content${isLandscape ? ' landscape' : ''}`;
+    content.innerHTML = `<iframe src="${item.sectionPath}/${item.folder}/code.html" style="width:${isLandscape ? '844px' : '390px'};height:${isLandscape ? '390px' : '844px'};border:none;border-radius:12px;background:#0A0A0F;" sandbox="allow-scripts allow-same-origin"></iframe>`;
+    document.getElementById('modalCounter').textContent = `${index + 1} / ${allScreenItems.length}`;
+    document.getElementById('modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+    document.body.style.overflow = '';
+    currentModalIndex = -1;
+}
+
+function prevScreen() {
+    if (currentModalIndex > 0) openModal(currentModalIndex - 1);
+}
+function nextScreen() {
+    if (currentModalIndex < allScreenItems.length - 1) openModal(currentModalIndex + 1);
+}
+
+document.addEventListener('keydown', e => {
+    if (currentModalIndex === -1) return;
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'ArrowRight') prevScreen();
+    if (e.key === 'ArrowLeft') nextScreen();
+});
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+const navItems = document.querySelectorAll('.nav-item');
+const sections = document.querySelectorAll('.section');
+window.addEventListener('scroll', () => {
+    const nav = document.getElementById('sectionNav');
+    if (window.scrollY > 100) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+    let current = '';
+    sections.forEach(section => {
+        const top = section.offsetTop - 120;
+        if (window.scrollY >= top) current = section.id;
+    });
+    navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('href') === '#' + current) item.classList.add('active');
+    });
+    const activeItem = document.querySelector('.nav-item.active');
+    if (activeItem) {
+        activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+});
+
+document.getElementById('modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>

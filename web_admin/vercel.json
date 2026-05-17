@@ -1,0 +1,6 @@
+{
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/", "dest": "/01_dashboard/01_home_stats.html" }
+  ]
+}

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>Bloot - Direct Message</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#15121b",
+                        "surface-container-highest": "#37333d",
+                        "tertiary-fixed": "#ffdcbb",
+                        "on-tertiary": "#482900",
+                        "on-secondary-container": "#5b3800",
+                        "surface-container": "#211e27",
+                        "surface": "#0A0A0F",
+                        "border-gold": "rgba(245, 158, 11, 0.3)",
+                        "primary-dark": "#7C3AED",
+                        "surface-container-high": "#2c2832",
+                        "primary-fixed": "#e9ddff",
+                        "primary-fixed-dim": "#d0bcff",
+                        "live": "#FF1A1A",
+                        "gold-dark": "#D97706",
+                        "on-secondary-fixed": "#2a1700",
+                        "on-primary-fixed-variant": "#5516be",
+                        "surface-container-low": "#1d1a23",
+                        "on-primary-container": "#340080",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "on-primary-fixed": "#23005c",
+                        "on-primary": "#3c0091",
+                        "on-error-container": "#ffdad6",
+                        "outline": "#958ea0",
+                        "inverse-on-surface": "#322f39",
+                        "surface-elevated": "#161622",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "inverse-primary": "#6d3bd7",
+                        "gold-light": "#FBBF24",
+                        "secondary-fixed": "#ffddb8",
+                        "surface-hover": "#252538",
+                        "on-surface-variant": "#cbc3d7",
+                        "error-container": "#93000a",
+                        "on-error": "#690005",
+                        "on-surface": "#e7e0ed",
+                        "on-surface-secondary": "#6B7280",
+                        "primary-container": "#a078ff",
+                        "on-tertiary-fixed": "#2c1700",
+                        "background": "#15121b",
+                        "surface-bright": "#3b3742",
+                        "error": "#EF4444",
+                        "tertiary": "#ffb869",
+                        "inverse-surface": "#e7e0ed",
+                        "surface-muted": "#1E1E2E",
+                        "on-tertiary-container": "#3f2300",
+                        "secondary-container": "#ee9800",
+                        "on-background": "#e7e0ed",
+                        "on-surface-muted": "#9CA3AF",
+                        "secondary": "#ffb95f",
+                        "surface-tint": "#d0bcff",
+                        "surface-container-lowest": "#0f0d15",
+                        "border-light": "rgba(139, 92, 246, 0.25)",
+                        "success": "#22C55E",
+                        "tertiary-container": "#ca801e",
+                        "primary-light": "#A78BFA",
+                        "surface-variant": "#37333d",
+                        "outline-variant": "#494454",
+                        "on-secondary": "#472a00",
+                        "primary": "#d0bcff",
+                        "border": "rgba(139, 92, 246, 0.15)"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xxl": "32px",
+                        "xl": "24px",
+                        "lg": "16px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "md": "12px"
+                    },
+                    "fontFamily": {
+                        "score": ["Inter"],
+                        "title": ["Inter"],
+                        "headline": ["Inter"],
+                        "caption": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"],
+                        "display": ["Inter"]
+                    },
+                    "fontSize": {
+                        "score": ["24px", { "lineHeight": "1.1", "fontWeight": "700" }],
+                        "title": ["15px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "headline": ["22px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "caption": ["12px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "body": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "label": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "display": ["28px", { "lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "800" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        .pt-safe { padding-top: env(safe-area-inset-top, 20px); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body h-screen flex flex-col items-center overflow-hidden pt-safe">
+<!-- Mobile Container (Max 448px for Portrait) -->
+<div class="w-full max-w-[448px] h-full flex flex-col relative bg-surface border-x border-border-light/10 shadow-2xl">
+<!-- TopAppBar (Transactional - Hidden global nav, custom header) -->
+<header class="flex justify-between items-center px-lg py-md w-full bg-surface/80 backdrop-blur-lg border-b border-border-light shadow-md z-50 shrink-0">
+<div class="flex items-center gap-md">
+<button class="text-primary hover:text-primary-light transition-colors scale-95 active:scale-90 flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-hover">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<div class="flex items-center gap-sm cursor-pointer">
+<div class="relative w-10 h-10 rounded-full overflow-hidden border border-border-light">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A close-up portrait of a sophisticated person in a premium dark card room setting. The lighting is moody with subtle purple and gold highlights reflecting on their face. The background is a deep, immersive black void, typical of a high-end social gaming application. The overall aesthetic is elegant and slightly mysterious." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPNhMEL_HonpDmmjUCezb85zlx3U_QRclx8TQZQhel01qydox0QWt6wthHZgwggGI996ax148F2Z82KHfiYF_6oKwkZGs2T0tQtOatCG1-BU7zzBuX5jN8hrQHx2F6BkIlv3Y9VKeIOPW3RMhyoBiHzl-zSiS4nk_v-DuGLlcBz4dmX_T2oUfi5MzuUfGjtEO-bhZprby3awmJCauWaJhkI56-AUIzHfRdODw_bls-Fch2keHoNrMXTn3eycRxsEc5L46bw_WzExj3"/>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-surface"></div>
+</div>
+<div class="flex flex-col">
+<span class="font-title text-title text-on-surface">Ahmad Al-Fahad</span>
+<span class="font-caption text-caption text-success">Online</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<button class="text-primary hover:text-primary-light transition-colors scale-95 active:scale-90 w-10 h-10 rounded-full hover:bg-surface-hover flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">videocam</span>
+</button>
+<button class="text-primary hover:text-primary-light transition-colors scale-95 active:scale-90 w-10 h-10 rounded-full hover:bg-surface-hover flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">call</span>
+</button>
+</div>
+</header>
+<!-- Chat Canvas -->
+<main class="flex-1 overflow-y-auto p-lg flex flex-col gap-lg hide-scrollbar pb-24">
+<!-- Date Divider -->
+<div class="flex justify-center my-md">
+<span class="font-caption text-caption text-on-surface-muted bg-surface-muted px-md py-xs rounded-full border border-border">Today</span>
+</div>
+<!-- Other's Message -->
+<div class="flex flex-col items-start gap-xs max-w-[85%] self-start">
+<div class="bg-surface-muted text-on-surface p-md rounded-2xl rounded-tl-sm border border-border shadow-sm">
+<p class="font-body text-body">Ready for another round? I promise I won't go easy this time.</p>
+</div>
+<span class="font-caption text-caption text-on-surface-muted px-xs">10:42 AM</span>
+</div>
+<!-- Your Message -->
+<div class="flex flex-col items-end gap-xs max-w-[85%] self-end">
+<div class="bg-primary-dark/80 text-white p-md rounded-2xl rounded-tr-sm shadow-[0_4px_12px_rgba(124,58,237,0.2)] border border-primary-light/20 relative overflow-hidden">
+<!-- Glassmorphism subtle glow -->
+<div class="absolute top-0 right-0 w-16 h-16 bg-white/10 blur-xl rounded-full mix-blend-overlay"></div>
+<p class="font-body text-body relative z-10">Bring it on! I've been practicing my calls.</p>
+</div>
+<div class="flex items-center gap-xs px-xs">
+<span class="font-caption text-caption text-on-surface-muted">10:45 AM</span>
+<span class="material-symbols-outlined text-primary-light text-[14px]" style="font-variation-settings: 'FILL' 0;">done_all</span>
+</div>
+</div>
+<!-- Other's Message with Image -->
+<div class="flex flex-col items-start gap-xs max-w-[85%] self-start">
+<div class="bg-surface-muted text-on-surface p-sm rounded-2xl rounded-tl-sm border border-border shadow-sm">
+<div class="rounded-xl overflow-hidden mb-sm border border-border/50">
+<img alt="Game Screenshot" class="w-full h-auto" data-alt="A dramatically lit close-up of premium playing cards fanned out on a dark green felt table. The cards feature a luxurious gold diamond pattern on the back and crisp white faces. Subtle purple ambient light spills across the table, creating a moody, high-stakes casino atmosphere typical of a digital card game interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOS-ew8LBFkx4lh6HU3e1hUOw4jvJ6ko7PFie6NuHAT5_4JyPANOQZ63IVv1cLmyBBaK6JwST8wiWY29I1dyutb3a9ls2YVdWUaZWWN2dRIy0aedlSvCjvmGIhWNrM_lLiDqw92QaQAZkoQIJxKpYodTEB1gzVebR04oRW22Qk_gcea_OqHgU8nIT2fk72qzG7iEa2VJY5BrwS1TF4uER1DEFaYa3UzQMHJ3ZC7dgIKx7fEKf_3fhXPtorwMcXOjjP25rSuTbI_64S"/>
+</div>
+<p class="font-body text-body px-sm pb-xs">Look at this hand from last night. Unbelievable luck.</p>
+</div>
+<span class="font-caption text-caption text-on-surface-muted px-xs">10:48 AM</span>
+</div>
+<!-- Your Message -->
+<div class="flex flex-col items-end gap-xs max-w-[85%] self-end">
+<div class="bg-primary-dark/80 text-white p-md rounded-2xl rounded-tr-sm shadow-[0_4px_12px_rgba(124,58,237,0.2)] border border-primary-light/20">
+<p class="font-body text-body">Wow, incredible hand. Let's start the lobby.</p>
+</div>
+<span class="font-caption text-caption text-on-surface-muted px-xs">10:50 AM</span>
+</div>
+</main>
+<!-- Input Area Container (Fixed Bottom) -->
+<div class="absolute bottom-0 left-0 w-full bg-surface-container/95 backdrop-blur-xl border-t border-border-light shadow-[0_-8px_30px_rgba(0,0,0,0.5)] z-40 pb-safe">
+<!-- Quick Actions Scrollable Row -->
+<div class="w-full overflow-x-auto hide-scrollbar py-sm px-lg flex gap-sm items-center border-b border-border/30">
+<button class="whitespace-nowrap px-md py-xs rounded-full border border-border bg-surface-muted/50 text-on-surface hover:bg-surface-hover hover:border-primary-light/50 transition-colors font-label text-label">
+                    Good game!
+                </button>
+<button class="whitespace-nowrap px-md py-xs rounded-full border border-border bg-surface-muted/50 text-on-surface hover:bg-surface-hover hover:border-primary-light/50 transition-colors font-label text-label">
+                    Nice move!
+                </button>
+<button class="whitespace-nowrap px-md py-xs rounded-full border border-border bg-surface-muted/50 text-on-surface hover:bg-surface-hover hover:border-primary-light/50 transition-colors font-label text-label">
+                    GG
+                </button>
+<button class="whitespace-nowrap px-md py-xs rounded-full border border-border bg-surface-muted/50 text-on-surface hover:bg-surface-hover hover:border-primary-light/50 transition-colors font-label text-label">
+                    Ready?
+                </button>
+</div>
+<!-- Input Bar -->
+<div class="p-md flex gap-sm items-end">
+<button class="shrink-0 p-sm text-on-surface-muted hover:text-primary transition-colors flex items-center justify-center rounded-full hover:bg-surface-hover h-10 w-10">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">add_photo_alternate</span>
+</button>
+<div class="flex-1 bg-surface-muted rounded-xl border border-border flex items-end min-h-[44px] focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-all relative">
+<button class="absolute left-2 bottom-1 p-sm text-on-surface-muted hover:text-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 0;">mood</span>
+</button>
+<!-- RTL Note: Add dir="auto" for proper RTL support if typing Arabic -->
+<textarea class="w-full bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-on-surface-muted font-body text-body py-[10px] pl-10 pr-3 resize-none max-h-24 hide-scrollbar" placeholder="Type a message..." rows="1"></textarea>
+</div>
+<button class="shrink-0 h-11 w-11 bg-primary-dark text-white rounded-full flex items-center justify-center hover:bg-primary-light shadow-[0_0_15px_rgba(124,58,237,0.3)] transition-all active:scale-95 border border-primary-light/20">
+<span class="material-symbols-outlined ml-1" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>
