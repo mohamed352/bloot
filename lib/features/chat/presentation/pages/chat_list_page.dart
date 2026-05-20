@@ -1,163 +1,154 @@
 import 'package:flutter/material.dart';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/style/colors.dart';
+import 'package:bloot/core/constants/app_spacing.dart';
+import 'package:bloot/core/constants/app_radius.dart';
+import 'package:bloot/features/chat/domain/entities/chat.dart';
+import 'package:bloot/features/chat/presentation/cubit/chat_cubit.dart';
+import 'package:bloot/features/chat/presentation/cubit/chat_state.dart';
 
-class ChatListPage extends StatefulWidget {
+class ChatListPage extends StatelessWidget {
   const ChatListPage({super.key});
 
   @override
-  State<ChatListPage> createState() => _ChatListPageState();
-}
-
-class _ChatListPageState extends State<ChatListPage> {
-  int _selectedFilter = 0;
-  final _filters = ['all'.tr(), 'rooms'.tr(), 'direct'.tr(), 'tournaments'.tr()];
-
-  final List<Map<String, dynamic>> _chats = [
-    {
-      'name': 'Khalid Al-Rashid',
-      'avatar': 'https://i.pravatar.cc/150?img=12',
-      'message': 'good_game_yesterday'.tr(),
-      'time': '2m',
-      'unread': 2,
-      'type': 'direct'.tr(),
-    },
-    {
-      'name': 'Room: Weekend Bash',
-      'avatar': null,
-      'message': 'ahmed_im_ready_when_you_are'.tr(),
-      'time': '15m',
-      'unread': 0,
-      'type': 'rooms'.tr(),
-    },
-    {
-      'name': 'Faisal Band',
-      'avatar': 'https://i.pravatar.cc/150?img=33',
-      'message': 'lets_play_again_tonight'.tr(),
-      'time': '1h',
-      'unread': 1,
-      'type': 'direct'.tr(),
-    },
-    {
-      'name': 'Tournament: Gulf Cup',
-      'avatar': null,
-      'message': 'registration_closes_in_2_hours'.tr(),
-      'time': '3h',
-      'unread': 0,
-      'type': 'tournaments'.tr(),
-    },
-    {
-      'name': 'Omar Hassan',
-      'avatar': 'https://i.pravatar.cc/150?img=44',
-      'message': 'sent_a_room_invitation'.tr(),
-      'time': '1d',
-      'unread': 0,
-      'type': 'direct'.tr(),
-    },
-  ];
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColorManager.darkCanvas,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Text(
-                    'messages'.tr(),
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: ColorManager.darkTextPrimary,
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: ColorManager.primary.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.edit_rounded,
-                        color: ColorManager.primary,
-                      ),
-                      onPressed: () {},
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Filters
-            SizedBox(
-              height: 40,
-              child: ListView.separated(
-                padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
-                scrollDirection: Axis.horizontal,
-                itemCount: _filters.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  final isSelected = index == _selectedFilter;
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedFilter = index),
-                    child: Container(
-                      padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? ColorManager.primary
-                            : ColorManager.darkSurface,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: isSelected
-                              ? ColorManager.primary
-                              : ColorManager.darkBorderSoft,
+    return BlocConsumer<ChatCubit, ChatState>(
+      listener: (context, state) {
+        state.whenOrNull(
+          error: (message) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(message)));
+          },
+        );
+      },
+      builder: (context, state) {
+        final conversations = state is ChatConversationsLoaded
+            ? state.conversations
+            : <ChatConversation>[];
+        final selectedFilter = state is ChatConversationsLoaded
+            ? state.selectedFilterIndex
+            : 0;
+        final filters = [
+          'all'.tr(),
+          'rooms'.tr(),
+          'direct'.tr(),
+          'tournaments'.tr(),
+        ];
+
+        return Scaffold(
+          backgroundColor: ColorManager.darkCanvas,
+          body: SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Row(
+                    children: [
+                      Text(
+                        'messages'.tr(),
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: ColorManager.darkTextPrimary,
                         ),
                       ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        _filters[index],
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                          color: isSelected
-                              ? ColorManager.darkTextPrimary
-                              : ColorManager.darkTextSecondary,
+                      const Spacer(),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: ColorManager.primary.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.edit_rounded,
+                            color: ColorManager.primary,
+                          ),
+                          onPressed: () {},
                         ),
                       ),
+                    ],
+                  ),
+                ),
+                // Filters
+                SizedBox(
+                  height: 40,
+                  child: ListView.separated(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.screenHorizontal,
                     ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Chat list
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
-                itemCount: _chats.length,
-                itemBuilder: (context, index) {
-                  final chat = _chats[index];
-                  return _ChatListItem(
-                    chat: chat,
-                    onTap: () => context.pushNamed(
-                      RouteNames.directMessage,
-                      pathParameters: {'userId': 'user_$index'},
+                    scrollDirection: Axis.horizontal,
+                    itemCount: filters.length,
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(width: AppSpacing.sm),
+                    itemBuilder: (context, index) {
+                      final isSelected = index == selectedFilter;
+                      return GestureDetector(
+                        onTap: () =>
+                            context.read<ChatCubit>().selectFilter(index),
+                        child: Container(
+                          padding: const EdgeInsetsDirectional.symmetric(
+                            horizontal: AppSpacing.screenHorizontal,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? ColorManager.primary
+                                : ColorManager.darkSurface,
+                            borderRadius: BorderRadius.circular(AppRadius.full),
+                            border: Border.all(
+                              color: isSelected
+                                  ? ColorManager.primary
+                                  : ColorManager.darkBorderSoft,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            filters[index],
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                              color: isSelected
+                                  ? ColorManager.darkTextPrimary
+                                  : ColorManager.darkTextSecondary,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                // Chat list
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.screenHorizontal,
                     ),
-                  );
-                },
-              ),
+                    itemCount: conversations.length,
+                    itemBuilder: (context, index) {
+                      final chat = conversations[index];
+                      return _ChatListItem(
+                        chat: chat,
+                        onTap: () => context.pushNamed(
+                          RouteNames.directMessage,
+                          pathParameters: {'userId': chat.id},
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -165,25 +156,22 @@ class _ChatListPageState extends State<ChatListPage> {
 class _ChatListItem extends StatelessWidget {
   const _ChatListItem({required this.chat, required this.onTap});
 
-  final Map<String, dynamic> chat;
+  final ChatConversation chat;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final unread = chat['unread'] as int;
-    final hasAvatar = chat['avatar'] != null;
+    final hasAvatar = chat.avatarUrl != null;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: ColorManager.darkSurface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: ColorManager.darkBorderSoft,
-          ),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: ColorManager.darkBorderSoft),
         ),
         child: Row(
           children: [
@@ -195,25 +183,23 @@ class _ChatListItem extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: ColorManager.darkSectionGray,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: ColorManager.darkBorderSoft,
-                    ),
+                    border: Border.all(color: ColorManager.darkBorderSoft),
                   ),
                   child: hasAvatar
                       ? ClipOval(
                           child: Image.network(
-                            chat['avatar'] as String,
+                            chat.avatarUrl!,
                             fit: BoxFit.cover,
                           ),
                         )
                       : Icon(
-                          chat['type'] == 'rooms'.tr()
+                          chat.type == 'rooms'
                               ? Icons.meeting_room_rounded
                               : Icons.emoji_events_rounded,
                           color: ColorManager.primary,
                         ),
                 ),
-                if (unread > 0)
+                if (chat.unread > 0)
                   Positioned(
                     right: 0,
                     top: 0,
@@ -226,7 +212,7 @@ class _ChatListItem extends StatelessWidget {
                       ),
                       child: Center(
                         child: Text(
-                          '$unread',
+                          '${chat.unread}',
                           style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
@@ -238,7 +224,7 @@ class _ChatListItem extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,18 +233,20 @@ class _ChatListItem extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          chat['name'] as String,
+                          chat.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 15,
-                            fontWeight: unread > 0 ? FontWeight.w600 : FontWeight.w500,
+                            fontWeight: chat.unread > 0
+                                ? FontWeight.w600
+                                : FontWeight.w500,
                             color: ColorManager.darkTextPrimary,
                           ),
                         ),
                       ),
                       Text(
-                        chat['time'] as String,
+                        chat.time,
                         style: const TextStyle(
                           fontSize: 12,
                           color: ColorManager.darkTextMuted,
@@ -268,12 +256,12 @@ class _ChatListItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    chat['message'] as String,
+                    chat.lastMessage,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 13,
-                      color: unread > 0
+                      color: chat.unread > 0
                           ? ColorManager.darkTextSecondary
                           : ColorManager.darkTextMuted,
                     ),

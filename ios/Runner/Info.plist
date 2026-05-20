@@ -66,5 +66,15 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- Permission descriptions required by Flutter plugins -->
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access for video calls during Baloot games and live streams.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs microphone access for voice chat during Baloot games and live streams.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs photo library access to let you upload profile pictures.</string>
+	<!-- App Store compliance -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

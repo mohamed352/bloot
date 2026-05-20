@@ -65,38 +65,6 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color shadow;
   final Color elevatedShadow;
 
-  static const AppColors light = AppColors(
-    background: ColorManager.softCloud,
-    surface: ColorManager.cardWhite,
-    cardBackground: ColorManager.cardWhite,
-    surfaceVariant: ColorManager.sectionGray,
-    textPrimary: ColorManager.textPrimary,
-    textSecondary: ColorManager.textSecondary,
-    textMuted: ColorManager.textMuted,
-    textDisabled: ColorManager.textDisabled,
-    textPlaceholder: ColorManager.textPlaceholder,
-    primary: ColorManager.primary,
-    primaryDark: ColorManager.primaryDark,
-    primaryLight: ColorManager.primaryLight,
-    primaryGlow: ColorManager.primaryGlow,
-    secondary: ColorManager.secondary,
-    secondaryLight: ColorManager.secondaryLight,
-    secondaryGlow: ColorManager.secondaryGlow,
-    success: ColorManager.success,
-    successLight: ColorManager.successLight,
-    warning: ColorManager.warning,
-    warningLight: ColorManager.warningLight,
-    error: ColorManager.error,
-    errorLight: ColorManager.errorLight,
-    info: ColorManager.info,
-    infoLight: ColorManager.infoLight,
-    border: ColorManager.borderSoft,
-    divider: ColorManager.borderSoft,
-    borderFocus: ColorManager.primary,
-    shadow: ColorManager.cardShadow,
-    elevatedShadow: ColorManager.elevatedShadow,
-  );
-
   static const AppColors dark = AppColors(
     background: ColorManager.darkCanvas,
     surface: ColorManager.darkSurface,

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Sign in with Apple capability -->
+	<!-- IMPORTANT: Open ios/Runner.xcworkspace in Xcode, select the Runner target, -->
+	<!-- go to Signing & Capabilities, and add "Sign In with Apple" capability. -->
+	<!-- Xcode will then automatically reference this entitlements file. -->
+	<key>com.apple.developer.applesignin</key>
+	<array>
+		<string>Default</string>
+	</array>
+	<!-- Push notifications (uncomment after adding APNs certificate in Firebase) -->
+	<!-- <key>aps-environment</key> -->
+	<!-- <string>development</string> -->
+</dict>
+</plist>

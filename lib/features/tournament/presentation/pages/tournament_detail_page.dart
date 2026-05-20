@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:bloot/core/components/app_button.dart';
+import 'package:bloot/core/components/cached_avatar.dart';
 import 'package:bloot/core/style/colors.dart';
+import 'package:bloot/core/constants/app_spacing.dart';
+import 'package:bloot/core/constants/app_radius.dart';
 
 class TournamentDetailPage extends StatelessWidget {
   const TournamentDetailPage({super.key, required this.id});
@@ -46,7 +49,10 @@ class TournamentDetailPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsetsDirectional.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsetsDirectional.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: ColorManager.live.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(6),
@@ -63,7 +69,7 @@ class TournamentDetailPage extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSpacing.sm),
                           Text(
                             'gulf_champions_cup'.tr(),
                             style: const TextStyle(
@@ -81,7 +87,7 @@ class TournamentDetailPage extends StatelessWidget {
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 // Prize pool
@@ -89,7 +95,7 @@ class TournamentDetailPage extends StatelessWidget {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: ColorManager.darkSurface,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
                     border: Border.all(
                       color: ColorManager.secondary.withValues(alpha: 0.3),
                       width: 1.5,
@@ -104,7 +110,7 @@ class TournamentDetailPage extends StatelessWidget {
                           color: ColorManager.darkTextSecondary,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -127,21 +133,41 @@ class TournamentDetailPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 // Details
                 _buildSection(
                   title: 'details'.tr(),
                   child: Column(
                     children: [
-                      _buildDetailRow(Icons.calendar_today_rounded, 'date'.tr(), 'tomorrow_8pm'.tr()),
-                      _buildDetailRow(Icons.videogame_asset_rounded, 'game_type'.tr(), 'khaleeji_baloot'.tr()),
-                      _buildDetailRow(Icons.format_list_numbered_rounded, 'format'.tr(), 'single_elimination'.tr()),
-                      _buildDetailRow(Icons.repeat_rounded, 'rounds'.tr(), '6_rounds'.tr()),
-                      _buildDetailRow(Icons.login_rounded, 'entry'.tr(), '500_coins'.tr()),
+                      _buildDetailRow(
+                        Icons.calendar_today_rounded,
+                        'date'.tr(),
+                        'tomorrow_8pm'.tr(),
+                      ),
+                      _buildDetailRow(
+                        Icons.videogame_asset_rounded,
+                        'game_type'.tr(),
+                        'khaleeji_baloot'.tr(),
+                      ),
+                      _buildDetailRow(
+                        Icons.format_list_numbered_rounded,
+                        'format'.tr(),
+                        'single_elimination'.tr(),
+                      ),
+                      _buildDetailRow(
+                        Icons.repeat_rounded,
+                        'rounds'.tr(),
+                        '6_rounds'.tr(),
+                      ),
+                      _buildDetailRow(
+                        Icons.login_rounded,
+                        'entry'.tr(),
+                        '500_coins'.tr(),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 // Rules
                 _buildSection(
                   title: 'rules'.tr(),
@@ -154,7 +180,7 @@ class TournamentDetailPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 // Participants
                 _buildSection(
                   title: 'participants_23_64'.tr(),
@@ -163,19 +189,20 @@ class TournamentDetailPage extends StatelessWidget {
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: 12,
-                      separatorBuilder: (_, _) => const SizedBox(width: 8),
+                      separatorBuilder: (_, _) =>
+                          const SizedBox(width: AppSpacing.sm),
                       itemBuilder: (context, index) {
-                        return CircleAvatar(
-                          radius: 20,
-                          backgroundImage: NetworkImage(
-                            'https://i.pravatar.cc/150?img=${index + 10}',
-                          ),
+                        return CachedAvatar(
+                          imageUrl:
+                              'https://i.pravatar.cc/150?img=${index + 10}',
+                          size: 40,
+                          borderRadius: 20,
                         );
                       },
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 // Bracket preview
                 _buildSection(
                   title: 'bracket'.tr(),
@@ -183,7 +210,7 @@ class TournamentDetailPage extends StatelessWidget {
                     height: 160,
                     decoration: BoxDecoration(
                       color: ColorManager.darkSectionGray,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
                     child: Center(
                       child: Column(
@@ -194,7 +221,7 @@ class TournamentDetailPage extends StatelessWidget {
                             size: 48,
                             color: ColorManager.primary.withValues(alpha: 0.3),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSpacing.sm),
                           Text(
                             'bracket_visualization'.tr(),
                             style: const TextStyle(
@@ -207,25 +234,42 @@ class TournamentDetailPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 // Prize distribution
                 _buildSection(
                   title: 'prize_distribution'.tr(),
                   child: Column(
                     children: [
-                      _buildPrizeRow('1st'.tr(), '4,000', ColorManager.secondary, Icons.emoji_events_rounded),
-                      _buildPrizeRow('2nd'.tr(), '2,500', ColorManager.darkTextSecondary, Icons.emoji_events_rounded),
-                      _buildPrizeRow('3rd'.tr(), '1,500', ColorManager.secondaryDark, Icons.emoji_events_rounded),
-                      _buildPrizeRow('4th'.tr(), '500', ColorManager.darkTextMuted, Icons.emoji_events_rounded),
+                      _buildPrizeRow(
+                        '1st'.tr(),
+                        '4,000',
+                        ColorManager.secondary,
+                        Icons.emoji_events_rounded,
+                      ),
+                      _buildPrizeRow(
+                        '2nd'.tr(),
+                        '2,500',
+                        ColorManager.darkTextSecondary,
+                        Icons.emoji_events_rounded,
+                      ),
+                      _buildPrizeRow(
+                        '3rd'.tr(),
+                        '1,500',
+                        ColorManager.secondaryDark,
+                        Icons.emoji_events_rounded,
+                      ),
+                      _buildPrizeRow(
+                        '4th'.tr(),
+                        '500',
+                        ColorManager.darkTextMuted,
+                        Icons.emoji_events_rounded,
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
-                AppButton(
-                  text: 'join_tournament'.tr(),
-                  onPressed: () {},
-                ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.xxl),
+                AppButton(text: 'join_tournament'.tr(), onPressed: () {}),
+                const SizedBox(height: AppSpacing.xxl),
               ]),
             ),
           ),
@@ -236,13 +280,11 @@ class TournamentDetailPage extends StatelessWidget {
 
   Widget _buildSection({required String title, required Widget child}) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: ColorManager.darkSurface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: ColorManager.darkBorderSoft,
-        ),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(color: ColorManager.darkBorderSoft),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,7 +297,7 @@ class TournamentDetailPage extends StatelessWidget {
               color: ColorManager.darkTextPrimary,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           child,
         ],
       ),
@@ -272,7 +314,7 @@ class TournamentDetailPage extends StatelessWidget {
             size: 18,
             color: ColorManager.darkTextMuted.withValues(alpha: 0.7),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Text(
             label,
             style: const TextStyle(
@@ -294,13 +336,18 @@ class TournamentDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildPrizeRow(String place, String amount, Color color, IconData icon) {
+  Widget _buildPrizeRow(
+    String place,
+    String amount,
+    Color color,
+    IconData icon,
+  ) {
     return Padding(
       padding: const EdgeInsetsDirectional.symmetric(vertical: 6),
       child: Row(
         children: [
           Icon(icon, size: 20, color: color),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Text(
             place,
             style: TextStyle(

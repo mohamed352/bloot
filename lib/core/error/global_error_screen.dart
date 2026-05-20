@@ -20,37 +20,43 @@ class GlobalErrorScreen extends StatelessWidget {
     final colors = context.appColors;
     return Scaffold(
       backgroundColor: colors.background,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsetsDirectional.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline_rounded, size: 64, color: colors.error),
-              const SizedBox(height: 24),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: colors.textPrimary,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsetsDirectional.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: 64,
+                  color: colors.error,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                subtitle,
-                style: TextStyle(fontSize: 14, color: colors.textSecondary),
-                textAlign: TextAlign.center,
-              ),
-              if (onRetry != null) ...[
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: onRetry,
-                  child: Text(LocaleKeys.commonRetry.tr()),
+                const SizedBox(height: 24),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: colors.textPrimary,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
+                const SizedBox(height: 8),
+                Text(
+                  subtitle,
+                  style: TextStyle(fontSize: 14, color: colors.textSecondary),
+                  textAlign: TextAlign.center,
+                ),
+                if (onRetry != null) ...[
+                  const SizedBox(height: 32),
+                  ElevatedButton(
+                    onPressed: onRetry,
+                    child: Text(LocaleKeys.commonRetry.tr()),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'package:bloot/core/components/app_text.dart';
 import 'package:bloot/core/extension/context_values.dart';
+import 'package:bloot/core/style/colors.dart';
 
 enum AppSnackBarType { success, error, warning, info }
 
@@ -16,7 +18,7 @@ class AppSnackBar {
     final colors = context.appColors;
 
     Color backgroundColor;
-    Color textColor = Colors.white;
+    Color textColor = ColorManager.darkTextPrimary;
     IconData icon;
 
     switch (type) {
@@ -31,7 +33,7 @@ class AppSnackBar {
       case AppSnackBarType.warning:
         backgroundColor = colors.warning;
         icon = Icons.warning_rounded;
-        textColor = Colors.black87;
+        textColor = ColorManager.darkCanvas;
         break;
       case AppSnackBarType.info:
         backgroundColor = colors.textPrimary;
@@ -43,7 +45,7 @@ class AppSnackBar {
     final snackBar = SnackBar(
       elevation: 0,
       behavior: SnackBarBehavior.floating,
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color(0x00000000),
       padding: EdgeInsets.zero,
       margin: const EdgeInsetsDirectional.only(bottom: 24, start: 16, end: 16),
       duration: duration,

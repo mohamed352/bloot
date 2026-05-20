@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/style/colors.dart';
+import 'package:bloot/core/constants/app_spacing.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -15,8 +16,7 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage>
-    with TickerProviderStateMixin {
+class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   late final AnimationController _logoController;
   late final AnimationController _progressController;
   late final Animation<double> _fadeAnimation;
@@ -97,7 +97,7 @@ class _SplashPageState extends State<SplashPage>
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.xxl),
                     Text(
                       'bloot'.tr(),
                       style: const TextStyle(
@@ -107,12 +107,14 @@ class _SplashPageState extends State<SplashPage>
                         letterSpacing: 4,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
                       'live_baloot'.tr(),
                       style: TextStyle(
                         fontSize: 14,
-                        color: ColorManager.darkTextSecondary.withValues(alpha: 0.8),
+                        color: ColorManager.darkTextSecondary.withValues(
+                          alpha: 0.8,
+                        ),
                       ),
                     ),
                   ],
@@ -122,7 +124,7 @@ class _SplashPageState extends State<SplashPage>
           ),
           // Progress bar at bottom
           Positioned(
-            bottom: 48,
+            bottom: 48 + MediaQuery.paddingOf(context).bottom,
             left: 64,
             right: 64,
             child: AnimatedBuilder(
@@ -196,8 +198,8 @@ class _FloatingSuitState extends State<_FloatingSuit>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        return Positioned(
-          left: left,
+        return PositionedDirectional(
+          start: left,
           top: top + (_controller.value - 0.5) * 30,
           child: Transform.rotate(
             angle: _controller.value * pi * 0.5,

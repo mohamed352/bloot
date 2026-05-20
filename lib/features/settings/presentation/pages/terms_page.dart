@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:bloot/core/style/colors.dart';
+import 'package:bloot/core/constants/app_spacing.dart';
 
 class TermsPage extends StatelessWidget {
   const TermsPage({super.key});
@@ -13,7 +14,7 @@ class TermsPage extends StatelessWidget {
       backgroundColor: ColorManager.darkCanvas,
       appBar: AppBar(
         title: Text('terms_of_service'.tr()),
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0x00000000),
         elevation: 0,
       ),
       body: SafeArea(
@@ -83,7 +84,7 @@ class TermsPage extends StatelessWidget {
               color: ColorManager.darkTextPrimary,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             content,
             style: const TextStyle(

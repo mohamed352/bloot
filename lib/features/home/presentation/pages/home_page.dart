@@ -4,7 +4,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:bloot/config/routes/routes.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:bloot/core/components/cached_avatar.dart';
 import 'package:bloot/core/style/colors.dart';
+import 'package:bloot/core/constants/app_spacing.dart';
+import 'package:bloot/core/constants/app_radius.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -19,20 +23,24 @@ class HomePage extends StatelessWidget {
             // Top bar
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () => context.pushNamed(RouteNames.userProfile, pathParameters: {'userId': 'me'}),
-                      child: const CircleAvatar(
-                        radius: 20,
-                        backgroundColor: ColorManager.darkSurface,
-                        backgroundImage: NetworkImage(
-                          'https://i.pravatar.cc/150?img=11',
-                        ),
+                      onTap: () => context.pushNamed(
+                        RouteNames.userProfile,
+                        pathParameters: {'userId': 'me'},
+                      ),
+                      child: const CachedAvatar(
+                        imageUrl: 'https://i.pravatar.cc/150?img=11',
+                        size: 40,
+                        borderRadius: 20,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.md),
                     const Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,13 +105,15 @@ class HomePage extends StatelessWidget {
             // Hero Banner with background image and gradient overlay
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: AppSpacing.screenHorizontal,
+                ),
                 child: Container(
                   height: 160,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
                     image: const DecorationImage(
-                      image: NetworkImage(
+                      image: CachedNetworkImageProvider(
                         'https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=800&q=80',
                       ),
                       fit: BoxFit.cover,
@@ -111,7 +121,7 @@ class HomePage extends StatelessWidget {
                   ),
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(AppRadius.xl),
                       gradient: LinearGradient(
                         colors: [
                           ColorManager.primary.withValues(alpha: 0.7),
@@ -145,7 +155,9 @@ class HomePage extends StatelessWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: ColorManager.live.withValues(alpha: 0.15),
+                                  color: ColorManager.live.withValues(
+                                    alpha: 0.15,
+                                  ),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Row(
@@ -168,7 +180,7 @@ class HomePage extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               Text(
                                 'baloot_live'.tr(),
                                 style: const TextStyle(
@@ -182,20 +194,25 @@ class HomePage extends StatelessWidget {
                                 'your_voice_your_passion_your_table'.tr(),
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: ColorManager.darkTextPrimary.withValues(alpha: 0.7),
+                                  color: ColorManager.darkTextPrimary
+                                      .withValues(alpha: 0.7),
                                 ),
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               GestureDetector(
-                                onTap: () => context.pushNamed(RouteNames.discover),
+                                onTap: () =>
+                                    context.pushNamed(RouteNames.discover),
                                 child: Container(
-                                  padding: const EdgeInsetsDirectional.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
-                                  ),
+                                  padding:
+                                      const EdgeInsetsDirectional.symmetric(
+                                        horizontal: 16,
+                                        vertical: 8,
+                                      ),
                                   decoration: BoxDecoration(
                                     color: ColorManager.darkTextPrimary,
-                                    borderRadius: BorderRadius.circular(999),
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.full,
+                                    ),
                                   ),
                                   child: Text(
                                     'discover_streams'.tr(),
@@ -219,7 +236,7 @@ class HomePage extends StatelessWidget {
             // Quick Actions - 3 horizontal cards in a row
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -231,7 +248,7 @@ class HomePage extends StatelessWidget {
                         color: ColorManager.darkTextPrimary,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     Row(
                       children: [
                         Expanded(
@@ -243,7 +260,7 @@ class HomePage extends StatelessWidget {
                             onTap: () => context.pushNamed(RouteNames.play),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: AppSpacing.md),
                         Expanded(
                           child: _QuickActionCard(
                             icon: Icons.mic_rounded,
@@ -253,7 +270,7 @@ class HomePage extends StatelessWidget {
                             onTap: () => context.pushNamed(RouteNames.play),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: AppSpacing.md),
                         Expanded(
                           child: _QuickActionCard(
                             icon: Icons.videocam_rounded,
@@ -272,7 +289,9 @@ class HomePage extends StatelessWidget {
             // Live Now header with red dot
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: AppSpacing.screenHorizontal,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -286,7 +305,7 @@ class HomePage extends StatelessWidget {
                             color: ColorManager.darkTextPrimary,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.sm),
                         Container(
                           width: 8,
                           height: 8,
@@ -314,43 +333,46 @@ class HomePage extends StatelessWidget {
             ),
             // Live streams list
             SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final streams = [
-                    _StreamData(
-                      'Ahmed & Khalid vs Faisal Band',
-                      'Ahmed',
-                      'https://i.pravatar.cc/150?img=11',
-                      1240,
-                      'Baloot',
-                      '4/4',
-                    ),
-                    _StreamData(
-                      'Pro League Finals — Game 3',
-                      'SaadTV',
-                      'https://i.pravatar.cc/150?img=12',
-                      856,
-                      'Competitive',
-                      '4/4',
-                    ),
-                    _StreamData(
-                      'Late Night Baloot Session',
-                      'Khaled_G',
-                      'https://i.pravatar.cc/150?img=33',
-                      342,
-                      'Streaming',
-                      '3/4',
-                    ),
-                  ];
-                  if (index >= streams.length) return null;
-                  return _StreamCard(stream: streams[index]);
-                },
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final streams = [
+                  _StreamData(
+                    'Ahmed & Khalid vs Faisal Band',
+                    'Ahmed',
+                    'https://i.pravatar.cc/150?img=11',
+                    1240,
+                    'Baloot',
+                    '4/4',
+                  ),
+                  _StreamData(
+                    'Pro League Finals — Game 3',
+                    'SaadTV',
+                    'https://i.pravatar.cc/150?img=12',
+                    856,
+                    'Competitive',
+                    '4/4',
+                  ),
+                  _StreamData(
+                    'Late Night Baloot Session',
+                    'Khaled_G',
+                    'https://i.pravatar.cc/150?img=33',
+                    342,
+                    'Streaming',
+                    '3/4',
+                  ),
+                ];
+                if (index >= streams.length) return null;
+                return _StreamCard(stream: streams[index]);
+              }),
             ),
             // Upcoming Tournaments header
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+                padding: const EdgeInsetsDirectional.only(
+                  start: 16,
+                  end: 16,
+                  top: 24,
+                  bottom: 12,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -363,7 +385,8 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                     TextButton(
-                      onPressed: () => context.pushNamed(RouteNames.tournamentsTab),
+                      onPressed: () =>
+                          context.pushNamed(RouteNames.tournamentsTab),
                       child: Text(
                         'view_all'.tr(),
                         style: const TextStyle(
@@ -382,10 +405,13 @@ class HomePage extends StatelessWidget {
               child: SizedBox(
                 height: 180,
                 child: ListView.separated(
-                  padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: AppSpacing.screenHorizontal,
+                  ),
                   scrollDirection: Axis.horizontal,
                   itemCount: 3,
-                  separatorBuilder: (_, _) => const SizedBox(width: 12),
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(width: AppSpacing.md),
                   itemBuilder: (context, index) {
                     final tournaments = [
                       _TournamentPreview(
@@ -446,10 +472,8 @@ class _QuickActionCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: ColorManager.darkSurface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: color.withValues(alpha: 0.15),
-          ),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: color.withValues(alpha: 0.15)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -489,7 +513,14 @@ class _QuickActionCard extends StatelessWidget {
 }
 
 class _StreamData {
-  _StreamData(this.title, this.host, this.avatar, this.viewers, this.type, this.players);
+  _StreamData(
+    this.title,
+    this.host,
+    this.avatar,
+    this.viewers,
+    this.type,
+    this.players,
+  );
   final String title;
   final String host;
   final String avatar;
@@ -511,13 +542,14 @@ class _StreamCard extends StatelessWidget {
         pathParameters: {'id': 'stream_1'},
       ),
       child: Container(
-        margin: const EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 6),
+        margin: const EdgeInsetsDirectional.symmetric(
+          horizontal: 16,
+          vertical: 6,
+        ),
         decoration: BoxDecoration(
           color: ColorManager.darkSurface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: ColorManager.darkBorderSoft,
-          ),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: ColorManager.darkBorderSoft),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -592,7 +624,7 @@ class _StreamCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.6),
+                        color: ColorManager.darkCanvas.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Row(
@@ -621,12 +653,13 @@ class _StreamCard extends StatelessWidget {
             ),
             // Info
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundImage: NetworkImage(stream.avatar),
+                  CachedAvatar(
+                    imageUrl: stream.avatar,
+                    size: 32,
+                    borderRadius: 16,
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -653,14 +686,16 @@ class _StreamCard extends StatelessWidget {
                                 color: ColorManager.darkTextSecondary,
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: AppSpacing.sm),
                             Container(
                               padding: const EdgeInsetsDirectional.symmetric(
                                 horizontal: 6,
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: ColorManager.primary.withValues(alpha: 0.1),
+                                color: ColorManager.primary.withValues(
+                                  alpha: 0.1,
+                                ),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -672,7 +707,7 @@ class _StreamCard extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: AppSpacing.sm),
                             Text(
                               '${stream.players} players',
                               style: const TextStyle(
@@ -696,7 +731,13 @@ class _StreamCard extends StatelessWidget {
 }
 
 class _TournamentPreview {
-  _TournamentPreview(this.name, this.date, this.prize, this.players, this.isPremium);
+  _TournamentPreview(
+    this.name,
+    this.date,
+    this.prize,
+    this.players,
+    this.isPremium,
+  );
   final String name;
   final String date;
   final String prize;
@@ -721,7 +762,7 @@ class _TournamentCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: ColorManager.darkSurface,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
           border: Border.all(
             color: preview.isPremium
                 ? ColorManager.secondary.withValues(alpha: 0.4)
@@ -754,7 +795,7 @@ class _TournamentCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               preview.date,
               style: const TextStyle(
@@ -789,14 +830,16 @@ class _TournamentCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             // Join button (gold)
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorManager.secondary.withValues(alpha: 0.2),
+                  backgroundColor: ColorManager.secondary.withValues(
+                    alpha: 0.2,
+                  ),
                   foregroundColor: ColorManager.secondary,
                   elevation: 0,
                   minimumSize: Size.zero,

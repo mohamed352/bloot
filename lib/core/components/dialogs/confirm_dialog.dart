@@ -88,8 +88,9 @@ class ConfirmDialog extends StatelessWidget {
             onConfirm();
           },
           style: FilledButton.styleFrom(
-            backgroundColor:
-                isDestructive ? colors.error.withAlpha(25) : colors.primaryLight,
+            backgroundColor: isDestructive
+                ? colors.error.withAlpha(25)
+                : colors.primaryLight,
             foregroundColor: isDestructive ? colors.error : colors.primary,
             elevation: 0,
             padding: const EdgeInsetsDirectional.symmetric(horizontal: 20),

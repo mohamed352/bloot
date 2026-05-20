@@ -32,15 +32,28 @@ class AppButton extends StatelessWidget {
       child = const SizedBox(
         width: 24,
         height: 24,
-        child: CircularProgressIndicator(strokeWidth: 2.5, color: ColorManager.darkTextPrimary),
+        child: CircularProgressIndicator(
+          strokeWidth: 2.5,
+          color: ColorManager.darkTextPrimary,
+        ),
       );
     } else if (icon != null) {
       child = Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [Icon(icon, size: 20, color: ColorManager.darkTextPrimary), const SizedBox(width: 8), Text(text, style: const TextStyle(color: ColorManager.darkTextPrimary))],
+        children: [
+          Icon(icon, size: 20, color: ColorManager.darkTextPrimary),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: const TextStyle(color: ColorManager.darkTextPrimary),
+          ),
+        ],
       );
     } else {
-      child = Text(text, style: const TextStyle(color: ColorManager.darkTextPrimary));
+      child = Text(
+        text,
+        style: const TextStyle(color: ColorManager.darkTextPrimary),
+      );
     }
 
     if (gradient != null && !isOutlined) {
@@ -142,7 +155,10 @@ class GradientButton extends StatelessWidget {
       child = const SizedBox(
         width: 24,
         height: 24,
-        child: CircularProgressIndicator(strokeWidth: 2.5, color: ColorManager.darkTextPrimary),
+        child: CircularProgressIndicator(
+          strokeWidth: 2.5,
+          color: ColorManager.darkTextPrimary,
+        ),
       );
     } else if (icon != null) {
       child = Row(
@@ -166,7 +182,7 @@ class GradientButton extends StatelessWidget {
         style: GoogleFonts.cairo(
           fontSize: 16,
           fontWeight: FontWeight.w700,
-          color: Colors.white,
+          color: ColorManager.darkTextPrimary,
         ),
       );
     }
@@ -178,10 +194,10 @@ class GradientButton extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: isLoading ? null : (gradient ?? purpleGradient),
           borderRadius: BorderRadius.circular(borderRadius),
-          color: isLoading ? Colors.grey.shade700 : null,
+          color: isLoading ? ColorManager.darkTextDisabled : null,
         ),
         child: Material(
-          color: Colors.transparent,
+          color: const Color(0x00000000),
           child: InkWell(
             onTap: isLoading ? null : onPressed,
             borderRadius: BorderRadius.circular(borderRadius),

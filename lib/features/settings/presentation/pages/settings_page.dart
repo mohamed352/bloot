@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/style/colors.dart';
+import 'package:bloot/core/constants/app_spacing.dart';
+import 'package:bloot/core/constants/app_radius.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -15,12 +17,12 @@ class SettingsPage extends StatelessWidget {
       backgroundColor: ColorManager.darkCanvas,
       appBar: AppBar(
         title: Text('settings'.tr()),
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0x00000000),
         elevation: 0,
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
             _buildSectionTitle('account'.tr()),
             _buildSettingTile(
@@ -43,7 +45,7 @@ class SettingsPage extends StatelessWidget {
               title: 'block_list'.tr(),
               onTap: () {},
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xxl),
             _buildSectionTitle('game'.tr()),
             _buildToggleTile('voice_chat'.tr(), true),
             _buildToggleTile('camera'.tr(), false),
@@ -62,7 +64,7 @@ class SettingsPage extends StatelessWidget {
             ),
             _buildToggleTile('sound_effects'.tr(), true),
             _buildToggleTile('background_music'.tr(), false),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xxl),
             _buildSectionTitle('privacy'.tr()),
             _buildToggleTile('show_online_status'.tr(), true),
             _buildSettingTile(
@@ -81,7 +83,7 @@ class SettingsPage extends StatelessWidget {
               title: 'muted_users'.tr(),
               onTap: () {},
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xxl),
             _buildSectionTitle('support'.tr()),
             _buildSettingTile(
               icon: Icons.help_outline_rounded,
@@ -113,7 +115,7 @@ class SettingsPage extends StatelessWidget {
               title: 'about_bloot'.tr(),
               onTap: () {},
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xxl),
             _buildSectionTitle('danger_zone'.tr()),
             _buildSettingTile(
               icon: Icons.logout_rounded,
@@ -129,7 +131,7 @@ class SettingsPage extends StatelessWidget {
               textColor: ColorManager.error,
               onTap: () {},
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xxl),
             const Center(
               child: Text(
                 'Bloot v1.0.0',
@@ -139,7 +141,7 @@ class SettingsPage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xxl),
           ],
         ),
       ),
@@ -176,17 +178,11 @@ class SettingsPage extends StatelessWidget {
         decoration: BoxDecoration(
           color: ColorManager.darkSurface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: ColorManager.darkBorderSoft,
-          ),
+          border: Border.all(color: ColorManager.darkBorderSoft),
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 22,
-              color: iconColor ?? ColorManager.primary,
-            ),
+            Icon(icon, size: 22, color: iconColor ?? ColorManager.primary),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -229,13 +225,14 @@ class SettingsPage extends StatelessWidget {
       builder: (context, setState) {
         return Container(
           margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsetsDirectional.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: 14,
+            vertical: 10,
+          ),
           decoration: BoxDecoration(
             color: ColorManager.darkSurface,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: ColorManager.darkBorderSoft,
-            ),
+            border: Border.all(color: ColorManager.darkBorderSoft),
           ),
           child: Row(
             children: [
@@ -266,7 +263,9 @@ class SettingsPage extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: ColorManager.darkSurface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+        ),
         title: Text(
           'log_out_question'.tr(),
           style: const TextStyle(color: ColorManager.darkTextPrimary),

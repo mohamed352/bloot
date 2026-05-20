@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/components/app_button.dart';
 import 'package:bloot/core/style/colors.dart';
+import 'package:bloot/core/constants/app_spacing.dart';
 
 class OfflinePage extends StatelessWidget {
   const OfflinePage({super.key});
@@ -33,7 +34,7 @@ class OfflinePage extends StatelessWidget {
                   color: ColorManager.warning,
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xxxl),
               Text(
                 'no_internet_connection'.tr(),
                 textAlign: TextAlign.center,
@@ -43,7 +44,7 @@ class OfflinePage extends StatelessWidget {
                   color: ColorManager.darkTextPrimary,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               Text(
                 'offline_message'.tr(),
                 textAlign: TextAlign.center,
@@ -53,13 +54,13 @@ class OfflinePage extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xxxl),
               AppButton(
                 text: 'retry'.tr(),
                 icon: Icons.refresh_rounded,
                 onPressed: () => context.goNamed(RouteNames.home),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               AppButton(
                 text: 'go_to_settings'.tr(),
                 isOutlined: true,

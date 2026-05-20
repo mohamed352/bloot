@@ -4,7 +4,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:bloot/core/components/app_button.dart';
+import 'package:bloot/core/components/cached_avatar.dart';
 import 'package:bloot/core/style/colors.dart';
+import 'package:bloot/core/constants/app_spacing.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -16,9 +18,7 @@ class EditProfilePage extends StatefulWidget {
 class _EditProfilePageState extends State<EditProfilePage> {
   final _nameController = TextEditingController(text: 'Ahmed Al-Saud');
   final _usernameController = TextEditingController(text: 'ahmed_baloot');
-  final _bioController = TextEditingController(
-    text: 'bio_text'.tr(),
-  );
+  final _bioController = TextEditingController(text: 'bio_text'.tr());
 
   @override
   Widget build(BuildContext context) {
@@ -26,32 +26,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
       backgroundColor: ColorManager.darkCanvas,
       appBar: AppBar(
         title: Text('edit_profile'.tr()),
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0x00000000),
         elevation: 0,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             children: [
               // Avatar
               Stack(
                 alignment: AlignmentDirectional.bottomEnd,
                 children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: ColorManager.primary.withValues(alpha: 0.3),
-                        width: 3,
-                      ),
-                      image: const DecorationImage(
-                        image: NetworkImage('https://i.pravatar.cc/150?img=11'),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                  CachedAvatar(
+                    imageUrl: 'https://i.pravatar.cc/150?img=11',
+                    size: 100,
+                    borderColor: ColorManager.primary.withValues(alpha: 0.3),
+                    borderWidth: 3,
                   ),
                   Container(
                     width: 32,
@@ -68,7 +59,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xxxl),
               _buildTextField(
                 label: 'display_name'.tr(),
                 controller: _nameController,
@@ -91,12 +82,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
               _buildDropdown('region'.tr(), 'riyadh_saudi_arabia'.tr()),
               const SizedBox(height: 20),
               _buildDropdown('favorite_mode'.tr(), 'Hokm'),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xxxl),
               AppButton(
                 text: 'save_changes'.tr(),
                 onPressed: () => context.pop(),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxl),
             ],
           ),
         ),
@@ -121,7 +112,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             color: ColorManager.darkTextSecondary,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         TextField(
           controller: controller,
           maxLines: maxLines,
@@ -139,9 +130,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: ColorManager.darkBorderSoft,
-              ),
+              borderSide: const BorderSide(color: ColorManager.darkBorderSoft),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
@@ -168,15 +157,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
             color: ColorManager.darkTextSecondary,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Container(
-          padding: const EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
           decoration: BoxDecoration(
             color: ColorManager.darkSectionGray,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: ColorManager.darkBorderSoft,
-            ),
+            border: Border.all(color: ColorManager.darkBorderSoft),
           ),
           child: Row(
             children: [

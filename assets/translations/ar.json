@@ -158,7 +158,6 @@
   "muted_users": "المستخدمون المكتومون",
   "my_tournaments": "بطولاتي",
   "need_1_more": "يلزم لاعب واحد",
-  "new": "جديد",
   "next_friday": "الجمعة القادمة",
   "nice_move": "حركة جميلة",
   "no_internet_connection": "لا يوجد اتصال بالإنترنت",
@@ -169,7 +168,6 @@
   "now": "الآن",
   "off": "إيقاف",
   "offline_message": "رسالة بدون اتصال",
-  "on": "تشغيل",
   "online": "متصل",
   "open_chat": "فتح الدردشة",
   "opponent_1": "الخصم ١",
@@ -282,6 +280,11 @@
   "your_name": "اسمك",
   "your_partner": "شريكك",
   "your_voice_your_passion_your_table": "صوتك، شغفك، طاولتك",
-  "2_days_ago": "منذ يومين",
-  "3_days_ago": "منذ 3 أيام"
+  "authPhoneHint": "50 123 4567",
+  "placeholderPlayerName": "اسم اللاعب",
+  "roomPlayerCount": "{current}/{max} لاعبين",
+  "labelNew": "جديد",
+  "labelOn": "تشغيل",
+  "time2DaysAgo": "منذ يومين",
+  "time3DaysAgo": "منذ 3 أيام"
 }

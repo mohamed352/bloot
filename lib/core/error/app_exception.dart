@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_core/firebase_core.dart';
+
 import 'package:bloot/generated/locale_keys.g.dart';
 
 class AppException implements Exception {
@@ -28,8 +30,8 @@ class AppException implements Exception {
     );
   }
 
-  factory AppException.fromFirebase(dynamic error, [StackTrace? stack]) {
-    final code = (error as dynamic).code?.toString();
+  factory AppException.fromFirebase(Object error, [StackTrace? stack]) {
+    final code = error is FirebaseException ? error.code : null;
     String message = LocaleKeys.errorServer.tr();
 
     switch (code) {

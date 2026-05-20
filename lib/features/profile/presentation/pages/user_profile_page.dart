@@ -4,7 +4,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:bloot/config/routes/routes.dart';
+import 'package:bloot/core/components/cached_avatar.dart';
 import 'package:bloot/core/style/colors.dart';
+import 'package:bloot/core/constants/app_spacing.dart';
+import 'package:bloot/core/constants/app_radius.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -39,7 +42,7 @@ class _UserProfilePageState extends State<UserProfilePage>
             return [
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Column(
                     children: [
                       // Avatar + name with gold ring and level badge
@@ -52,15 +55,16 @@ class _UserProfilePageState extends State<UserProfilePage>
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: ColorManager.secondary.withValues(alpha: 0.6),
+                                color: ColorManager.secondary.withValues(
+                                  alpha: 0.6,
+                                ),
                                 width: 3,
                               ),
                             ),
-                            child: const CircleAvatar(
-                              radius: 46,
-                              backgroundImage: NetworkImage(
-                                'https://i.pravatar.cc/150?img=11',
-                              ),
+                            child: const CachedAvatar(
+                              imageUrl: 'https://i.pravatar.cc/150?img=11',
+                              size: 92,
+                              borderRadius: 46,
                             ),
                           ),
                           // Level badge overlapping avatar bottom-right
@@ -71,7 +75,9 @@ class _UserProfilePageState extends State<UserProfilePage>
                             ),
                             decoration: BoxDecoration(
                               color: ColorManager.secondary,
-                              borderRadius: BorderRadius.circular(999),
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.full,
+                              ),
                               border: Border.all(
                                 color: ColorManager.darkCanvas,
                                 width: 2,
@@ -88,7 +94,7 @@ class _UserProfilePageState extends State<UserProfilePage>
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.lg),
                       const Text(
                         'Ahmed Al-Saud',
                         style: TextStyle(
@@ -105,13 +111,13 @@ class _UserProfilePageState extends State<UserProfilePage>
                           color: ColorManager.darkTextSecondary,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.lg),
                       // XP bar
                       Container(
                         height: 8,
                         decoration: BoxDecoration(
                           color: ColorManager.darkSectionGray,
-                          borderRadius: BorderRadius.circular(999),
+                          borderRadius: BorderRadius.circular(AppRadius.full),
                         ),
                         child: FractionallySizedBox(
                           alignment: AlignmentDirectional.centerStart,
@@ -124,7 +130,9 @@ class _UserProfilePageState extends State<UserProfilePage>
                                   ColorManager.primaryLight,
                                 ],
                               ),
-                              borderRadius: BorderRadius.circular(999),
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.full,
+                              ),
                             ),
                           ),
                         ),
@@ -177,10 +185,11 @@ class _UserProfilePageState extends State<UserProfilePage>
                             child: _ActionButton(
                               icon: Icons.edit_rounded,
                               label: 'edit_profile'.tr(),
-                              onTap: () => context.pushNamed(RouteNames.editProfile),
+                              onTap: () =>
+                                  context.pushNamed(RouteNames.editProfile),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppSpacing.md),
                           Expanded(
                             child: _ActionButton(
                               icon: Icons.share_rounded,
@@ -188,12 +197,13 @@ class _UserProfilePageState extends State<UserProfilePage>
                               onTap: () {},
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppSpacing.md),
                           Expanded(
                             child: _ActionButton(
                               icon: Icons.settings_rounded,
                               label: 'settings'.tr(),
-                              onTap: () => context.pushNamed(RouteNames.settings),
+                              onTap: () =>
+                                  context.pushNamed(RouteNames.settings),
                             ),
                           ),
                         ],
@@ -223,11 +233,7 @@ class _UserProfilePageState extends State<UserProfilePage>
           },
           body: TabBarView(
             controller: _tabController,
-            children: const [
-              _StatsTab(),
-              _HistoryTab(),
-              _AboutTab(),
-            ],
+            children: const [_StatsTab(), _HistoryTab(), _AboutTab()],
           ),
         ),
       ),
@@ -255,9 +261,7 @@ class _StatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: ColorManager.darkSurface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: color.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -304,10 +308,8 @@ class _ActionButton extends StatelessWidget {
         padding: const EdgeInsetsDirectional.symmetric(vertical: 10),
         decoration: BoxDecoration(
           color: ColorManager.darkSurface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: ColorManager.darkBorderSoft,
-          ),
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(color: ColorManager.darkBorderSoft),
         ),
         child: Column(
           children: [
@@ -333,17 +335,15 @@ class _StatsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
         // Win rate with subtitle
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: ColorManager.darkSurface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: ColorManager.darkBorderSoft,
-            ),
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            border: Border.all(color: ColorManager.darkBorderSoft),
           ),
           child: Row(
             children: [
@@ -405,7 +405,7 @@ class _StatsTab extends StatelessWidget {
                         color: ColorManager.darkTextMuted,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     // Horizontal bar charts
                     _BarChartRow(
                       label: 'sun_games'.tr(),
@@ -424,7 +424,7 @@ class _StatsTab extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         // Achievements with unlock dates
         Text(
           'achievements'.tr(),
@@ -434,13 +434,13 @@ class _StatsTab extends StatelessWidget {
             color: ColorManager.darkTextPrimary,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         SizedBox(
           height: 100,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: 6,
-            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
             itemBuilder: (context, index) {
               final earned = index < 3;
               final unlockDates = ['Oct 12', 'Nov 3', 'Dec 1'];
@@ -451,7 +451,7 @@ class _StatsTab extends StatelessWidget {
                   color: earned
                       ? ColorManager.secondary.withValues(alpha: 0.15)
                       : ColorManager.darkSurface,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
                   border: Border.all(
                     color: earned
                         ? ColorManager.secondary.withValues(alpha: 0.3)
@@ -543,7 +543,7 @@ class _BarChartRow extends StatelessWidget {
               height: 8,
               decoration: BoxDecoration(
                 color: ColorManager.darkSectionGray,
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: BorderRadius.circular(AppRadius.full),
               ),
             ),
             FractionallySizedBox(
@@ -554,7 +554,7 @@ class _BarChartRow extends StatelessWidget {
                   gradient: LinearGradient(
                     colors: [color, color.withValues(alpha: 0.7)],
                   ),
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
                 ),
               ),
             ),
@@ -580,15 +580,45 @@ class _HistoryTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final games = [
-      _GameHistory(won: true, score: '52-48', type: 'Hokm', duration: '24m', date: 'today'.tr()),
-      _GameHistory(won: false, score: '45-55', type: 'Sun', duration: '18m', date: 'yesterday'.tr()),
-      _GameHistory(won: true, score: '60-40', type: 'Hokm', duration: '32m', date: '2_days_ago'.tr()),
-      _GameHistory(won: true, score: '58-42', type: 'Sun', duration: '28m', date: '3_days_ago'.tr()),
-      _GameHistory(won: false, score: '50-50', type: 'Hokm', duration: '35m', date: 'last_week'.tr()),
+      _GameHistory(
+        won: true,
+        score: '52-48',
+        type: 'Hokm',
+        duration: '24m',
+        date: 'today'.tr(),
+      ),
+      _GameHistory(
+        won: false,
+        score: '45-55',
+        type: 'Sun',
+        duration: '18m',
+        date: 'yesterday'.tr(),
+      ),
+      _GameHistory(
+        won: true,
+        score: '60-40',
+        type: 'Hokm',
+        duration: '32m',
+        date: '2_days_ago'.tr(),
+      ),
+      _GameHistory(
+        won: true,
+        score: '58-42',
+        type: 'Sun',
+        duration: '28m',
+        date: '3_days_ago'.tr(),
+      ),
+      _GameHistory(
+        won: false,
+        score: '50-50',
+        type: 'Hokm',
+        duration: '35m',
+        date: 'last_week'.tr(),
+      ),
     ];
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       itemCount: games.length,
       itemBuilder: (context, index) {
         final game = games[index];
@@ -597,10 +627,8 @@ class _HistoryTab extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: ColorManager.darkSurface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: ColorManager.darkBorderSoft,
-            ),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: ColorManager.darkBorderSoft),
           ),
           child: Row(
             children: [
@@ -611,14 +639,14 @@ class _HistoryTab extends StatelessWidget {
                   color: game.won
                       ? ColorManager.success.withValues(alpha: 0.15)
                       : ColorManager.error.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: Icon(
                   game.won ? Icons.check_rounded : Icons.close_rounded,
                   color: game.won ? ColorManager.success : ColorManager.error,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -679,7 +707,7 @@ class _AboutTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         children: [
           _AboutCard(
@@ -687,19 +715,19 @@ class _AboutTab extends StatelessWidget {
             label: 'bio'.tr(),
             value: 'bio_text'.tr(),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           _AboutCard(
             icon: Icons.calendar_today_rounded,
             label: 'member_since'.tr(),
             value: 'march_2024'.tr(),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           _AboutCard(
             icon: Icons.favorite_rounded,
             label: 'favorite_mode'.tr(),
             value: 'Hokm',
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           _AboutCard(
             icon: Icons.location_on_rounded,
             label: 'region'.tr(),
@@ -725,18 +753,16 @@ class _AboutCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: ColorManager.darkSurface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: ColorManager.darkBorderSoft,
-        ),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: ColorManager.darkBorderSoft),
       ),
       child: Row(
         children: [
           Icon(icon, size: 20, color: ColorManager.primary),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

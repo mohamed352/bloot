@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/components/app_button.dart';
 import 'package:bloot/core/style/colors.dart';
+import 'package:bloot/core/constants/app_spacing.dart';
 
 class ErrorPage extends StatelessWidget {
   const ErrorPage({super.key});
@@ -33,7 +34,7 @@ class ErrorPage extends StatelessWidget {
                   color: ColorManager.error,
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xxxl),
               Text(
                 'something_went_wrong'.tr(),
                 textAlign: TextAlign.center,
@@ -43,7 +44,7 @@ class ErrorPage extends StatelessWidget {
                   color: ColorManager.darkTextPrimary,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               Text(
                 'unexpected_error_message'.tr(),
                 textAlign: TextAlign.center,
@@ -53,12 +54,12 @@ class ErrorPage extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xxxl),
               AppButton(
                 text: 'try_again'.tr(),
                 onPressed: () => context.goNamed(RouteNames.home),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               AppButton(
                 text: 'go_home'.tr(),
                 isOutlined: true,

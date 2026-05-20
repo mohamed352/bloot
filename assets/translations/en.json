@@ -158,7 +158,6 @@
   "muted_users": "Muted Users",
   "my_tournaments": "My Tournaments",
   "need_1_more": "Need 1 more",
-  "new": "New",
   "next_friday": "Next Friday",
   "nice_move": "Nice move",
   "no_internet_connection": "No internet connection",
@@ -169,7 +168,6 @@
   "now": "Now",
   "off": "Off",
   "offline_message": "You are currently offline",
-  "on": "On",
   "online": "Online",
   "open_chat": "Open Chat",
   "opponent_1": "Opponent 1",
@@ -282,6 +280,11 @@
   "your_name": "Your Name",
   "your_partner": "Your Partner",
   "your_voice_your_passion_your_table": "Your voice. Your passion. Your table.",
-  "2_days_ago": "2 days ago",
-  "3_days_ago": "3 days ago"
+  "authPhoneHint": "50 123 4567",
+  "placeholderPlayerName": "Player Name",
+  "roomPlayerCount": "{current}/{max} players",
+  "labelNew": "New",
+  "labelOn": "On",
+  "time2DaysAgo": "2 days ago",
+  "time3DaysAgo": "3 days ago"
 }

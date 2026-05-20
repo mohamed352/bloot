@@ -20,9 +20,7 @@ class BottomNavBarWidget extends StatelessWidget {
       height: 64 + MediaQuery.paddingOf(context).bottom,
       decoration: const BoxDecoration(
         color: ColorManager.darkSurface,
-        border: Border(
-          top: BorderSide(color: ColorManager.darkBorderPurple),
-        ),
+        border: Border(top: BorderSide(color: ColorManager.darkBorderPurple)),
       ),
       child: SafeArea(
         top: false,

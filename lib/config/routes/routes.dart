@@ -27,6 +27,11 @@ abstract class RouteNames {
   static const String settings = 'settings';
   static const String privacy = 'privacy';
   static const String terms = 'terms';
+  static const String joinRoom = 'joinRoom';
+  static const String notifications = 'notifications';
+  static const String newMessage = 'newMessage';
+  static const String forceUpdate = 'forceUpdate';
+  static const String maintenance = 'maintenance';
   static const String error = 'error';
   static const String offline = 'offline';
 }
@@ -55,6 +60,11 @@ abstract class RoutePaths {
   static const String settings = '/settings';
   static const String privacy = '/privacy';
   static const String terms = '/terms';
+  static const String joinRoom = '/join-room';
+  static const String notifications = '/notifications';
+  static const String newMessage = '/new-message';
+  static const String forceUpdate = '/force-update';
+  static const String maintenance = '/maintenance';
   static const String error = '/error';
   static const String offline = '/offline';
 }
