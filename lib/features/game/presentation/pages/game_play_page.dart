@@ -95,158 +95,174 @@ class _GamePlayPageState extends State<GamePlayPage> {
                         // Top player (partner)
                         if (game != null && game.players.length > 1)
                           _GamePlayerSeat(player: game.players[0]),
-                        const Spacer(),
                         // Middle row: left, table, right
-                        Row(
-                          children: [
-                            // Left player (opponent)
-                            if (game != null && game.players.length > 2)
-                              _GamePlayerSeat(player: game.players[1]),
-                            const SizedBox(width: AppSpacing.md),
-                            // Game table
-                            Expanded(
-                              child: AspectRatio(
-                                aspectRatio: 1.4,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: ColorManager.gameTableTop.withValues(
-                                      alpha: 0.6,
-                                    ),
-                                    borderRadius: BorderRadius.circular(
-                                      AppRadius.xl,
-                                    ),
-                                    border: Border.all(
-                                      color: ColorManager.gameTableBorder,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      // Center info
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          // Score display
-                                          Container(
-                                            padding:
-                                                const EdgeInsetsDirectional.symmetric(
-                                                  horizontal: 16,
-                                                  vertical: 8,
-                                                ),
+                        Expanded(
+                          child: Row(
+                            children: [
+                              // Left player (opponent)
+                              if (game != null && game.players.length > 2)
+                                _GamePlayerSeat(player: game.players[1]),
+                              const SizedBox(width: AppSpacing.md),
+                              // Game table
+                              Expanded(
+                                child: LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    double width = constraints.maxWidth;
+                                    double height = width / 1.4;
+                                    if (height > constraints.maxHeight) {
+                                      height = constraints.maxHeight;
+                                      width = height * 1.4;
+                                    }
+                                    return Center(
+                                      child: SizedBox(
+                                        width: width,
+                                        height: height,
+                                        child: AspectRatio(
+                                          aspectRatio: 1.4,
+                                          child: Container(
                                             decoration: BoxDecoration(
-                                              color: ColorManager.darkCanvas
-                                                  .withValues(alpha: 0.5),
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
+                                              color: ColorManager.gameTableTop.withValues(
+                                                alpha: 0.6,
+                                              ),
+                                              borderRadius: BorderRadius.circular(
+                                                AppRadius.xl,
+                                              ),
+                                              border: Border.all(
+                                                color: ColorManager.gameTableBorder,
+                                                width: 2,
+                                              ),
                                             ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
+                                            child: Stack(
+                                              alignment: Alignment.center,
                                               children: [
-                                                Text(
-                                                  'us'.tr(),
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: ColorManager
-                                                        .darkTextSecondary,
-                                                  ),
+                                                // Center info
+                                                Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    // Score display
+                                                    Container(
+                                                      padding:
+                                                          const EdgeInsetsDirectional.symmetric(
+                                                            horizontal: 16,
+                                                            vertical: 8,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        color: ColorManager.darkCanvas
+                                                            .withValues(alpha: 0.5),
+                                                        borderRadius:
+                                                            BorderRadius.circular(10),
+                                                      ),
+                                                      child: Row(
+                                                        mainAxisSize: MainAxisSize.min,
+                                                        children: [
+                                                          Text(
+                                                            'us'.tr(),
+                                                            style: const TextStyle(
+                                                              fontSize: 14,
+                                                              fontWeight: FontWeight.w600,
+                                                              color: ColorManager
+                                                                  .darkTextSecondary,
+                                                            ),
+                                                          ),
+                                                          const SizedBox(width: 4),
+                                                          Text(
+                                                            '${game?.scoreUs ?? 8}',
+                                                            style: const TextStyle(
+                                                              fontSize: 18,
+                                                              fontWeight: FontWeight.w700,
+                                                              color: ColorManager
+                                                                  .darkTextPrimary,
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                            width: AppSpacing.sm,
+                                                          ),
+                                                          const Text(
+                                                            '—',
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              color: ColorManager
+                                                                  .darkTextMuted,
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                            width: AppSpacing.sm,
+                                                          ),
+                                                          Text(
+                                                            '${game?.scoreThem ?? 12}',
+                                                            style: const TextStyle(
+                                                              fontSize: 18,
+                                                              fontWeight: FontWeight.w700,
+                                                              color:
+                                                                  ColorManager.secondary,
+                                                            ),
+                                                          ),
+                                                          const SizedBox(width: 4),
+                                                          Text(
+                                                            'them'.tr(),
+                                                            style: const TextStyle(
+                                                              fontSize: 14,
+                                                              fontWeight: FontWeight.w600,
+                                                              color:
+                                                                  ColorManager.secondary,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: AppSpacing.sm),
+                                                    Container(
+                                                      padding:
+                                                          const EdgeInsetsDirectional.symmetric(
+                                                            horizontal: 10,
+                                                            vertical: 4,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        color: ColorManager.primary
+                                                            .withValues(alpha: 0.2),
+                                                        borderRadius:
+                                                            BorderRadius.circular(6),
+                                                      ),
+                                                      child: Text(
+                                                        game?.trump ?? 'hokm_spades'.tr(),
+                                                        style: const TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight: FontWeight.w600,
+                                                          color: ColorManager.primary,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  '${game?.scoreUs ?? 8}',
-                                                  style: const TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: ColorManager
-                                                        .darkTextPrimary,
-                                                  ),
-                                                ),
-                                                const SizedBox(
-                                                  width: AppSpacing.sm,
-                                                ),
-                                                const Text(
-                                                  '—',
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                    color: ColorManager
-                                                        .darkTextMuted,
-                                                  ),
-                                                ),
-                                                const SizedBox(
-                                                  width: AppSpacing.sm,
-                                                ),
-                                                Text(
-                                                  '${game?.scoreThem ?? 12}',
-                                                  style: const TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w700,
-                                                    color:
-                                                        ColorManager.secondary,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  'them'.tr(),
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w600,
-                                                    color:
-                                                        ColorManager.secondary,
-                                                  ),
-                                                ),
+                                                // Played cards
+                                                ...[
+                                                  const Offset(0, -40),
+                                                  const Offset(0, 40),
+                                                  const Offset(-50, 0),
+                                                  const Offset(50, 0),
+                                                ].map((offset) {
+                                                  return Transform.translate(
+                                                    offset: offset,
+                                                    child: const _MiniCard(),
+                                                  );
+                                                }),
                                               ],
                                             ),
                                           ),
-                                          const SizedBox(height: AppSpacing.sm),
-                                          Container(
-                                            padding:
-                                                const EdgeInsetsDirectional.symmetric(
-                                                  horizontal: 10,
-                                                  vertical: 4,
-                                                ),
-                                            decoration: BoxDecoration(
-                                              color: ColorManager.primary
-                                                  .withValues(alpha: 0.2),
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                            ),
-                                            child: Text(
-                                              game?.trump ?? 'hokm_spades'.tr(),
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w600,
-                                                color: ColorManager.primary,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
-                                      // Played cards
-                                      ...[
-                                        const Offset(0, -40),
-                                        const Offset(0, 40),
-                                        const Offset(-50, 0),
-                                        const Offset(50, 0),
-                                      ].map((offset) {
-                                        return Transform.translate(
-                                          offset: offset,
-                                          child: const _MiniCard(),
-                                        );
-                                      }),
-                                    ],
-                                  ),
+                                    );
+                                  },
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: AppSpacing.md),
-                            // Right player (opponent)
-                            if (game != null && game.players.length > 3)
-                              _GamePlayerSeat(player: game.players[2]),
-                          ],
+                              const SizedBox(width: AppSpacing.md),
+                              // Right player (opponent)
+                              if (game != null && game.players.length > 3)
+                                _GamePlayerSeat(player: game.players[2]),
+                            ],
+                          ),
                         ),
-                        const Spacer(),
                         // My hand area (bottom - you)
                         Column(
                           mainAxisSize: MainAxisSize.min,

@@ -3,10 +3,8 @@ import 'package:bloot/core/di/injection.dart';
 import 'package:bloot/core/error/global_error_handler.dart';
 import 'package:bloot/core/logger/app_logger.dart';
 import 'package:bloot/core/network/cache_keys.dart';
-
-// Uncomment after running `flutterfire configure`:
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:bloot/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:bloot/firebase_options.dart';
 
 abstract class AppInitializer {
   static bool onboardingCompleted = false;
@@ -22,13 +20,13 @@ abstract class AppInitializer {
     GlobalErrorHandler.initialize();
     AppLogger.info('Error handlers installed', tag: LogTags.init);
 
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    AppLogger.info('Firebase initialized', tag: LogTags.init);
+
     await configureDependencies();
     AppLogger.info('DI configured', tag: LogTags.init);
-
-    // TODO: Uncomment after running `flutterfire configure`
-    // await Firebase.initializeApp(
-    //   options: DefaultFirebaseOptions.currentPlatform,
-    // );
 
     AppLogger.info('Initialization complete', tag: LogTags.init);
   }

@@ -33,17 +33,17 @@ class SettingsPage extends StatelessWidget {
             _buildSettingTile(
               icon: Icons.alternate_email_rounded,
               title: 'change_username'.tr(),
-              onTap: () {},
+              onTap: () => _showComingSoon(context),
             ),
             _buildSettingTile(
               icon: Icons.link_rounded,
               title: 'linked_accounts'.tr(),
-              onTap: () {},
+              onTap: () => _showComingSoon(context),
             ),
             _buildSettingTile(
               icon: Icons.block_rounded,
               title: 'block_list'.tr(),
-              onTap: () {},
+              onTap: () => _showComingSoon(context),
             ),
             const SizedBox(height: AppSpacing.xxl),
             _buildSectionTitle('game'.tr()),
@@ -53,14 +53,14 @@ class SettingsPage extends StatelessWidget {
               icon: Icons.speaker_rounded,
               title: 'speaker_mode'.tr(),
               subtitle: 'speaker'.tr(),
-              onTap: () {},
+              onTap: () => _showComingSoon(context),
             ),
             _buildToggleTile('auto_rotate_for_game'.tr(), true),
             _buildSettingTile(
               icon: Icons.speed_rounded,
               title: 'game_speed'.tr(),
               subtitle: 'normal'.tr(),
-              onTap: () {},
+              onTap: () => _showComingSoon(context),
             ),
             _buildToggleTile('sound_effects'.tr(), true),
             _buildToggleTile('background_music'.tr(), false),
@@ -71,34 +71,34 @@ class SettingsPage extends StatelessWidget {
               icon: Icons.visibility_rounded,
               title: 'profile_visibility'.tr(),
               subtitle: 'everyone'.tr(),
-              onTap: () {},
+              onTap: () => _showComingSoon(context),
             ),
             _buildSettingTile(
               icon: Icons.notifications_rounded,
               title: 'notifications'.tr(),
-              onTap: () {},
+              onTap: () => context.pushNamed(RouteNames.notifications),
             ),
             _buildSettingTile(
               icon: Icons.volume_off_rounded,
               title: 'muted_users'.tr(),
-              onTap: () {},
+              onTap: () => _showComingSoon(context),
             ),
             const SizedBox(height: AppSpacing.xxl),
             _buildSectionTitle('support'.tr()),
             _buildSettingTile(
               icon: Icons.help_outline_rounded,
               title: 'help_center'.tr(),
-              onTap: () {},
+              onTap: () => _showComingSoon(context),
             ),
             _buildSettingTile(
               icon: Icons.mail_outline_rounded,
               title: 'contact_support'.tr(),
-              onTap: () {},
+              onTap: () => _showComingSoon(context),
             ),
             _buildSettingTile(
               icon: Icons.report_problem_outlined,
               title: 'report_a_problem'.tr(),
-              onTap: () {},
+              onTap: () => _showComingSoon(context),
             ),
             _buildSettingTile(
               icon: Icons.description_outlined,
@@ -113,7 +113,7 @@ class SettingsPage extends StatelessWidget {
             _buildSettingTile(
               icon: Icons.info_outline_rounded,
               title: 'about_bloot'.tr(),
-              onTap: () {},
+              onTap: () => _showComingSoon(context),
             ),
             const SizedBox(height: AppSpacing.xxl),
             _buildSectionTitle('danger_zone'.tr()),
@@ -129,7 +129,7 @@ class SettingsPage extends StatelessWidget {
               title: 'delete_account'.tr(),
               iconColor: ColorManager.error,
               textColor: ColorManager.error,
-              onTap: () {},
+              onTap: () => _showComingSoon(context),
             ),
             const SizedBox(height: AppSpacing.xxl),
             const Center(
@@ -256,6 +256,12 @@ class SettingsPage extends StatelessWidget {
         );
       },
     );
+  }
+
+  void _showComingSoon(BuildContext context) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Coming soon')));
   }
 
   void _showLogoutDialog(BuildContext context) {

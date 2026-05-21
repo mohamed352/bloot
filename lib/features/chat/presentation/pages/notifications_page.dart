@@ -10,45 +10,80 @@ import 'package:bloot/core/extension/context_values.dart';
 import 'package:bloot/generated/locale_keys.g.dart';
 
 /// Notification feed screen showing all user notifications.
-class NotificationsPage extends StatelessWidget {
+class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
+
+  @override
+  State<NotificationsPage> createState() => _NotificationsPageState();
+}
+
+class _NotificationsPageState extends State<NotificationsPage> {
+  late final List<_NotificationItem> _notifications;
+
+  @override
+  void initState() {
+    super.initState();
+    _notifications = const [
+      _NotificationItem(
+        icon: Icons.emoji_events_rounded,
+        title: 'Tournament Starting Soon',
+        body: 'Gulf Champions Cup begins in 15 minutes.',
+        time: '15m ago',
+      ),
+      _NotificationItem(
+        icon: Icons.videogame_asset_rounded,
+        title: 'Room Invitation',
+        body: 'Khalid invited you to play Baloot.',
+        time: '1h ago',
+      ),
+      _NotificationItem(
+        icon: Icons.person_add_rounded,
+        title: 'New Follower',
+        body: 'Faisal started following you.',
+        time: '3h ago',
+      ),
+      _NotificationItem(
+        icon: Icons.local_fire_department_rounded,
+        title: 'Win Streak!',
+        body: 'You won 3 games in a row.',
+        time: 'Yesterday',
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
 
-    // TODO: Replace with real notifications from a Cubit
-    final notifications = <_NotificationItem>[];
-
     return AppScaffold(
       appBar: CustomAppBar(
         title: LocaleKeys.notifications.tr(),
         actions: [
-          if (notifications.isNotEmpty)
+          if (_notifications.isNotEmpty)
             TextButton(
-              onPressed: () {},
+              onPressed: () => setState(() => _notifications.clear()),
               child: Text(LocaleKeys.commonDelete.tr()),
             ),
         ],
       ),
-      body: notifications.isEmpty
-          ? const EmptyStateWidget(
+      body: _notifications.isEmpty
+          ? EmptyStateWidget(
               icon: Icons.notifications_none_rounded,
-              title: 'No notifications yet',
-              subtitle: 'When you get notifications, they will appear here',
+              title: LocaleKeys.notificationsEmptyTitle.tr(),
+              subtitle: LocaleKeys.notificationsEmptySubtitle.tr(),
             )
           : ListView.separated(
               padding: const EdgeInsetsDirectional.symmetric(
                 vertical: AppSpacing.md,
               ),
-              itemCount: notifications.length,
+              itemCount: _notifications.length,
               separatorBuilder: (context, index) => Divider(
                 color: colors.divider,
                 indent: AppSpacing.screenHorizontal,
                 endIndent: AppSpacing.screenHorizontal,
               ),
               itemBuilder: (context, index) {
-                final item = notifications[index];
+                final item = _notifications[index];
                 return _NotificationTile(item: item);
               },
             ),
@@ -80,7 +115,11 @@ class _NotificationTile extends StatelessWidget {
     final colors = context.appColors;
 
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(LocaleKeys.notificationOpened.tr())),
+        );
+      },
       child: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
           horizontal: AppSpacing.screenHorizontal,
@@ -136,7 +175,6 @@ class _NotificationTile extends StatelessWidget {
                 ],
               ),
             ),
-
           ],
         ),
       ),

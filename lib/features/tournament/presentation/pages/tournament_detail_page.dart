@@ -7,14 +7,57 @@ import 'package:bloot/core/components/cached_avatar.dart';
 import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
 import 'package:bloot/core/constants/app_radius.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:bloot/features/tournament/presentation/cubit/tournament_cubit.dart';
+import 'package:bloot/features/tournament/presentation/cubit/tournament_state.dart';
+import 'package:bloot/features/tournament/presentation/widgets/join_tournament_bottom_sheet.dart';
 
 class TournamentDetailPage extends StatelessWidget {
   const TournamentDetailPage({super.key, required this.id});
   final String id;
 
+  void _showJoinBottomSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return JoinTournamentBottomSheet(
+          tournamentName: 'gulf_champions_cup'.tr(),
+          entryFee: '500',
+          onConfirm: () {
+            Navigator.of(sheetContext).pop();
+            context.read<TournamentCubit>().joinTournament(id);
+          },
+          onCancel: () => Navigator.of(sheetContext).pop(),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocConsumer<TournamentCubit, TournamentState>(
+      listener: (context, state) {
+        state.whenOrNull(
+          joined: (tournamentId) {
+            context.pushNamed(
+              'tournamentBracket',
+              pathParameters: {'id': tournamentId},
+            );
+          },
+          joinError: (message) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(message)));
+          },
+        );
+      },
+      builder: (context, state) {
+        final isJoining = state is TournamentJoining;
+
+        return Scaffold(
       backgroundColor: ColorManager.darkCanvas,
       body: CustomScrollView(
         slivers: [
@@ -268,13 +311,28 @@ class TournamentDetailPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xxl),
-                AppButton(text: 'join_tournament'.tr(), onPressed: () {}),
+                AppButton(
+                  text: 'join_tournament'.tr(),
+                  onPressed: isJoining ? null : () => _showJoinBottomSheet(context),
+                  isLoading: isJoining,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppTextButton(
+                  text: 'view_bracket'.tr(),
+                  onPressed: () => context.pushNamed(
+                    'tournamentBracket',
+                    pathParameters: {'id': id},
+                  ),
+                  color: ColorManager.secondary,
+                ),
                 const SizedBox(height: AppSpacing.xxl),
               ]),
             ),
           ),
         ],
       ),
+    );
+      },
     );
   }
 

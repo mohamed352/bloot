@@ -136,6 +136,7 @@
   "last_week": "الأسبوع الماضي",
   "leave": "مغادرة",
   "leave_game": "مغادرة اللعبة",
+  "leave_room": "مغادرة الغرفة",
   "lets_go": "هيا بنا",
   "lets_play_again_tonight": "هيا نلعب مجدداً الليلة",
   "level_1": "المستوى ١",
@@ -165,6 +166,9 @@
   "normal": "عادي",
   "not_ready": "غير جاهز",
   "notifications": "الإشعارات",
+  "notificationsEmptyTitle": "لا توجد إشعارات بعد",
+  "notificationsEmptySubtitle": "عندما تحصل على إشعارات، ستظهر هنا",
+  "notificationOpened": "تم فتح الإشعار",
   "now": "الآن",
   "off": "إيقاف",
   "offline_message": "رسالة بدون اتصال",
@@ -286,5 +290,11 @@
   "labelNew": "جديد",
   "labelOn": "تشغيل",
   "time2DaysAgo": "منذ يومين",
-  "time3DaysAgo": "منذ 3 أيام"
+  "time3DaysAgo": "منذ 3 أيام",
+  "6_rounds": "٦ جولات",
+  "500_coins": "٥٠٠ عملة",
+  "1st": "الأول",
+  "2nd": "الثاني",
+  "3rd": "الثالث",
+  "4th": "الرابع"
 }

@@ -30,6 +30,12 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
     'ready'.tr(),
   ];
 
+  void _showComingSoon(BuildContext context) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Coming soon')));
+  }
+
   void _sendMessage() {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
@@ -116,11 +122,11 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.phone_rounded),
-                onPressed: () {},
+                onPressed: () => _showComingSoon(context),
               ),
               IconButton(
                 icon: const Icon(Icons.videocam_rounded),
-                onPressed: () {},
+                onPressed: () => _showComingSoon(context),
               ),
             ],
           ),
@@ -321,14 +327,14 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
                           Icons.image_rounded,
                           color: ColorManager.darkTextMuted,
                         ),
-                        onPressed: () {},
+                        onPressed: () => _showComingSoon(context),
                       ),
                       IconButton(
                         icon: const Icon(
                           Icons.emoji_emotions_outlined,
                           color: ColorManager.darkTextMuted,
                         ),
-                        onPressed: () {},
+                        onPressed: () => _showComingSoon(context),
                       ),
                       Expanded(
                         child: Container(

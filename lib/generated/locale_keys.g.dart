@@ -141,6 +141,7 @@ abstract class LocaleKeys {
   static const last_week = 'last_week';
   static const leave = 'leave';
   static const leave_game = 'leave_game';
+  static const leave_room = 'leave_room';
   static const lets_go = 'lets_go';
   static const lets_play_again_tonight = 'lets_play_again_tonight';
   static const level_1 = 'level_1';
@@ -170,6 +171,9 @@ abstract class LocaleKeys {
   static const normal = 'normal';
   static const not_ready = 'not_ready';
   static const notifications = 'notifications';
+  static const notificationsEmptyTitle = 'notificationsEmptyTitle';
+  static const notificationsEmptySubtitle = 'notificationsEmptySubtitle';
+  static const notificationOpened = 'notificationOpened';
   static const now = 'now';
   static const off = 'off';
   static const offline_message = 'offline_message';

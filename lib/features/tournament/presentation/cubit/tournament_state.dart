@@ -14,4 +14,9 @@ class TournamentState with _$TournamentState {
   }) = TournamentLoaded;
   const factory TournamentState.error({required String message}) =
       TournamentError;
+  const factory TournamentState.joining() = TournamentJoining;
+  const factory TournamentState.joined({required String tournamentId}) =
+      TournamentJoined;
+  const factory TournamentState.joinError({required String message}) =
+      TournamentJoinError;
 }

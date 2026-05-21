@@ -12,6 +12,7 @@ import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/generated/locale_keys.g.dart';
 import 'package:bloot/features/room/presentation/cubit/room_cubit.dart';
 import 'package:bloot/features/room/presentation/cubit/room_state.dart';
+import 'package:bloot/features/room/presentation/widgets/room_settings_bottom_sheet.dart';
 import 'package:bloot/features/room/presentation/widgets/seat_widget.dart';
 
 class RoomLobbyPage extends StatelessWidget {
@@ -23,7 +24,6 @@ class RoomLobbyPage extends StatelessWidget {
     return BlocConsumer<RoomCubit, RoomState>(
       listener: (context, state) {
         state.whenOrNull(
-          initial: () => context.read<RoomCubit>().loadRoom(id),
           error: (message) {
             ScaffoldMessenger.of(
               context,
@@ -54,11 +54,22 @@ class RoomLobbyPage extends StatelessWidget {
             actions: [
               IconButton(
                 icon: const Icon(Icons.share_rounded),
-                onPressed: () {},
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Room code copied')),
+                  );
+                },
               ),
               IconButton(
                 icon: const Icon(Icons.settings_rounded),
-                onPressed: () {},
+                onPressed: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    backgroundColor: Colors.transparent,
+                    isScrollControlled: true,
+                    builder: (context) => const RoomSettingsBottomSheet(),
+                  );
+                },
               ),
             ],
           ),
@@ -115,11 +126,26 @@ class RoomLobbyPage extends StatelessWidget {
                               ],
                             ),
                             const Spacer(),
-                            _IconButton(icon: Icons.copy_rounded, onTap: () {}),
+                            _IconButton(
+                              icon: Icons.copy_rounded,
+                              onTap: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Room code copied'),
+                                  ),
+                                );
+                              },
+                            ),
                             const SizedBox(width: AppSpacing.sm),
                             _IconButton(
                               icon: Icons.share_rounded,
-                              onTap: () {},
+                              onTap: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Room code copied'),
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -473,7 +499,13 @@ class RoomLobbyPage extends StatelessWidget {
                                 ),
                                 const SizedBox(width: AppSpacing.sm),
                                 GestureDetector(
-                                  onTap: () {},
+                                  onTap: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Message sent'),
+                                      ),
+                                    );
+                                  },
                                   child: Container(
                                     width: 40,
                                     height: 40,

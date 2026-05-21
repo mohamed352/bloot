@@ -82,7 +82,7 @@ class HomePage extends StatelessWidget {
                             Icons.notifications_outlined,
                             color: ColorManager.darkTextPrimary,
                           ),
-                          onPressed: () {},
+                          onPressed: () => context.pushNamed(RouteNames.notifications),
                         ),
                         Positioned(
                           top: 10,
@@ -109,7 +109,6 @@ class HomePage extends StatelessWidget {
                   horizontal: AppSpacing.screenHorizontal,
                 ),
                 child: Container(
-                  height: 160,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(AppRadius.xl),
                     image: const DecorationImage(
@@ -147,7 +146,7 @@ class HomePage extends StatelessWidget {
                           padding: const EdgeInsets.all(20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Container(
                                 padding: const EdgeInsetsDirectional.symmetric(
@@ -249,38 +248,46 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _QuickActionCard(
-                            icon: Icons.people_rounded,
-                            title: 'play_with_friends'.tr(),
-                            subtitle: 'create_or_join_room'.tr(),
-                            color: ColorManager.primary,
-                            onTap: () => context.pushNamed(RouteNames.play),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: _QuickActionCard(
-                            icon: Icons.mic_rounded,
-                            title: 'voice_tables'.tr(),
-                            subtitle: 'voice_only_games'.tr(),
-                            color: ColorManager.info,
-                            onTap: () => context.pushNamed(RouteNames.play),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: _QuickActionCard(
-                            icon: Icons.videocam_rounded,
-                            title: 'live_stream'.tr(),
-                            subtitle: 'watch_players_live'.tr(),
-                            color: ColorManager.live,
-                            onTap: () => context.pushNamed(RouteNames.discover),
-                          ),
-                        ),
-                      ],
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final cardWidth = (constraints.maxWidth - 2 * AppSpacing.md) / 3;
+                        return Row(
+                          children: [
+                            SizedBox(
+                              width: cardWidth,
+                              child: _QuickActionCard(
+                                icon: Icons.people_rounded,
+                                title: 'play_with_friends'.tr(),
+                                subtitle: 'create_or_join_room'.tr(),
+                                color: ColorManager.primary,
+                                onTap: () => context.pushNamed(RouteNames.play),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            SizedBox(
+                              width: cardWidth,
+                              child: _QuickActionCard(
+                                icon: Icons.mic_rounded,
+                                title: 'voice_tables'.tr(),
+                                subtitle: 'voice_only_games'.tr(),
+                                color: ColorManager.info,
+                                onTap: () => context.pushNamed(RouteNames.play),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            SizedBox(
+                              width: cardWidth,
+                              child: _QuickActionCard(
+                                icon: Icons.videocam_rounded,
+                                title: 'live_stream'.tr(),
+                                subtitle: 'watch_players_live'.tr(),
+                                color: ColorManager.live,
+                                onTap: () => context.pushNamed(RouteNames.discover),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -489,20 +496,28 @@ class _QuickActionCard extends StatelessWidget {
               child: Icon(icon, color: color, size: 18),
             ),
             const SizedBox(height: 10),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: ColorManager.darkTextPrimary,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                title,
+                maxLines: 1,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: ColorManager.darkTextPrimary,
+                ),
               ),
             ),
             const SizedBox(height: 2),
-            Text(
-              subtitle,
-              style: const TextStyle(
-                fontSize: 11,
-                color: ColorManager.darkTextSecondary,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                subtitle,
+                maxLines: 1,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: ColorManager.darkTextSecondary,
+                ),
               ),
             ),
           ],
@@ -835,7 +850,10 @@ class _TournamentCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () => context.pushNamed(
+                  RouteNames.tournamentDetail,
+                  pathParameters: {'id': 'tournament_1'},
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorManager.secondary.withValues(
                     alpha: 0.2,

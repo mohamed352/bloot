@@ -452,7 +452,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                   // Cancel text button
                   Center(
                     child: TextButton(
-                      onPressed: () => context.pop(),
+                      onPressed: () => context.goNamed(RouteNames.home),
                       child: Text(
                         'cancel'.tr(),
                         style: const TextStyle(

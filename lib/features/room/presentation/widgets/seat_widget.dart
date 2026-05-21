@@ -74,7 +74,11 @@ class SeatWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Invite sent')),
+                    );
+                  },
                   child: Text(
                     LocaleKeys.invite.tr(),
                     style: const TextStyle(fontSize: 12),

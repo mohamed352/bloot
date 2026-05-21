@@ -55,14 +55,17 @@ extension TournamentStatePatterns on TournamentState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( TournamentInitial value)?  initial,TResult Function( TournamentLoading value)?  loading,TResult Function( TournamentLoaded value)?  loaded,TResult Function( TournamentError value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( TournamentInitial value)?  initial,TResult Function( TournamentLoading value)?  loading,TResult Function( TournamentLoaded value)?  loaded,TResult Function( TournamentError value)?  error,TResult Function( TournamentJoining value)?  joining,TResult Function( TournamentJoined value)?  joined,TResult Function( TournamentJoinError value)?  joinError,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case TournamentInitial() when initial != null:
 return initial(_that);case TournamentLoading() when loading != null:
 return loading(_that);case TournamentLoaded() when loaded != null:
 return loaded(_that);case TournamentError() when error != null:
-return error(_that);case _:
+return error(_that);case TournamentJoining() when joining != null:
+return joining(_that);case TournamentJoined() when joined != null:
+return joined(_that);case TournamentJoinError() when joinError != null:
+return joinError(_that);case _:
   return orElse();
 
 }
@@ -80,14 +83,17 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( TournamentInitial value)  initial,required TResult Function( TournamentLoading value)  loading,required TResult Function( TournamentLoaded value)  loaded,required TResult Function( TournamentError value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( TournamentInitial value)  initial,required TResult Function( TournamentLoading value)  loading,required TResult Function( TournamentLoaded value)  loaded,required TResult Function( TournamentError value)  error,required TResult Function( TournamentJoining value)  joining,required TResult Function( TournamentJoined value)  joined,required TResult Function( TournamentJoinError value)  joinError,}){
 final _that = this;
 switch (_that) {
 case TournamentInitial():
 return initial(_that);case TournamentLoading():
 return loading(_that);case TournamentLoaded():
 return loaded(_that);case TournamentError():
-return error(_that);case _:
+return error(_that);case TournamentJoining():
+return joining(_that);case TournamentJoined():
+return joined(_that);case TournamentJoinError():
+return joinError(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -104,14 +110,17 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( TournamentInitial value)?  initial,TResult? Function( TournamentLoading value)?  loading,TResult? Function( TournamentLoaded value)?  loaded,TResult? Function( TournamentError value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( TournamentInitial value)?  initial,TResult? Function( TournamentLoading value)?  loading,TResult? Function( TournamentLoaded value)?  loaded,TResult? Function( TournamentError value)?  error,TResult? Function( TournamentJoining value)?  joining,TResult? Function( TournamentJoined value)?  joined,TResult? Function( TournamentJoinError value)?  joinError,}){
 final _that = this;
 switch (_that) {
 case TournamentInitial() when initial != null:
 return initial(_that);case TournamentLoading() when loading != null:
 return loading(_that);case TournamentLoaded() when loaded != null:
 return loaded(_that);case TournamentError() when error != null:
-return error(_that);case _:
+return error(_that);case TournamentJoining() when joining != null:
+return joining(_that);case TournamentJoined() when joined != null:
+return joined(_that);case TournamentJoinError() when joinError != null:
+return joinError(_that);case _:
   return null;
 
 }
@@ -128,13 +137,16 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<Tournament> tournaments,  int selectedFilterIndex)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<Tournament> tournaments,  int selectedFilterIndex)?  loaded,TResult Function( String message)?  error,TResult Function()?  joining,TResult Function( String tournamentId)?  joined,TResult Function( String message)?  joinError,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case TournamentInitial() when initial != null:
 return initial();case TournamentLoading() when loading != null:
 return loading();case TournamentLoaded() when loaded != null:
 return loaded(_that.tournaments,_that.selectedFilterIndex);case TournamentError() when error != null:
-return error(_that.message);case _:
+return error(_that.message);case TournamentJoining() when joining != null:
+return joining();case TournamentJoined() when joined != null:
+return joined(_that.tournamentId);case TournamentJoinError() when joinError != null:
+return joinError(_that.message);case _:
   return orElse();
 
 }
@@ -152,13 +164,16 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<Tournament> tournaments,  int selectedFilterIndex)  loaded,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<Tournament> tournaments,  int selectedFilterIndex)  loaded,required TResult Function( String message)  error,required TResult Function()  joining,required TResult Function( String tournamentId)  joined,required TResult Function( String message)  joinError,}) {final _that = this;
 switch (_that) {
 case TournamentInitial():
 return initial();case TournamentLoading():
 return loading();case TournamentLoaded():
 return loaded(_that.tournaments,_that.selectedFilterIndex);case TournamentError():
-return error(_that.message);case _:
+return error(_that.message);case TournamentJoining():
+return joining();case TournamentJoined():
+return joined(_that.tournamentId);case TournamentJoinError():
+return joinError(_that.message);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -175,13 +190,16 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<Tournament> tournaments,  int selectedFilterIndex)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<Tournament> tournaments,  int selectedFilterIndex)?  loaded,TResult? Function( String message)?  error,TResult? Function()?  joining,TResult? Function( String tournamentId)?  joined,TResult? Function( String message)?  joinError,}) {final _that = this;
 switch (_that) {
 case TournamentInitial() when initial != null:
 return initial();case TournamentLoading() when loading != null:
 return loading();case TournamentLoaded() when loaded != null:
 return loaded(_that.tournaments,_that.selectedFilterIndex);case TournamentError() when error != null:
-return error(_that.message);case _:
+return error(_that.message);case TournamentJoining() when joining != null:
+return joining();case TournamentJoined() when joined != null:
+return joined(_that.tournamentId);case TournamentJoinError() when joinError != null:
+return joinError(_that.message);case _:
   return null;
 
 }
@@ -385,6 +403,170 @@ class _$TournamentErrorCopyWithImpl<$Res>
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
   return _then(TournamentError(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class TournamentJoining implements TournamentState {
+  const TournamentJoining();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TournamentJoining);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'TournamentState.joining()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class TournamentJoined implements TournamentState {
+  const TournamentJoined({required this.tournamentId});
+  
+
+ final  String tournamentId;
+
+/// Create a copy of TournamentState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$TournamentJoinedCopyWith<TournamentJoined> get copyWith => _$TournamentJoinedCopyWithImpl<TournamentJoined>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TournamentJoined&&(identical(other.tournamentId, tournamentId) || other.tournamentId == tournamentId));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,tournamentId);
+
+@override
+String toString() {
+  return 'TournamentState.joined(tournamentId: $tournamentId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $TournamentJoinedCopyWith<$Res> implements $TournamentStateCopyWith<$Res> {
+  factory $TournamentJoinedCopyWith(TournamentJoined value, $Res Function(TournamentJoined) _then) = _$TournamentJoinedCopyWithImpl;
+@useResult
+$Res call({
+ String tournamentId
+});
+
+
+
+
+}
+/// @nodoc
+class _$TournamentJoinedCopyWithImpl<$Res>
+    implements $TournamentJoinedCopyWith<$Res> {
+  _$TournamentJoinedCopyWithImpl(this._self, this._then);
+
+  final TournamentJoined _self;
+  final $Res Function(TournamentJoined) _then;
+
+/// Create a copy of TournamentState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? tournamentId = null,}) {
+  return _then(TournamentJoined(
+tournamentId: null == tournamentId ? _self.tournamentId : tournamentId // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class TournamentJoinError implements TournamentState {
+  const TournamentJoinError({required this.message});
+  
+
+ final  String message;
+
+/// Create a copy of TournamentState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$TournamentJoinErrorCopyWith<TournamentJoinError> get copyWith => _$TournamentJoinErrorCopyWithImpl<TournamentJoinError>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TournamentJoinError&&(identical(other.message, message) || other.message == message));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message);
+
+@override
+String toString() {
+  return 'TournamentState.joinError(message: $message)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $TournamentJoinErrorCopyWith<$Res> implements $TournamentStateCopyWith<$Res> {
+  factory $TournamentJoinErrorCopyWith(TournamentJoinError value, $Res Function(TournamentJoinError) _then) = _$TournamentJoinErrorCopyWithImpl;
+@useResult
+$Res call({
+ String message
+});
+
+
+
+
+}
+/// @nodoc
+class _$TournamentJoinErrorCopyWithImpl<$Res>
+    implements $TournamentJoinErrorCopyWith<$Res> {
+  _$TournamentJoinErrorCopyWithImpl(this._self, this._then);
+
+  final TournamentJoinError _self;
+  final $Res Function(TournamentJoinError) _then;
+
+/// Create a copy of TournamentState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
+  return _then(TournamentJoinError(
 message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,
   ));

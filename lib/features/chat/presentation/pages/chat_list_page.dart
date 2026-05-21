@@ -69,7 +69,7 @@ class ChatListPage extends StatelessWidget {
                             Icons.edit_rounded,
                             color: ColorManager.primary,
                           ),
-                          onPressed: () {},
+                          onPressed: () => context.pushNamed(RouteNames.newMessage),
                         ),
                       ),
                     ],

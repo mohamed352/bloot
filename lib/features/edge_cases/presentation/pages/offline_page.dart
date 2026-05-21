@@ -64,7 +64,7 @@ class OfflinePage extends StatelessWidget {
               AppButton(
                 text: 'go_to_settings'.tr(),
                 isOutlined: true,
-                onPressed: () {},
+                onPressed: () => context.pushNamed(RouteNames.settings),
               ),
             ],
           ),

@@ -27,6 +27,7 @@ import 'package:bloot/features/onboarding/presentation/pages/splash_page.dart';
 import 'package:bloot/features/onboarding/presentation/pages/welcome_page.dart';
 import 'package:bloot/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:bloot/features/profile/presentation/pages/user_profile_page.dart';
+import 'package:bloot/features/room/presentation/cubit/room_cubit.dart';
 import 'package:bloot/features/room/presentation/pages/create_room_page.dart';
 import 'package:bloot/features/room/presentation/pages/join_room_page.dart';
 import 'package:bloot/features/room/presentation/pages/room_lobby_page.dart';
@@ -35,6 +36,7 @@ import 'package:bloot/features/settings/presentation/pages/settings_page.dart';
 import 'package:bloot/features/settings/presentation/pages/terms_page.dart';
 import 'package:bloot/features/shell/presentation/widgets/main_shell_widget.dart';
 import 'package:bloot/features/tournament/presentation/cubit/tournament_cubit.dart';
+import 'package:bloot/features/tournament/presentation/pages/tournament_bracket_page.dart';
 import 'package:bloot/features/tournament/presentation/pages/tournament_detail_page.dart';
 import 'package:bloot/features/tournament/presentation/pages/tournament_list_page.dart';
 
@@ -105,7 +107,10 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: RoutePaths.play,
               name: RouteNames.play,
-              builder: (context, state) => const CreateRoomPage(),
+              builder: (context, state) => BlocProvider(
+                create: (_) => getIt<RoomCubit>(),
+                child: const CreateRoomPage(),
+              ),
             ),
           ],
         ),
@@ -149,7 +154,10 @@ final GoRouter appRouter = GoRouter(
       name: RouteNames.roomLobby,
       builder: (context, state) {
         final id = state.pathParameters['id']!;
-        return RoomLobbyPage(id: id);
+        return BlocProvider(
+          create: (_) => getIt<RoomCubit>()..loadRoom(id),
+          child: RoomLobbyPage(id: id),
+        );
       },
     ),
     GoRoute(
@@ -179,7 +187,18 @@ final GoRouter appRouter = GoRouter(
       name: RouteNames.tournamentDetail,
       builder: (context, state) {
         final id = state.pathParameters['id']!;
-        return TournamentDetailPage(id: id);
+        return BlocProvider(
+          create: (_) => getIt<TournamentCubit>()..loadTournaments(),
+          child: TournamentDetailPage(id: id),
+        );
+      },
+    ),
+    GoRoute(
+      path: RoutePaths.tournamentBracket,
+      name: RouteNames.tournamentBracket,
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        return TournamentBracketPage(id: id);
       },
     ),
     GoRoute(

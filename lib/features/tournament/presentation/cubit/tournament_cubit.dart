@@ -29,4 +29,11 @@ class TournamentCubit extends Cubit<TournamentState> {
     if (currentState is! TournamentLoaded) return;
     emit(currentState.copyWith(selectedFilterIndex: index));
   }
+
+  Future<void> joinTournament(String tournamentId) async {
+    emit(const TournamentState.joining());
+    await Future<void>.delayed(const Duration(milliseconds: 800));
+    // Mock success
+    emit(TournamentState.joined(tournamentId: tournamentId));
+  }
 }

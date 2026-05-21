@@ -58,8 +58,16 @@ class RoomRemoteDataSource {
         RoomPlayerModel(
           name: 'Faisal',
           avatarUrl: 'https://i.pravatar.cc/150?img=33',
+          isReady: true,
           team: 'B',
           level: 15,
+        ),
+        RoomPlayerModel(
+          name: 'Omar',
+          avatarUrl: 'https://i.pravatar.cc/150?img=44',
+          isReady: true,
+          team: 'B',
+          level: 10,
         ),
       ],
       chatMessages: const [

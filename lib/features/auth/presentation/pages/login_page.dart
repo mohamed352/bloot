@@ -350,7 +350,7 @@ class _LoginPageState extends State<LoginPage> {
                                   // Apple button (dark) — iOS only
                                   Expanded(
                                     child: GestureDetector(
-                                      onTap: () {},
+                                      onTap: () => _showComingSoon(context),
                                       child: Container(
                                         height: 52,
                                         decoration: BoxDecoration(
@@ -392,7 +392,7 @@ class _LoginPageState extends State<LoginPage> {
                                 // Google button (outlined)
                                 Expanded(
                                   child: GestureDetector(
-                                    onTap: () {},
+                                    onTap: () => _showComingSoon(context),
                                     child: Container(
                                       height: 52,
                                       decoration: BoxDecoration(
@@ -471,5 +471,11 @@ class _LoginPageState extends State<LoginPage> {
         );
       },
     );
+  }
+
+  void _showComingSoon(BuildContext context) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Coming soon')));
   }
 }

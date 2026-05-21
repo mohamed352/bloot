@@ -194,7 +194,13 @@ class _UserProfilePageState extends State<UserProfilePage>
                             child: _ActionButton(
                               icon: Icons.share_rounded,
                               label: 'share'.tr(),
-                              onTap: () {},
+                              onTap: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Profile shared'),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                           const SizedBox(width: AppSpacing.md),
