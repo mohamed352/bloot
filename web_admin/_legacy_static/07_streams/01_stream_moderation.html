@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Moderation — Bloot Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <script>
+tailwind.config = {
+  theme: { extend: {
+    colors: {
+      'b-purple': '#8B5CF6', 'b-purple-dark': '#7C3AED', 'b-purple-light': '#A78BFA',
+      'b-gold': '#F59E0B', 'b-gold-light': '#FBBF24', 'b-gold-dark': '#D97706',
+      'b-black': '#0A0A0F', 'b-surface': '#0A0A0F', 'b-surface-elevated': '#161622',
+      'b-surface-muted': '#1E1E2E', 'b-surface-hover': '#252538',
+      'b-on-surface': '#FFFFFF', 'b-on-surface-muted': '#9CA3AF', 'b-on-surface-secondary': '#6B7280',
+      'b-border': 'rgba(139, 92, 246, 0.15)', 'b-live': '#FF1A1A',
+    },
+    fontFamily: { 'sans': ['Inter', 'sans-serif'] }
+  }}
+}
+</script>
+    <script src="../shared.js"></script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0A0A0F; }
+        ::-webkit-scrollbar-thumb { background: #252538; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #8B5CF6; }
+    </style>
+</head>
+<body class="bg-b-surface text-b-on-surface font-sans min-h-screen">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-b-surface-elevated border-r border-b-border z-30 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0">
+        <!-- Logo -->
+        <div class="flex items-center gap-3 px-6 py-5 border-b border-b-border">
+            <div class="w-9 h-9 rounded-full bg-b-purple flex items-center justify-center">
+                <span class="material-symbols-outlined text-white text-lg">style</span>
+            </div>
+            <div>
+                <span class="text-lg font-bold text-b-on-surface">Bloot</span>
+                <span class="text-xs font-semibold text-b-gold ml-1">Admin</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            <a href="../01_dashboard/01_home_stats.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
+                <span class="material-symbols-outlined text-xl">dashboard</span>Dashboard
+            </a>
+            <a href="../02_users/01_user_management.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
+                <span class="material-symbols-outlined text-xl">person</span>Users
+            </a>
+            <a href="../03_reports/01_report_review.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
+                <span class="material-symbols-outlined text-xl">flag</span>Reports
+            </a>
+            <a href="../04_tournaments/01_tournament_management.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
+                <span class="material-symbols-outlined text-xl">emoji_events</span>Tournaments
+            </a>
+            <a href="../05_games/01_game_monitor.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
+                <span class="material-symbols-outlined text-xl">casino</span>Games
+            </a>
+            <a href="../06_rooms/01_room_monitor.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
+                <span class="material-symbols-outlined text-xl">meeting_room</span>Rooms
+            </a>
+            <a href="../07_streams/01_stream_moderation.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium bg-purple-500/10 text-purple-400 transition-colors">
+                <span class="material-symbols-outlined text-xl">videocam</span>Streams
+            </a>
+            <a href="../08_economy/01_coin_transactions.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
+                <span class="material-symbols-outlined text-xl">payments</span>Economy
+            </a>
+            <a href="../09_achievements/01_achievement_management.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
+                <span class="material-symbols-outlined text-xl">military_tech</span>Achievements
+            </a>
+            <a href="../10_leaderboards/01_leaderboard_management.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
+                <span class="material-symbols-outlined text-xl">leaderboard</span>Leaderboards
+            </a>
+            <a href="../11_notifications/01_notification_broadcast.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
+                <span class="material-symbols-outlined text-xl">notifications</span>Notifications
+            </a>
+            <a href="../12_analytics/01_reports_analytics.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
+                <span class="material-symbols-outlined text-xl">analytics</span>Analytics
+            </a>
+            <a href="../13_settings/01_system_settings.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
+                <span class="material-symbols-outlined text-xl">settings</span>Settings
+            </a>
+        </nav>
+
+        <!-- Admin Footer -->
+        <div class="border-t border-b-border p-4 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-b-surface-muted flex items-center justify-center">
+                <span class="material-symbols-outlined text-b-purple text-lg">person</span>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-b-on-surface">Admin User</p>
+                <span class="text-xs font-semibold text-b-gold">Super Admin</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 min-h-screen">
+        <!-- Top Bar -->
+        <div class="sticky top-0 z-10 bg-b-surface/80 backdrop-blur-md border-b border-b-border px-6 py-4 flex items-center justify-between">
+            <button onclick="toggleSidebar()" class="lg:hidden text-b-on-surface-muted hover:text-b-on-surface">
+                <span class="material-symbols-outlined text-2xl">menu</span>
+            </button>
+            <div></div>
+            <div class="flex items-center gap-3">
+                <button class="relative text-b-on-surface-muted hover:text-b-on-surface transition-colors">
+                    <span class="material-symbols-outlined text-xl">notifications</span>
+                    <span class="absolute -top-1 -right-1 w-2 h-2 bg-b-live rounded-full"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-6 lg:p-8 space-y-6">
+            <!-- Page Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-b-on-surface">Stream Moderation</h1>
+                    <p class="text-sm text-b-on-surface-muted mt-1">Monitor and moderate live streams</p>
+                </div>
+                <button onclick="switchTab('live')" class="inline-flex items-center gap-2 px-5 py-2.5 bg-b-purple hover:bg-b-purple-dark text-white text-sm font-medium rounded-full transition-colors">
+                    <span class="material-symbols-outlined text-lg">videocam</span>View All Live
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div id="stream-tabs" class="flex gap-2 overflow-x-auto pb-1">
+                <button data-tab="live" class="px-4 py-2 rounded-full text-sm font-medium bg-b-purple text-white transition-colors whitespace-nowrap" onclick="switchTab('live')">Live Now</button>
+                <button data-tab="ended" class="px-4 py-2 rounded-full text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors whitespace-nowrap" onclick="switchTab('ended')">Recently Ended</button>
+                <button data-tab="reported" class="px-4 py-2 rounded-full text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors whitespace-nowrap" onclick="switchTab('reported')">Reported</button>
+                <button data-tab="all" class="px-4 py-2 rounded-full text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors whitespace-nowrap" onclick="switchTab('all')">All</button>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-b-surface-elevated rounded-xl border border-b-border p-5">
+                    <div class="flex items-center gap-3 mb-1">
+                        <span class="material-symbols-outlined text-b-live text-xl">videocam</span>
+                        <span class="text-sm text-b-on-surface-muted">Active Streams</span>
+                    </div>
+                    <p class="text-2xl font-bold text-b-on-surface">23</p>
+                </div>
+                <div class="bg-b-surface-elevated rounded-xl border border-b-border p-5">
+                    <div class="flex items-center gap-3 mb-1">
+                        <span class="material-symbols-outlined text-b-purple text-xl">visibility</span>
+                        <span class="text-sm text-b-on-surface-muted">Total Viewers</span>
+                    </div>
+                    <p class="text-2xl font-bold text-b-on-surface">892</p>
+                </div>
+                <div class="bg-b-surface-elevated rounded-xl border border-b-border p-5">
+                    <div class="flex items-center gap-3 mb-1">
+                        <span class="material-symbols-outlined text-red-400 text-xl">flag</span>
+                        <span class="text-sm text-b-on-surface-muted">Reports Today</span>
+                    </div>
+                    <p class="text-2xl font-bold text-b-on-surface">5</p>
+                </div>
+            </div>
+
+            <!-- Streams Table -->
+            <div class="bg-b-surface-elevated rounded-xl border border-b-border overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-b-border text-b-on-surface-muted">
+                                <th class="text-left px-5 py-3.5 font-medium">Stream ID</th>
+                                <th class="text-left px-5 py-3.5 font-medium">Streamer</th>
+                                <th class="text-left px-5 py-3.5 font-medium">Viewers</th>
+                                <th class="text-left px-5 py-3.5 font-medium">Duration</th>
+                                <th class="text-left px-5 py-3.5 font-medium">Reports</th>
+                                <th class="text-left px-5 py-3.5 font-medium">Status</th>
+                                <th class="text-right px-5 py-3.5 font-medium">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-b-border hover:bg-b-surface-hover transition-colors">
+                                <td class="px-5 py-3.5 text-b-on-surface-muted font-mono text-xs">#STM-2847</td>
+                                <td class="px-5 py-3.5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-b-purple/30 flex items-center justify-center text-xs font-bold text-b-purple">SA</div>
+                                        <div>
+                                            <p class="text-b-on-surface font-medium">SultanAce</p>
+                                            <p class="text-xs text-b-on-surface-secondary">Lvl 42</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3.5 text-b-on-surface">156</td>
+                                <td class="px-5 py-3.5 text-b-on-surface-muted">2h 14m</td>
+                                <td class="px-5 py-3.5 text-red-400">2</td>
+                                <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400"><span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>LIVE</span></td>
+                                <td class="px-5 py-3.5 text-right">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <button onclick="viewStream('STM-2847')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="View"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                                        <button onclick="endStream('STM-2847')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-red-400 transition-colors" title="End Stream"><span class="material-symbols-outlined text-lg">stop_circle</span></button>
+                                        <button onclick="muteStreamer('SultanAce')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-yellow-400 transition-colors" title="Mute Streamer"><span class="material-symbols-outlined text-lg">mic_off</span></button>
+                                        <button onclick="reviewChat('STM-2847')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="Review Chat"><span class="material-symbols-outlined text-lg">chat</span></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-b-border hover:bg-b-surface-hover transition-colors">
+                                <td class="px-5 py-3.5 text-b-on-surface-muted font-mono text-xs">#STM-2846</td>
+                                <td class="px-5 py-3.5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-b-gold/30 flex items-center justify-center text-xs font-bold text-b-gold">MR</div>
+                                        <div>
+                                            <p class="text-b-on-surface font-medium">MiraRouge</p>
+                                            <p class="text-xs text-b-on-surface-secondary">Lvl 38</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3.5 text-b-on-surface">89</td>
+                                <td class="px-5 py-3.5 text-b-on-surface-muted">1h 47m</td>
+                                <td class="px-5 py-3.5 text-b-on-surface-muted">0</td>
+                                <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400"><span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>LIVE</span></td>
+                                <td class="px-5 py-3.5 text-right">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <button onclick="viewStream('STM-2846')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="View"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                                        <button onclick="endStream('STM-2846')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-red-400 transition-colors" title="End Stream"><span class="material-symbols-outlined text-lg">stop_circle</span></button>
+                                        <button onclick="muteStreamer('MiraRouge')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-yellow-400 transition-colors" title="Mute Streamer"><span class="material-symbols-outlined text-lg">mic_off</span></button>
+                                        <button onclick="reviewChat('STM-2846')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="Review Chat"><span class="material-symbols-outlined text-lg">chat</span></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-b-border hover:bg-b-surface-hover transition-colors">
+                                <td class="px-5 py-3.5 text-b-on-surface-muted font-mono text-xs">#STM-2845</td>
+                                <td class="px-5 py-3.5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-green-500/30 flex items-center justify-center text-xs font-bold text-green-400">KZ</div>
+                                        <div>
+                                            <p class="text-b-on-surface font-medium">KingZayed</p>
+                                            <p class="text-xs text-b-on-surface-secondary">Lvl 55</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3.5 text-b-on-surface">234</td>
+                                <td class="px-5 py-3.5 text-b-on-surface-muted">3h 02m</td>
+                                <td class="px-5 py-3.5 text-red-400">3</td>
+                                <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400"><span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>LIVE</span></td>
+                                <td class="px-5 py-3.5 text-right">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <button onclick="viewStream('STM-2845')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="View"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                                        <button onclick="endStream('STM-2845')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-red-400 transition-colors" title="End Stream"><span class="material-symbols-outlined text-lg">stop_circle</span></button>
+                                        <button onclick="muteStreamer('KingZayed')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-yellow-400 transition-colors" title="Mute Streamer"><span class="material-symbols-outlined text-lg">mic_off</span></button>
+                                        <button onclick="reviewChat('STM-2845')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="Review Chat"><span class="material-symbols-outlined text-lg">chat</span></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-b-border hover:bg-b-surface-hover transition-colors">
+                                <td class="px-5 py-3.5 text-b-on-surface-muted font-mono text-xs">#STM-2844</td>
+                                <td class="px-5 py-3.5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-blue-500/30 flex items-center justify-center text-xs font-bold text-blue-400">LA</div>
+                                        <div>
+                                            <p class="text-b-on-surface font-medium">LadyAmira</p>
+                                            <p class="text-xs text-b-on-surface-secondary">Lvl 29</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3.5 text-b-on-surface">67</td>
+                                <td class="px-5 py-3.5 text-b-on-surface-muted">58m</td>
+                                <td class="px-5 py-3.5 text-b-on-surface-muted">0</td>
+                                <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400"><span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>LIVE</span></td>
+                                <td class="px-5 py-3.5 text-right">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <button onclick="viewStream('STM-2844')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="View"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                                        <button onclick="endStream('STM-2844')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-red-400 transition-colors" title="End Stream"><span class="material-symbols-outlined text-lg">stop_circle</span></button>
+                                        <button onclick="muteStreamer('LadyAmira')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-yellow-400 transition-colors" title="Mute Streamer"><span class="material-symbols-outlined text-lg">mic_off</span></button>
+                                        <button onclick="reviewChat('STM-2844')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="Review Chat"><span class="material-symbols-outlined text-lg">chat</span></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-b-border hover:bg-b-surface-hover transition-colors">
+                                <td class="px-5 py-3.5 text-b-on-surface-muted font-mono text-xs">#STM-2843</td>
+                                <td class="px-5 py-3.5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-pink-500/30 flex items-center justify-center text-xs font-bold text-pink-400">DH</div>
+                                        <div>
+                                            <p class="text-b-on-surface font-medium">DeemaH</p>
+                                            <p class="text-xs text-b-on-surface-secondary">Lvl 31</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3.5 text-b-on-surface">112</td>
+                                <td class="px-5 py-3.5 text-b-on-surface-muted">1h 23m</td>
+                                <td class="px-5 py-3.5 text-red-400">1</td>
+                                <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400"><span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>LIVE</span></td>
+                                <td class="px-5 py-3.5 text-right">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <button onclick="viewStream('STM-2843')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="View"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                                        <button onclick="endStream('STM-2843')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-red-400 transition-colors" title="End Stream"><span class="material-symbols-outlined text-lg">stop_circle</span></button>
+                                        <button onclick="muteStreamer('DeemaH')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-yellow-400 transition-colors" title="Mute Streamer"><span class="material-symbols-outlined text-lg">mic_off</span></button>
+                                        <button onclick="reviewChat('STM-2843')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="Review Chat"><span class="material-symbols-outlined text-lg">chat</span></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-b-border hover:bg-b-surface-hover transition-colors">
+                                <td class="px-5 py-3.5 text-b-on-surface-muted font-mono text-xs">#STM-2842</td>
+                                <td class="px-5 py-3.5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-cyan-500/30 flex items-center justify-center text-xs font-bold text-cyan-400">FJ</div>
+                                        <div>
+                                            <p class="text-b-on-surface font-medium">FahadJoker</p>
+                                            <p class="text-xs text-b-on-surface-secondary">Lvl 47</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3.5 text-b-on-surface">198</td>
+                                <td class="px-5 py-3.5 text-b-on-surface-muted">2h 51m</td>
+                                <td class="px-5 py-3.5 text-b-on-surface-muted">0</td>
+                                <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400"><span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>LIVE</span></td>
+                                <td class="px-5 py-3.5 text-right">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <button onclick="viewStream('STM-2842')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="View"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                                        <button onclick="endStream('STM-2842')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-red-400 transition-colors" title="End Stream"><span class="material-symbols-outlined text-lg">stop_circle</span></button>
+                                        <button onclick="muteStreamer('FahadJoker')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-yellow-400 transition-colors" title="Mute Streamer"><span class="material-symbols-outlined text-lg">mic_off</span></button>
+                                        <button onclick="reviewChat('STM-2842')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="Review Chat"><span class="material-symbols-outlined text-lg">chat</span></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-b-border hover:bg-b-surface-hover transition-colors">
+                                <td class="px-5 py-3.5 text-b-on-surface-muted font-mono text-xs">#STM-2841</td>
+                                <td class="px-5 py-3.5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-orange-500/30 flex items-center justify-center text-xs font-bold text-orange-400">NB</div>
+                                        <div>
+                                            <p class="text-b-on-surface font-medium">NoraBlitz</p>
+                                            <p class="text-xs text-b-on-surface-secondary">Lvl 36</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3.5 text-b-on-surface">0</td>
+                                <td class="px-5 py-3.5 text-b-on-surface-muted">1h 12m</td>
+                                <td class="px-5 py-3.5 text-b-on-surface-muted">0</td>
+                                <td class="px-5 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-500/10 text-b-on-surface-secondary">Ended</span></td>
+                                <td class="px-5 py-3.5 text-right">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <button onclick="viewStream('STM-2841')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="View"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                                        <button class="p-1.5 rounded-lg text-b-on-surface-secondary cursor-not-allowed opacity-40" title="Already Ended"><span class="material-symbols-outlined text-lg">stop_circle</span></button>
+                                        <button onclick="muteStreamer('NoraBlitz')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-yellow-400 transition-colors" title="Mute Streamer"><span class="material-symbols-outlined text-lg">mic_off</span></button>
+                                        <button onclick="reviewChat('STM-2841')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="Review Chat"><span class="material-symbols-outlined text-lg">chat</span></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-b-surface-hover transition-colors">
+                                <td class="px-5 py-3.5 text-b-on-surface-muted font-mono text-xs">#STM-2840</td>
+                                <td class="px-5 py-3.5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-violet-500/30 flex items-center justify-center text-xs font-bold text-violet-400">RK</div>
+                                        <div>
+                                            <p class="text-b-on-surface font-medium">RakanKing</p>
+                                            <p class="text-xs text-b-on-surface-secondary">Lvl 51</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3.5 text-b-on-surface">0</td>
+                                <td class="px-5 py-3.5 text-b-on-surface-muted">45m</td>
+                                <td class="px-5 py-3.5 text-red-400">1</td>
+                                <td class="px-5 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-500/10 text-b-on-surface-secondary">Ended</span></td>
+                                <td class="px-5 py-3.5 text-right">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <button onclick="viewStream('STM-2840')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="View"><span class="material-symbols-outlined text-lg">visibility</span></button>
+                                        <button class="p-1.5 rounded-lg text-b-on-surface-secondary cursor-not-allowed opacity-40" title="Already Ended"><span class="material-symbols-outlined text-lg">stop_circle</span></button>
+                                        <button onclick="muteStreamer('RakanKing')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-yellow-400 transition-colors" title="Mute Streamer"><span class="material-symbols-outlined text-lg">mic_off</span></button>
+                                        <button onclick="reviewChat('STM-2840')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="Review Chat"><span class="material-symbols-outlined text-lg">chat</span></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Stream Review Modal Template -->
+    <template id="stream-review-template">
+        <div class="space-y-5">
+            <!-- Thumbnail -->
+            <div class="w-full aspect-video bg-b-surface rounded-xl border border-b-border flex flex-col items-center justify-center">
+                <span class="material-symbols-outlined text-5xl text-b-on-surface-secondary">videocam</span>
+                <p class="text-sm text-b-on-surface-secondary mt-2">Stream Preview</p>
+            </div>
+
+            <!-- Streamer Quick Profile -->
+            <div class="flex items-center gap-4 p-4 bg-b-surface rounded-xl border border-b-border">
+                <div class="w-12 h-12 rounded-full bg-b-purple/30 flex items-center justify-center text-sm font-bold text-b-purple" id="modal-streamer-avatar"></div>
+                <div class="flex-1">
+                    <p class="text-b-on-surface font-semibold" id="modal-streamer-name"></p>
+                    <p class="text-xs text-b-on-surface-muted" id="modal-streamer-info"></p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-b-on-surface-muted">Followers</p>
+                    <p class="text-b-on-surface font-semibold" id="modal-streamer-followers"></p>
+                </div>
+            </div>
+
+            <!-- Chat Log -->
+            <div>
+                <h4 class="text-sm font-semibold text-b-on-surface mb-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">chat</span>Chat Log
+                </h4>
+                <div class="bg-b-surface rounded-xl border border-b-border p-3 space-y-2 max-h-40 overflow-y-auto text-xs">
+                    <div class="flex gap-2"><span class="text-b-purple font-medium">SultanAce:</span><span class="text-b-on-surface-muted">Let's gooo! Next round!</span></div>
+                    <div class="flex gap-2 bg-red-500/10 px-2 py-1 rounded"><span class="text-red-400 font-medium">SultanAce:</span><span class="text-red-300">[Reported] inappropriate content</span></div>
+                    <div class="flex gap-2"><span class="text-b-gold font-medium">MiraRouge:</span><span class="text-b-on-surface-muted">Great play! 🔥</span></div>
+                    <div class="flex gap-2"><span class="text-green-400 font-medium">KingZayed:</span><span class="text-b-on-surface-muted">GG everyone</span></div>
+                    <div class="flex gap-2 bg-red-500/10 px-2 py-1 rounded"><span class="text-red-400 font-medium">SultanAce:</span><span class="text-red-300">[Reported] harassment message</span></div>
+                    <div class="flex gap-2"><span class="text-b-purple font-medium">SultanAce:</span><span class="text-b-on-surface-muted">Thanks for the gifts!</span></div>
+                    <div class="flex gap-2"><span class="text-cyan-400 font-medium">FahadJoker:</span><span class="text-b-on-surface-muted">Amazing stream</span></div>
+                </div>
+            </div>
+
+            <!-- Gift History -->
+            <div>
+                <h4 class="text-sm font-semibold text-b-on-surface mb-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">redeem</span>Gift History (Last 10)
+                </h4>
+                <div class="bg-b-surface rounded-xl border border-b-border divide-y divide-b-border text-xs">
+                    <div class="flex items-center justify-between px-3 py-2">
+                        <span class="text-b-on-surface-muted">MiraRouge sent <span class="text-b-gold font-medium">Rose</span></span>
+                        <span class="text-b-on-surface-secondary">2m ago</span>
+                    </div>
+                    <div class="flex items-center justify-between px-3 py-2">
+                        <span class="text-b-on-surface-muted">KingZayed sent <span class="text-b-gold font-medium">Crown</span> (5,000 coins)</span>
+                        <span class="text-b-on-surface-secondary">5m ago</span>
+                    </div>
+                    <div class="flex items-center justify-between px-3 py-2">
+                        <span class="text-b-on-surface-muted">FahadJoker sent <span class="text-b-gold font-medium">Diamond</span> (10,000 coins)</span>
+                        <span class="text-b-on-surface-secondary">8m ago</span>
+                    </div>
+                    <div class="flex items-center justify-between px-3 py-2">
+                        <span class="text-b-on-surface-muted">LadyAmira sent <span class="text-b-gold font-medium">Heart</span> (500 coins)</span>
+                        <span class="text-b-on-surface-secondary">12m ago</span>
+                    </div>
+                    <div class="flex items-center justify-between px-3 py-2">
+                        <span class="text-b-on-surface-muted">NoraBlitz sent <span class="text-b-gold font-medium">Rocket</span> (2,500 coins)</span>
+                        <span class="text-b-on-surface-secondary">18m ago</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Summary -->
+            <div class="bg-red-500/5 border border-red-500/20 rounded-xl p-4">
+                <h4 class="text-sm font-semibold text-red-400 mb-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">flag</span>Report Summary
+                </h4>
+                <div class="space-y-1.5 text-xs">
+                    <p class="text-b-on-surface-muted"><span class="text-red-400 font-medium">2 reports</span> — Inappropriate content, Harassment</p>
+                    <p class="text-b-on-surface-secondary">First report: 45m ago | Last report: 12m ago</p>
+                    <p class="text-b-on-surface-secondary">Reported by: 2 unique users</p>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-wrap gap-3 pt-2">
+                <button onclick="endStreamFromModal()" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">stop_circle</span>End Stream
+                </button>
+                <div class="relative" id="mute-dropdown-container">
+                    <button onclick="toggleMuteDropdown()" class="px-4 py-2.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">mic_off</span>Mute Streamer
+                        <span class="material-symbols-outlined text-lg">expand_more</span>
+                    </button>
+                    <div id="mute-dropdown" class="hidden absolute bottom-full left-0 mb-2 bg-b-surface-elevated border border-b-border rounded-lg shadow-xl overflow-hidden z-10 min-w-[180px]">
+                        <button onclick="muteStreamerTemp('1h')" class="w-full text-left px-4 py-2.5 text-sm text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">Mute 1 hour</button>
+                        <button onclick="muteStreamerTemp('24h')" class="w-full text-left px-4 py-2.5 text-sm text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">Mute 24 hours</button>
+                        <button onclick="muteStreamerTemp('7d')" class="w-full text-left px-4 py-2.5 text-sm text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">Mute 7 days</button>
+                        <button onclick="muteStreamerPerm()" class="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors">Permanent Mute</button>
+                    </div>
+                </div>
+                <button onclick="issueWarning()" class="px-4 py-2.5 bg-b-gold hover:bg-b-gold-dark text-b-black text-sm font-medium rounded-lg transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">warning</span>Issue Warning
+                </button>
+                <button onclick="banFromStreaming()" class="px-4 py-2.5 bg-b-surface-muted hover:bg-b-surface-hover text-red-400 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 border border-red-500/30">
+                    <span class="material-symbols-outlined text-lg">block</span>Ban from Streaming
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        function switchTab(tab) {
+            const tabs = document.querySelectorAll('#stream-tabs button[data-tab]');
+            tabs.forEach(t => {
+                t.classList.remove('bg-b-purple', 'text-white');
+                t.classList.add('text-b-on-surface-muted', 'hover:bg-b-surface-hover', 'hover:text-b-on-surface');
+            });
+            const active = document.querySelector(`#stream-tabs button[data-tab="${tab}"]`);
+            if (active) {
+                active.classList.add('bg-b-purple', 'text-white');
+                active.classList.remove('text-b-on-surface-muted', 'hover:bg-b-surface-hover', 'hover:text-b-on-surface');
+            }
+            showToast(`Showing ${tab === 'live' ? 'live' : tab === 'ended' ? 'recently ended' : tab === 'reported' ? 'reported' : 'all'} streams`, 'info');
+        }
+
+        function viewStream(streamId) {
+            const streamers = {
+                'STM-2847': { initials: 'SA', name: 'SultanAce', level: 42, color: 'bg-b-purple/30 text-b-purple', followers: '12,450' },
+                'STM-2846': { initials: 'MR', name: 'MiraRouge', level: 38, color: 'bg-b-gold/30 text-b-gold', followers: '8,320' },
+                'STM-2845': { initials: 'KZ', name: 'KingZayed', level: 55, color: 'bg-green-500/30 text-green-400', followers: '24,100' },
+                'STM-2844': { initials: 'LA', name: 'LadyAmira', level: 29, color: 'bg-blue-500/30 text-blue-400', followers: '5,670' },
+                'STM-2843': { initials: 'DH', name: 'DeemaH', level: 31, color: 'bg-pink-500/30 text-pink-400', followers: '6,890' },
+                'STM-2842': { initials: 'FJ', name: 'FahadJoker', level: 47, color: 'bg-cyan-500/30 text-cyan-400', followers: '19,780' },
+                'STM-2841': { initials: 'NB', name: 'NoraBlitz', level: 36, color: 'bg-orange-500/30 text-orange-400', followers: '9,340' },
+                'STM-2840': { initials: 'RK', name: 'RakanKing', level: 51, color: 'bg-violet-500/30 text-violet-400', followers: '21,560' }
+            };
+            const s = streamers[streamId] || { initials: '??', name: 'Unknown', level: 0, color: 'bg-gray-500/30 text-gray-400', followers: '0' };
+            const template = document.getElementById('stream-review-template');
+            const clone = template.content.cloneNode(true);
+            clone.getElementById('modal-streamer-avatar').textContent = s.initials;
+            clone.getElementById('modal-streamer-avatar').className = `w-12 h-12 rounded-full ${s.color} flex items-center justify-center text-sm font-bold`;
+            clone.getElementById('modal-streamer-name').textContent = s.name;
+            clone.getElementById('modal-streamer-info').textContent = `Level ${s.level}`;
+            clone.getElementById('modal-streamer-followers').textContent = s.followers;
+            const modal = createModal(`Stream Review — #${streamId}`, clone.querySelector('.space-y-5').innerHTML, '');
+            modal.querySelector('.max-h-\\[60vh\\]').classList.remove('max-h-[60vh]');
+        }
+
+        function endStream(streamId) {
+            confirmDialog(`Are you sure you want to end stream #${streamId}?`, () => {
+                showToast(`Stream #${streamId} has been ended.`, 'success');
+            });
+        }
+
+        function endStreamFromModal() {
+            const modal = document.querySelector('.fixed.inset-0');
+            if (modal) modal.remove();
+            showToast('Stream has been ended.', 'success');
+        }
+
+        function muteStreamer(streamer) {
+            showToast(`${streamer} has been muted.`, 'warning');
+        }
+
+        function reviewChat(streamId) {
+            showToast(`Opening chat log for #${streamId}`, 'info');
+        }
+
+        function toggleMuteDropdown() {
+            const dd = document.getElementById('mute-dropdown');
+            dd.classList.toggle('hidden');
+        }
+
+        function muteStreamerTemp(duration) {
+            document.getElementById('mute-dropdown').classList.add('hidden');
+            showToast(`Streamer muted for ${duration}`, 'warning');
+        }
+
+        function muteStreamerPerm() {
+            document.getElementById('mute-dropdown').classList.add('hidden');
+            confirmDialog('Are you sure you want to permanently mute this streamer?', () => {
+                showToast('Streamer permanently muted.', 'warning');
+            });
+        }
+
+        function issueWarning() {
+            showToast('Warning issued to streamer.', 'warning');
+        }
+
+        function banFromStreaming() {
+            confirmDialog('Are you sure you want to ban this user from streaming? This is a serious action.', () => {
+                showToast('User has been banned from streaming.', 'error');
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            const dd = document.getElementById('mute-dropdown');
+            const container = document.getElementById('mute-dropdown-container');
+            if (dd && container && !container.contains(e.target)) {
+                dd.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

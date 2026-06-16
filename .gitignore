@@ -39,6 +39,18 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Firebase native configuration files — contain API keys and project IDs.
+/android/app/google-services.json
+/ios/Runner/GoogleService-Info.plist
+
+# Function environment files
+/functions/.env*
+/functions/.runtimeconfig.json
+
 # Custom ignores
 coderules/
 .env*
+
+# Firebase service account keys
+*firebase-adminsdk*.json
+serviceAccountKey.json

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloot Admin — Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: {
+                    'b-purple': '#8B5CF6', 'b-purple-dark': '#7C3AED', 'b-purple-light': '#A78BFA',
+                    'b-gold': '#F59E0B', 'b-gold-light': '#FBBF24', 'b-gold-dark': '#D97706',
+                    'b-black': '#0A0A0F', 'b-surface': '#0A0A0F', 'b-surface-elevated': '#161622',
+                    'b-surface-muted': '#1E1E2E', 'b-surface-hover': '#252538',
+                    'b-on-surface': '#FFFFFF', 'b-on-surface-muted': '#9CA3AF', 'b-on-surface-secondary': '#6B7280',
+                    'b-border': 'rgba(139, 92, 246, 0.15)', 'b-live': '#FF1A1A',
+                },
+                fontFamily: { 'sans': ['Inter', 'sans-serif'] }
+            }}
+        }
+    </script>
+    <style>
+        body { background: #0A0A0F; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.3); border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(139,92,246,0.5); }
+        .toggle-switch { position: relative; width: 44px; height: 24px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; inset: 0; background-color: #374151; border-radius: 24px; transition: 0.3s; }
+        .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s; }
+        .toggle-switch input:checked + .toggle-slider { background-color: #8B5CF6; }
+        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+        .card-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease-in-out; }
+        .card-body.open { max-height: 2000px; }
+        .card-chevron { transition: transform 0.3s ease; }
+        .card-chevron.rotated { transform: rotate(180deg); }
+    </style>
+</head>
+<body class="font-sans text-b-on-surface min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-b-surface-elevated border-r border-b-border flex flex-col z-30 transition-transform duration-300 -translate-x-full lg:translate-x-0">
+        <div class="p-6 border-b border-b-border">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-b-purple flex items-center justify-center">
+                    <span class="text-white text-xl font-bold">♠</span>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-b-on-surface">Bloot</h1>
+                    <span class="text-xs font-semibold text-b-gold">Admin</span>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4 custom-scrollbar">
+            <ul class="space-y-1 px-3">
+                <li><a href="../01_dashboard/01_home_stats.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">dashboard</span>Dashboard</a></li>
+                <li><a href="../02_users/01_user_management.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">person</span>Users</a></li>
+                <li><a href="../03_reports/01_report_review.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">flag</span>Reports</a></li>
+                <li><a href="../04_tournaments/01_tournament_management.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">emoji_events</span>Tournaments</a></li>
+                <li><a href="../05_games/01_game_monitor.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">casino</span>Games</a></li>
+                <li><a href="../06_rooms/01_room_monitor.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">meeting_room</span>Rooms</a></li>
+                <li><a href="../07_streams/01_stream_moderation.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">videocam</span>Streams</a></li>
+                <li><a href="../08_economy/01_coin_transactions.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">payments</span>Economy</a></li>
+                <li><a href="../09_achievements/01_achievement_management.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">military_tech</span>Achievements</a></li>
+                <li><a href="../10_leaderboards/01_leaderboard_management.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">leaderboard</span>Leaderboards</a></li>
+                <li><a href="../11_notifications/01_notification_broadcast.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">notifications</span>Notifications</a></li>
+                <li><a href="../12_analytics/01_reports_analytics.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">analytics</span>Analytics</a></li>
+                <li><a href="../13_settings/01_system_settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 bg-purple-500/10 text-purple-400 border-r-2 border-purple-400"><span class="material-symbols-outlined text-xl">settings</span>Settings</a></li>
+            </ul>
+        </nav>
+        <div class="p-4 border-t border-b-border">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-b-gold/20 flex items-center justify-center text-b-gold font-bold text-sm">A</div>
+                <div>
+                    <p class="text-sm font-medium text-b-on-surface">Admin User</p>
+                    <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-b-gold/20 text-b-gold">Super Admin</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <button onclick="toggleSidebar()" class="lg:hidden fixed top-4 left-4 z-40 p-2 rounded-lg bg-b-surface-elevated border border-b-border">
+        <span class="material-symbols-outlined text-b-on-surface">menu</span>
+    </button>
+
+    <main class="lg:ml-64 min-h-screen p-6 lg:p-8 pb-24">
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-b-on-surface">Settings</h1>
+        </div>
+
+        <div class="space-y-4">
+            <div class="bg-b-surface-elevated rounded-xl border border-b-border overflow-hidden settings-card" data-card="game-rules">
+                <button onclick="toggleCard('game-rules')" class="w-full flex items-center justify-between px-5 py-4 hover:bg-b-surface-hover transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-b-purple text-xl">sports_esports</span>
+                        <h3 class="font-semibold text-b-on-surface">Game Rules</h3>
+                    </div>
+                    <span id="chevron-game-rules" class="material-symbols-outlined text-b-on-surface-muted card-chevron rotated">expand_more</span>
+                </button>
+                <div id="body-game-rules" class="card-body open">
+                    <div class="px-5 pb-5 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-sm text-b-on-surface-muted block mb-1">Default Sun Target Score</label>
+                                <input type="number" value="120" class="w-full bg-b-surface border border-b-border rounded-lg px-4 py-2.5 text-sm text-b-on-surface focus:border-b-purple focus:outline-none transition-colors">
+                            </div>
+                            <div>
+                                <label class="text-sm text-b-on-surface-muted block mb-1">Default Hokm Rounds</label>
+                                <input type="number" value="8" class="w-full bg-b-surface border border-b-border rounded-lg px-4 py-2.5 text-sm text-b-on-surface focus:border-b-purple focus:outline-none transition-colors">
+                            </div>
+                            <div>
+                                <label class="text-sm text-b-on-surface-muted block mb-1">Turn Time Limit (seconds)</label>
+                                <input type="number" value="30" class="w-full bg-b-surface border border-b-border rounded-lg px-4 py-2.5 text-sm text-b-on-surface focus:border-b-purple focus:outline-none transition-colors">
+                            </div>
+                            <div>
+                                <label class="text-sm text-b-on-surface-muted block mb-1">Max Players Per Room</label>
+                                <input type="number" value="4" class="w-full bg-b-surface border border-b-border rounded-lg px-4 py-2.5 text-sm text-b-on-surface focus:border-b-purple focus:outline-none transition-colors">
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <label class="text-sm text-b-on-surface-muted block">Enable Game Modes</label>
+                            <div class="flex items-center justify-between py-2">
+                                <span class="text-sm text-b-on-surface">Sun</span>
+                                <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+                            </div>
+                            <div class="flex items-center justify-between py-2">
+                                <span class="text-sm text-b-on-surface">Hokm</span>
+                                <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-b-surface-elevated rounded-xl border border-b-border overflow-hidden settings-card" data-card="feature-flags">
+                <button onclick="toggleCard('feature-flags')" class="w-full flex items-center justify-between px-5 py-4 hover:bg-b-surface-hover transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-b-purple text-xl">flag</span>
+                        <h3 class="font-semibold text-b-on-surface">Feature Flags</h3>
+                    </div>
+                    <span id="chevron-feature-flags" class="material-symbols-outlined text-b-on-surface-muted card-chevron">expand_more</span>
+                </button>
+                <div id="body-feature-flags" class="card-body">
+                    <div class="px-5 pb-5 space-y-3">
+                        <div class="flex items-center justify-between py-2"><span class="text-sm text-b-on-surface">Tournaments Enabled</span><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                        <div class="flex items-center justify-between py-2"><span class="text-sm text-b-on-surface">Live Streaming Enabled</span><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                        <div class="flex items-center justify-between py-2"><span class="text-sm text-b-on-surface">Voice Chat Enabled</span><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                        <div class="flex items-center justify-between py-2"><span class="text-sm text-b-on-surface">Camera Enabled</span><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                        <div class="flex items-center justify-between py-2"><span class="text-sm text-b-on-surface">Gifting Enabled</span><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                        <div class="flex items-center justify-between py-2"><span class="text-sm text-b-on-surface">Coin Purchases Enabled</span><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                        <div class="flex items-center justify-between py-2"><span class="text-sm text-b-on-surface">Guest Mode / Play Without Account</span><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-b-surface-elevated rounded-xl border border-b-border overflow-hidden settings-card" data-card="economy">
+                <button onclick="toggleCard('economy')" class="w-full flex items-center justify-between px-5 py-4 hover:bg-b-surface-hover transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-b-purple text-xl">payments</span>
+                        <h3 class="font-semibold text-b-on-surface">Economy Settings</h3>
+                    </div>
+                    <span id="chevron-economy" class="material-symbols-outlined text-b-on-surface-muted card-chevron">expand_more</span>
+                </button>
+                <div id="body-economy" class="card-body">
+                    <div class="px-5 pb-5 space-y-5">
+                        <div>
+                            <label class="text-sm text-b-on-surface-muted block mb-1">Daily Login Bonus Coins</label>
+                            <input type="number" value="50" class="w-full bg-b-surface border border-b-border rounded-lg px-4 py-2.5 text-sm text-b-on-surface focus:border-b-purple focus:outline-none transition-colors">
+                        </div>
+                        <div>
+                            <label class="text-sm text-b-on-surface-muted block mb-3">Coin Purchase Packages</label>
+                            <div class="overflow-x-auto custom-scrollbar">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-b-border">
+                                            <th class="text-left px-4 py-2 text-b-on-surface-muted font-medium">Package Name</th>
+                                            <th class="text-left px-4 py-2 text-b-on-surface-muted font-medium">Coins</th>
+                                            <th class="text-left px-4 py-2 text-b-on-surface-muted font-medium">Price (SAR)</th>
+                                            <th class="text-left px-4 py-2 text-b-on-surface-muted font-medium">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b border-b-border">
+                                            <td class="px-4 py-2.5">Starter</td>
+                                            <td class="px-4 py-2.5">500</td>
+                                            <td class="px-4 py-2.5">9.99</td>
+                                            <td class="px-4 py-2.5"><div class="flex items-center gap-2"><button class="p-1 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-on-surface transition-colors"><span class="material-symbols-outlined text-lg">edit</span></button><button class="p-1 rounded-lg hover:bg-b-surface-muted text-red-400 transition-colors"><span class="material-symbols-outlined text-lg">delete</span></button></div></td>
+                                        </tr>
+                                        <tr class="border-b border-b-border">
+                                            <td class="px-4 py-2.5">Pro</td>
+                                            <td class="px-4 py-2.5">2,500</td>
+                                            <td class="px-4 py-2.5">44.99</td>
+                                            <td class="px-4 py-2.5"><div class="flex items-center gap-2"><button class="p-1 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-on-surface transition-colors"><span class="material-symbols-outlined text-lg">edit</span></button><button class="p-1 rounded-lg hover:bg-b-surface-muted text-red-400 transition-colors"><span class="material-symbols-outlined text-lg">delete</span></button></div></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2.5">VIP</td>
+                                            <td class="px-4 py-2.5">10,000</td>
+                                            <td class="px-4 py-2.5">149.99</td>
+                                            <td class="px-4 py-2.5"><div class="flex items-center gap-2"><button class="p-1 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-on-surface transition-colors"><span class="material-symbols-outlined text-lg">edit</span></button><button class="p-1 rounded-lg hover:bg-b-surface-muted text-red-400 transition-colors"><span class="material-symbols-outlined text-lg">delete</span></button></div></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="mt-3 px-4 py-2 rounded-lg border border-b-border text-b-on-surface-muted text-sm font-medium hover:bg-b-surface-muted transition-colors">Add Package</button>
+                        </div>
+                        <div>
+                            <label class="text-sm text-b-on-surface-muted block mb-2">Gift Coin Amounts</label>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-4 py-2 rounded-lg bg-b-surface border border-b-border text-sm text-b-on-surface cursor-pointer hover:border-b-purple/40 transition-colors">10</span>
+                                <span class="px-4 py-2 rounded-lg bg-b-surface border border-b-border text-sm text-b-on-surface cursor-pointer hover:border-b-purple/40 transition-colors">50</span>
+                                <span class="px-4 py-2 rounded-lg bg-b-surface border border-b-border text-sm text-b-on-surface cursor-pointer hover:border-b-purple/40 transition-colors">100</span>
+                                <span class="px-4 py-2 rounded-lg bg-b-surface border border-b-border text-sm text-b-on-surface cursor-pointer hover:border-b-purple/40 transition-colors">500</span>
+                                <span class="px-4 py-2 rounded-lg bg-b-surface border border-b-border text-sm text-b-on-surface cursor-pointer hover:border-b-purple/40 transition-colors">1000</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm text-b-on-surface-muted block mb-2">Tournament Entry Fee Presets</label>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-4 py-2 rounded-lg bg-green-500/20 border border-green-500/30 text-sm text-green-400 cursor-pointer hover:border-green-400/50 transition-colors">Free</span>
+                                <span class="px-4 py-2 rounded-lg bg-b-surface border border-b-border text-sm text-b-on-surface cursor-pointer hover:border-b-purple/40 transition-colors">50</span>
+                                <span class="px-4 py-2 rounded-lg bg-b-surface border border-b-border text-sm text-b-on-surface cursor-pointer hover:border-b-purple/40 transition-colors">100</span>
+                                <span class="px-4 py-2 rounded-lg bg-b-surface border border-b-border text-sm text-b-on-surface cursor-pointer hover:border-b-purple/40 transition-colors">500</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm text-b-on-surface-muted block mb-1">Platform Commission Percentage</label>
+                            <div class="relative w-32">
+                                <input type="number" value="15" class="w-full bg-b-surface border border-b-border rounded-lg px-4 py-2.5 text-sm text-b-on-surface focus:border-b-purple focus:outline-none transition-colors pr-8">
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-b-on-surface-muted text-sm">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-b-surface-elevated rounded-xl border border-b-border overflow-hidden settings-card" data-card="moderation">
+                <button onclick="toggleCard('moderation')" class="w-full flex items-center justify-between px-5 py-4 hover:bg-b-surface-hover transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-b-purple text-xl">moderation</span>
+                        <h3 class="font-semibold text-b-on-surface">Moderation Settings</h3>
+                    </div>
+                    <span id="chevron-moderation" class="material-symbols-outlined text-b-on-surface-muted card-chevron">expand_more</span>
+                </button>
+                <div id="body-moderation" class="card-body">
+                    <div class="px-5 pb-5 space-y-4">
+                        <div>
+                            <label class="text-sm text-b-on-surface-muted block mb-1">Auto-Ban Threshold (reports before auto-ban)</label>
+                            <input type="number" value="5" class="w-full bg-b-surface border border-b-border rounded-lg px-4 py-2.5 text-sm text-b-on-surface focus:border-b-purple focus:outline-none transition-colors">
+                        </div>
+                        <div>
+                            <label class="text-sm text-b-on-surface-muted block mb-1">Report Escalation Rules</label>
+                            <input type="text" value="3 reports in 24h = auto-escalate" class="w-full bg-b-surface border border-b-border rounded-lg px-4 py-2.5 text-sm text-b-on-surface focus:border-b-purple focus:outline-none transition-colors">
+                        </div>
+                        <div>
+                            <label class="text-sm text-b-on-surface-muted block mb-1">Profanity Filter Word List (Arabic)</label>
+                            <textarea rows="3" class="w-full bg-bsurface border border-b-border rounded-lg px-4 py-2.5 text-sm text-b-on-surface focus:border-b-purple focus:outline-none transition-colors resize-none" dir="rtl" style="background-color: #0A0A0F;">كلب، غبي، حقير، أحمق، سخيف</textarea>
+                        </div>
+                        <div>
+                            <label class="text-sm text-b-on-surface-muted block mb-1">Profanity Filter Word List (English)</label>
+                            <textarea rows="3" class="w-full bg-b-surface border border-b-border rounded-lg px-4 py-2.5 text-sm text-b-on-surface focus:border-b-purple focus:outline-none transition-colors resize-none">damn, hell, stupid, idiot, trash</textarea>
+                        </div>
+                        <div>
+                            <label class="text-sm text-b-on-surface-muted block mb-1">Stream Recording Retention (days)</label>
+                            <input type="number" value="30" class="w-full bg-b-surface border border-b-border rounded-lg px-4 py-2.5 text-sm text-b-on-surface focus:border-b-purple focus:outline-none transition-colors">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-b-surface-elevated rounded-xl border border-b-border overflow-hidden settings-card" data-card="maintenance">
+                <button onclick="toggleCard('maintenance')" class="w-full flex items-center justify-between px-5 py-4 hover:bg-b-surface-hover transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-b-purple text-xl">build</span>
+                        <h3 class="font-semibold text-b-on-surface">Maintenance</h3>
+                    </div>
+                    <span id="chevron-maintenance" class="material-symbols-outlined text-b-on-surface-muted card-chevron">expand_more</span>
+                </button>
+                <div id="body-maintenance" class="card-body">
+                    <div class="px-5 pb-5 space-y-5">
+                        <div>
+                            <div class="flex items-center justify-between py-2">
+                                <div>
+                                    <span class="text-sm text-b-on-surface">Maintenance Mode</span>
+                                    <p class="text-xs text-red-400 mt-0.5">Enabling maintenance mode will block all user access</p>
+                                </div>
+                                <label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm text-b-on-surface-muted block mb-1">Force Update Minimum Version</label>
+                            <input type="text" value="1.0.0" class="w-full bg-b-surface border border-b-border rounded-lg px-4 py-2.5 text-sm text-b-on-surface focus:border-b-purple focus:outline-none transition-colors">
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between py-2">
+                                <span class="text-sm text-b-on-surface">Announcement Banner</span>
+                                <label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label>
+                            </div>
+                            <div>
+                                <label class="text-sm text-b-on-surface-muted block mb-1">Banner Text (EN)</label>
+                                <textarea rows="2" placeholder="Enter announcement text in English..." class="w-full bg-b-surface border border-b-border rounded-lg px-4 py-2.5 text-sm text-b-on-surface focus:border-b-purple focus:outline-none transition-colors resize-none"></textarea>
+                            </div>
+                            <div>
+                                <label class="text-sm text-b-on-surface-muted block mb-1">Banner Text (AR)</label>
+                                <textarea rows="2" dir="rtl" placeholder="أدخل نص الإعلان بالعربية..." class="w-full bg-b-surface border border-b-border rounded-lg px-4 py-2.5 text-sm text-b-on-surface focus:border-b-purple focus:outline-none transition-colors resize-none"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-b-surface-elevated rounded-xl border border-b-border overflow-hidden settings-card" data-card="admin-users">
+                <button onclick="toggleCard('admin-users')" class="w-full flex items-center justify-between px-5 py-4 hover:bg-b-surface-hover transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-b-purple text-xl">admin_panel_settings</span>
+                        <h3 class="font-semibold text-b-on-surface">Admin Users</h3>
+                    </div>
+                    <span id="chevron-admin-users" class="material-symbols-outlined text-b-on-surface-muted card-chevron">expand_more</span>
+                </button>
+                <div id="body-admin-users" class="card-body">
+                    <div class="px-5 pb-5">
+                        <div class="overflow-x-auto custom-scrollbar mb-4">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-b-border">
+                                        <th class="text-left px-4 py-2 text-b-on-surface-muted font-medium">Avatar</th>
+                                        <th class="text-left px-4 py-2 text-b-on-surface-muted font-medium">Name</th>
+                                        <th class="text-left px-4 py-2 text-b-on-surface-muted font-medium">Email</th>
+                                        <th class="text-left px-4 py-2 text-b-on-surface-muted font-medium">Role</th>
+                                        <th class="text-left px-4 py-2 text-b-on-surface-muted font-medium">Last Login</th>
+                                        <th class="text-left px-4 py-2 text-b-on-surface-muted font-medium">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-b-border">
+                                        <td class="px-4 py-3"><div class="w-8 h-8 rounded-full bg-b-gold/20 flex items-center justify-center text-b-gold font-bold text-xs">A</div></td>
+                                        <td class="px-4 py-3 font-medium">Admin User</td>
+                                        <td class="px-4 py-3 text-b-on-surface-muted">admin@bloot.com</td>
+                                        <td class="px-4 py-3"><span class="text-xs font-bold uppercase px-2 py-0.5 rounded bg-b-purple/20 text-b-purple">Super Admin</span></td>
+                                        <td class="px-4 py-3 text-b-on-surface-muted">2 hours ago</td>
+                                        <td class="px-4 py-3"><div class="flex items-center gap-2"><button class="p-1 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-on-surface transition-colors"><span class="material-symbols-outlined text-lg">edit</span></button><button class="p-1 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-red-400 transition-colors"><span class="material-symbols-outlined text-lg">delete</span></button></div></td>
+                                    </tr>
+                                    <tr class="border-b border-b-border">
+                                        <td class="px-4 py-3"><div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-xs">S</div></td>
+                                        <td class="px-4 py-3 font-medium">Sarah Moderator</td>
+                                        <td class="px-4 py-3 text-b-on-surface-muted">sarah@bloot.com</td>
+                                        <td class="px-4 py-3"><span class="text-xs font-bold uppercase px-2 py-0.5 rounded bg-blue-500/20 text-blue-400">Moderator</span></td>
+                                        <td class="px-4 py-3 text-b-on-surface-muted">1 day ago</td>
+                                        <td class="px-4 py-3"><div class="flex items-center gap-2"><button class="p-1 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-on-surface transition-colors"><span class="material-symbols-outlined text-lg">edit</span></button><button class="p-1 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-red-400 transition-colors"><span class="material-symbols-outlined text-lg">delete</span></button></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3"><div class="w-8 h-8 rounded-full bg-gray-500/20 flex items-center justify-center text-gray-400 font-bold text-xs">SA</div></td>
+                                        <td class="px-4 py-3 font-medium">Support Agent</td>
+                                        <td class="px-4 py-3 text-b-on-surface-muted">support@bloot.com</td>
+                                        <td class="px-4 py-3"><span class="text-xs font-bold uppercase px-2 py-0.5 rounded bg-gray-500/20 text-gray-400">Support</span></td>
+                                        <td class="px-4 py-3 text-b-on-surface-muted">3 days ago</td>
+                                        <td class="px-4 py-3"><div class="flex items-center gap-2"><button class="p-1 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-on-surface transition-colors"><span class="material-symbols-outlined text-lg">edit</span></button><button class="p-1 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-red-400 transition-colors"><span class="material-symbols-outlined text-lg">delete</span></button></div></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button onclick="showToast('Add admin dialog','info')" class="px-4 py-2 rounded-lg border border-b-border text-b-on-surface-muted text-sm font-medium hover:bg-b-surface-muted transition-colors flex items-center gap-2">
+                            <span class="material-symbols-outlined text-lg">person_add</span>Add Admin
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="fixed bottom-0 left-0 right-0 lg:left-64 bg-b-surface-elevated border-t border-b-border p-4 z-20">
+        <button onclick="showToast('Settings saved successfully','success')" class="w-full py-3 rounded-xl bg-gradient-to-r from-b-gold-dark to-b-gold text-black font-semibold text-sm hover:from-b-gold hover:to-b-gold-light transition-all">Save Changes</button>
+    </div>
+
+    <script src="../shared.js"></script>
+    <script>
+        // BL-INTERACTIONS
+        function toggleCard(cardId) {
+            const allBodies = document.querySelectorAll('.card-body');
+            const allChevrons = document.querySelectorAll('.card-chevron');
+            const targetBody = document.getElementById('body-' + cardId);
+            const targetChevron = document.getElementById('chevron-' + cardId);
+            const isOpen = targetBody.classList.contains('open');
+
+            allBodies.forEach(b => b.classList.remove('open'));
+            allChevrons.forEach(c => c.classList.remove('rotated'));
+
+            if (!isOpen) {
+                targetBody.classList.add('open');
+                targetChevron.classList.add('rotated');
+            }
+        }
+    </script>
+</body>
+</html>

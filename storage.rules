@@ -1,0 +1,77 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin(uid) {
+      return isAuthenticated()
+        && uid == request.auth.uid
+        && firestore.exists(/databases/(default)/documents/admins/$(uid));
+    }
+
+    // Avatar images: authenticated users can read avatars;
+    // each user can only write their own avatar folder.
+    // Admins may also write on behalf of users.
+    match /avatars/{userId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated()
+        && (request.auth.uid == userId || isAdmin(request.auth.uid))
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if isAuthenticated()
+        && (request.auth.uid == userId || isAdmin(request.auth.uid));
+    }
+
+    // Stream thumbnails: anyone can read;
+    // only the stream host can upload based on metadata uid.
+    match /streams/{streamId}/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if isAuthenticated()
+        && request.resource.metadata.uid == request.auth.uid
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if isAuthenticated()
+        && resource.metadata.uid == request.auth.uid;
+    }
+
+    // Room / tournament images: anyone can read;
+    // only the room creator can upload based on metadata creatorUid.
+    match /rooms/{roomId}/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if isAuthenticated()
+        && request.resource.metadata.creatorUid == request.auth.uid
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if isAuthenticated()
+        && resource.metadata.creatorUid == request.auth.uid;
+    }
+
+    // Tournament banners: admins only.
+    match /tournaments/{tournamentId}/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if isAdmin(request.auth.uid)
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if isAdmin(request.auth.uid);
+    }
+
+    // Achievement icons: admins only.
+    match /achievements/{achievementId}/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if isAdmin(request.auth.uid)
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if isAdmin(request.auth.uid);
+    }
+
+    // Notification images: admins only.
+    match /notifications/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if isAdmin(request.auth.uid)
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if isAdmin(request.auth.uid);
+    }
+
+    // Default deny.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
