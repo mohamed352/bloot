@@ -71,6 +71,7 @@ abstract class  LocaleKeys {
   static const auto_rotate_for_game = 'auto_rotate_for_game';
   static const background_music = 'background_music';
   static const baloot_live = 'baloot_live';
+  static const bidding = 'bidding';
   static const bio = 'bio';
   static const bio_text = 'bio_text';
   static const block_list = 'block_list';
@@ -143,9 +144,11 @@ abstract class  LocaleKeys {
   static const good_game_yesterday = 'good_game_yesterday';
   static const gulf_champions_cup = 'gulf_champions_cup';
   static const help_center = 'help_center';
+  static const hurry_up = 'hurry_up';
   static const hey_want_to_play_tonight = 'hey_want_to_play_tonight';
   static const hide_chat = 'hide_chat';
   static const history = 'history';
+  static const hokm = 'hokm';
   static const hokm_games = 'hokm_games';
   static const hokm_spades = 'hokm_spades';
   static const home = 'home';
@@ -252,6 +255,7 @@ abstract class  LocaleKeys {
   static const rooms = 'rooms';
   static const rounds = 'rounds';
   static const rules = 'rules';
+  static const round_end = 'round_end';
   static const sat_6pm = 'sat_6pm';
   static const save_changes = 'save_changes';
   static const say_something = 'say_something';
@@ -284,8 +288,10 @@ abstract class  LocaleKeys {
   static const end_stream = 'end_stream';
   static const sun_games = 'sun_games';
   static const support = 'support';
+  static const sun = 'sun';
   static const sure_what_time = 'sure_what_time';
   static const terms_of_service = 'terms_of_service';
+  static const time_remaining = 'time_remaining';
   static const them = 'them';
   static const today = 'today';
   static const tomorrow_8pm = 'tomorrow_8pm';

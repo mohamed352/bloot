@@ -19,11 +19,13 @@ class BiddingOverlay extends StatefulWidget {
     required this.currentBidder,
     required this.onBid,
     this.timeLeft = 30,
+    this.isEnabled = true,
   });
 
   final String currentBidder;
   final ValueChanged<String> onBid;
   final int timeLeft;
+  final bool isEnabled;
 
   @override
   State<BiddingOverlay> createState() => _BiddingOverlayState();
@@ -32,6 +34,7 @@ class BiddingOverlay extends StatefulWidget {
 class _BiddingOverlayState extends State<BiddingOverlay> {
   late int _secondsLeft;
   Timer? _timer;
+  bool _autoPassed = false;
 
   @override
   void initState() {
@@ -44,14 +47,17 @@ class _BiddingOverlayState extends State<BiddingOverlay> {
   void didUpdateWidget(covariant BiddingOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.currentBidder != widget.currentBidder ||
-        oldWidget.timeLeft != widget.timeLeft) {
+        oldWidget.timeLeft != widget.timeLeft ||
+        oldWidget.isEnabled != widget.isEnabled) {
       _timer?.cancel();
+      _autoPassed = false;
       _secondsLeft = widget.timeLeft;
       _startTimer();
     }
   }
 
   void _startTimer() {
+    _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
       setState(() {
@@ -59,6 +65,12 @@ class _BiddingOverlayState extends State<BiddingOverlay> {
           _secondsLeft--;
         }
       });
+
+      if (_secondsLeft <= 0 && widget.isEnabled && !_autoPassed) {
+        _autoPassed = true;
+        _timer?.cancel();
+        widget.onBid('pass');
+      }
     });
   }
 
@@ -83,7 +95,7 @@ class _BiddingOverlayState extends State<BiddingOverlay> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                '${widget.currentBidder} ${'bidding'.tr()}',
+                '${widget.currentBidder} ${LocaleKeys.bidding.tr()}',
                 style: context.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: colors.textPrimary,
@@ -91,7 +103,7 @@ class _BiddingOverlayState extends State<BiddingOverlay> {
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                '${'time_remaining'.tr()}: ${_secondsLeft}s',
+                '${LocaleKeys.time_remaining.tr()}: ${_secondsLeft}s',
                 style: context.textTheme.bodyMedium?.copyWith(
                   color: colors.textSecondary,
                 ),
@@ -101,18 +113,20 @@ class _BiddingOverlayState extends State<BiddingOverlay> {
                 children: [
                   Expanded(
                     child: _BidButton(
-                      label: 'Sun',
+                      label: LocaleKeys.sun.tr(),
                       icon: Icons.wb_sunny_rounded,
                       color: colors.secondary,
+                      isEnabled: widget.isEnabled,
                       onTap: () => widget.onBid('sun'),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.lg),
                   Expanded(
                     child: _BidButton(
-                      label: 'Hokm',
+                      label: LocaleKeys.hokm.tr(),
                       icon: Icons.shield_rounded,
                       color: colors.primary,
+                      isEnabled: widget.isEnabled,
                       onTap: () => widget.onBid('hokm'),
                     ),
                   ),
@@ -122,6 +136,7 @@ class _BiddingOverlayState extends State<BiddingOverlay> {
                       label: LocaleKeys.commonCancel.tr(),
                       icon: Icons.close_rounded,
                       color: colors.textMuted,
+                      isEnabled: widget.isEnabled,
                       onTap: () => widget.onBid('pass'),
                     ),
                   ),
@@ -130,7 +145,7 @@ class _BiddingOverlayState extends State<BiddingOverlay> {
               const SizedBox(height: AppSpacing.xxxl),
               if (_secondsLeft <= 5)
                 Text(
-                  'hurry_up'.tr(),
+                  LocaleKeys.hurry_up.tr(),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -151,39 +166,44 @@ class _BidButton extends StatelessWidget {
     required this.icon,
     required this.color,
     required this.onTap,
+    this.isEnabled = true,
   });
 
   final String label;
   final IconData icon;
   final Color color;
   final VoidCallback onTap;
+  final bool isEnabled;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
 
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsetsDirectional.symmetric(vertical: 20),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: color.withValues(alpha: 0.5)),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 32),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: color,
+      onTap: isEnabled ? onTap : null,
+      child: Opacity(
+        opacity: isEnabled ? 1.0 : 0.45,
+        child: Container(
+          padding: const EdgeInsetsDirectional.symmetric(vertical: 20),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: color.withValues(alpha: 0.5)),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, color: color, size: 32),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

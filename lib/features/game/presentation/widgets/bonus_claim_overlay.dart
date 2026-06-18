@@ -124,30 +124,34 @@ class _BonusClaimOverlayState extends State<BonusClaimOverlay> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton.icon(
-                  onPressed: _detectBonuses,
-                  icon: const Icon(Icons.search_rounded, size: 18),
-                  label: Text('auto_detect'.tr()),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorManager.primary,
-                    foregroundColor: ColorManager.darkTextPrimary,
-                    padding: const EdgeInsetsDirectional.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: _detectBonuses,
+                    icon: const Icon(Icons.search_rounded, size: 18),
+                    label: Text('auto_detect'.tr()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorManager.primary,
+                      foregroundColor: ColorManager.darkTextPrimary,
+                      padding: const EdgeInsetsDirectional.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
-                OutlinedButton.icon(
-                  onPressed: widget.onPass,
-                  icon: const Icon(Icons.block_rounded, size: 18),
-                  label: Text('no_bonuses'.tr()),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: ColorManager.darkTextSecondary,
-                    side: const BorderSide(color: ColorManager.darkBorderSoft),
-                    padding: const EdgeInsetsDirectional.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: widget.onPass,
+                    icon: const Icon(Icons.block_rounded, size: 18),
+                    label: Text('no_bonuses'.tr()),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: ColorManager.darkTextSecondary,
+                      side: const BorderSide(color: ColorManager.darkBorderSoft),
+                      padding: const EdgeInsetsDirectional.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                 ),

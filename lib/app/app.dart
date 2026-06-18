@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
 import 'package:bloot/config/routes/app_router.dart';
 import 'package:bloot/config/routes/routes.dart';
@@ -11,6 +12,7 @@ import 'package:bloot/core/di/injection.dart';
 import 'package:bloot/core/extension/context_values.dart';
 import 'package:bloot/core/localization/language_manager.dart';
 import 'package:bloot/core/network/connectivity_cubit.dart';
+import 'package:bloot/core/services/agora_service.dart';
 import 'package:bloot/core/services/deep_link_service.dart';
 import 'package:bloot/core/services/notification_service.dart';
 import 'package:bloot/core/style/colors.dart';
@@ -150,8 +152,9 @@ class _BlootAppState extends State<BlootApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return MultiProvider(
       providers: [
+        Provider<AgoraService>(create: (_) => getIt<AgoraService>()),
         BlocProvider(create: (_) => ConnectivityCubit()),
         BlocProvider(create: (_) => getIt<AuthCubit>()),
       ],

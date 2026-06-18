@@ -13,6 +13,12 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource _remoteDataSource;
 
   @override
+  Future<User?> signInWithGoogle() async {
+    final model = await _remoteDataSource.signInWithGoogle();
+    return model?.toEntity();
+  }
+
+  @override
   Future<void> sendOtp(String phoneNumber) =>
       _remoteDataSource.sendOtp(phoneNumber);
 

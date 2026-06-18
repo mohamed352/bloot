@@ -2,6 +2,9 @@ import 'package:bloot/features/auth/domain/entities/user.dart';
 
 /// Repository contract for authentication operations.
 abstract class AuthRepository {
+  /// Signs in with Google and returns the authenticated user.
+  Future<User?> signInWithGoogle();
+
   /// Sends an OTP to the given [phoneNumber].
   Future<void> sendOtp(String phoneNumber);
 

@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/foundation.dart';
@@ -30,10 +31,17 @@ abstract class AppInitializer {
     GlobalErrorHandler.initialize();
     AppLogger.info('Error handlers installed', tag: LogTags.init);
 
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    AppLogger.info('Firebase initialized', tag: LogTags.init);
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      AppLogger.info('Firebase initialized', tag: LogTags.init);
+    } else {
+      AppLogger.info(
+        'Firebase already initialized, skipping duplicate init',
+        tag: LogTags.init,
+      );
+    }
 
     // Activate Firebase App Check to protect callable functions and Firestore.
     await _activateAppCheck();
@@ -43,6 +51,9 @@ abstract class AppInitializer {
 
     // Initialize Performance Monitoring.
     await FirebasePerformance.instance.setPerformanceCollectionEnabled(!kDebugMode);
+
+    // Pre-initialize Google Sign-In so the account picker is ready on login.
+    await _initializeGoogleSignIn();
 
     await configureDependencies();
     AppLogger.info('DI configured', tag: LogTags.init);
@@ -94,6 +105,29 @@ abstract class AppInitializer {
       }
     } catch (e) {
       AppLogger.error('Failed to initialize Crashlytics', error: e);
+    }
+  }
+
+  static Future<void> _initializeGoogleSignIn() async {
+    try {
+      if (kIsWeb) return;
+      const googleClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
+      await GoogleSignIn.instance.initialize(
+        serverClientId: googleClientId.isNotEmpty ? googleClientId : null,
+      );
+      if (googleClientId.isEmpty) {
+        AppLogger.warning(
+          'GOOGLE_SERVER_CLIENT_ID missing from environment. Google Sign-In might fail on some platforms.',
+          tag: LogTags.init,
+        );
+      } else {
+        AppLogger.info('Google Sign-In initialized', tag: LogTags.init);
+      }
+    } catch (e) {
+      AppLogger.error(
+        'Ignored Google Sign-In initialization error: $e',
+        tag: LogTags.init,
+      );
     }
   }
 

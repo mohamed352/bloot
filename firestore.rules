@@ -17,35 +17,12 @@ service cloud.firestore {
       return value is list;
     }
 
-    function isMap(value) {
-      return value is map;
-    }
-
-    // ---- Field allow-list helpers (user self-service updates) ----
-    function allowedUserFields() {
-      return ['displayName', 'username', 'bio', 'region', 'favoriteMode', 'avatarUrl',
-              'isOnline', 'lastSeen', 'settings', 'fcmToken', 'fcmTokenUpdatedAt', 'updatedAt'];
-    }
-
-    function allowedRoomFields() {
-      return ['name', 'players', 'playerUids', 'readyPlayers', 'teamA', 'teamB',
-              'currentPlayerCount', 'isPrivate', 'password', 'targetScore', 'updatedAt'];
-    }
-
-    function allowedTournamentFields() {
-      return ['name', 'description', 'startDate', 'endDate', 'registrationDeadline',
-              'rules', 'updatedAt'];
-    }
-
     // Users can read any user profile when authenticated, write only their own; admins may write
     match /users/{uid} {
       allow read: if request.auth != null;
       allow create: if request.auth != null && request.auth.uid == uid;
       allow update: if request.auth != null &&
-        (isAdmin(request.auth.uid) ||
-         (request.auth.uid == uid &&
-          request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(allowedUserFields())));
+        (request.auth.uid == uid || isAdmin(request.auth.uid));
       allow delete: if request.auth != null && isAdmin(request.auth.uid);
     }
 
@@ -54,11 +31,9 @@ service cloud.firestore {
       allow read: if true;
       allow create: if request.auth != null && request.auth.uid == request.resource.data.creatorUid;
       allow update: if request.auth != null &&
-        (isAdmin(request.auth.uid) ||
-         ((request.auth.uid == resource.data.creatorUid ||
-           (isList(resource.data.playerUids) && request.auth.uid in resource.data.playerUids)) &&
-          request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(allowedRoomFields())));
+        (request.auth.uid == resource.data.creatorUid ||
+         (isList(resource.data.playerUids) && request.auth.uid in resource.data.playerUids) ||
+         isAdmin(request.auth.uid));
       allow delete: if request.auth != null && isAdmin(request.auth.uid);
     }
 
@@ -76,23 +51,12 @@ service cloud.firestore {
         (request.auth.uid == resource.data.hostUid || isAdmin(request.auth.uid));
     }
 
-    // Stream viewers: viewers may register/remove their own presence; host/admin may remove any
-    match /streams/{streamId}/viewers/{viewerId} {
-      allow read: if request.auth != null;
-      allow create, update: if request.auth != null && request.auth.uid == viewerId;
-      allow delete: if request.auth != null &&
-        (request.auth.uid == viewerId || isAdmin(request.auth.uid));
-    }
-
     // Tournaments: read any, create/update by authenticated users, full admin access
     match /tournaments/{tournamentId} {
       allow read: if true;
       allow create: if request.auth != null && request.auth.uid == request.resource.data.hostUid;
       allow update: if request.auth != null &&
-        (isAdmin(request.auth.uid) ||
-         (request.auth.uid == resource.data.hostUid &&
-          request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(allowedTournamentFields())));
+        (request.auth.uid == resource.data.hostUid || isAdmin(request.auth.uid));
       allow delete: if request.auth != null && isAdmin(request.auth.uid);
     }
 
@@ -148,9 +112,10 @@ service cloud.firestore {
       allow delete: if request.auth != null && isAdmin(request.auth.uid);
     }
 
-    // Settings: read any authenticated user, write by admin
+    // Settings: read any user (needed during pre-auth init for maintenance /
+    // feature flags), write by admin only.
     match /settings/{settingsId} {
-      allow read: if request.auth != null;
+      allow read: if true;
       allow write: if request.auth != null && isAdmin(request.auth.uid);
     }
 
@@ -223,7 +188,7 @@ service cloud.firestore {
         allow read: if request.auth != null && conversationParticipant(conversationId);
         allow create: if request.auth != null &&
           conversationParticipant(conversationId) &&
-          request.resource.data.senderUid == request.auth.uid;
+          request.resource.data.senderId == request.auth.uid;
         allow update: if request.auth != null &&
           conversationParticipant(conversationId) &&
           request.resource.data.diff(resource.data).affectedKeys()

@@ -54,3 +54,4 @@ coderules/
 # Firebase service account keys
 *firebase-adminsdk*.json
 serviceAccountKey.json
+.firebase/

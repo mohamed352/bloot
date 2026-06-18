@@ -48,7 +48,7 @@ class RoundScoreOverlay extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Round End'.tr(),
+                  LocaleKeys.round_end.tr(),
                   style: context.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: colors.textPrimary,

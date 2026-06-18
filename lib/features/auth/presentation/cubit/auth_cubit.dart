@@ -24,6 +24,32 @@ class AuthCubit extends Cubit<AuthState> {
   /// The phone number used for the current OTP session.
   String? get phoneNumber => _phoneNumber;
 
+  Future<void> signInWithGoogle() async {
+    emit(const AuthState.loading());
+    try {
+      final user = await _authRepository.signInWithGoogle();
+      if (user == null) {
+        // User canceled the Google sign-in flow.
+        emit(const AuthState.initial());
+        return;
+      }
+      if (user.isProfileComplete) {
+        emit(AuthState.authenticated(user: user));
+      } else {
+        emit(const AuthState.profileRequired());
+      }
+    } on AuthException catch (e) {
+      emit(AuthState.error(message: e.message));
+    } catch (e) {
+      AppLogger.error('Failed to sign in with Google', error: e);
+      emit(
+        const AuthState.error(
+          message: 'Failed to sign in with Google. Please try again.',
+        ),
+      );
+    }
+  }
+
   Future<void> sendOtp(String phoneNumber) async {
     emit(const AuthState.loading());
     try {

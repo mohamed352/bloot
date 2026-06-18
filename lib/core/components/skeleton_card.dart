@@ -59,8 +59,6 @@ class _SkeletonCardState extends State<SkeletonCard>
                 colors.surfaceVariant,
               ],
               stops: const [0.0, 0.5, 1.0],
-              begin: AlignmentDirectional.centerStart,
-              end: AlignmentDirectional.centerEnd,
               transform: _SlideGradientTransform(percent: _controller.value),
             ).createShader(bounds);
           },

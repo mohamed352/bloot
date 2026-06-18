@@ -136,6 +136,8 @@ class _LoginPageState extends State<LoginPage> {
       listener: (context, state) {
         state.whenOrNull(
           otpSent: (_) => context.pushNamed(RouteNames.otp),
+          profileRequired: () => context.pushNamed(RouteNames.completeProfile),
+          authenticated: (_) => context.goNamed(RouteNames.home),
           error: (message) {
             ScaffoldMessenger.of(
               context,
@@ -389,7 +391,7 @@ class _LoginPageState extends State<LoginPage> {
                                 // Google button (outlined)
                                 Expanded(
                                   child: GestureDetector(
-                                    onTap: () => _showComingSoon(context),
+                                    onTap: () => context.read<AuthCubit>().signInWithGoogle(),
                                     child: Container(
                                       height: 52,
                                       decoration: BoxDecoration(

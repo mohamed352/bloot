@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/constants/app_radius.dart';
+import 'package:bloot/generated/locale_keys.g.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
 import 'package:bloot/core/extension/context_values.dart';
 import 'package:bloot/core/services/agora_service.dart';
@@ -58,8 +59,13 @@ class _GamePlayPageState extends State<GamePlayPage>
     ]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
-    // Start watching the game
-    context.read<GameCubit>().watchGame(widget.id);
+    // Start watching only if the route did not already initialize the cubit.
+    // This keeps the page self-contained for tests while avoiding a duplicate
+    // watchGame call when the route already invoked loadGame/watchGame.
+    final cubit = context.read<GameCubit>();
+    if (cubit.state is GameInitial) {
+      cubit.watchGame(widget.id);
+    }
 
     final agoraService = context.read<AgoraService>();
     _isMicOn = agoraService.isMicOn;
@@ -326,7 +332,7 @@ class _GamePlayPageState extends State<GamePlayPage>
                           chatOpen: s.chatOpen,
                           chatMessages: s.chatMessages,
                         ),
-                        bidding: (s) => widget.isSpectator
+                        bidding: (s) => widget.isSpectator || !s.game.isMyTurn
                             ? _buildGameLayout(
                                 s.game,
                                 s.controlsVisible,
@@ -346,6 +352,7 @@ class _GamePlayPageState extends State<GamePlayPage>
                                   BiddingOverlay(
                                     currentBidder:
                                         s.game.currentPlayer?.name ?? '',
+                                    isEnabled: s.game.isMyTurn,
                                     onBid: (bid) =>
                                         context.read<GameCubit>().placeBid(bid),
                                   ),
@@ -668,8 +675,8 @@ class _GamePlayPageState extends State<GamePlayPage>
                                             ),
                                             child: Text(
                                               game.gameType == 'hokm'
-                                                  ? '${'hokm'.tr()} ${game.trump}'
-                                                  : 'sun'.tr(),
+                                                  ? '${LocaleKeys.hokm.tr()} ${game.trump}'
+                                                  : LocaleKeys.sun.tr(),
                                               style: const TextStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w600,

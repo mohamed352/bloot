@@ -50,7 +50,7 @@ npm install
 | Flag | Description | Default |
 |------|-------------|---------|
 | `--code`, `-c` | Room invite code (required) | — |
-| `--project` | Firebase project ID | `bloot-d9442` |
+| `--project` | Firebase project ID | `bloot-89b2b` |
 | `--host` | Emulator host | `localhost` |
 
 ## Notes

@@ -1,0 +1,31 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "bloot",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--dart-define-from-file=env/endpoints.json"
+      ]
+    },
+    {
+      "name": "bloot (profile mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "args": [
+        "--dart-define-from-file=env/endpoints.json"
+      ]
+    },
+    {
+      "name": "bloot (release mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "args": [
+        "--dart-define-from-file=env/endpoints.json"
+      ]
+    }
+  ]
+}

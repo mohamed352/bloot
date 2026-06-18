@@ -51,7 +51,7 @@ import {
 
 const args = process.argv.slice(2);
 const inviteCode = parseArg('--code', args) || parseArg('-c', args);
-const projectId = parseArg('--project', args) || 'bloot-d9442';
+const projectId = parseArg('--project', args) || 'bloot-89b2b';
 const emulatorHost = parseArg('--host', args) || 'localhost';
 
 if (!inviteCode) {

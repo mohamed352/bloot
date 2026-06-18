@@ -10,11 +10,11 @@ import 'package:bloot/app/app_initializer.dart';
 import 'package:bloot/core/localization/language_manager.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
   runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
     await AppInitializer.initialize();
     await EasyLocalization.ensureInitialized();
 

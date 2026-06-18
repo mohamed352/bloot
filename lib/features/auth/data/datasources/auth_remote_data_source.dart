@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 
 import 'package:bloot/core/logger/app_logger.dart';
@@ -25,6 +26,50 @@ class AuthRemoteDataSource {
 
   String? _verificationId;
   int? _resendToken;
+
+  Future<UserModel?> signInWithGoogle() async {
+    try {
+      AppLogger.info('Starting Google Sign In', tag: 'Auth');
+
+      final GoogleSignInAccount googleUser =
+          await GoogleSignIn.instance.authenticate();
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final GoogleSignInClientAuthorization? authz = await googleUser
+          .authorizationClient
+          .authorizationForScopes(<String>['email', 'profile']);
+
+      final firebase_auth.OAuthCredential credential =
+          firebase_auth.GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+        accessToken: authz?.accessToken,
+      );
+
+      await _firebaseAuth.signInWithCredential(credential);
+      AppLogger.info('Google Sign In successful', tag: 'Auth');
+      return getCurrentUser();
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      AppLogger.error('Google sign in failed', error: e, tag: 'Auth');
+      throw AuthException(
+        e.message ?? 'Google sign in failed. Please try again.',
+        code: e.code,
+      );
+    } on GoogleSignInException catch (e) {
+      AppLogger.error('Google sign in failed', error: e, tag: 'Auth');
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        return null;
+      }
+      throw AuthException(
+        e.description ?? 'Google sign in failed. Please try again.',
+        code: e.code.name,
+      );
+    } catch (e) {
+      AppLogger.error('Google sign in failed', error: e, tag: 'Auth');
+      throw const AuthException(
+        'Google sign in failed. Please try again.',
+        code: 'GOOGLE_SIGN_IN_ERROR',
+      );
+    }
+  }
 
   Future<void> sendOtp(String phoneNumber) async {
     final completer = Completer<void>();
@@ -258,6 +303,11 @@ class AuthRemoteDataSource {
       }
     }
     await _firebaseAuth.signOut();
+    try {
+      await GoogleSignIn.instance.signOut();
+    } catch (e) {
+      AppLogger.error('Failed to sign out from Google', error: e, tag: 'Auth');
+    }
     _verificationId = null;
     _resendToken = null;
   }
@@ -286,6 +336,15 @@ class AuthRemoteDataSource {
   Future<void> deleteAccount() async {
     try {
       await _functions.httpsCallable('deleteAccount').call<void>();
+      try {
+        await GoogleSignIn.instance.disconnect();
+      } catch (e) {
+        AppLogger.error(
+          'Failed to disconnect Google account',
+          error: e,
+          tag: 'Auth',
+        );
+      }
     } catch (e) {
       AppLogger.error('Failed to delete account', error: e, tag: 'Auth');
       throw const AuthException('Failed to delete account. Please try again.');

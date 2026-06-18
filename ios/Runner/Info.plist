@@ -76,6 +76,14 @@
 				<string>bloot</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.googleusercontent.apps.738592764893-k0to50pfuimbfnk67g8oe7hvrk9b7m4v</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.738592764893-k0to50pfuimbfnk67g8oe7hvrk9b7m4v</string>
+			</array>
+		</dict>
 	</array>
 	<!-- Permission descriptions required by Flutter plugins -->
 	<key>NSCameraUsageDescription</key>
