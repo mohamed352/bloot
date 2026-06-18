@@ -4,6 +4,7 @@ import { requireAppCheck } from '../utils/appCheck';
 
 /**
  * Unfollows another user and decrements follow counts atomically.
+ * Idempotent: repeated calls do not deflate counters below zero.
  */
 export const unfollowUser = functions.https.onCall(async (request) => {
   if (!request.auth) {
@@ -24,16 +25,22 @@ export const unfollowUser = functions.https.onCall(async (request) => {
   const followerRef = targetRef.collection('followers').doc(currentUid);
 
   await db.runTransaction(async (transaction) => {
-    const followingDoc = await transaction.get(followingRef);
-    if (!followingDoc.exists) return;
+    const [currentDoc, targetDoc, followingDoc] = await Promise.all([
+      transaction.get(currentRef),
+      transaction.get(targetRef),
+      transaction.get(followingRef),
+    ]);
 
-    const targetDoc = await transaction.get(targetRef);
+    if (!followingDoc.exists) {
+      // Not following; nothing to do.
+      return;
+    }
 
     transaction.delete(followingRef);
     transaction.delete(followerRef);
 
     transaction.update(currentRef, {
-      followingCount: Math.max(0, (targetDoc.data()?.followingCount ?? 1) - 1),
+      followingCount: Math.max(0, (currentDoc.data()?.followingCount ?? 1) - 1),
       updatedAt: new Date(),
     });
 

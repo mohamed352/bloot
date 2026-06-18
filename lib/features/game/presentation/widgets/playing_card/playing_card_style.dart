@@ -46,10 +46,7 @@ class PlayingCardStyle {
       fontWeight: FontWeight.w700,
       height: 1.0,
     ),
-    suitTextStyle: TextStyle(
-      fontSize: 10,
-      height: 1.0,
-    ),
+    suitTextStyle: TextStyle(fontSize: 10, height: 1.0),
     centerSuitSize: 28,
     centerSuitOpacity: 0.15,
     redColor: Color(0xFFD32F2F),

@@ -1,3 +1,24 @@
+/// Domain entity representing a player in a stream.
+class StreamPlayer {
+  const StreamPlayer({
+    required this.uid,
+    required this.name,
+    this.avatarUrl,
+    required this.agoraUid,
+    this.team = 'A',
+    this.isCameraOn = false,
+    this.isMicOn = true,
+  });
+
+  final String uid;
+  final String name;
+  final String? avatarUrl;
+  final int agoraUid;
+  final String team;
+  final bool isCameraOn;
+  final bool isMicOn;
+}
+
 /// Domain entity representing a discoverable stream.
 class DiscoverStream {
   const DiscoverStream({
@@ -9,6 +30,9 @@ class DiscoverStream {
     this.category = 'Baloot',
     this.isLive = true,
     this.isPremium = false,
+    this.agoraChannelName,
+    this.roomId,
+    this.players = const [],
   });
 
   final String id;
@@ -19,16 +43,29 @@ class DiscoverStream {
   final String category;
   final bool isLive;
   final bool isPremium;
+  final String? agoraChannelName;
+  final String? roomId;
+  final List<StreamPlayer> players;
 }
 
 class StreamChatMessage {
   const StreamChatMessage({
-    required this.user,
+    required this.id,
+    required this.senderUid,
+    required this.senderName,
+    this.senderAvatar,
     required this.text,
+    this.type = 'text',
+    this.createdAt,
     this.isMe = false,
   });
 
-  final String user;
+  final String id;
+  final String senderUid;
+  final String senderName;
+  final String? senderAvatar;
   final String text;
+  final String type;
+  final DateTime? createdAt;
   final bool isMe;
 }

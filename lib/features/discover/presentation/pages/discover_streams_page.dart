@@ -50,6 +50,69 @@ class DiscoverStreamsPage extends StatelessWidget {
           body: SafeArea(
             child: Column(
               children: [
+                // Public rooms banner
+                Padding(
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: AppSpacing.screenHorizontal,
+                    vertical: AppSpacing.md,
+                  ),
+                  child: GestureDetector(
+                    onTap: () => context.pushNamed(RouteNames.publicRooms),
+                    child: Container(
+                      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+                      decoration: BoxDecoration(
+                        color: ColorManager.darkSurface,
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                        border: Border.all(color: ColorManager.darkBorderSoft),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: ColorManager.primary.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(AppRadius.md),
+                            ),
+                            child: const Icon(
+                              Icons.meeting_room_rounded,
+                              color: ColorManager.primary,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'public_rooms'.tr(),
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: ColorManager.darkTextPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'join_table'.tr(),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: ColorManager.darkTextSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            color: ColorManager.darkTextMuted,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
                 // Search bar
                 Padding(
                   padding: const EdgeInsets.all(AppSpacing.lg),

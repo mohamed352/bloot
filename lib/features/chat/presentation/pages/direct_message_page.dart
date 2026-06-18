@@ -13,8 +13,14 @@ import 'package:bloot/features/chat/presentation/cubit/chat_cubit.dart';
 import 'package:bloot/features/chat/presentation/cubit/chat_state.dart';
 
 class DirectMessagePage extends StatefulWidget {
-  const DirectMessagePage({super.key, required this.userId});
-  final String userId;
+  const DirectMessagePage({
+    super.key,
+    required this.conversationId,
+    this.conversation,
+  });
+
+  final String conversationId;
+  final ChatConversation? conversation;
 
   @override
   State<DirectMessagePage> createState() => _DirectMessagePageState();
@@ -39,7 +45,7 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
   void _sendMessage() {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
-    context.read<ChatCubit>().sendMessage(widget.userId, text);
+    context.read<ChatCubit>().sendMessage(widget.conversationId, text);
     _controller.clear();
   }
 
@@ -51,6 +57,8 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
 
   @override
   Widget build(BuildContext context) {
+    final conversation = widget.conversation;
+
     return BlocConsumer<ChatCubit, ChatState>(
       listener: (context, state) {
         state.whenOrNull(
@@ -77,8 +85,8 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
             ),
             title: Row(
               children: [
-                const CachedAvatar(
-                  imageUrl: 'https://i.pravatar.cc/150?img=12',
+                CachedAvatar(
+                  imageUrl: conversation?.avatarUrl,
                   size: 36,
                   borderRadius: 18,
                 ),
@@ -87,9 +95,9 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Khalid Al-Rashid',
-                        style: TextStyle(
+                      Text(
+                        conversation?.name ?? '',
+                        style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
@@ -285,7 +293,7 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
                     children: _quickActions.map((action) {
                       return GestureDetector(
                         onTap: () => context.read<ChatCubit>().sendMessage(
-                          widget.userId,
+                          widget.conversationId,
                           action,
                         ),
                         child: Container(

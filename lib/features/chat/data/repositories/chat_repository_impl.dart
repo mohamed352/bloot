@@ -19,17 +19,32 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
+  Stream<List<ChatMessage>> watchMessages(String conversationId) {
+    return _remoteDataSource
+        .watchMessages(conversationId)
+        .map((models) => models.map((m) => m.toEntity()).toList());
+  }
+
+  @override
   Future<List<ChatMessage>> getMessages(String conversationId) async {
     final models = await _remoteDataSource.getMessages(conversationId);
     return models.map((m) => m.toEntity()).toList();
   }
 
   @override
-  Future<List<ChatMessage>> sendMessage(
-    String conversationId,
-    String message,
-  ) async {
-    final models = await _remoteDataSource.sendMessage(conversationId, message);
+  Future<void> sendMessage(String conversationId, String message) async {
+    await _remoteDataSource.sendMessage(conversationId, message);
+  }
+
+  @override
+  Future<List<ChatConversation>> searchUsers(String query) async {
+    final models = await _remoteDataSource.searchUsers(query);
     return models.map((m) => m.toEntity()).toList();
+  }
+
+  @override
+  Future<ChatConversation> createDirectConversation(String otherUserId) async {
+    final model = await _remoteDataSource.createDirectConversation(otherUserId);
+    return model.toEntity();
   }
 }

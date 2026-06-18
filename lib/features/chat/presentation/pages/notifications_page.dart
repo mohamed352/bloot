@@ -135,11 +135,7 @@ class _NotificationTile extends StatelessWidget {
                 color: colors.primary.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                item.icon,
-                color: colors.primary,
-                size: 22,
-              ),
+              child: Icon(item.icon, color: colors.primary, size: 22),
             ),
             const SizedBox(width: AppSpacing.lg),
             Expanded(
@@ -159,18 +155,12 @@ class _NotificationTile extends StatelessWidget {
                     item.body,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: colors.textSecondary,
-                    ),
+                    style: TextStyle(fontSize: 13, color: colors.textSecondary),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     item.time,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: colors.textMuted,
-                    ),
+                    style: TextStyle(fontSize: 11, color: colors.textMuted),
                   ),
                 ],
               ),

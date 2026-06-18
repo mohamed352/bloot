@@ -21,6 +21,7 @@ abstract class RouteNames {
   static const String watchStream = 'watchStream';
   static const String tournamentDetail = 'tournamentDetail';
   static const String tournamentBracket = 'tournamentBracket';
+  static const String tournamentResults = 'tournamentResults';
   static const String directMessage = 'directMessage';
   static const String roomInvitation = 'roomInvitation';
   static const String editProfile = 'editProfile';
@@ -31,10 +32,22 @@ abstract class RouteNames {
   static const String joinRoom = 'joinRoom';
   static const String notifications = 'notifications';
   static const String newMessage = 'newMessage';
+  static const String spectate = 'spectate';
+  static const String publicRooms = 'publicRooms';
   static const String forceUpdate = 'forceUpdate';
   static const String maintenance = 'maintenance';
   static const String error = 'error';
   static const String offline = 'offline';
+  static const String loading = 'loading';
+  static const String success = 'success';
+
+  // Settings Sub-pages
+  static const String languageSettings = 'languageSettings';
+  static const String notificationSettings = 'notificationSettings';
+  static const String privacySettings = 'privacySettings';
+  static const String audioSettings = 'audioSettings';
+  static const String accountSettings = 'accountSettings';
+  static const String aboutSettings = 'aboutSettings';
 }
 
 abstract class RoutePaths {
@@ -55,7 +68,8 @@ abstract class RoutePaths {
   static const String watchStream = '/stream/:id';
   static const String tournamentDetail = '/tournament/:id';
   static const String tournamentBracket = '/tournament/:id/bracket';
-  static const String directMessage = '/chat/:userId';
+  static const String tournamentResults = '/tournament/:id/results';
+  static const String directMessage = '/chat/:conversationId';
   static const String roomInvitation = '/room-invite/:id';
   static const String editProfile = '/edit-profile';
   static const String userProfile = '/user/:userId';
@@ -65,8 +79,20 @@ abstract class RoutePaths {
   static const String joinRoom = '/join-room';
   static const String notifications = '/notifications';
   static const String newMessage = '/new-message';
+  static const String spectate = '/spectate/:id';
+  static const String publicRooms = '/public-rooms';
   static const String forceUpdate = '/force-update';
   static const String maintenance = '/maintenance';
   static const String error = '/error';
   static const String offline = '/offline';
+  static const String loading = '/loading';
+  static const String success = '/success';
+
+  // Settings Sub-pages
+  static const String languageSettings = '/settings/language';
+  static const String notificationSettings = '/settings/notifications';
+  static const String privacySettings = '/settings/privacy';
+  static const String audioSettings = '/settings/audio';
+  static const String accountSettings = '/settings/account';
+  static const String aboutSettings = '/settings/about';
 }

@@ -56,6 +56,7 @@ export interface GameEvent {
 export interface GameDocument {
   id: string;
   roomId: string;
+  agoraChannelName?: string;
   status: GameStatus;
   gameType: GameType | null;
   targetScore: number;
@@ -75,6 +76,8 @@ export interface GameDocument {
   roundTricksB: number;
   currentTrick: CurrentTrick;
   players: Record<string, PlayerState>;
+  /** Resolved bonus points after bonus claim phase (Hokm only). */
+  resolvedBonuses?: { teamA: number; teamB: number } | null;
   gameLog: GameEvent[];
   createdAt: Timestamp;
   updatedAt: Timestamp;

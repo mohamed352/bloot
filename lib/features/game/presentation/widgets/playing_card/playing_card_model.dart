@@ -18,13 +18,13 @@ enum CardSuit {
   /// Returns true for red suits (hearts & diamonds).
   bool get isRed => this == hearts || this == diamonds;
 
-  /// Parses a suit from its Unicode symbol.
+  /// Parses a suit from its Unicode symbol or ASCII code.
   static CardSuit fromSymbol(String symbol) {
     return switch (symbol) {
-      '♠' => CardSuit.spades,
-      '♥' => CardSuit.hearts,
-      '♦' => CardSuit.diamonds,
-      '♣' => CardSuit.clubs,
+      '♠' || 'S' || 's' => CardSuit.spades,
+      '♥' || 'H' || 'h' => CardSuit.hearts,
+      '♦' || 'D' || 'd' => CardSuit.diamonds,
+      '♣' || 'C' || 'c' => CardSuit.clubs,
       _ => throw FormatException('Invalid suit symbol: $symbol'),
     };
   }

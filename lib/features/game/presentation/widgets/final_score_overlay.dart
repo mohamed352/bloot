@@ -40,7 +40,9 @@ class FinalScoreOverlay extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                isWinner ? Icons.emoji_events_rounded : Icons.sentiment_dissatisfied_rounded,
+                isWinner
+                    ? Icons.emoji_events_rounded
+                    : Icons.sentiment_dissatisfied_rounded,
                 size: 64,
                 color: isWinner ? colors.secondary : colors.textMuted,
               ),
@@ -78,11 +80,7 @@ class FinalScoreOverlay extends StatelessWidget {
                       score: teamAScore,
                       color: colors.primary,
                     ),
-                    Container(
-                      width: 1,
-                      height: 60,
-                      color: colors.divider,
-                    ),
+                    Container(width: 1, height: 60, color: colors.divider),
                     _TeamScore(
                       label: LocaleKeys.them.tr(),
                       score: teamBScore,
@@ -92,10 +90,7 @@ class FinalScoreOverlay extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.xxxl),
-              AppButton(
-                text: 'Rematch',
-                onPressed: onRematch,
-              ),
+              AppButton(text: 'Rematch', onPressed: onRematch),
               const SizedBox(height: AppSpacing.lg),
               AppButton(
                 text: LocaleKeys.go_home.tr(),

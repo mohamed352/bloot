@@ -72,8 +72,20 @@ export function validateBid(
 }
 
 /**
+ * Returns the bidding order (seat indices) for a given dealer.
+ * Bidding starts with the player to the dealer's right and proceeds clockwise.
+ */
+function getBiddingOrder(dealerIndex: number): number[] {
+  return [1, 2, 3, 4].map((offset) => (dealerIndex + offset) % 4);
+}
+
+/**
  * Checks if all players have bid, and resolves the bidding.
  * Returns the game type and bidder, or indicates a re-deal is needed.
+ *
+ * Winner rules (per docs/game_rules.md):
+ * - Hokm: first Hokm bidder in clockwise bidding order wins.
+ * - Sun: last Sun bidder in clockwise bidding order wins.
  */
 export function resolveBidding(game: GameDocument): {
   resolved: boolean;
@@ -96,10 +108,12 @@ export function resolveBidding(game: GameDocument): {
     return { resolved: true, redeal: true };
   }
 
-  // Find Hokm bidders (first one wins if multiple)
+  const biddingOrder = getBiddingOrder(game.dealerIndex);
+
+  // Find Hokm bidders (first one in bidding order wins)
   const hokmBidders = allBids
     .filter((b) => b.bid === 'hokm')
-    .sort((a, b) => a.seatIndex - b.seatIndex);
+    .sort((a, b) => biddingOrder.indexOf(a.seatIndex) - biddingOrder.indexOf(b.seatIndex));
 
   if (hokmBidders.length > 0) {
     const winner = hokmBidders[0];
@@ -110,10 +124,10 @@ export function resolveBidding(game: GameDocument): {
     };
   }
 
-  // Find Sun bidders (last one wins)
+  // Find Sun bidders (last one in bidding order wins)
   const sunBidders = allBids
     .filter((b) => b.bid === 'sun')
-    .sort((a, b) => a.seatIndex - b.seatIndex);
+    .sort((a, b) => biddingOrder.indexOf(a.seatIndex) - biddingOrder.indexOf(b.seatIndex));
 
   if (sunBidders.length > 0) {
     const winner = sunBidders[sunBidders.length - 1];
@@ -135,8 +149,7 @@ export function applyBiddingResult(
   result: Exclude<ReturnType<typeof resolveBidding>, { resolved: false }>,
 ): GameDocument {
   if (result.redeal) {
-    // Rotate dealer and re-deal
-    game.dealerIndex = (game.dealerIndex + 1) % 4;
+    // All four players passed: re-deal by the same dealer (per Baloot rules)
     game.status = 'dealing';
     return game;
   }

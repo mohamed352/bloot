@@ -6,18 +6,21 @@ import { createTournamentMatchRoom } from '../engine/createTournamentMatchRoom';
 
 interface Match {
   matchId: string;
-  playerAUid?: string;
+  playerAUid?: string | null;
   playerAName?: string;
-  playerBUid?: string;
+  playerBUid?: string | null;
   playerBName?: string;
-  winnerUid?: string;
+  winnerUid?: string | null;
+  winnerTeamPlayerIds?: string[];
   playerAScore?: number;
   playerBScore?: number;
   status?: string;
-  nextMatchId?: string;
+  nextMatchId?: string | null;
   roundIndex?: number;
-  roomId?: string;
+  roomId?: string | null;
   gameId?: string | null;
+  teamAPlayerIds?: string[];
+  teamBPlayerIds?: string[];
 }
 
 type TournamentTransactionResult =
@@ -27,9 +30,8 @@ type TournamentTransactionResult =
       type: 'advance';
       tournamentId: string;
       matchId: string;
-      playerAUid: string;
-      playerBUid: string;
-      participantPool: string[];
+      teamAPlayerIds: string[];
+      teamBPlayerIds: string[];
     }
   | { type: 'waiting' };
 
@@ -122,13 +124,16 @@ async function handleTournamentGameEnd(
     if (matchIndex === -1) return null;
 
     const match = matches[matchIndex];
+    const teamA = match.teamAPlayerIds ?? [];
+    const teamB = match.teamBPlayerIds ?? [];
 
-    // Determine winning captain
-    const winnerUid = winningTeam === 'A' ? match.playerAUid : match.playerBUid;
+    // Determine winning team (full player ids).
+    const winningTeamIds = winningTeam === 'A' ? teamA : teamB;
+    const winnerUid = winningTeamIds[0] || null;
     const winnerName = winningTeam === 'A' ? match.playerAName : match.playerBName;
 
-    if (!winnerUid) {
-      console.error(`Tournament match ${matchId} has no winner UID`);
+    if (!winnerUid || winningTeamIds.length !== 2) {
+      console.error(`Tournament match ${matchId} has no valid winning team`);
       return null;
     }
     const finalWinnerName = winnerName || 'Winner';
@@ -136,6 +141,7 @@ async function handleTournamentGameEnd(
 
     // Update match with result
     match.winnerUid = winnerUid;
+    match.winnerTeamPlayerIds = winningTeamIds;
     match.playerAScore = teamAScore;
     match.playerBScore = teamBScore;
     match.status = 'finished';
@@ -147,7 +153,7 @@ async function handleTournamentGameEnd(
       return { type: 'final' as const, tournamentId, championUid: safeWinnerUid, championName: finalWinnerName };
     }
 
-    // Advance winner to next match
+    // Advance winning team to next match
     const nextMatchIndex = matches.findIndex((m) => m.matchId === match.nextMatchId);
     if (nextMatchIndex === -1) {
       console.error(`Next match ${match.nextMatchId} not found`);
@@ -158,14 +164,16 @@ async function handleTournamentGameEnd(
     const nextMatch = matches[nextMatchIndex];
 
     // Slot winner into next match
-    if (!nextMatch.playerAUid) {
+    if (!nextMatch.teamAPlayerIds || nextMatch.teamAPlayerIds.length === 0) {
+      nextMatch.teamAPlayerIds = winningTeamIds;
       nextMatch.playerAUid = winnerUid;
       nextMatch.playerAName = winnerName;
-    } else if (!nextMatch.playerBUid) {
+    } else if (!nextMatch.teamBPlayerIds || nextMatch.teamBPlayerIds.length === 0) {
+      nextMatch.teamBPlayerIds = winningTeamIds;
       nextMatch.playerBUid = winnerUid;
       nextMatch.playerBName = winnerName;
     } else {
-      console.error(`Next match ${nextMatch.matchId} already has both players`);
+      console.error(`Next match ${nextMatch.matchId} already has both teams`);
       transaction.update(tournamentRef, { matches, updatedAt: new Date() });
       return null;
     }
@@ -174,7 +182,9 @@ async function handleTournamentGameEnd(
     let currentRound = (tournamentData.currentRound as number) ?? 0;
     const roundMatches = matches.filter((m) => m.roundIndex === currentRound);
     const roundFinished = roundMatches.every((m) => m.status === 'finished');
-    const nextMatchFull = !!nextMatch.playerAUid && !!nextMatch.playerBUid;
+    const nextMatchFull =
+      (nextMatch.teamAPlayerIds?.length ?? 0) > 0 &&
+      (nextMatch.teamBPlayerIds?.length ?? 0) > 0;
     if (roundFinished && nextMatchFull) {
       currentRound++;
     }
@@ -186,15 +196,12 @@ async function handleTournamentGameEnd(
     });
 
     if (nextMatchFull) {
-      const playerAUid = nextMatch.playerAUid!;
-      const playerBUid = nextMatch.playerBUid!;
       return {
         type: 'advance' as const,
         tournamentId,
         matchId: nextMatch.matchId,
-        playerAUid,
-        playerBUid,
-        participantPool: (tournamentData.participantIds as string[]) ?? [],
+        teamAPlayerIds: nextMatch.teamAPlayerIds!,
+        teamBPlayerIds: nextMatch.teamBPlayerIds!,
       };
     }
 
@@ -226,9 +233,8 @@ async function handleTournamentGameEnd(
       const newRoomId = await createTournamentMatchRoom({
         tournamentId: transactionResult.tournamentId,
         matchId: transactionResult.matchId,
-        playerAUid: transactionResult.playerAUid,
-        playerBUid: transactionResult.playerBUid,
-        participantPool: transactionResult.participantPool,
+        teamAPlayerIds: transactionResult.teamAPlayerIds,
+        teamBPlayerIds: transactionResult.teamBPlayerIds,
       });
 
       nextMatch.roomId = newRoomId;

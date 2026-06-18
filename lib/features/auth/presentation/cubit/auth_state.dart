@@ -8,7 +8,7 @@ part 'auth_state.freezed.dart';
 class AuthState with _$AuthState {
   const factory AuthState.initial() = AuthInitial;
   const factory AuthState.loading() = AuthLoading;
-  const factory AuthState.otpSent() = AuthOtpSent;
+  const factory AuthState.otpSent({required String phoneNumber}) = AuthOtpSent;
   const factory AuthState.otpVerified() = AuthOtpVerified;
   const factory AuthState.profileRequired() = AuthProfileRequired;
   const factory AuthState.authenticated({required User user}) =

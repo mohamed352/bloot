@@ -63,11 +63,7 @@ class RoundScoreOverlay extends StatelessWidget {
                       score: teamAScore,
                       color: colors.primary,
                     ),
-                    Container(
-                      width: 1,
-                      height: 60,
-                      color: colors.divider,
-                    ),
+                    Container(width: 1, height: 60, color: colors.divider),
                     _TeamScore(
                       label: LocaleKeys.them.tr(),
                       score: teamBScore,
@@ -107,10 +103,7 @@ class RoundScoreOverlay extends StatelessWidget {
                     }).toList(),
                   ),
                 const SizedBox(height: AppSpacing.xxl),
-                AppButton(
-                  text: 'next_round'.tr(),
-                  onPressed: onNextRound,
-                ),
+                AppButton(text: 'next_round'.tr(), onPressed: onNextRound),
               ],
             ),
           ),

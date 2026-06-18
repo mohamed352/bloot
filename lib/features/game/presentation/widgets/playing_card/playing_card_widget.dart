@@ -30,10 +30,7 @@ class PlayingCardWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: faceDown ? s.faceDownColor : s.backgroundColor,
         borderRadius: s.borderRadius,
-        border: Border.all(
-          color: s.borderColor,
-          width: s.borderWidth,
-        ),
+        border: Border.all(color: s.borderColor, width: s.borderWidth),
         boxShadow: [s.shadow],
       ),
       clipBehavior: Clip.antiAlias,
@@ -45,10 +42,7 @@ class PlayingCardWidget extends StatelessWidget {
 }
 
 class _FaceUpContent extends StatelessWidget {
-  const _FaceUpContent({
-    required this.card,
-    required this.style,
-  });
+  const _FaceUpContent({required this.card, required this.style});
 
   final PlayingCard card;
   final PlayingCardStyle style;
@@ -120,14 +114,8 @@ class _Corner extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          rank.label,
-          style: style.rankTextStyle.copyWith(color: color),
-        ),
-        Text(
-          suit.symbol,
-          style: style.suitTextStyle.copyWith(color: color),
-        ),
+        Text(rank.label, style: style.rankTextStyle.copyWith(color: color)),
+        Text(suit.symbol, style: style.suitTextStyle.copyWith(color: color)),
       ],
     );
   }
@@ -147,14 +135,10 @@ class _FaceDownContent extends StatelessWidget {
         decoration: BoxDecoration(
           color: style.faceDownPatternColor,
           borderRadius: style.borderRadius * 0.7,
-          border: Border.all(
-            color: style.faceDownColor.withValues(alpha: 0.5),
-          ),
+          border: Border.all(color: style.faceDownColor.withValues(alpha: 0.5)),
         ),
         child: CustomPaint(
-          painter: _DiamondPatternPainter(
-            color: style.faceDownColor,
-          ),
+          painter: _DiamondPatternPainter(color: style.faceDownColor),
         ),
       ),
     );

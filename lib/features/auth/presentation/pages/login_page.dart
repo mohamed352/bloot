@@ -12,6 +12,7 @@ import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:bloot/features/auth/presentation/cubit/auth_state.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
+import 'package:bloot/features/auth/domain/utils/auth_validators.dart';
 
 class _Country {
   const _Country({required this.name, required this.flag, required this.code});
@@ -134,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
         state.whenOrNull(
-          otpSent: () => context.pushNamed(RouteNames.otp),
+          otpSent: (_) => context.pushNamed(RouteNames.otp),
           error: (message) {
             ScaffoldMessenger.of(
               context,
@@ -304,11 +305,7 @@ class _LoginPageState extends State<LoginPage> {
                               isLoading: isLoading,
                               onPressed: isLoading
                                   ? null
-                                  : () {
-                                      final phone =
-                                          '${_selectedCountry.code}${_phoneController.text.trim()}';
-                                      context.read<AuthCubit>().sendOtp(phone);
-                                    },
+                                  : () => _sendCode(context),
                             ),
                             const SizedBox(height: AppSpacing.xxl),
                             // OR CONTINUE WITH divider
@@ -445,9 +442,9 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                 ),
                                 TextButton(
-                                  onPressed: () => context.pushNamed(
-                                    RouteNames.completeProfile,
-                                  ),
+                                  onPressed: isLoading
+                                      ? null
+                                      : () => _sendCode(context),
                                   child: Text(
                                     'sign_up'.tr(),
                                     style: const TextStyle(
@@ -477,5 +474,20 @@ class _LoginPageState extends State<LoginPage> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Coming soon')));
+  }
+
+  void _sendCode(BuildContext context) {
+    final phone = AuthValidators.normalizePhone(
+      _selectedCountry.code,
+      _phoneController.text.trim(),
+    );
+    final error = AuthValidators.validatePhone(phone);
+    if (error != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.tr())));
+      return;
+    }
+    context.read<AuthCubit>().sendOtp(phone);
   }
 }

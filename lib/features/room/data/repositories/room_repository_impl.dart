@@ -26,6 +26,18 @@ class RoomRepositoryImpl implements RoomRepository {
   }
 
   @override
+  Stream<Room> watchRoom(String id) {
+    return _remoteDataSource.watchRoom(id).map((model) => model.toEntity());
+  }
+
+  @override
+  Stream<List<Room>> watchPublicRooms() {
+    return _remoteDataSource.watchPublicRooms().map(
+          (models) => models.map((m) => m.toEntity()).toList(),
+        );
+  }
+
+  @override
   Future<Room> getRoomById(String id) async {
     final model = await _remoteDataSource.getRoomById(id);
     return model.toEntity();
@@ -38,8 +50,57 @@ class RoomRepositoryImpl implements RoomRepository {
   }
 
   @override
-  Future<Room> sendChatMessage(String roomId, String message) async {
-    final model = await _remoteDataSource.sendChatMessage(roomId, message);
+  Future<void> sendChatMessage(String roomId, String message) async {
+    await _remoteDataSource.sendChatMessage(roomId, message);
+  }
+
+  @override
+  Stream<List<RoomChatMessage>> watchChatMessages(String roomId) {
+    return _remoteDataSource
+        .watchChatMessages(roomId)
+        .map((models) => models.map((m) => m.toEntity()).toList());
+  }
+
+  @override
+  Future<void> updatePlayerMediaState(
+    String roomId, {
+    required bool isMicOn,
+    required bool isCameraOn,
+  }) async {
+    await _remoteDataSource.updatePlayerMediaState(
+      roomId,
+      isMicOn: isMicOn,
+      isCameraOn: isCameraOn,
+    );
+  }
+
+  @override
+  Future<Room> joinRoomByCode(String inviteCode) async {
+    final model = await _remoteDataSource.joinRoomByCode(inviteCode);
+    return model.toEntity();
+  }
+
+  @override
+  Future<String> startGame(String roomId) async {
+    return _remoteDataSource.startGame(roomId);
+  }
+
+  @override
+  Future<void> leaveRoom(String roomId) => _remoteDataSource.leaveRoom(roomId);
+
+  @override
+  Future<void> kickPlayer(String roomId, String targetUid) =>
+      _remoteDataSource.kickPlayer(roomId, targetUid);
+
+  @override
+  Future<Room> startStream(String roomId) async {
+    final model = await _remoteDataSource.startStream(roomId);
+    return model.toEntity();
+  }
+
+  @override
+  Future<Room> endStream(String roomId) async {
+    final model = await _remoteDataSource.endStream(roomId);
     return model.toEntity();
   }
 }

@@ -1,0 +1,1 @@
+import{j as a}from"./query-srg42uGd.js";import{L as t,C as i,a as n,b as s,P as r,c as o,p as l,d as p,e as m,i as u}from"./index-wNZzQ04d.js";import"./react-CsvPsKmv.js";i.register(n,s,r,o,l,p,m,u);function c(e){return a.jsx(t,{...e})}export{c as default};

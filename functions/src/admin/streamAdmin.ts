@@ -120,6 +120,22 @@ export const warnHost = functions.https.onCall(async (request) => {
   }
   const hostUid = streamDoc.data()!.hostUid as string;
 
+  // Write to the host's per-user notifications so it appears in the mobile app.
+  const userNotificationRef = db
+    .collection('users')
+    .doc(hostUid)
+    .collection('notifications')
+    .doc();
+  await userNotificationRef.set({
+    uid: hostUid,
+    type: 'system',
+    title: 'Stream Warning',
+    body: 'A moderator has warned you about your stream content. Please follow community guidelines.',
+    read: false,
+    createdAt: new Date(),
+  });
+
+  // Also keep a top-level admin-visible copy.
   const notificationRef = db.collection('notifications').doc();
   await notificationRef.set({
     uid: hostUid,

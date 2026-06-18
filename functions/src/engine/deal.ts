@@ -10,12 +10,11 @@ import { createDeck, shuffle } from './deck';
  */
 export function dealRound(game: GameDocument): GameDocument {
   const deck = shuffle(createDeck());
-  const seatIndices = ['0', '1', '2', '3'];
   const dealPattern = [5, 4, 4];
   let deckIndex = 0;
 
   // Initialize empty hands
-  for (const seat of seatIndices) {
+  for (const seat of ['0', '1', '2', '3']) {
     game.players[seat].hand = [];
     game.players[seat].takenCards = [];
     game.players[seat].tricksWon = 0;
@@ -24,17 +23,23 @@ export function dealRound(game: GameDocument): GameDocument {
     game.players[seat].isReady = false;
   }
 
-  // Deal according to pattern
+  // Deal counter-clockwise in rounds of 5 + 4 + 4.
+  // The player to the dealer's right is dealt first; the dealer is dealt last.
+  // For each round, the last card is dealt to the dealer and becomes the face-up card.
+  let faceUpCard: string | null = null;
   for (const count of dealPattern) {
-    for (const seat of seatIndices) {
+    for (let offset = 1; offset <= 4; offset++) {
+      const seat = String((game.dealerIndex + offset) % 4);
       const cards = deck.slice(deckIndex, deckIndex + count);
       game.players[seat].hand.push(...cards);
       deckIndex += count;
+      if (offset === 4) {
+        faceUpCard = cards[cards.length - 1];
+      }
     }
   }
 
-  // The last card (should be dealer's last card) becomes face-up
-  game.faceUpCard = deck[deckIndex - 1];
+  game.faceUpCard = faceUpCard;
 
   // Reset trick state
   game.currentTrick = {

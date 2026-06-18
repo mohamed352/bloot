@@ -7,10 +7,18 @@ import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/constants/app_radius.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
 import 'package:bloot/core/style/colors.dart';
+import 'package:bloot/features/room/domain/entities/room.dart';
 import 'package:bloot/generated/locale_keys.g.dart';
 
 class RoomSettingsBottomSheet extends StatelessWidget {
-  const RoomSettingsBottomSheet({super.key});
+  const RoomSettingsBottomSheet({
+    super.key,
+    required this.room,
+    required this.onLeave,
+  });
+
+  final Room room;
+  final VoidCallback onLeave;
 
   @override
   Widget build(BuildContext context) {
@@ -54,34 +62,25 @@ class RoomSettingsBottomSheet extends StatelessWidget {
             _buildSettingRow(
               Icons.mic_rounded,
               'voice_chat'.tr(),
-              LocaleKeys.labelOn.tr(),
+              room.voiceEnabled ? LocaleKeys.labelOn.tr() : LocaleKeys.off.tr(),
             ),
-            const Divider(
-              color: ColorManager.darkBorderSoft,
-              height: 16,
-            ),
+            const Divider(color: ColorManager.darkBorderSoft, height: 16),
             _buildSettingRow(
               Icons.videocam_rounded,
               'camera'.tr(),
-              'off'.tr(),
+              room.cameraEnabled ? LocaleKeys.labelOn.tr() : LocaleKeys.off.tr(),
             ),
-            const Divider(
-              color: ColorManager.darkBorderSoft,
-              height: 16,
-            ),
+            const Divider(color: ColorManager.darkBorderSoft, height: 16),
             _buildSettingRow(
               Icons.visibility_rounded,
               'spectators'.tr(),
-              'allowed'.tr(),
+              room.allowSpectators ? 'allowed'.tr() : 'not_allowed'.tr(),
             ),
-            const Divider(
-              color: ColorManager.darkBorderSoft,
-              height: 16,
-            ),
+            const Divider(color: ColorManager.darkBorderSoft, height: 16),
             _buildSettingRow(
               Icons.meeting_room_rounded,
               'room_type'.tr(),
-              'private'.tr(),
+              room.type.name.tr(),
             ),
             const SizedBox(height: AppSpacing.xxl),
             ListTile(
@@ -114,15 +113,49 @@ class RoomSettingsBottomSheet extends StatelessWidget {
               ),
               title: Text(
                 'leave_room'.tr(),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: ColorManager.error,
-                ),
+                style: const TextStyle(fontSize: 14, color: ColorManager.error),
               ),
-              onTap: () => context.pop(),
+              onTap: () {
+                context.pop();
+                _showLeaveConfirmation(context);
+              },
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showLeaveConfirmation(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: ColorManager.darkSurface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'leave_room'.tr(),
+          style: const TextStyle(color: ColorManager.darkTextPrimary),
+        ),
+        content: Text(
+          'leave_room_confirm'.tr(),
+          style: const TextStyle(color: ColorManager.darkTextSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(),
+            child: Text('cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () {
+              context.pop();
+              onLeave();
+            },
+            child: Text(
+              'leave'.tr(),
+              style: const TextStyle(color: ColorManager.error),
+            ),
+          ),
+        ],
       ),
     );
   }

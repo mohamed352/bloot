@@ -83,10 +83,11 @@ export function calculateRoundScore(game: GameDocument): {
   const opponentPoints = biddingTeam === 'A' ? teamBCardPoints : teamACardPoints;
 
   if (bidderPoints <= opponentPoints) {
-    // Bidding team falls: opponents get 152 + all bonuses from BOTH teams
-    const teamABonuses = sumTeamBonuses(game, 'A');
-    const teamBBonuses = sumTeamBonuses(game, 'B');
-    const totalBonuses = teamABonuses + teamBBonuses;
+    // Bidding team falls: opponents get 152 + all raw bonuses from BOTH teams.
+    // We intentionally use the raw claimed bonuses here because the claim-resolution
+    // step nullifies the falling team's bonuses, but the rules award every claimed
+    // bonus to the winning side when the bidding team falls.
+    const totalBonuses = sumTeamBonuses(game, 'A') + sumTeamBonuses(game, 'B');
 
     return {
       teamAPoints: biddingTeam === 'A' ? 0 : 152 + totalBonuses,
@@ -95,9 +96,9 @@ export function calculateRoundScore(game: GameDocument): {
     };
   }
 
-  // Both teams keep their points including their own valid bonuses
-  const teamABonuses = sumTeamBonuses(game, 'A');
-  const teamBBonuses = sumTeamBonuses(game, 'B');
+  // Both teams keep their points including their own valid bonuses.
+  // Use pre-resolved bonus points if the bonus claim phase ran; otherwise sum raw claims.
+  const { teamABonuses, teamBBonuses } = getEffectiveBonuses(game);
 
   return {
     teamAPoints: teamACardPoints + teamABonuses,
@@ -114,6 +115,19 @@ function sumTeamBonuses(game: GameDocument, team: 'A' | 'B'): number {
     }
   }
   return sum;
+}
+
+function getEffectiveBonuses(game: GameDocument): { teamABonuses: number; teamBBonuses: number } {
+  if (game.resolvedBonuses) {
+    return {
+      teamABonuses: game.resolvedBonuses.teamA,
+      teamBBonuses: game.resolvedBonuses.teamB,
+    };
+  }
+  return {
+    teamABonuses: sumTeamBonuses(game, 'A'),
+    teamBBonuses: sumTeamBonuses(game, 'B'),
+  };
 }
 
 /**

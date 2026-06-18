@@ -13,5 +13,7 @@ class RoomState with _$RoomState {
     @Default(false) bool chatOpen,
   }) = RoomLoaded;
   const factory RoomState.created({required Room room}) = RoomCreated;
+  const factory RoomState.gameStarted({required String gameId}) = RoomGameStarted;
+  const factory RoomState.publicListLoaded({required List<Room> rooms}) = RoomPublicListLoaded;
   const factory RoomState.error({required String message}) = RoomError;
 }

@@ -69,7 +69,8 @@ class ChatListPage extends StatelessWidget {
                             Icons.edit_rounded,
                             color: ColorManager.primary,
                           ),
-                          onPressed: () => context.pushNamed(RouteNames.newMessage),
+                          onPressed: () =>
+                              context.pushNamed(RouteNames.newMessage),
                         ),
                       ),
                     ],
@@ -138,7 +139,8 @@ class ChatListPage extends StatelessWidget {
                         chat: chat,
                         onTap: () => context.pushNamed(
                           RouteNames.directMessage,
-                          pathParameters: {'userId': chat.id},
+                          pathParameters: {'conversationId': chat.id},
+                          extra: chat,
                         ),
                       );
                     },

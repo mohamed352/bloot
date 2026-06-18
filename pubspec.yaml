@@ -15,6 +15,7 @@ dependencies:
 
   # Immutability & Serialization
   freezed_annotation: ^3.1.0
+  json_annotation: ^4.11.0
 
   # Dependency Injection
   get_it: ^9.2.0
@@ -42,12 +43,32 @@ dependencies:
   connectivity_plus: ^6.1.5
   image_picker: ^1.2.1
   intl: ^0.20.2
+  package_info_plus: ^8.3.0
 
   # Firebase
   firebase_core: ^4.7.0
   firebase_auth: ^6.4.0
   cloud_firestore: ^6.3.0
   firebase_storage: ^13.3.0
+  cloud_functions: ^6.2.0
+  firebase_messaging: ^16.2.0
+  firebase_app_check: ^0.4.0
+  firebase_crashlytics: ^5.0.0
+  firebase_performance: ^0.11.0
+  firebase_remote_config: ^6.0.0
+
+  # Voice/Video
+  agora_rtc_engine: ^6.5.4
+
+  # Share
+  share_plus: ^10.0.0
+
+  # Deep Links / URLs
+  app_links: ^6.4.0
+  url_launcher: ^6.0.0
+
+  # Audio
+  audioplayers: ^6.4.0
 
 dev_dependencies:
   flutter_test:
@@ -57,8 +78,8 @@ dev_dependencies:
   injectable_generator: ^2.6.2
   freezed: ^3.2.3
   json_serializable: ^6.9.0
-  bloc_test: any
-  mocktail: any
+  bloc_test: ^10.0.0
+  mocktail: ^1.0.5
   integration_test:
     sdk: flutter
   test: ^1.29.0
@@ -69,3 +90,4 @@ flutter:
     - assets/translations/
     - assets/images/
     - assets/icons/
+    - assets/sounds/

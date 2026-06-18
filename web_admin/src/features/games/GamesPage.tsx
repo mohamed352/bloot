@@ -15,13 +15,13 @@ import type { Game } from '../../types';
 const tabs: { label: string; value?: string }[] = [
   { label: 'All' },
   { label: 'Playing', value: 'playing' },
-  { label: 'Completed', value: 'completed' },
+  { label: 'Completed', value: 'gameEnd' },
 ];
 
 const statusVariant: Record<string, 'default' | 'success' | 'warning' | 'danger' | 'info'> = {
   waiting: 'warning',
   playing: 'success',
-  completed: 'default',
+  gameEnd: 'default',
   cancelled: 'danger',
 };
 

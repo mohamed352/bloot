@@ -17,3 +17,18 @@ class RoomNotFoundException extends RoomException {
   const RoomNotFoundException()
     : super('Room not found', code: 'ROOM_NOT_FOUND');
 }
+
+class AlreadyInRoomException extends RoomException {
+  const AlreadyInRoomException()
+    : super('You are already in this room', code: 'ALREADY_IN_ROOM');
+}
+
+class PlayerNotInRoomException extends RoomException {
+  const PlayerNotInRoomException()
+    : super('Player not in room', code: 'PLAYER_NOT_IN_ROOM');
+}
+
+class UnauthenticatedException extends RoomException {
+  const UnauthenticatedException()
+    : super('User not authenticated', code: 'UNAUTHENTICATED');
+}

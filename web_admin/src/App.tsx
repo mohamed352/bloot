@@ -33,18 +33,22 @@ export function App() {
       <Route path="/login" element={<Login />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/users" element={<UsersPage />} />
-        <Route path="/reports" element={<ReportsPage />} />
-        <Route path="/tournaments" element={<TournamentsPage />} />
-        <Route path="/games" element={<GamesPage />} />
-        <Route path="/rooms" element={<RoomsPage />} />
-        <Route path="/streams" element={<StreamsPage />} />
-        <Route path="/economy" element={<EconomyPage />} />
-        <Route path="/achievements" element={<AchievementsPage />} />
-        <Route path="/leaderboards" element={<LeaderboardsPage />} />
+        <Route element={<RoleRoute requiredPermission="moderate" />}>
+          <Route path="/users" element={<UsersPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/streams" element={<StreamsPage />} />
+        </Route>
         <Route element={<RoleRoute requiredPermission="manage" />}>
+          <Route path="/tournaments" element={<TournamentsPage />} />
+          <Route path="/economy" element={<EconomyPage />} />
+          <Route path="/achievements" element={<AchievementsPage />} />
+          <Route path="/leaderboards" element={<LeaderboardsPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
+        </Route>
+        <Route element={<RoleRoute requiredPermission="view" />}>
+          <Route path="/games" element={<GamesPage />} />
+          <Route path="/rooms" element={<RoomsPage />} />
         </Route>
         <Route element={<RoleRoute requiredPermission="super" />}>
           <Route path="/settings" element={<SettingsPage />} />

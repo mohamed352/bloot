@@ -7,9 +7,8 @@ import 'package:bloot/features/tournament/domain/repositories/tournament_reposit
 
 @LazySingleton(as: TournamentRepository)
 class TournamentRepositoryImpl implements TournamentRepository {
-  TournamentRepositoryImpl({
-    required TournamentRemoteDataSource remoteDataSource,
-  }) : _remoteDataSource = remoteDataSource;
+  TournamentRepositoryImpl({required TournamentRemoteDataSource remoteDataSource})
+    : _remoteDataSource = remoteDataSource;
 
   final TournamentRemoteDataSource _remoteDataSource;
 
@@ -17,5 +16,22 @@ class TournamentRepositoryImpl implements TournamentRepository {
   Future<List<Tournament>> getTournaments() async {
     final models = await _remoteDataSource.getTournaments();
     return models.map((m) => m.toEntity()).toList();
+  }
+
+  @override
+  Future<Tournament?> getTournamentById(String id) async {
+    final model = await _remoteDataSource.getTournamentById(id);
+    return model?.toEntity();
+  }
+
+  @override
+  Stream<Tournament> watchTournament(String id) {
+    return _remoteDataSource.watchTournament(id).map((model) => model.toEntity());
+  }
+
+  @override
+  Future<Tournament> joinTournament(String tournamentId) async {
+    final model = await _remoteDataSource.joinTournament(tournamentId);
+    return model.toEntity();
   }
 }

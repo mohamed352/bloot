@@ -13,51 +13,62 @@ function hashCode(str: string): number {
   return Math.abs(hash);
 }
 
+interface PlayerInfo {
+  uid: string;
+  displayName: string;
+  avatarUrl: string;
+}
+
+async function fetchPlayerInfos(uids: string[]): Promise<PlayerInfo[]> {
+  const uniqueUids = Array.from(new Set(uids.filter(Boolean)));
+  const docs = await Promise.all(uniqueUids.map((uid) => db.collection('users').doc(uid).get()));
+  const infoByUid = new Map<string, PlayerInfo>();
+  docs.forEach((doc) => {
+    const data = doc.data();
+    if (doc.exists && data) {
+      infoByUid.set(doc.id, {
+        uid: doc.id,
+        displayName: String(data.displayName ?? 'Player'),
+        avatarUrl: String(data.avatarUrl ?? ''),
+      });
+    }
+  });
+  return uids.map((uid) =>
+    infoByUid.get(uid) ?? { uid, displayName: 'Player', avatarUrl: '' },
+  );
+}
+
 /**
- * Creates a 4-player room for a tournament match.
+ * Creates a 4-player room for a tournament match using the supplied fixed teams.
  * Returns the created room ID.
  */
 export async function createTournamentMatchRoom({
   tournamentId,
   matchId,
-  playerAUid,
-  playerBUid,
-  participantPool,
+  teamAPlayerIds,
+  teamBPlayerIds,
 }: {
   tournamentId: string;
   matchId: string;
-  playerAUid: string;
-  playerBUid: string;
-  participantPool: string[];
+  teamAPlayerIds: string[];
+  teamBPlayerIds: string[];
 }): Promise<string> {
-  // Get user profiles for the two captains
-  const [userADoc, userBDoc] = await Promise.all([
-    db.collection('users').doc(playerAUid).get(),
-    db.collection('users').doc(playerBUid).get(),
-  ]);
-
-  const userA = userADoc.data();
-  const userB = userBDoc.data();
-
-  // Pick random partners from the remaining participant pool
-  const remaining = participantPool.filter(
-    (uid) => uid !== playerAUid && uid !== playerBUid,
-  );
-
-  // Shuffle remaining to pick random partners
-  for (let i = remaining.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [remaining[i], remaining[j]] = [remaining[j], remaining[i]];
+  if (teamAPlayerIds.length !== 2 || teamBPlayerIds.length !== 2) {
+    throw new Error('Each team must have exactly 2 players');
   }
 
-  const partnerA = remaining[0] ?? playerAUid;
-  const partnerB = remaining[1] ?? playerBUid;
-
-  const teamA = [playerAUid, partnerA];
-  const teamB = [playerBUid, partnerB];
+  const [teamAInfos, teamBInfos] = await Promise.all([
+    fetchPlayerInfos(teamAPlayerIds),
+    fetchPlayerInfos(teamBPlayerIds),
+  ]);
 
   const roomRef = db.collection('rooms').doc();
   const now = new Date();
+
+  const seatA0 = teamAInfos[0];
+  const seatA1 = teamAInfos[1];
+  const seatB0 = teamBInfos[0];
+  const seatB1 = teamBInfos[1];
 
   await roomRef.set({
     id: roomRef.id,
@@ -72,57 +83,57 @@ export async function createTournamentMatchRoom({
     gameSpeed: 'normal',
     players: [
       {
-        uid: playerAUid,
-        displayName: userA?.displayName ?? 'Player A',
-        avatarUrl: userA?.avatarUrl ?? '',
+        uid: seatA0.uid,
+        displayName: seatA0.displayName,
+        avatarUrl: seatA0.avatarUrl,
         team: 'A',
         seatIndex: 0,
         isReady: false,
         isMicOn: true,
         isCameraOn: false,
-        agoraUid: hashCode(playerAUid),
+        agoraUid: hashCode(seatA0.uid),
         joinedAt: now,
       },
       {
-        uid: partnerA,
-        displayName: 'Partner A',
-        avatarUrl: '',
+        uid: seatA1.uid,
+        displayName: seatA1.displayName,
+        avatarUrl: seatA1.avatarUrl,
         team: 'A',
         seatIndex: 1,
         isReady: false,
         isMicOn: true,
         isCameraOn: false,
-        agoraUid: hashCode(partnerA),
+        agoraUid: hashCode(seatA1.uid),
         joinedAt: now,
       },
       {
-        uid: playerBUid,
-        displayName: userB?.displayName ?? 'Player B',
-        avatarUrl: userB?.avatarUrl ?? '',
+        uid: seatB0.uid,
+        displayName: seatB0.displayName,
+        avatarUrl: seatB0.avatarUrl,
         team: 'B',
         seatIndex: 2,
         isReady: false,
         isMicOn: true,
         isCameraOn: false,
-        agoraUid: hashCode(playerBUid),
+        agoraUid: hashCode(seatB0.uid),
         joinedAt: now,
       },
       {
-        uid: partnerB,
-        displayName: 'Partner B',
-        avatarUrl: '',
+        uid: seatB1.uid,
+        displayName: seatB1.displayName,
+        avatarUrl: seatB1.avatarUrl,
         team: 'B',
         seatIndex: 3,
         isReady: false,
         isMicOn: true,
         isCameraOn: false,
-        agoraUid: hashCode(partnerB),
+        agoraUid: hashCode(seatB1.uid),
         joinedAt: now,
       },
     ],
-    playerUids: [...teamA, ...teamB],
-    teamA,
-    teamB,
+    playerUids: [...teamAPlayerIds, ...teamBPlayerIds],
+    teamA: teamAPlayerIds,
+    teamB: teamBPlayerIds,
     readyPlayers: [],
     currentPlayerCount: 4,
     maxPlayers: 4,

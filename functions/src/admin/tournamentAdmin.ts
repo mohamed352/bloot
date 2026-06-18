@@ -85,6 +85,24 @@ export const adminCreateTournament = functions.https.onCall(async (request) => {
   return { success: true, tournamentId: tournamentRef.id } as SuccessResponse & { tournamentId: string };
 });
 
+const ADMIN_UPDATABLE_TOURNAMENT_FIELDS = new Set([
+  'name',
+  'description',
+  'type',
+  'gameType',
+  'maxParticipants',
+  'entryFee',
+  'prizePool',
+  'prizes',
+  'rules',
+  'startDate',
+  'endDate',
+  'registrationDeadline',
+  'imageUrl',
+  'isPremium',
+  'status',
+]);
+
 export const adminUpdateTournament = functions.https.onCall(async (request) => {
   const actorUid = assertAuth(request);
   await verifyPermission(actorUid, 'manage');
@@ -103,12 +121,22 @@ export const adminUpdateTournament = functions.https.onCall(async (request) => {
     if (!tournamentDoc.exists) {
       throw new functions.https.HttpsError('not-found', 'Tournament not found');
     }
-    const payload: Record<string, unknown> = { ...updates, updatedAt: new Date() };
-    ['startDate', 'endDate', 'registrationDeadline'].forEach((key) => {
-      if (payload[key]) {
-        payload[key] = toDate(payload[key]);
+
+    const payload: Record<string, unknown> = { updatedAt: new Date() };
+    for (const [key, value] of Object.entries(updates as Record<string, unknown>)) {
+      if (!ADMIN_UPDATABLE_TOURNAMENT_FIELDS.has(key)) {
+        throw new functions.https.HttpsError(
+          'invalid-argument',
+          `Field '${key}' cannot be updated via adminUpdateTournament.`,
+        );
       }
-    });
+      if (['startDate', 'endDate', 'registrationDeadline'].includes(key) && value) {
+        payload[key] = toDate(value);
+      } else {
+        payload[key] = value;
+      }
+    }
+
     transaction.update(tournamentRef, payload);
   });
 

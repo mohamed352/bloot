@@ -41,6 +41,34 @@ export const resolveReport = functions.https.onCall(async (request) => {
   return { success: true } as SuccessResponse;
 });
 
+export const dismissReport = functions.https.onCall(async (request) => {
+  const actorUid = assertAuth(request);
+  await verifyPermission(actorUid, 'moderate');
+
+  const { reportId } = request.data as { reportId?: string };
+  if (!reportId || typeof reportId !== 'string') {
+    throw new functions.https.HttpsError('invalid-argument', 'Missing reportId');
+  }
+
+  const reportRef = db.collection('reports').doc(reportId);
+  await db.runTransaction(async (transaction) => {
+    const reportDoc = await transaction.get(reportRef);
+    if (!reportDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Report not found');
+    }
+    transaction.update(reportRef, {
+      status: 'dismissed',
+      resolution: 'Dismissed',
+      resolvedBy: actorUid,
+      resolvedAt: new Date(),
+      updatedAt: new Date(),
+    });
+  });
+
+  await logAdminAction(actorUid, 'dismissReport', 'report', reportId, {});
+  return { success: true } as SuccessResponse;
+});
+
 export const escalateReport = functions.https.onCall(async (request) => {
   const actorUid = assertAuth(request);
   await verifyPermission(actorUid, 'moderate');

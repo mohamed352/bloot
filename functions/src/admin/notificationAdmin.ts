@@ -39,6 +39,26 @@ function createNotificationPayload(
   };
 }
 
+function createUserNotificationPayload(
+  uid: string,
+  title: string,
+  body: string,
+  imageUrl?: string,
+  data?: Record<string, string>,
+): Record<string, unknown> {
+  const now = new Date();
+  return {
+    uid,
+    type: 'system',
+    title,
+    body,
+    imageUrl: imageUrl || null,
+    data: data ?? {},
+    read: false,
+    createdAt: now,
+  };
+}
+
 function buildFcmPayload(
   title: string,
   body: string,
@@ -91,6 +111,18 @@ export const sendNotification = functions.https.onCall(async (request) => {
     throw new functions.https.HttpsError('not-found', 'User not found');
   }
 
+  // Write to the per-user subcollection so the mobile app can read it.
+  const userNotificationRef = db.collection('users').doc(uid).collection('notifications').doc();
+  const userNotificationData = createUserNotificationPayload(
+    uid,
+    title,
+    body,
+    imageUrl,
+    data,
+  );
+  await userNotificationRef.set(userNotificationData);
+
+  // Also write a top-level admin-visible notification doc.
   const notificationRef = db.collection('notifications').doc();
   const notificationData = createNotificationPayload(
     uid,
@@ -174,11 +206,17 @@ export const sendBroadcast = functions.https.onCall(async (request) => {
     const batchUids = snapshot.docs.map((d) => d.id);
     recipientCount += batchUids.length;
 
-    // Write notification docs in batches of 500.
+    // Write per-user notification docs and top-level admin-visible docs in batches.
     const notificationRefs: { uid: string; ref: FirebaseFirestore.DocumentReference }[] = [];
     let writeBatch = db.batch();
     let batchCount = 0;
     for (const uid of batchUids) {
+      // Per-user doc (read by mobile app).
+      const userRef = db.collection('users').doc(uid).collection('notifications').doc();
+      writeBatch.set(userRef, createUserNotificationPayload(uid, title, body, imageUrl, data));
+      batchCount++;
+
+      // Top-level admin-visible doc.
       const ref = db.collection('notifications').doc();
       notificationRefs.push({ uid, ref });
       writeBatch.set(
@@ -195,7 +233,8 @@ export const sendBroadcast = functions.https.onCall(async (request) => {
         ),
       );
       batchCount++;
-      if (batchCount === 500) {
+
+      if (batchCount >= 500) {
         await writeBatch.commit();
         writeBatch = db.batch();
         batchCount = 0;
@@ -208,7 +247,7 @@ export const sendBroadcast = functions.https.onCall(async (request) => {
     // Send FCM with a small concurrency limit.
     const fcmResults = await sendFcmToUsers(batchUids, fcmPayload, BROADCAST_FCM_CONCURRENCY);
 
-    // Update notification docs with FCM status in batches.
+    // Update top-level notification docs with FCM status in batches.
     let updateBatch = db.batch();
     batchCount = 0;
     for (const { uid, ref } of notificationRefs) {

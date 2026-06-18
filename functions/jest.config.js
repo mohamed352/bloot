@@ -7,4 +7,12 @@ module.exports = {
   collectCoverageFrom: ['src/**/*.ts', '!src/index.ts', '!src/**/*.d.ts'],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov'],
+  coverageThreshold: {
+    global: {
+      statements: 25,
+      branches: 10,
+      functions: 33,
+      lines: 25,
+    },
+  },
 };

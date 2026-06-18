@@ -25,11 +25,14 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
   }
 
   @override
-  Future<List<StreamChatMessage>> sendChatMessage(
-    String streamId,
-    String message,
-  ) async {
-    final models = await _remoteDataSource.sendChatMessage(streamId, message);
-    return models.map((m) => m.toEntity()).toList();
+  Stream<List<StreamChatMessage>> watchStreamChat(String streamId) {
+    return _remoteDataSource.watchStreamChat(streamId).map(
+      (models) => models.map((m) => m.toEntity()).toList(),
+    );
+  }
+
+  @override
+  Future<void> sendChatMessage(String streamId, String message) async {
+    return _remoteDataSource.sendChatMessage(streamId, message);
   }
 }

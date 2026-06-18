@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop, admin-dashboard-polish]
+  pull_request:
+    branches: [main, master, develop, admin-dashboard-polish]
+
+jobs:
+  analyze-and-test-flutter:
+    name: Analyze & Test Flutter
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.0'
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate code
+        run: dart run build_runner build
+
+      - name: Analyze
+        run: flutter analyze --no-pub
+
+      - name: Test with coverage
+        run: flutter test --no-pub --coverage
+
+      - name: Upload Flutter coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-coverage
+          path: coverage/lcov.info
+
+  build-functions:
+    name: Build Cloud Functions
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./functions
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ./functions/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Test with coverage
+        run: npm test -- --coverage
+
+      - name: Upload Functions coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: functions-coverage
+          path: functions/coverage/lcov.info
+
+  build-web-admin:
+    name: Build Web Admin
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web_admin
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ./web_admin/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build

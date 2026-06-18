@@ -44,4 +44,11 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> signOut() => _remoteDataSource.signOut();
+
+  @override
+  Future<bool> isUsernameAvailable(String username) =>
+      _remoteDataSource.isUsernameAvailable(username);
+
+  @override
+  Future<void> deleteAccount() => _remoteDataSource.deleteAccount();
 }

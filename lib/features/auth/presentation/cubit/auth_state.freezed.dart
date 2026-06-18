@@ -137,12 +137,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function()?  otpSent,TResult Function()?  otpVerified,TResult Function()?  profileRequired,TResult Function( User user)?  authenticated,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( String phoneNumber)?  otpSent,TResult Function()?  otpVerified,TResult Function()?  profileRequired,TResult Function( User user)?  authenticated,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case AuthInitial() when initial != null:
 return initial();case AuthLoading() when loading != null:
 return loading();case AuthOtpSent() when otpSent != null:
-return otpSent();case AuthOtpVerified() when otpVerified != null:
+return otpSent(_that.phoneNumber);case AuthOtpVerified() when otpVerified != null:
 return otpVerified();case AuthProfileRequired() when profileRequired != null:
 return profileRequired();case AuthAuthenticated() when authenticated != null:
 return authenticated(_that.user);case AuthError() when error != null:
@@ -164,12 +164,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function()  otpSent,required TResult Function()  otpVerified,required TResult Function()  profileRequired,required TResult Function( User user)  authenticated,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( String phoneNumber)  otpSent,required TResult Function()  otpVerified,required TResult Function()  profileRequired,required TResult Function( User user)  authenticated,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case AuthInitial():
 return initial();case AuthLoading():
 return loading();case AuthOtpSent():
-return otpSent();case AuthOtpVerified():
+return otpSent(_that.phoneNumber);case AuthOtpVerified():
 return otpVerified();case AuthProfileRequired():
 return profileRequired();case AuthAuthenticated():
 return authenticated(_that.user);case AuthError():
@@ -190,12 +190,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function()?  otpSent,TResult? Function()?  otpVerified,TResult? Function()?  profileRequired,TResult? Function( User user)?  authenticated,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( String phoneNumber)?  otpSent,TResult? Function()?  otpVerified,TResult? Function()?  profileRequired,TResult? Function( User user)?  authenticated,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case AuthInitial() when initial != null:
 return initial();case AuthLoading() when loading != null:
 return loading();case AuthOtpSent() when otpSent != null:
-return otpSent();case AuthOtpVerified() when otpVerified != null:
+return otpSent(_that.phoneNumber);case AuthOtpVerified() when otpVerified != null:
 return otpVerified();case AuthProfileRequired() when profileRequired != null:
 return profileRequired();case AuthAuthenticated() when authenticated != null:
 return authenticated(_that.user);case AuthError() when error != null:
@@ -275,33 +275,67 @@ String toString() {
 
 
 class AuthOtpSent implements AuthState {
-  const AuthOtpSent();
+  const AuthOtpSent({required this.phoneNumber});
   
 
+ final  String phoneNumber;
 
-
+/// Create a copy of AuthState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$AuthOtpSentCopyWith<AuthOtpSent> get copyWith => _$AuthOtpSentCopyWithImpl<AuthOtpSent>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthOtpSent);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthOtpSent&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,phoneNumber);
 
 @override
 String toString() {
-  return 'AuthState.otpSent()';
+  return 'AuthState.otpSent(phoneNumber: $phoneNumber)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class $AuthOtpSentCopyWith<$Res> implements $AuthStateCopyWith<$Res> {
+  factory $AuthOtpSentCopyWith(AuthOtpSent value, $Res Function(AuthOtpSent) _then) = _$AuthOtpSentCopyWithImpl;
+@useResult
+$Res call({
+ String phoneNumber
+});
 
 
+
+
+}
+/// @nodoc
+class _$AuthOtpSentCopyWithImpl<$Res>
+    implements $AuthOtpSentCopyWith<$Res> {
+  _$AuthOtpSentCopyWithImpl(this._self, this._then);
+
+  final AuthOtpSent _self;
+  final $Res Function(AuthOtpSent) _then;
+
+/// Create a copy of AuthState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? phoneNumber = null,}) {
+  return _then(AuthOtpSent(
+phoneNumber: null == phoneNumber ? _self.phoneNumber : phoneNumber // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
 
 /// @nodoc
 

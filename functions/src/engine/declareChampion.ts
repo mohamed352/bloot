@@ -3,11 +3,20 @@ import * as admin from 'firebase-admin';
 
 interface Prize {
   place: string;
-  amount: string;
+  amount: string | number;
+}
+
+function parsePrizeAmount(amount: string | number | undefined): number {
+  if (amount === undefined || amount === null) return 0;
+  if (typeof amount === 'number') return Math.max(0, Math.floor(amount));
+  const parsed = parseInt(String(amount).replace(/[^0-9]/g, ''), 10);
+  return isNaN(parsed) ? 0 : parsed;
 }
 
 /**
  * Declares a tournament champion, distributes prizes, and marks tournament complete.
+ * Currently awards the 1st-place prize; full 1st-4th place distribution requires
+ * bracket state to include runner-up placements.
  */
 export async function declareChampion({
   tournamentId,
@@ -27,34 +36,41 @@ export async function declareChampion({
 
   const tournamentData = tournamentDoc.data()!;
   const prizes: Prize[] = tournamentData.prizes ?? [];
+  const prizePool: number = tournamentData.prizePool ?? parsePrizeAmount(tournamentData.prize);
   const now = new Date();
 
   const batch = db.batch();
 
-  // Distribute prizes
-  for (const prize of prizes) {
-    const amount = parseInt(prize.amount.replace(/[^0-9]/g, ''), 10);
-    if (isNaN(amount) || amount <= 0) continue;
+  // Distribute 1st-place prize to the champion.
+  const firstPlace = prizes.find((p) => p.place === '1st');
+  const firstPlaceAmount = firstPlace
+    ? parsePrizeAmount(firstPlace.amount)
+    : prizePool;
 
-    // For MVP, only the champion gets 1st place prize
-    if (prize.place === '1st') {
-      const userRef = db.collection('users').doc(championUid);
-      batch.update(userRef, {
-        coins: (tournamentData.coins || 0) + amount,
-        updatedAt: now,
-      });
+  if (firstPlaceAmount > 0) {
+    const userRef = db.collection('users').doc(championUid);
+    const userDoc = await userRef.get();
+    const userData = userDoc.data() ?? {};
+    const currentCoins: number = userData.coins ?? 0;
 
-      // Record transaction
-      const txRef = userRef.collection('transactions').doc();
-      batch.set(txRef, {
-        type: 'tournament_prize',
-        amount,
-        tournamentId,
-        tournamentName: tournamentData.name,
-        description: `Won ${prize.place} place in ${tournamentData.name}`,
-        createdAt: now,
-      });
-    }
+    batch.update(userRef, {
+      coins: currentCoins + firstPlaceAmount,
+      updatedAt: now,
+    });
+
+    // Record transaction in the shared coin_transactions collection.
+    const txRef = db.collection('coin_transactions').doc();
+    batch.set(txRef, {
+      uid: championUid,
+      type: 'tournament_prize',
+      amount: firstPlaceAmount,
+      currency: 'coins',
+      status: 'completed',
+      description: `Won 1st place in ${tournamentData.name}`,
+      metadata: { tournamentId, tournamentName: tournamentData.name, place: '1st' },
+      createdAt: now,
+      updatedAt: now,
+    });
   }
 
   // Mark tournament as completed

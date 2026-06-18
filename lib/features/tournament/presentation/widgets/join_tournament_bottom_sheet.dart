@@ -15,12 +15,14 @@ class JoinTournamentBottomSheet extends StatelessWidget {
     required this.entryFee,
     required this.onConfirm,
     required this.onCancel,
+    this.balance,
   });
 
   final String tournamentName;
   final String entryFee;
   final VoidCallback onConfirm;
   final VoidCallback onCancel;
+  final String? balance;
 
   @override
   Widget build(BuildContext context) {
@@ -67,17 +69,20 @@ class JoinTournamentBottomSheet extends StatelessWidget {
             _buildInfoRow(
               icon: Icons.monetization_on_rounded,
               label: 'entry_fee'.tr(),
-              value: entryFee,
+              value: entryFee == '0' || entryFee == 'free_entry'
+                  ? 'free_entry'.tr()
+                  : '$entryFee coins',
               valueColor: ColorManager.secondary,
             ),
-            const SizedBox(height: AppSpacing.md),
-            // Balance row
-            _buildInfoRow(
-              icon: Icons.account_balance_wallet_rounded,
-              label: 'your_balance'.tr(),
-              value: '2,450 coins',
-              valueColor: ColorManager.darkTextPrimary,
-            ),
+            if (balance != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              _buildInfoRow(
+                icon: Icons.account_balance_wallet_rounded,
+                label: 'your_balance'.tr(),
+                value: balance!,
+                valueColor: ColorManager.darkTextPrimary,
+              ),
+            ],
             const SizedBox(height: AppSpacing.lg),
             // Checkbox row
             Row(

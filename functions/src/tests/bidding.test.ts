@@ -104,7 +104,7 @@ describe('resolveBidding', () => {
     expect(result.redeal).toBe(true);
   });
 
-  it('resolves to Hokm with first Hokm bidder', () => {
+  it('resolves to Hokm with first Hokm bidder in bidding order', () => {
     const game = createGameDocument('g1', 'r1', createMockPlayers());
     dealRound(game);
     game.players['0'].bid = 'pass';
@@ -118,7 +118,21 @@ describe('resolveBidding', () => {
     expect(result.bidderIndex).toBe(1);
   });
 
-  it('resolves to Sun with last Sun bidder', () => {
+  it('first Hokm bidder wins by bidding order, not seat index', () => {
+    const game = createGameDocument('g1', 'r1', createMockPlayers());
+    dealRound(game);
+    game.dealerIndex = 3; // bidding order: 0 -> 1 -> 2 -> 3
+    game.players['0'].bid = 'pass';
+    game.players['1'].bid = 'pass';
+    game.players['2'].bid = 'hokm';
+    game.players['3'].bid = 'hokm'; // later in bidding order
+
+    const result = resolveBidding(game);
+    expect(result.gameType).toBe('hokm');
+    expect(result.bidderIndex).toBe(2);
+  });
+
+  it('resolves to Sun with last Sun bidder in bidding order', () => {
     const game = createGameDocument('g1', 'r1', createMockPlayers());
     dealRound(game);
     game.players['0'].bid = 'pass';
@@ -130,6 +144,20 @@ describe('resolveBidding', () => {
     expect(result.resolved).toBe(true);
     expect(result.gameType).toBe('sun');
     expect(result.bidderIndex).toBe(3);
+  });
+
+  it('last Sun bidder wins by bidding order, not seat index', () => {
+    const game = createGameDocument('g1', 'r1', createMockPlayers());
+    dealRound(game);
+    game.dealerIndex = 2; // bidding order: 3 -> 0 -> 1 -> 2
+    game.players['0'].bid = 'sun'; // second in bidding order
+    game.players['1'].bid = 'pass';
+    game.players['2'].bid = 'sun'; // last in bidding order
+    game.players['3'].bid = 'pass';
+
+    const result = resolveBidding(game);
+    expect(result.gameType).toBe('sun');
+    expect(result.bidderIndex).toBe(2);
   });
 
   it('Hokm beats Sun', () => {
@@ -147,13 +175,13 @@ describe('resolveBidding', () => {
 });
 
 describe('applyBiddingResult', () => {
-  it('rotates dealer and sets dealing on redeal', () => {
+  it('preserves dealer and sets dealing on redeal', () => {
     const game = createGameDocument('g1', 'r1', createMockPlayers());
     dealRound(game);
     const oldDealer = game.dealerIndex;
 
     applyBiddingResult(game, { resolved: true, redeal: true });
-    expect(game.dealerIndex).toBe((oldDealer + 1) % 4);
+    expect(game.dealerIndex).toBe(oldDealer);
     expect(game.status).toBe('dealing');
   });
 

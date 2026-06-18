@@ -3,6 +3,7 @@ import { db } from '../config/admin';
 import { requireAppCheck } from '../utils/appCheck';
 import { isCardLegal, playCardOntoTrick } from '../engine/trick';
 import { calculateRoundScore, checkGameEnd } from '../engine/scoring';
+import { buildGameUpdate, deepCloneGame } from '../utils/gameUpdate';
 
 export const playCard = functions.https.onCall(async (request) => {
   if (!request.auth) {
@@ -25,6 +26,7 @@ export const playCard = functions.https.onCall(async (request) => {
     }
 
     const game = gameDoc.data() as any;
+    const originalGame = deepCloneGame(game);
 
     if (game.status !== 'playing') {
       throw new functions.https.HttpsError('failed-precondition', 'Not in playing phase');
@@ -81,9 +83,8 @@ export const playCard = functions.https.onCall(async (request) => {
       game.turnTimerStart = new Date();
     }
 
-    game.updatedAt = new Date();
-
-    transaction.update(gameRef, game);
+    const update = buildGameUpdate(originalGame, game);
+    transaction.update(gameRef, update);
     return {
       success: true,
       trickComplete: result.trickComplete,

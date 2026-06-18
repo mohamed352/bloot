@@ -94,26 +94,56 @@ class BracketMatchCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: Container(
-              padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: 8,
-                vertical: 2,
-              ),
-              decoration: BoxDecoration(
-                color: _statusColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                _statusLabel,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: _statusColor,
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: 8,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: _statusColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  _statusLabel,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: _statusColor,
+                  ),
                 ),
               ),
-            ),
+              const SizedBox(width: AppSpacing.sm),
+              Container(
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: 8,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: ColorManager.darkSectionGray,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.people_rounded,
+                      size: 12,
+                      color: ColorManager.darkTextMuted,
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      '4v4',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: ColorManager.darkTextMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -157,11 +187,7 @@ class BracketMatchCard extends StatelessWidget {
     required String? avatarUrl,
     required bool alignEnd,
   }) {
-    final avatar = CachedAvatar(
-      imageUrl: avatarUrl,
-      size: 32,
-      borderRadius: 8,
-    );
+    final avatar = CachedAvatar(imageUrl: avatarUrl, size: 32, borderRadius: 8);
     final nameWidget = Text(
       name,
       style: const TextStyle(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -11,7 +13,7 @@ import 'package:bloot/generated/locale_keys.g.dart';
 ///
 /// Allows the current bidder to select Sun, Hokm, or Pass,
 /// and choose a trump suit for Hokm.
-class BiddingOverlay extends StatelessWidget {
+class BiddingOverlay extends StatefulWidget {
   const BiddingOverlay({
     super.key,
     required this.currentBidder,
@@ -22,6 +24,49 @@ class BiddingOverlay extends StatelessWidget {
   final String currentBidder;
   final ValueChanged<String> onBid;
   final int timeLeft;
+
+  @override
+  State<BiddingOverlay> createState() => _BiddingOverlayState();
+}
+
+class _BiddingOverlayState extends State<BiddingOverlay> {
+  late int _secondsLeft;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _secondsLeft = widget.timeLeft;
+    _startTimer();
+  }
+
+  @override
+  void didUpdateWidget(covariant BiddingOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentBidder != widget.currentBidder ||
+        oldWidget.timeLeft != widget.timeLeft) {
+      _timer?.cancel();
+      _secondsLeft = widget.timeLeft;
+      _startTimer();
+    }
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      setState(() {
+        if (_secondsLeft > 0) {
+          _secondsLeft--;
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +83,7 @@ class BiddingOverlay extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                '$currentBidder ${'bidding'.tr()}',
+                '${widget.currentBidder} ${'bidding'.tr()}',
                 style: context.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: colors.textPrimary,
@@ -46,7 +91,7 @@ class BiddingOverlay extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                '${'time_remaining'.tr()}: ${timeLeft}s',
+                '${'time_remaining'.tr()}: ${_secondsLeft}s',
                 style: context.textTheme.bodyMedium?.copyWith(
                   color: colors.textSecondary,
                 ),
@@ -59,7 +104,7 @@ class BiddingOverlay extends StatelessWidget {
                       label: 'Sun',
                       icon: Icons.wb_sunny_rounded,
                       color: colors.secondary,
-                      onTap: () => onBid('sun'),
+                      onTap: () => widget.onBid('sun'),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.lg),
@@ -68,7 +113,7 @@ class BiddingOverlay extends StatelessWidget {
                       label: 'Hokm',
                       icon: Icons.shield_rounded,
                       color: colors.primary,
-                      onTap: () => onBid('hokm'),
+                      onTap: () => widget.onBid('hokm'),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.lg),
@@ -77,13 +122,13 @@ class BiddingOverlay extends StatelessWidget {
                       label: LocaleKeys.commonCancel.tr(),
                       icon: Icons.close_rounded,
                       color: colors.textMuted,
-                      onTap: () => onBid('pass'),
+                      onTap: () => widget.onBid('pass'),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: AppSpacing.xxxl),
-              if (timeLeft <= 5)
+              if (_secondsLeft <= 5)
                 Text(
                   'hurry_up'.tr(),
                   style: TextStyle(

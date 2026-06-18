@@ -1,5 +1,7 @@
 import * as functions from 'firebase-functions';
 import { RtcTokenBuilder, RtcRole, RtmTokenBuilder } from 'agora-token';
+import { db } from './config/admin';
+import { requireAppCheck } from './utils/appCheck';
 
 // Admin functions
 export {
@@ -9,6 +11,7 @@ export {
   resetUserCoins,
   forceLogoutUser,
   resolveReport,
+  dismissReport,
   escalateReport,
   forceCloseRoom,
   transferRoomOwnership,
@@ -51,10 +54,13 @@ export { processGameEnd } from './triggers/processGameEnd';
 export { sendRoomInviteNotification } from './triggers/sendRoomInviteNotification';
 export { sendChatMessageNotification } from './triggers/sendChatMessageNotification';
 export { sendGameStartingNotification } from './triggers/sendGameStartingNotification';
+export { updateViewerCount } from './triggers/updateViewerCount';
 export { syncUserSearchKeywords } from './triggers/syncUserSearchKeywords';
 export { syncReportSearchKeywords } from './triggers/syncReportSearchKeywords';
 export { cleanStaleRooms } from './scheduler/cleanStaleRooms';
 export { createTournament } from './https/createTournament';
+export { joinTournament } from './https/joinTournament';
+export { leaveTournament } from './https/leaveTournament';
 export { startTournament } from './https/startTournament';
 export { startStream } from './https/startStream';
 export { endStream } from './https/endStream';
@@ -75,8 +81,143 @@ function getExpirationTimestamp(): number {
   return Math.floor(Date.now() / 1000) + TOKEN_EXPIRATION_SECONDS;
 }
 
+interface GenerateTokenData {
+  channelName?: string;
+  uid?: number | string;
+  role?: 'publisher' | 'subscriber';
+  roomId?: string;
+  gameId?: string;
+  streamId?: string;
+}
+
+/**
+ * Verifies that the authenticated caller is allowed to join the requested
+ * Agora channel. Channels are always associated with a room, game, or stream.
+ */
+async function verifyChannelAccess(
+  authUid: string,
+  data: GenerateTokenData,
+): Promise<void> {
+  const { channelName, roomId, gameId, streamId } = data;
+
+  // Direct lookup when the caller provides the associated resource id.
+  if (roomId && typeof roomId === 'string') {
+    const roomDoc = await db.collection('rooms').doc(roomId).get();
+    if (roomDoc.exists && isRoomParticipant(authUid, roomDoc.data()!)) {
+      return;
+    }
+  }
+
+  if (gameId && typeof gameId === 'string') {
+    const gameDoc = await db.collection('games').doc(gameId).get();
+    if (gameDoc.exists && isGameParticipant(authUid, gameDoc.data()!)) {
+      return;
+    }
+  }
+
+  if (streamId && typeof streamId === 'string') {
+    const streamDoc = await db.collection('streams').doc(streamId).get();
+    if (streamDoc.exists && isStreamParticipant(authUid, streamDoc.data()!)) {
+      return;
+    }
+  }
+
+  // Fallback for legacy clients that only send channelName.
+  if (!channelName || typeof channelName !== 'string') {
+    throw new functions.https.HttpsError(
+      'invalid-argument',
+      'Missing channel membership context. Provide roomId, gameId, streamId, or channelName.',
+    );
+  }
+
+  // Default channel naming convention: room_<roomId>.
+  let derivedRoomId: string | undefined;
+  if (channelName.startsWith('room_')) {
+    derivedRoomId = channelName.substring(5);
+  }
+
+  const [roomById, roomsByName, gamesByName, streamsByName] = await Promise.all([
+    derivedRoomId ? db.collection('rooms').doc(derivedRoomId).get() : Promise.resolve(null),
+    db.collection('rooms').where('agoraChannelName', '==', channelName).limit(1).get(),
+    db.collection('games').where('agoraChannelName', '==', channelName).limit(1).get(),
+    db.collection('streams').where('agoraChannelName', '==', channelName).limit(1).get(),
+  ]);
+
+  if (roomById?.exists && isRoomParticipant(authUid, roomById.data()!)) {
+    return;
+  }
+
+  const roomDoc = roomsByName.docs[0];
+  if (roomDoc && isRoomParticipant(authUid, roomDoc.data())) {
+    return;
+  }
+
+  const gameDoc = gamesByName.docs[0];
+  if (gameDoc && isGameParticipant(authUid, gameDoc.data())) {
+    return;
+  }
+
+  const streamDoc = streamsByName.docs[0];
+  if (streamDoc && isStreamParticipant(authUid, streamDoc.data())) {
+    return;
+  }
+
+  throw new functions.https.HttpsError(
+    'permission-denied',
+    'You are not a participant in this channel.',
+  );
+}
+
+function isRoomParticipant(authUid: string, data: Record<string, unknown>): boolean {
+  if (data.creatorUid === authUid) return true;
+  const playerUids = data.playerUids;
+  if (Array.isArray(playerUids) && playerUids.includes(authUid)) return true;
+  const players = data.players;
+  if (Array.isArray(players)) {
+    return players.some((p) => p && typeof p === 'object' && (p as Record<string, unknown>).uid === authUid);
+  }
+  return false;
+}
+
+function isGameParticipant(authUid: string, data: Record<string, unknown>): boolean {
+  const playerUids = data.playerUids;
+  if (Array.isArray(playerUids) && playerUids.includes(authUid)) return true;
+  const players = data.players;
+  if (players && typeof players === 'object') {
+    return Object.values(players).some(
+      (p) => p && typeof p === 'object' && (p as Record<string, unknown>).uid === authUid,
+    );
+  }
+  return false;
+}
+
+function isStreamParticipant(authUid: string, data: Record<string, unknown>): boolean {
+  if (data.hostUid === authUid) return true;
+  const players = data.players;
+  if (Array.isArray(players)) {
+    return players.some((p) => p && typeof p === 'object' && (p as Record<string, unknown>).uid === authUid);
+  }
+  return false;
+}
+
+function parseUid(raw: number | string | undefined): number {
+  if (raw === undefined || raw === null) return 0;
+  if (typeof raw === 'number') {
+    if (!Number.isFinite(raw) || raw < 0 || raw > 4294967295) {
+      throw new functions.https.HttpsError('invalid-argument', 'Invalid uid value.');
+    }
+    return Math.floor(raw);
+  }
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || parsed < 0 || parsed > 4294967295) {
+    throw new functions.https.HttpsError('invalid-argument', 'Invalid uid value.');
+  }
+  return Math.floor(parsed);
+}
+
 /**
  * Generates an Agora RTC token for a given channel.
+ * The caller must be a participant in the associated room, game, or stream.
  */
 export const generateAgoraToken = functions.https.onCall(
   {
@@ -91,18 +232,24 @@ export const generateAgoraToken = functions.https.onCall(
       );
     }
 
-    const { channelName, role = 'publisher' } = request.data as {
-      channelName?: string;
-      role?: 'publisher' | 'subscriber';
-    };
+    requireAppCheck(request);
+
+    const data = request.data as GenerateTokenData;
+    const { channelName, role = 'publisher' } = data;
 
     if (!channelName || typeof channelName !== 'string') {
       throw new functions.https.HttpsError('invalid-argument', 'Missing or invalid channelName.');
     }
 
+    if (role !== 'publisher' && role !== 'subscriber') {
+      throw new functions.https.HttpsError('invalid-argument', 'Invalid role.');
+    }
+
+    await verifyChannelAccess(request.auth.uid, data);
+
     const appId = APP_ID.value();
     const appCertificate = APP_CERTIFICATE.value();
-    const uid = (request.data.uid as number) || 0;
+    const uid = parseUid(data.uid);
     const rtcRole = role === 'publisher' ? RtcRole.PUBLISHER : RtcRole.SUBSCRIBER;
 
     const expire = getExpirationTimestamp();
@@ -139,6 +286,8 @@ export const generateAgoraRtmToken = functions.https.onCall(
         'Must be authenticated to generate an Agora RTM token.',
       );
     }
+
+    requireAppCheck(request);
 
     const { account } = request.data as { account?: string };
     const userAccount = account ?? request.auth.uid;

@@ -14,9 +14,19 @@ class TournamentState with _$TournamentState {
   }) = TournamentLoaded;
   const factory TournamentState.error({required String message}) =
       TournamentError;
+  const factory TournamentState.detailLoading() = TournamentDetailLoading;
+  const factory TournamentState.detailLoaded({required Tournament tournament}) =
+      TournamentDetailLoaded;
+  const factory TournamentState.detailError({required String message}) =
+      TournamentDetailError;
   const factory TournamentState.joining() = TournamentJoining;
   const factory TournamentState.joined({required String tournamentId}) =
       TournamentJoined;
   const factory TournamentState.joinError({required String message}) =
       TournamentJoinError;
+  const factory TournamentState.matchReady({
+    required String tournamentId,
+    required String roomId,
+    required String matchId,
+  }) = TournamentMatchReady;
 }

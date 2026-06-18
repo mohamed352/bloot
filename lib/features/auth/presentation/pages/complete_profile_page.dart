@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -7,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/components/app_button.dart';
 import 'package:bloot/core/style/colors.dart';
+import 'package:bloot/features/auth/domain/utils/auth_validators.dart';
 import 'package:bloot/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:bloot/features/auth/presentation/cubit/auth_state.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
@@ -22,12 +25,49 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
   final _displayNameController = TextEditingController();
   final _usernameController = TextEditingController();
   bool _usernameAvailable = true;
+  bool _termsAccepted = false;
+  bool _isCheckingUsername = false;
+  Timer? _usernameDebounce;
 
   @override
   void dispose() {
     _displayNameController.dispose();
     _usernameController.dispose();
+    _usernameDebounce?.cancel();
     super.dispose();
+  }
+
+  void _onUsernameChanged(String value) {
+    _usernameDebounce?.cancel();
+    if (value.trim().length < 3) {
+      setState(() {
+        _usernameAvailable = true;
+        _isCheckingUsername = false;
+      });
+      return;
+    }
+    setState(() => _isCheckingUsername = true);
+    _usernameDebounce = Timer(const Duration(milliseconds: 500), () async {
+      final available = await context
+          .read<AuthCubit>()
+          .checkUsernameAvailability(value.trim());
+      if (mounted) {
+        setState(() {
+          _usernameAvailable = available;
+          _isCheckingUsername = false;
+        });
+      }
+    });
+  }
+
+  bool get _canSubmit {
+    final name = _displayNameController.text.trim();
+    final username = _usernameController.text.trim();
+    return AuthValidators.validateDisplayName(name) == null &&
+        AuthValidators.validateUsername(username) == null &&
+        _usernameAvailable &&
+        _termsAccepted &&
+        !_isCheckingUsername;
   }
 
   @override
@@ -39,7 +79,7 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
           error: (message) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text(message)));
+            ).showSnackBar(SnackBar(content: Text(message.tr())));
           },
         );
       },
@@ -101,6 +141,7 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
                     hint: 'your_name'.tr(),
                     controller: _displayNameController,
                     icon: Icons.person_outline_rounded,
+                    onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: 20),
                   // Username
@@ -109,25 +150,34 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
                     hint: '@username',
                     controller: _usernameController,
                     icon: Icons.alternate_email_rounded,
-                    suffix: _usernameAvailable
+                    suffix: _isCheckingUsername
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: ColorManager.primary,
+                            ),
+                          )
+                        : _usernameAvailable &&
+                              _usernameController.text.trim().length >= 3
                         ? const Icon(
                             Icons.check_circle_rounded,
                             color: ColorManager.success,
                             size: 20,
                           )
-                        : const Icon(
+                        : !_usernameAvailable &&
+                              _usernameController.text.trim().length >= 3
+                        ? const Icon(
                             Icons.error_rounded,
                             color: ColorManager.error,
                             size: 20,
-                          ),
-                    onChanged: (value) {
-                      setState(() {
-                        _usernameAvailable =
-                            value.length < 4 || value != 'taken';
-                      });
-                    },
+                          )
+                        : null,
+                    onChanged: _onUsernameChanged,
                   ),
-                  if (!_usernameAvailable)
+                  if (!_usernameAvailable &&
+                      _usernameController.text.trim().length >= 3)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: Text(
@@ -138,19 +188,63 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
                         ),
                       ),
                     ),
+                  const SizedBox(height: AppSpacing.xl),
+                  // Terms of Service
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Checkbox(
+                        value: _termsAccepted,
+                        onChanged: (value) {
+                          setState(() => _termsAccepted = value ?? false);
+                        },
+                        activeColor: ColorManager.primary,
+                        side: const BorderSide(
+                          color: ColorManager.darkBorderSoft,
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => context.pushNamed(RouteNames.terms),
+                          child: Padding(
+                            padding: const EdgeInsetsDirectional.only(top: 12),
+                            child: Text.rich(
+                              TextSpan(
+                                text: 'by_creating_account'.tr(),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: ColorManager.darkTextSecondary,
+                                  height: 1.4,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: 'terms_of_service'.tr(),
+                                    style: const TextStyle(
+                                      color: ColorManager.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: AppSpacing.xxxl),
                   GradientButton(
                     text: 'start_playing'.tr(),
                     gradient: GradientButton.goldGradient,
                     isLoading: isLoading,
-                    onPressed: isLoading
-                        ? null
-                        : () {
+                    onPressed: _canSubmit && !isLoading
+                        ? () {
                             context.read<AuthCubit>().completeProfile(
                               name: _displayNameController.text.trim(),
                               username: _usernameController.text.trim(),
                             );
-                          },
+                          }
+                        : null,
                   ),
                   const SizedBox(height: AppSpacing.xxl),
                 ],
@@ -193,7 +287,12 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
             hintText: hint,
             hintStyle: const TextStyle(color: ColorManager.darkTextMuted),
             prefixIcon: Icon(icon, color: ColorManager.darkTextMuted, size: 20),
-            suffixIcon: suffix,
+            suffixIcon: suffix != null
+                ? Padding(
+                    padding: const EdgeInsetsDirectional.only(end: 12),
+                    child: suffix,
+                  )
+                : null,
             filled: true,
             fillColor: ColorManager.darkSectionGray,
             border: OutlineInputBorder(

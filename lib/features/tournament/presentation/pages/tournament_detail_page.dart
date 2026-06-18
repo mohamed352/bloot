@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:bloot/core/components/app_button.dart';
 import 'package:bloot/core/components/cached_avatar.dart';
-import 'package:bloot/core/style/colors.dart';
-import 'package:bloot/core/constants/app_spacing.dart';
 import 'package:bloot/core/constants/app_radius.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:bloot/core/constants/app_spacing.dart';
+import 'package:bloot/core/style/colors.dart';
+import 'package:bloot/features/tournament/domain/entities/tournament.dart';
 import 'package:bloot/features/tournament/presentation/cubit/tournament_cubit.dart';
 import 'package:bloot/features/tournament/presentation/cubit/tournament_state.dart';
 import 'package:bloot/features/tournament/presentation/widgets/join_tournament_bottom_sheet.dart';
@@ -17,15 +18,20 @@ class TournamentDetailPage extends StatelessWidget {
   const TournamentDetailPage({super.key, required this.id});
   final String id;
 
-  void _showJoinBottomSheet(BuildContext context) {
+  void _showJoinBottomSheet(BuildContext context, Tournament tournament) {
+    final cubit = context.read<TournamentCubit>();
+    final balance = cubit.currentUserProfile?.coins;
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (sheetContext) {
         return JoinTournamentBottomSheet(
-          tournamentName: 'gulf_champions_cup'.tr(),
-          entryFee: '500',
+          tournamentName: tournament.name.tr(),
+          entryFee: tournament.entryFee.isNotEmpty
+              ? tournament.entryFee
+              : '0',
+          balance: balance != null ? '$balance coins' : null,
           onConfirm: () {
             Navigator.of(sheetContext).pop();
             context.read<TournamentCubit>().joinTournament(id);
@@ -55,9 +61,101 @@ class TournamentDetailPage extends StatelessWidget {
         );
       },
       builder: (context, state) {
-        final isJoining = state is TournamentJoining;
+        return state.when(
+          initial: () => const Scaffold(
+            backgroundColor: ColorManager.darkCanvas,
+            body: Center(
+              child: CircularProgressIndicator(color: ColorManager.primary),
+            ),
+          ),
+          loading: () => const Scaffold(
+            backgroundColor: ColorManager.darkCanvas,
+            body: Center(
+              child: CircularProgressIndicator(color: ColorManager.primary),
+            ),
+          ),
+          loaded: (tournaments, index) => const Scaffold(
+            backgroundColor: ColorManager.darkCanvas,
+            body: Center(
+              child: CircularProgressIndicator(color: ColorManager.primary),
+            ),
+          ),
+          error: (message) => Scaffold(
+            backgroundColor: ColorManager.darkCanvas,
+            body: Center(
+              child: Text(
+                message,
+                style: const TextStyle(color: ColorManager.darkTextSecondary),
+              ),
+            ),
+          ),
+          detailLoading: () => const Scaffold(
+            backgroundColor: ColorManager.darkCanvas,
+            body: Center(
+              child: CircularProgressIndicator(color: ColorManager.primary),
+            ),
+          ),
+          detailLoaded: (tournament) => _buildDetailContent(context, tournament),
+          detailError: (message) => Scaffold(
+            backgroundColor: ColorManager.darkCanvas,
+            body: Center(
+              child: Text(
+                message,
+                style: const TextStyle(color: ColorManager.darkTextSecondary),
+              ),
+            ),
+          ),
+          joining: () => _buildDetailContent(
+            context,
+            state.maybeWhen(
+              detailLoaded: (t) => t,
+              orElse: () => null,
+            ),
+            isJoining: true,
+          ),
+          joined: (_) => _buildDetailContent(
+            context,
+            state.maybeWhen(
+              detailLoaded: (t) => t,
+              orElse: () => null,
+            ),
+          ),
+          joinError: (_) => _buildDetailContent(
+            context,
+            state.maybeWhen(
+              detailLoaded: (t) => t,
+              orElse: () => null,
+            ),
+          ),
+          matchReady: (_, roomId, matchId) => _buildDetailContent(
+            context,
+            state.maybeWhen(
+              detailLoaded: (t) => t,
+              orElse: () => null,
+            ),
+          ),
+        );
+      },
+    );
+  }
 
-        return Scaffold(
+  Widget _buildDetailContent(
+    BuildContext context,
+    Tournament? tournament, {
+    bool isJoining = false,
+  }) {
+    if (tournament == null) {
+      return const Scaffold(
+        backgroundColor: ColorManager.darkCanvas,
+        body: Center(
+          child: CircularProgressIndicator(color: ColorManager.primary),
+        ),
+      );
+    }
+
+    final statusColor = _statusColor(tournament.status);
+
+    return Scaffold(
       backgroundColor: ColorManager.darkCanvas,
       body: CustomScrollView(
         slivers: [
@@ -82,12 +180,14 @@ class TournamentDetailPage extends StatelessWidget {
                       child: Icon(
                         Icons.emoji_events_rounded,
                         size: 100,
-                        color: ColorManager.secondary.withValues(alpha: 0.15),
+                        color: ColorManager.secondary.withValues(
+                          alpha: 0.15,
+                        ),
                       ),
                     ),
-                    Positioned(
+                    PositionedDirectional(
                       bottom: 16,
-                      left: 16,
+                      start: 16,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -97,24 +197,24 @@ class TournamentDetailPage extends StatelessWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: ColorManager.live.withValues(alpha: 0.15),
+                              color: statusColor.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
-                                color: ColorManager.live.withValues(alpha: 0.3),
+                                color: statusColor.withValues(alpha: 0.3),
                               ),
                             ),
                             child: Text(
-                              'live'.tr(),
-                              style: const TextStyle(
+                              tournament.status.toLowerCase().tr(),
+                              style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
-                                color: ColorManager.live,
+                                color: statusColor,
                               ),
                             ),
                           ),
                           const SizedBox(height: AppSpacing.sm),
                           Text(
-                            'gulf_champions_cup'.tr(),
+                            tournament.name.tr(),
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
@@ -154,18 +254,18 @@ class TournamentDetailPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
-                      const Row(
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.monetization_on_rounded,
                             color: ColorManager.secondary,
                             size: 32,
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Text(
-                            '10,000',
-                            style: TextStyle(
+                            tournament.prize.tr(),
+                            style: const TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
                               color: ColorManager.secondary,
@@ -185,7 +285,7 @@ class TournamentDetailPage extends StatelessWidget {
                       _buildDetailRow(
                         Icons.calendar_today_rounded,
                         'date'.tr(),
-                        'tomorrow_8pm'.tr(),
+                        tournament.date.tr(),
                       ),
                       _buildDetailRow(
                         Icons.videogame_asset_rounded,
@@ -226,20 +326,40 @@ class TournamentDetailPage extends StatelessWidget {
                 const SizedBox(height: AppSpacing.lg),
                 // Participants
                 _buildSection(
-                  title: 'participants_23_64'.tr(),
+                  title: 'participants_${tournament.participants.replaceAll('/', '_')}'
+                          .tr(),
                   child: SizedBox(
                     height: 48,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 12,
-                      separatorBuilder: (_, _) =>
-                          const SizedBox(width: AppSpacing.sm),
-                      itemBuilder: (context, index) {
-                        return CachedAvatar(
-                          imageUrl:
-                              'https://i.pravatar.cc/150?img=${index + 10}',
-                          size: 40,
-                          borderRadius: 20,
+                    child: Builder(
+                      builder: (context) {
+                        final profiles = context
+                            .read<TournamentCubit>()
+                            .participantProfiles;
+                        final avatarUrls = profiles
+                            .map((p) => p.avatarUrl)
+                            .whereType<String>()
+                            .toList();
+                        return ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: avatarUrls.isNotEmpty
+                              ? avatarUrls.length
+                              : 1,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(width: AppSpacing.sm),
+                          itemBuilder: (context, index) {
+                            if (avatarUrls.isEmpty) {
+                              return const CachedAvatar(
+                                imageUrl: null,
+                                size: 40,
+                                borderRadius: 20,
+                              );
+                            }
+                            return CachedAvatar(
+                              imageUrl: avatarUrls[index],
+                              size: 40,
+                              borderRadius: 20,
+                            );
+                          },
                         );
                       },
                     ),
@@ -262,7 +382,9 @@ class TournamentDetailPage extends StatelessWidget {
                           Icon(
                             Icons.account_tree_rounded,
                             size: 48,
-                            color: ColorManager.primary.withValues(alpha: 0.3),
+                            color: ColorManager.primary.withValues(
+                              alpha: 0.3,
+                            ),
                           ),
                           const SizedBox(height: AppSpacing.sm),
                           Text(
@@ -281,50 +403,62 @@ class TournamentDetailPage extends StatelessWidget {
                 // Prize distribution
                 _buildSection(
                   title: 'prize_distribution'.tr(),
-                  child: Column(
-                    children: [
-                      _buildPrizeRow(
-                        '1st'.tr(),
-                        '4,000',
-                        ColorManager.secondary,
-                        Icons.emoji_events_rounded,
-                      ),
-                      _buildPrizeRow(
-                        '2nd'.tr(),
-                        '2,500',
-                        ColorManager.darkTextSecondary,
-                        Icons.emoji_events_rounded,
-                      ),
-                      _buildPrizeRow(
-                        '3rd'.tr(),
-                        '1,500',
-                        ColorManager.secondaryDark,
-                        Icons.emoji_events_rounded,
-                      ),
-                      _buildPrizeRow(
-                        '4th'.tr(),
-                        '500',
-                        ColorManager.darkTextMuted,
-                        Icons.emoji_events_rounded,
-                      ),
-                    ],
-                  ),
+                  child: tournament.prizes.isEmpty
+                      ? Text(
+                          'no_prizes_available'.tr(),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: ColorManager.darkTextMuted,
+                          ),
+                        )
+                      : Column(
+                          children: tournament.prizes.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final prize = entry.value;
+                            final color = switch (index) {
+                              0 => ColorManager.secondary,
+                              1 => ColorManager.darkTextSecondary,
+                              2 => ColorManager.secondaryDark,
+                              _ => ColorManager.darkTextMuted,
+                            };
+                            return _buildPrizeRow(
+                              prize.place.tr(),
+                              prize.amount,
+                              color,
+                              Icons.emoji_events_rounded,
+                            );
+                          }).toList(),
+                        ),
                 ),
                 const SizedBox(height: AppSpacing.xxl),
                 AppButton(
-                  text: 'join_tournament'.tr(),
-                  onPressed: isJoining ? null : () => _showJoinBottomSheet(context),
+                  text: tournament.isJoined
+                      ? 'view_bracket'.tr()
+                      : 'join_tournament'.tr(),
+                  onPressed: isJoining
+                      ? null
+                      : () {
+                          if (tournament.isJoined) {
+                            context.pushNamed(
+                              'tournamentBracket',
+                              pathParameters: {'id': id},
+                            );
+                          } else {
+                            _showJoinBottomSheet(context, tournament);
+                          }
+                        },
                   isLoading: isJoining,
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                AppTextButton(
-                  text: 'view_bracket'.tr(),
-                  onPressed: () => context.pushNamed(
-                    'tournamentBracket',
-                    pathParameters: {'id': id},
+                if (!tournament.isJoined)
+                  AppTextButton(
+                    text: 'view_bracket'.tr(),
+                    onPressed: () => context.pushNamed(
+                      'tournamentBracket',
+                      pathParameters: {'id': id},
+                    ),
+                    color: ColorManager.secondary,
                   ),
-                  color: ColorManager.secondary,
-                ),
                 const SizedBox(height: AppSpacing.xxl),
               ]),
             ),
@@ -332,8 +466,19 @@ class TournamentDetailPage extends StatelessWidget {
         ],
       ),
     );
-      },
-    );
+  }
+
+  Color _statusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'live':
+        return ColorManager.live;
+      case 'upcoming':
+        return ColorManager.info;
+      case 'completed':
+        return ColorManager.darkTextMuted;
+      default:
+        return ColorManager.primary;
+    }
   }
 
   Widget _buildSection({required String title, required Widget child}) {

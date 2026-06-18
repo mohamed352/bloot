@@ -2,13 +2,25 @@ import 'package:flutter/material.dart';
 
 import 'package:bloot/core/components/app_button.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
+import 'package:bloot/core/di/injection.dart';
 import 'package:bloot/core/extension/context_values.dart';
+import 'package:bloot/core/services/remote_config_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Full-screen force update page shown when the app version is too old.
 ///
 /// Blocks all navigation until the user updates the app.
 class ForceUpdatePage extends StatelessWidget {
   const ForceUpdatePage({super.key});
+
+  Future<void> _openStore() async {
+    final url = getIt<RemoteConfigService>().forceUpdateStoreUrl;
+    if (url.isEmpty) return;
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +62,7 @@ class ForceUpdatePage extends StatelessWidget {
               const Spacer(),
               AppButton(
                 text: 'Update Now',
-                onPressed: () {
-                  // TODO: Deep link to App Store / Play Store
-                },
+                onPressed: _openStore,
               ),
               const SizedBox(height: AppSpacing.xxxl),
             ],

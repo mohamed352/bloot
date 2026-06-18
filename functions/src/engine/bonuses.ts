@@ -4,10 +4,16 @@ import { BonusClaim } from '../models/game';
 /**
  * Detects the highest Bnaga (sequence) in a hand.
  * Returns the best sequence found, or null if none.
+ * If two sequences have the same length, the higher-ranking sequence wins.
  */
 export function detectBnaga(hand: CardString[]): { points: number; sequence: CardString[] } | null {
   const rankIndex: Record<string, number> = {};
   RANKS.forEach((r, i) => { rankIndex[r] = i; });
+
+  const rankPower: Record<string, number> = {
+    '2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6,
+    '9': 7, '10': 8, J: 9, Q: 10, K: 11, A: 12,
+  };
 
   let bestSequence: CardString[] = [];
 
@@ -17,7 +23,7 @@ export function detectBnaga(hand: CardString[]): { points: number; sequence: Car
 
     const sorted = suitCards.sort((a, b) => rankIndex[getRank(a)] - rankIndex[getRank(b)]);
 
-    // Find longest consecutive sequence
+    // Find longest consecutive sequence; on length tie, keep the higher-ranking one.
     let currentSeq: CardString[] = [sorted[0]];
     for (let i = 1; i < sorted.length; i++) {
       const prevRankIdx = rankIndex[getRank(currentSeq[currentSeq.length - 1])];
@@ -25,21 +31,31 @@ export function detectBnaga(hand: CardString[]): { points: number; sequence: Car
       if (currRankIdx === prevRankIdx + 1) {
         currentSeq.push(sorted[i]);
       } else {
-        if (currentSeq.length > bestSequence.length) {
-          bestSequence = currentSeq;
-        }
+        bestSequence = chooseBetterSequence(bestSequence, currentSeq, rankPower);
         currentSeq = [sorted[i]];
       }
     }
-    if (currentSeq.length > bestSequence.length) {
-      bestSequence = currentSeq;
-    }
+    bestSequence = chooseBetterSequence(bestSequence, currentSeq, rankPower);
   }
 
   if (bestSequence.length < 3) return null;
 
   const points = bestSequence.length === 3 ? 20 : bestSequence.length === 4 ? 50 : 100;
   return { points, sequence: bestSequence };
+}
+
+function chooseBetterSequence(
+  currentBest: CardString[],
+  candidate: CardString[],
+  rankPower: Record<string, number>,
+): CardString[] {
+  if (candidate.length < 3) return currentBest;
+  if (candidate.length > currentBest.length) return candidate;
+  if (candidate.length < currentBest.length) return currentBest;
+
+  const candidateHigh = Math.max(...candidate.map((c) => rankPower[getRank(c)] ?? 0));
+  const bestHigh = Math.max(...currentBest.map((c) => rankPower[getRank(c)] ?? 0));
+  return candidateHigh >= bestHigh ? candidate : currentBest;
 }
 
 /**
@@ -161,8 +177,14 @@ export function resolveBonusClaims(
     const bHigh = getHighestSequenceCard(teamBSeq.cards);
     if (aHigh > bHigh) {
       return { teamAPoints: sumBonuses(teamABonuses), teamBPoints: 0 };
-    } else {
+    } else if (bHigh > aHigh) {
       return { teamAPoints: 0, teamBPoints: sumBonuses(teamBBonuses) };
+    } else {
+      // True tie: both teams keep their bonuses
+      return {
+        teamAPoints: sumBonuses(teamABonuses),
+        teamBPoints: sumBonuses(teamBBonuses),
+      };
     }
   } else if (teamASeq) {
     return { teamAPoints: sumBonuses(teamABonuses), teamBPoints: 0 };
@@ -178,9 +200,17 @@ function sumBonuses(bonuses: BonusClaim[]): number {
 }
 
 function getBestSequence(bonuses: BonusClaim[]): BonusClaim | undefined {
-  return bonuses
-    .filter((b) => b.type === 'bnaga')
-    .sort((a, b) => b.cards.length - a.cards.length)[0];
+  const bnagas = bonuses.filter((b) => b.type === 'bnaga');
+  if (bnagas.length === 0) return undefined;
+
+  // Pick the longest sequence; on length tie, pick the one with the highest card.
+  return bnagas.reduce((best, current) => {
+    if (current.cards.length > best.cards.length) return current;
+    if (current.cards.length < best.cards.length) return best;
+    const currentHigh = getHighestSequenceCard(current.cards);
+    const bestHigh = getHighestSequenceCard(best.cards);
+    return currentHigh >= bestHigh ? current : best;
+  });
 }
 
 function getHighestSequenceCard(cards: CardString[]): number {

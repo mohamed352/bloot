@@ -9,6 +9,7 @@ export {
 
 export {
   resolveReport,
+  dismissReport,
   escalateReport,
 } from './reportAdmin';
 

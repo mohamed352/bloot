@@ -66,6 +66,17 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>app.bloot.roominvite</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>bloot</string>
+			</array>
+		</dict>
+	</array>
 	<!-- Permission descriptions required by Flutter plugins -->
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access for video calls during Baloot games and live streams.</string>

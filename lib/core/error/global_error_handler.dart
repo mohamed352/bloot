@@ -1,3 +1,4 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:bloot/core/logger/app_logger.dart';
 
@@ -10,6 +11,9 @@ abstract class GlobalErrorHandler {
         error: details.exception,
         stackTrace: details.stack,
       );
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordFlutterError(details);
+      }
     };
     PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
       AppLogger.fatal(
@@ -18,6 +22,9 @@ abstract class GlobalErrorHandler {
         error: error,
         stackTrace: stack,
       );
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      }
       return true;
     };
   }

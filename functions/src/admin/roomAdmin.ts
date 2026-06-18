@@ -30,7 +30,7 @@ export const forceCloseRoom = functions.https.onCall(async (request) => {
       throw new functions.https.HttpsError('not-found', 'Room not found');
     }
     transaction.update(roomRef, {
-      status: 'closed',
+      status: 'finished',
       isStreaming: false,
       updatedAt: new Date(),
     });

@@ -14,8 +14,9 @@ _RoomModel _$RoomModelFromJson(Map<String, dynamic> json) => _RoomModel(
   cameraEnabled: json['cameraEnabled'] as bool? ?? false,
   allowSpectators: json['allowSpectators'] as bool? ?? true,
   gameSpeed: json['gameSpeed'] as String? ?? 'normal',
-  creatorName: json['creatorName'] as String?,
+  creatorUid: json['creatorUid'] as String?,
   inviteCode: json['inviteCode'] as String?,
+  agoraChannelName: json['agoraChannelName'] as String?,
   players:
       (json['players'] as List<dynamic>?)
           ?.map((e) => RoomPlayerModel.fromJson(e as Map<String, dynamic>))
@@ -26,6 +27,10 @@ _RoomModel _$RoomModelFromJson(Map<String, dynamic> json) => _RoomModel(
           ?.map((e) => RoomChatMessageModel.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const <RoomChatMessageModel>[],
+  status: json['status'] as String? ?? 'waiting',
+  gameId: json['gameId'] as String?,
+  isStreaming: json['isStreaming'] as bool? ?? false,
+  streamId: json['streamId'] as String?,
 );
 
 Map<String, dynamic> _$RoomModelToJson(_RoomModel instance) =>
@@ -37,30 +42,45 @@ Map<String, dynamic> _$RoomModelToJson(_RoomModel instance) =>
       'cameraEnabled': instance.cameraEnabled,
       'allowSpectators': instance.allowSpectators,
       'gameSpeed': instance.gameSpeed,
-      'creatorName': instance.creatorName,
+      'creatorUid': instance.creatorUid,
       'inviteCode': instance.inviteCode,
+      'agoraChannelName': instance.agoraChannelName,
       'players': instance.players,
       'chatMessages': instance.chatMessages,
+      'status': instance.status,
+      'gameId': instance.gameId,
+      'isStreaming': instance.isStreaming,
+      'streamId': instance.streamId,
     };
 
 _RoomPlayerModel _$RoomPlayerModelFromJson(Map<String, dynamic> json) =>
     _RoomPlayerModel(
+      uid: json['uid'] as String,
       name: json['name'] as String,
       avatarUrl: json['avatarUrl'] as String?,
       isReady: json['isReady'] as bool? ?? false,
       isMe: json['isMe'] as bool? ?? false,
       team: json['team'] as String? ?? 'A',
       level: (json['level'] as num?)?.toInt(),
+      isMicOn: json['isMicOn'] as bool? ?? true,
+      isCameraOn: json['isCameraOn'] as bool? ?? false,
+      agoraUid: (json['agoraUid'] as num?)?.toInt(),
+      isSpeaking: json['isSpeaking'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$RoomPlayerModelToJson(_RoomPlayerModel instance) =>
     <String, dynamic>{
+      'uid': instance.uid,
       'name': instance.name,
       'avatarUrl': instance.avatarUrl,
       'isReady': instance.isReady,
       'isMe': instance.isMe,
       'team': instance.team,
       'level': instance.level,
+      'isMicOn': instance.isMicOn,
+      'isCameraOn': instance.isCameraOn,
+      'agoraUid': instance.agoraUid,
+      'isSpeaking': instance.isSpeaking,
     };
 
 _RoomChatMessageModel _$RoomChatMessageModelFromJson(
@@ -68,8 +88,13 @@ _RoomChatMessageModel _$RoomChatMessageModelFromJson(
 ) => _RoomChatMessageModel(
   user: json['user'] as String,
   text: json['text'] as String,
+  isSystem: json['isSystem'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$RoomChatMessageModelToJson(
   _RoomChatMessageModel instance,
-) => <String, dynamic>{'user': instance.user, 'text': instance.text};
+) => <String, dynamic>{
+  'user': instance.user,
+  'text': instance.text,
+  'isSystem': instance.isSystem,
+};

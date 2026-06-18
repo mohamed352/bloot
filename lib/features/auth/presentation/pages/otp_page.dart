@@ -11,6 +11,7 @@ import 'package:bloot/core/components/app_button.dart';
 import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:bloot/features/auth/presentation/cubit/auth_state.dart';
+import 'package:bloot/features/auth/presentation/widgets/otp_input_field.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
 import 'package:bloot/core/constants/app_radius.dart';
 
@@ -22,11 +23,8 @@ class OtpPage extends StatefulWidget {
 }
 
 class _OtpPageState extends State<OtpPage> {
-  final List<TextEditingController> _controllers = List.generate(
-    4,
-    (_) => TextEditingController(),
-  );
-  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
+  static const _otpLength = 6;
+  String _otpCode = '';
   int _timerSeconds = 30;
   Timer? _timer;
 
@@ -34,9 +32,6 @@ class _OtpPageState extends State<OtpPage> {
   void initState() {
     super.initState();
     _startTimer();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNodes.first.requestFocus();
-    });
   }
 
   void _startTimer() {
@@ -53,26 +48,19 @@ class _OtpPageState extends State<OtpPage> {
   @override
   void dispose() {
     _timer?.cancel();
-    for (final c in _controllers) {
-      c.dispose();
-    }
-    for (final f in _focusNodes) {
-      f.dispose();
-    }
     super.dispose();
   }
 
-  void _onOtpChanged(int index, String value) {
-    if (value.length == 1 && index < 3) {
-      _focusNodes[index + 1].requestFocus();
-    } else if (value.isEmpty && index > 0) {
-      _focusNodes[index - 1].requestFocus();
-    }
+  String _maskPhoneNumber(String? phone) {
+    if (phone == null || phone.length < 7) return '';
+    final prefix = phone.substring(0, phone.length - 6);
+    return '$prefix ••• ${phone.substring(phone.length - 3)}';
   }
 
   @override
   Widget build(BuildContext context) {
-    final otpComplete = _controllers.every((c) => c.text.isNotEmpty);
+    final otpComplete = _otpCode.length == _otpLength;
+    final phoneNumber = context.read<AuthCubit>().phoneNumber;
 
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
@@ -82,7 +70,7 @@ class _OtpPageState extends State<OtpPage> {
           error: (message) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text(message)));
+            ).showSnackBar(SnackBar(content: Text(message.tr())));
           },
         );
       },
@@ -134,17 +122,17 @@ class _OtpPageState extends State<OtpPage> {
                   // Subtitle with bold phone
                   Text.rich(
                     TextSpan(
-                      text: 'enter_the_4_digit_code_sent_to'.tr(),
+                      text: 'enter_the_6_digit_code_sent_to'.tr(),
                       style: TextStyle(
                         fontSize: 14,
                         color: ColorManager.darkTextSecondary.withValues(
                           alpha: 0.8,
                         ),
                       ),
-                      children: const [
+                      children: [
                         TextSpan(
-                          text: ' +966 5X XXX XXXX',
-                          style: TextStyle(
+                          text: ' ${_maskPhoneNumber(phoneNumber)}',
+                          style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             color: ColorManager.darkTextPrimary,
                           ),
@@ -155,54 +143,15 @@ class _OtpPageState extends State<OtpPage> {
                   ),
                   const SizedBox(height: AppSpacing.section),
                   // OTP inputs
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(4, (index) {
-                      return Padding(
-                        padding: const EdgeInsetsDirectional.symmetric(
-                          horizontal: 8,
-                        ),
-                        child: SizedBox(
-                          width: 64,
-                          height: 64,
-                          child: TextField(
-                            controller: _controllers[index],
-                            focusNode: _focusNodes[index],
-                            keyboardType: TextInputType.number,
-                            textAlign: TextAlign.center,
-                            maxLength: 1,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
-                              color: ColorManager.darkTextPrimary,
-                            ),
-                            decoration: InputDecoration(
-                              counterText: '',
-                              filled: true,
-                              fillColor: ColorManager.darkSectionGray,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.lg,
-                                ),
-                                borderSide: const BorderSide(
-                                  color: ColorManager.darkBorderSoft,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.lg,
-                                ),
-                                borderSide: const BorderSide(
-                                  color: ColorManager.info,
-                                  width: 2,
-                                ),
-                              ),
-                            ),
-                            onChanged: (value) => _onOtpChanged(index, value),
-                          ),
-                        ),
-                      );
-                    }),
+                  OtpInputField(
+                    length: _otpLength,
+                    onChanged: (code) => setState(() => _otpCode = code),
+                    onCompleted: (code) {
+                      setState(() => _otpCode = code);
+                      if (!isLoading) {
+                        context.read<AuthCubit>().verifyOtp(code);
+                      }
+                    },
                   ),
                   const SizedBox(height: AppSpacing.xxxl),
                   // Resend timer with clock icon
@@ -218,7 +167,14 @@ class _OtpPageState extends State<OtpPage> {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                "${'resend_code_in'.tr()} 00:$_timerSeconds",
+                                'resend_code_in'.tr(
+                                  namedArgs: {
+                                    'seconds': _timerSeconds.toString().padLeft(
+                                      2,
+                                      '0',
+                                    ),
+                                  },
+                                ),
                                 style: const TextStyle(
                                   color: ColorManager.darkTextMuted,
                                   fontSize: 14,
@@ -232,7 +188,7 @@ class _OtpPageState extends State<OtpPage> {
                                 : () {
                                     setState(() => _timerSeconds = 30);
                                     _startTimer();
-                                    // TODO: Resend OTP via cubit with stored phone
+                                    context.read<AuthCubit>().resendOtp();
                                   },
                             child: Text(
                               'resend_code'.tr(),
@@ -251,10 +207,7 @@ class _OtpPageState extends State<OtpPage> {
                     gradient: GradientButton.purpleGradient,
                     isLoading: isLoading,
                     onPressed: otpComplete && !isLoading
-                        ? () {
-                            final otp = _controllers.map((c) => c.text).join();
-                            context.read<AuthCubit>().verifyOtp(otp);
-                          }
+                        ? () => context.read<AuthCubit>().verifyOtp(_otpCode)
                         : null,
                   ),
                   const SizedBox(height: AppSpacing.xxl),

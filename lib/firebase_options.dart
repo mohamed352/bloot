@@ -3,9 +3,6 @@ import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
-///
-/// TODO: Replace with your own Firebase project credentials.
-/// Run `flutterfire configure` to auto-generate this file.
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
@@ -31,51 +28,51 @@ class DefaultFirebaseOptions {
     }
   }
 
-  // TODO: Replace these placeholder values with your actual Firebase config.
-  // You can find them in your Firebase Console → Project Settings → General → Your apps.
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    authDomain: 'YOUR_AUTH_DOMAIN',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
-    measurementId: 'YOUR_MEASUREMENT_ID',
+    apiKey: 'AIzaSyDZFEC6lNOF_rfkIn1r2I-HsSQzdhCOeMU',
+    appId: '1:847357865468:web:e87c768aa91b4429fdd679',
+    messagingSenderId: '847357865468',
+    projectId: 'bloot-d9442',
+    authDomain: 'bloot-d9442.firebaseapp.com',
+    storageBucket: 'bloot-d9442.firebasestorage.app',
+    measurementId: 'G-0G330W28NN',
   );
 
+
+
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
+    apiKey: 'AIzaSyBxrytREMHR-8tYxyISDjkybb__e5O48xU',
+    appId: '1:847357865468:android:875d4f7c0af0aaeafdd679',
+    messagingSenderId: '847357865468',
+    projectId: 'bloot-d9442',
+    storageBucket: 'bloot-d9442.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
-    iosBundleId: 'YOUR_IOS_BUNDLE_ID',
+    apiKey: 'AIzaSyCDz4eW2na-uoggpWwg1LfdlVW8AJOFRTI',
+    appId: '1:847357865468:ios:f5f50e5766c8df3efdd679',
+    messagingSenderId: '847357865468',
+    projectId: 'bloot-d9442',
+    storageBucket: 'bloot-d9442.firebasestorage.app',
+    iosBundleId: 'com.bloot.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
-    iosBundleId: 'YOUR_IOS_BUNDLE_ID',
+    apiKey: 'AIzaSyCDz4eW2na-uoggpWwg1LfdlVW8AJOFRTI',
+    appId: '1:847357865468:ios:f5f50e5766c8df3efdd679',
+    messagingSenderId: '847357865468',
+    projectId: 'bloot-d9442',
+    storageBucket: 'bloot-d9442.firebasestorage.app',
+    iosBundleId: 'com.bloot.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    authDomain: 'YOUR_AUTH_DOMAIN',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
-    measurementId: 'YOUR_MEASUREMENT_ID',
+    apiKey: 'AIzaSyDZFEC6lNOF_rfkIn1r2I-HsSQzdhCOeMU',
+    appId: '1:847357865468:web:e87c768aa91b4429fdd679',
+    messagingSenderId: '847357865468',
+    projectId: 'bloot-d9442',
+    authDomain: 'bloot-d9442.firebaseapp.com',
+    storageBucket: 'bloot-d9442.firebasestorage.app',
+    measurementId: 'G-0G330W28NN',
   );
 }

@@ -23,4 +23,10 @@ abstract class AuthRepository {
 
   /// Signs the user out.
   Future<void> signOut();
+
+  /// Checks if a username is available (not already taken).
+  Future<bool> isUsernameAvailable(String username);
+
+  /// Deletes the current user's account and all associated data.
+  Future<void> deleteAccount();
 }

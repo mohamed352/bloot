@@ -55,14 +55,16 @@ extension RoomStatePatterns on RoomState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( RoomInitial value)?  initial,TResult Function( RoomLoading value)?  loading,TResult Function( RoomLoaded value)?  loaded,TResult Function( RoomCreated value)?  created,TResult Function( RoomError value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( RoomInitial value)?  initial,TResult Function( RoomLoading value)?  loading,TResult Function( RoomLoaded value)?  loaded,TResult Function( RoomCreated value)?  created,TResult Function( RoomGameStarted value)?  gameStarted,TResult Function( RoomPublicListLoaded value)?  publicListLoaded,TResult Function( RoomError value)?  error,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case RoomInitial() when initial != null:
 return initial(_that);case RoomLoading() when loading != null:
 return loading(_that);case RoomLoaded() when loaded != null:
 return loaded(_that);case RoomCreated() when created != null:
-return created(_that);case RoomError() when error != null:
+return created(_that);case RoomGameStarted() when gameStarted != null:
+return gameStarted(_that);case RoomPublicListLoaded() when publicListLoaded != null:
+return publicListLoaded(_that);case RoomError() when error != null:
 return error(_that);case _:
   return orElse();
 
@@ -81,14 +83,16 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( RoomInitial value)  initial,required TResult Function( RoomLoading value)  loading,required TResult Function( RoomLoaded value)  loaded,required TResult Function( RoomCreated value)  created,required TResult Function( RoomError value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( RoomInitial value)  initial,required TResult Function( RoomLoading value)  loading,required TResult Function( RoomLoaded value)  loaded,required TResult Function( RoomCreated value)  created,required TResult Function( RoomGameStarted value)  gameStarted,required TResult Function( RoomPublicListLoaded value)  publicListLoaded,required TResult Function( RoomError value)  error,}){
 final _that = this;
 switch (_that) {
 case RoomInitial():
 return initial(_that);case RoomLoading():
 return loading(_that);case RoomLoaded():
 return loaded(_that);case RoomCreated():
-return created(_that);case RoomError():
+return created(_that);case RoomGameStarted():
+return gameStarted(_that);case RoomPublicListLoaded():
+return publicListLoaded(_that);case RoomError():
 return error(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -106,14 +110,16 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( RoomInitial value)?  initial,TResult? Function( RoomLoading value)?  loading,TResult? Function( RoomLoaded value)?  loaded,TResult? Function( RoomCreated value)?  created,TResult? Function( RoomError value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( RoomInitial value)?  initial,TResult? Function( RoomLoading value)?  loading,TResult? Function( RoomLoaded value)?  loaded,TResult? Function( RoomCreated value)?  created,TResult? Function( RoomGameStarted value)?  gameStarted,TResult? Function( RoomPublicListLoaded value)?  publicListLoaded,TResult? Function( RoomError value)?  error,}){
 final _that = this;
 switch (_that) {
 case RoomInitial() when initial != null:
 return initial(_that);case RoomLoading() when loading != null:
 return loading(_that);case RoomLoaded() when loaded != null:
 return loaded(_that);case RoomCreated() when created != null:
-return created(_that);case RoomError() when error != null:
+return created(_that);case RoomGameStarted() when gameStarted != null:
+return gameStarted(_that);case RoomPublicListLoaded() when publicListLoaded != null:
+return publicListLoaded(_that);case RoomError() when error != null:
 return error(_that);case _:
   return null;
 
@@ -131,13 +137,15 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( Room room,  bool chatOpen)?  loaded,TResult Function( Room room)?  created,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( Room room,  bool chatOpen)?  loaded,TResult Function( Room room)?  created,TResult Function( String gameId)?  gameStarted,TResult Function( List<Room> rooms)?  publicListLoaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case RoomInitial() when initial != null:
 return initial();case RoomLoading() when loading != null:
 return loading();case RoomLoaded() when loaded != null:
 return loaded(_that.room,_that.chatOpen);case RoomCreated() when created != null:
-return created(_that.room);case RoomError() when error != null:
+return created(_that.room);case RoomGameStarted() when gameStarted != null:
+return gameStarted(_that.gameId);case RoomPublicListLoaded() when publicListLoaded != null:
+return publicListLoaded(_that.rooms);case RoomError() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -156,13 +164,15 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( Room room,  bool chatOpen)  loaded,required TResult Function( Room room)  created,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( Room room,  bool chatOpen)  loaded,required TResult Function( Room room)  created,required TResult Function( String gameId)  gameStarted,required TResult Function( List<Room> rooms)  publicListLoaded,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case RoomInitial():
 return initial();case RoomLoading():
 return loading();case RoomLoaded():
 return loaded(_that.room,_that.chatOpen);case RoomCreated():
-return created(_that.room);case RoomError():
+return created(_that.room);case RoomGameStarted():
+return gameStarted(_that.gameId);case RoomPublicListLoaded():
+return publicListLoaded(_that.rooms);case RoomError():
 return error(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -180,13 +190,15 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( Room room,  bool chatOpen)?  loaded,TResult? Function( Room room)?  created,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( Room room,  bool chatOpen)?  loaded,TResult? Function( Room room)?  created,TResult? Function( String gameId)?  gameStarted,TResult? Function( List<Room> rooms)?  publicListLoaded,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case RoomInitial() when initial != null:
 return initial();case RoomLoading() when loading != null:
 return loading();case RoomLoaded() when loaded != null:
 return loaded(_that.room,_that.chatOpen);case RoomCreated() when created != null:
-return created(_that.room);case RoomError() when error != null:
+return created(_that.room);case RoomGameStarted() when gameStarted != null:
+return gameStarted(_that.gameId);case RoomPublicListLoaded() when publicListLoaded != null:
+return publicListLoaded(_that.rooms);case RoomError() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -387,6 +399,144 @@ class _$RoomCreatedCopyWithImpl<$Res>
   return _then(RoomCreated(
 room: null == room ? _self.room : room // ignore: cast_nullable_to_non_nullable
 as Room,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class RoomGameStarted implements RoomState {
+  const RoomGameStarted({required this.gameId});
+  
+
+ final  String gameId;
+
+/// Create a copy of RoomState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RoomGameStartedCopyWith<RoomGameStarted> get copyWith => _$RoomGameStartedCopyWithImpl<RoomGameStarted>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RoomGameStarted&&(identical(other.gameId, gameId) || other.gameId == gameId));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,gameId);
+
+@override
+String toString() {
+  return 'RoomState.gameStarted(gameId: $gameId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RoomGameStartedCopyWith<$Res> implements $RoomStateCopyWith<$Res> {
+  factory $RoomGameStartedCopyWith(RoomGameStarted value, $Res Function(RoomGameStarted) _then) = _$RoomGameStartedCopyWithImpl;
+@useResult
+$Res call({
+ String gameId
+});
+
+
+
+
+}
+/// @nodoc
+class _$RoomGameStartedCopyWithImpl<$Res>
+    implements $RoomGameStartedCopyWith<$Res> {
+  _$RoomGameStartedCopyWithImpl(this._self, this._then);
+
+  final RoomGameStarted _self;
+  final $Res Function(RoomGameStarted) _then;
+
+/// Create a copy of RoomState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? gameId = null,}) {
+  return _then(RoomGameStarted(
+gameId: null == gameId ? _self.gameId : gameId // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class RoomPublicListLoaded implements RoomState {
+  const RoomPublicListLoaded({required final  List<Room> rooms}): _rooms = rooms;
+  
+
+ final  List<Room> _rooms;
+ List<Room> get rooms {
+  if (_rooms is EqualUnmodifiableListView) return _rooms;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_rooms);
+}
+
+
+/// Create a copy of RoomState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RoomPublicListLoadedCopyWith<RoomPublicListLoaded> get copyWith => _$RoomPublicListLoadedCopyWithImpl<RoomPublicListLoaded>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RoomPublicListLoaded&&const DeepCollectionEquality().equals(other._rooms, _rooms));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_rooms));
+
+@override
+String toString() {
+  return 'RoomState.publicListLoaded(rooms: $rooms)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RoomPublicListLoadedCopyWith<$Res> implements $RoomStateCopyWith<$Res> {
+  factory $RoomPublicListLoadedCopyWith(RoomPublicListLoaded value, $Res Function(RoomPublicListLoaded) _then) = _$RoomPublicListLoadedCopyWithImpl;
+@useResult
+$Res call({
+ List<Room> rooms
+});
+
+
+
+
+}
+/// @nodoc
+class _$RoomPublicListLoadedCopyWithImpl<$Res>
+    implements $RoomPublicListLoadedCopyWith<$Res> {
+  _$RoomPublicListLoadedCopyWithImpl(this._self, this._then);
+
+  final RoomPublicListLoaded _self;
+  final $Res Function(RoomPublicListLoaded) _then;
+
+/// Create a copy of RoomState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? rooms = null,}) {
+  return _then(RoomPublicListLoaded(
+rooms: null == rooms ? _self._rooms : rooms // ignore: cast_nullable_to_non_nullable
+as List<Room>,
   ));
 }
 

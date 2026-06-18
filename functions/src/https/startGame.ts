@@ -1,4 +1,5 @@
 import * as functions from 'firebase-functions';
+import { Timestamp } from 'firebase-admin/firestore';
 import { db } from '../config/admin';
 import { requireAppCheck } from '../utils/appCheck';
 import { createGameDocument, dealRound } from '../engine/deal';
@@ -68,9 +69,39 @@ export const startGame = functions.https.onCall(async (request) => {
       isConnected: true,
     }));
 
+    if (room.status !== 'waiting') {
+      throw new functions.https.HttpsError(
+        'failed-precondition',
+        `Room cannot start a game (status: ${room.status}).`,
+      );
+    }
+
+    if (room.gameId) {
+      throw new functions.https.HttpsError(
+        'failed-precondition',
+        'A game is already in progress for this room.',
+      );
+    }
+
+    const teamA = (room.teamA ?? []) as string[];
+    const teamB = (room.teamB ?? []) as string[];
+    if (teamA.length !== 2 || teamB.length !== 2) {
+      throw new functions.https.HttpsError(
+        'failed-precondition',
+        'Teams must be balanced (2 players each).',
+      );
+    }
+
     const targetScore = room.targetScore || 152;
     let game = createGameDocument(gameRef.id, roomId, playerStates, targetScore);
     game = dealRound(game);
+
+    // Start the bidding turn timer so the auto-play scheduler does not immediately
+    // time out the first bidder.
+    game.turnTimerStart = Timestamp.now();
+
+    // Propagate the room's Agora channel name so the game client can rejoin voice/video.
+    game.agoraChannelName = room.agoraChannelName ?? `room_${roomId}`;
 
     transaction.set(gameRef, game);
     transaction.update(roomRef, {

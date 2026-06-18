@@ -3,11 +3,14 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
+import 'package:bloot/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:bloot/features/auth/presentation/cubit/auth_state.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -21,6 +24,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   late final AnimationController _progressController;
   late final Animation<double> _fadeAnimation;
   late final Animation<double> _scaleAnimation;
+  bool _authChecked = false;
 
   @override
   void initState() {
@@ -45,8 +49,12 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     _logoController.forward();
     _progressController.forward();
 
+    // Check auth status after animation completes
     Future.delayed(const Duration(milliseconds: 2500), () {
-      if (mounted) context.goNamed(RouteNames.welcome);
+      if (mounted && !_authChecked) {
+        context.read<AuthCubit>().checkAuthStatus();
+        _authChecked = true;
+      }
     });
   }
 
@@ -57,94 +65,117 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  void _onAuthStateChanged(BuildContext context, AuthState state) {
+    state.whenOrNull(
+      authenticated: (_) {
+        if (mounted) context.goNamed(RouteNames.home);
+      },
+      profileRequired: () {
+        if (mounted) context.goNamed(RouteNames.completeProfile);
+      },
+      initial: () {
+        if (mounted) context.goNamed(RouteNames.welcome);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColorManager.darkCanvas,
-      body: Stack(
-        children: [
-          // Floating card suits background
-          ...List.generate(6, (index) => _FloatingSuit(index: index)),
-          // Center content
-          Center(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Logo container
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: ColorManager.primary.withValues(alpha: 0.15),
-                        boxShadow: [
-                          BoxShadow(
-                            color: ColorManager.primary.withValues(alpha: 0.3),
-                            blurRadius: 40,
-                            spreadRadius: 10,
+    return BlocListener<AuthCubit, AuthState>(
+      listenWhen: (previous, current) =>
+          current is AuthAuthenticated ||
+          current is AuthProfileRequired ||
+          current is AuthInitial,
+      listener: _onAuthStateChanged,
+      child: Scaffold(
+        backgroundColor: ColorManager.darkCanvas,
+        body: Stack(
+          children: [
+            // Floating card suits background
+            ...List.generate(6, (index) => _FloatingSuit(index: index)),
+            // Center content
+            Center(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Logo container
+                      Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: ColorManager.primary.withValues(alpha: 0.15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: ColorManager.primary.withValues(
+                                alpha: 0.3,
+                              ),
+                              blurRadius: 40,
+                              spreadRadius: 10,
+                            ),
+                          ],
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.style_rounded,
+                            size: 56,
+                            color: ColorManager.primary,
                           ),
-                        ],
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.style_rounded,
-                          size: 56,
-                          color: ColorManager.primary,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.xxl),
-                    Text(
-                      'bloot'.tr(),
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: ColorManager.darkTextPrimary,
-                        letterSpacing: 4,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'live_baloot'.tr(),
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: ColorManager.darkTextSecondary.withValues(
-                          alpha: 0.8,
+                      const SizedBox(height: AppSpacing.xxl),
+                      Text(
+                        'bloot'.tr(),
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: ColorManager.darkTextPrimary,
+                          letterSpacing: 4,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        'live_baloot'.tr(),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: ColorManager.darkTextSecondary.withValues(
+                            alpha: 0.8,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          // Progress bar at bottom
-          Positioned(
-            bottom: 48 + MediaQuery.paddingOf(context).bottom,
-            left: 64,
-            right: 64,
-            child: AnimatedBuilder(
-              animation: _progressController,
-              builder: (context, child) {
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: _progressController.value,
-                    backgroundColor: ColorManager.darkBorderSoft,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      ColorManager.primary,
+            // Progress bar at bottom
+            Positioned(
+              bottom: 48 + MediaQuery.paddingOf(context).bottom,
+              left: 64,
+              right: 64,
+              child: AnimatedBuilder(
+                animation: _progressController,
+                builder: (context, child) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: _progressController.value,
+                      backgroundColor: ColorManager.darkBorderSoft,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        ColorManager.primary,
+                      ),
+                      minHeight: 4,
                     ),
-                    minHeight: 4,
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

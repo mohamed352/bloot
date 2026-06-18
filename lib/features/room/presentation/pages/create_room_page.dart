@@ -30,7 +30,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
   bool _spectatorsOn = true;
   bool _showAdvanced = false;
   int _selectedSpeed = 1; // 0=Relaxed, 1=Normal, 2=Fast
-  final _nameController = TextEditingController(text: 'ahmeds_room'.tr());
+  final _nameController = TextEditingController();
 
   final _roomTypes = [
     _RoomTypeData(
@@ -54,6 +54,12 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
   ];
 
   final _speedOptions = ['relaxed'.tr(), 'normal'.tr(), 'fast'.tr()];
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,20 +102,21 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                       fontSize: 15,
                     ),
                     decoration: InputDecoration(
+                      hintText: 'room_name'.tr(),
                       filled: true,
                       fillColor: ColorManager.darkSectionGray,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(AppRadius.cardCompact),
                         borderSide: BorderSide.none,
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(AppRadius.cardCompact),
                         borderSide: const BorderSide(
                           color: ColorManager.darkBorderSoft,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(AppRadius.cardCompact),
                         borderSide: const BorderSide(
                           color: ColorManager.primary,
                           width: 1.5,
@@ -149,7 +156,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                                 height: 40,
                                 decoration: BoxDecoration(
                                   color: e.value.color.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(AppRadius.iconContainer),
                                 ),
                                 child: Icon(
                                   e.value.icon,
@@ -188,11 +195,11 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                                               color: ColorManager.live
                                                   .withValues(alpha: 0.15),
                                               borderRadius:
-                                                  BorderRadius.circular(4),
+                                                  BorderRadius.circular(AppRadius.xs),
                                             ),
-                                            child: const Text(
-                                              'LIVE',
-                                              style: TextStyle(
+                                            child: Text(
+                                              LocaleKeys.liveBadge.tr(),
+                                              style: const TextStyle(
                                                 fontSize: 10,
                                                 fontWeight: FontWeight.w800,
                                                 color: ColorManager.live,
@@ -202,7 +209,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                                         ],
                                       ],
                                     ),
-                                    const SizedBox(height: 2),
+                                    const SizedBox(height: AppSpacing.xxs),
                                     Text(
                                       e.value.desc,
                                       style: const TextStyle(
@@ -392,9 +399,9 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                                       color: ColorManager.darkTextPrimary,
                                     ),
                                   ),
-                                  const SizedBox(height: 2),
+                                  const SizedBox(height: AppSpacing.xxs),
                                   Text(
-                                    '${_roomTypes[_selectedType].name} • 0/4 players',
+                                    '${_roomTypes[_selectedType].name} • ${LocaleKeys.playersCount.tr(namedArgs: {'current': '0', 'max': '4'})}',
                                     style: const TextStyle(
                                       fontSize: 13,
                                       color: ColorManager.darkTextSecondary,
@@ -411,7 +418,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             _buildPreviewAvatar(
-                              'https://i.pravatar.cc/150?img=11',
+                              null,
                               true,
                             ),
                             const SizedBox(width: AppSpacing.sm),
@@ -472,9 +479,10 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                     onPressed: isLoading
                         ? null
                         : () {
+                            final name = _nameController.text.trim();
                             context.read<RoomCubit>().createRoom(
                               CreateRoomParams(
-                                name: _nameController.text.trim(),
+                                name: name.isNotEmpty ? name : 'room'.tr(),
                                 type: RoomType.values[_selectedType],
                                 voiceEnabled: _voiceOn,
                                 cameraEnabled: _cameraOn,
@@ -547,7 +555,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
       ),
       decoration: BoxDecoration(
         color: ColorManager.darkSectionGray,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppRadius.cardCompact),
         border: Border.all(color: ColorManager.darkBorderSoft),
       ),
       child: Row(

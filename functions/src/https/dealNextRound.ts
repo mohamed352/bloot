@@ -2,6 +2,7 @@ import * as functions from 'firebase-functions';
 import { db } from '../config/admin';
 import { requireAppCheck } from '../utils/appCheck';
 import { dealRound } from '../engine/deal';
+import { buildGameUpdate, deepCloneGame } from '../utils/gameUpdate';
 
 export const dealNextRound = functions.https.onCall(async (request) => {
   if (!request.auth) {
@@ -24,6 +25,7 @@ export const dealNextRound = functions.https.onCall(async (request) => {
     }
 
     const game = gameDoc.data() as any;
+    const originalGame = deepCloneGame(game);
 
     if (game.status !== 'roundEnd') {
       throw new functions.https.HttpsError(
@@ -62,9 +64,9 @@ export const dealNextRound = functions.https.onCall(async (request) => {
     }
 
     game.turnTimerStart = new Date();
-    game.updatedAt = new Date();
 
-    transaction.update(gameRef, game);
+    const update = buildGameUpdate(originalGame, game);
+    transaction.update(gameRef, update);
 
     return { success: true, status: game.status, currentRound: game.currentRound };
   });

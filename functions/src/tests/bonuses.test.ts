@@ -159,4 +159,17 @@ describe('resolveBonusClaims', () => {
     expect(result.teamAPoints).toBe(20);
     expect(result.teamBPoints).toBe(0);
   });
+
+  it('equal highest sequence card is a true tie: both keep bonuses', () => {
+    const teamA: BonusClaim[] = [
+      { type: 'bnaga', points: 50, cards: ['AH', 'KH', 'QH', 'JH'], description: '' },
+    ];
+    const teamB: BonusClaim[] = [
+      { type: 'bnaga', points: 50, cards: ['AD', 'KD', 'QD', 'JD'], description: '' },
+    ];
+
+    const result = resolveBonusClaims(teamA, teamB);
+    expect(result.teamAPoints).toBe(50);
+    expect(result.teamBPoints).toBe(50);
+  });
 });

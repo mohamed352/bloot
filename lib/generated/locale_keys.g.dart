@@ -2,7 +2,7 @@
 
 // ignore_for_file: constant_identifier_names
 
-abstract class LocaleKeys {
+abstract class  LocaleKeys {
   static const appName = 'appName';
   static const commonLoading = 'commonLoading';
   static const commonError = 'commonError';
@@ -51,6 +51,11 @@ abstract class LocaleKeys {
   static const about = 'about';
   static const about_bloot = 'about_bloot';
   static const account = 'account';
+  static const audio = 'audio';
+  static const language = 'language';
+  static const notification_settings = 'notification_settings';
+  static const blocked_users = 'blocked_users';
+  static const data_download = 'data_download';
   static const achievements = 'achievements';
   static const active = 'active';
   static const advanced_settings = 'advanced_settings';
@@ -62,6 +67,7 @@ abstract class LocaleKeys {
   static const already_have_an_account = 'already_have_an_account';
   static const anyone_can_join = 'anyone_can_join';
   static const around_8_pm = 'around_8_pm';
+  static const auto_detect = 'auto_detect';
   static const auto_rotate_for_game = 'auto_rotate_for_game';
   static const background_music = 'background_music';
   static const baloot_live = 'baloot_live';
@@ -77,6 +83,10 @@ abstract class LocaleKeys {
   static const cancel = 'cancel';
   static const change_username = 'change_username';
   static const chat = 'chat';
+  static const type_message = 'type_message';
+  static const chat_unavailable = 'chat_unavailable';
+  static const claim = 'claim';
+  static const claim_bonuses = 'claim_bonuses';
   static const compete_and_win_prizes = 'compete_and_win_prizes';
   static const complete_profile = 'complete_profile';
   static const completed = 'completed';
@@ -87,27 +97,39 @@ abstract class LocaleKeys {
   static const date = 'date';
   static const decline = 'decline';
   static const delete_account = 'delete_account';
+  static const delete_account_confirm_title = 'delete_account_confirm_title';
+  static const delete_account_confirm_body = 'delete_account_confirm_body';
   static const details = 'details';
   static const direct = 'direct';
   static const discover = 'discover';
   static const discover_streams = 'discover_streams';
   static const display_name = 'display_name';
   static const dont_have_account = 'dont_have_account';
+  static const earpiece = 'earpiece';
   static const edit_profile = 'edit_profile';
   static const empty = 'empty';
-  static const enter_the_4_digit_code_sent_to =
-      'enter_the_4_digit_code_sent_to';
+  static const enter_the_4_digit_code_sent_to = 'enter_the_4_digit_code_sent_to';
   static const entry = 'entry';
   static const everyone = 'everyone';
+  static const failed_to_send = 'failed_to_send';
   static const fast = 'fast';
+  static const fell = 'fell';
   static const favorite_mode = 'favorite_mode';
+  static const dubai_uae = 'dubai_uae';
+  static const kuwait_city = 'kuwait_city';
+  static const manama_bahrain = 'manama_bahrain';
+  static const doha_qatar = 'doha_qatar';
   static const first_win = 'first_win';
   static const follow = 'follow';
   static const followers = 'followers';
   static const following = 'following';
   static const forfeit_warning = 'forfeit_warning';
+  static const kick_player = 'kick_player';
+  static const kick_confirm = 'kick_confirm';
+  static const leave_room_confirm = 'leave_room_confirm';
   static const format = 'format';
   static const free_entry = 'free_entry';
+  static const friends = 'friends';
   static const game = 'game';
   static const game_speed = 'game_speed';
   static const game_type = 'game_type';
@@ -129,6 +151,9 @@ abstract class LocaleKeys {
   static const home = 'home';
   static const i_am_ready = 'i_am_ready';
   static const invite = 'invite';
+  static const room_full = 'room_full';
+  static const room_closed = 'room_closed';
+  static const room_not_found = 'room_not_found';
   static const invite_only = 'invite_only';
   static const invited_you_to_join = 'invited_you_to_join';
   static const join = 'join';
@@ -165,9 +190,13 @@ abstract class LocaleKeys {
   static const my_tournaments = 'my_tournaments';
   static const need_1_more = 'need_1_more';
   static const next_friday = 'next_friday';
+  static const next_round = 'next_round';
   static const nice_move = 'nice_move';
+  static const no_bonuses = 'no_bonuses';
+  static const no_games_yet = 'no_games_yet';
   static const no_internet_connection = 'no_internet_connection';
   static const none = 'none';
+  static const nobody = 'nobody';
   static const normal = 'normal';
   static const not_ready = 'not_ready';
   static const notifications = 'notifications';
@@ -188,8 +217,7 @@ abstract class LocaleKeys {
   static const phone_number = 'phone_number';
   static const play_baloot_go_live = 'play_baloot_go_live';
   static const play_with_friends = 'play_with_friends';
-  static const play_with_friends_face_to_face =
-      'play_with_friends_face_to_face';
+  static const play_with_friends_face_to_face = 'play_with_friends_face_to_face';
   static const popular = 'popular';
   static const premium_baloot_platform = 'premium_baloot_platform';
   static const privacy = 'privacy';
@@ -206,8 +234,7 @@ abstract class LocaleKeys {
   static const ramadan_tournament = 'ramadan_tournament';
   static const ready = 'ready';
   static const region = 'region';
-  static const registration_closes_in_2_hours =
-      'registration_closes_in_2_hours';
+  static const registration_closes_in_2_hours = 'registration_closes_in_2_hours';
   static const relaxed = 'relaxed';
   static const report_a_problem = 'report_a_problem';
   static const resend_code = 'resend_code';
@@ -228,6 +255,7 @@ abstract class LocaleKeys {
   static const sat_6pm = 'sat_6pm';
   static const save_changes = 'save_changes';
   static const say_something = 'say_something';
+  static const select_bonus_cards = 'select_bonus_cards';
   static const search_streams_players = 'search_streams_players';
   static const see_all = 'see_all';
   static const send_code = 'send_code';
@@ -239,6 +267,7 @@ abstract class LocaleKeys {
   static const sign_in_to_continue_playing = 'sign_in_to_continue_playing';
   static const sign_up = 'sign_up';
   static const single_elimination = 'single_elimination';
+  static const slow = 'slow';
   static const something_went_wrong = 'something_went_wrong';
   static const sound_effects = 'sound_effects';
   static const speaker = 'speaker';
@@ -248,7 +277,11 @@ abstract class LocaleKeys {
   static const start_game = 'start_game';
   static const start_playing = 'start_playing';
   static const stats = 'stats';
+  static const stream_offline = 'stream_offline';
   static const stream_to_fans = 'stream_to_fans';
+  static const streaming_live = 'streaming_live';
+  static const go_live = 'go_live';
+  static const end_stream = 'end_stream';
   static const sun_games = 'sun_games';
   static const support = 'support';
   static const sure_what_time = 'sure_what_time';
@@ -268,6 +301,15 @@ abstract class LocaleKeys {
   static const us_52_them_48 = 'us_52_them_48';
   static const username = 'username';
   static const username_taken = 'username_taken';
+  static const phone_required = 'phone_required';
+  static const phone_invalid = 'phone_invalid';
+  static const name_required = 'name_required';
+  static const name_too_short = 'name_too_short';
+  static const name_too_long = 'name_too_long';
+  static const username_required = 'username_required';
+  static const username_too_short = 'username_too_short';
+  static const username_too_long = 'username_too_long';
+  static const username_invalid = 'username_invalid';
   static const verify = 'verify';
   static const verify_your_phone = 'verify_your_phone';
   static const view_all = 'view_all';
@@ -278,6 +320,7 @@ abstract class LocaleKeys {
   static const vs = 'vs';
   static const waiting_for_players = 'waiting_for_players';
   static const watch_players_live = 'watch_players_live';
+  static const join_competitions = 'join_competitions';
   static const weekend_baloot_bash = 'weekend_baloot_bash';
   static const weekend_bash = 'weekend_bash';
   static const welcome_back = 'welcome_back';
@@ -290,8 +333,7 @@ abstract class LocaleKeys {
   static const you = 'you';
   static const your_name = 'your_name';
   static const your_partner = 'your_partner';
-  static const your_voice_your_passion_your_table =
-      'your_voice_your_passion_your_table';
+  static const your_voice_your_passion_your_table = 'your_voice_your_passion_your_table';
   static const authPhoneHint = 'authPhoneHint';
   static const placeholderPlayerName = 'placeholderPlayerName';
   static const roomPlayerCount = 'roomPlayerCount';
@@ -299,4 +341,73 @@ abstract class LocaleKeys {
   static const labelOn = 'labelOn';
   static const time2DaysAgo = 'time2DaysAgo';
   static const time3DaysAgo = 'time3DaysAgo';
+  static const by_creating_account = 'by_creating_account';
+  static const no_live_streams = 'no_live_streams';
+  static const check_back_later_for_live_games = 'check_back_later_for_live_games';
+  static const loading_message = 'loading_message';
+  static const success_title = 'success_title';
+  static const success_message = 'success_message';
+  static const continue_ = 'continue_';
+  static const room_code_copied = 'room_code_copied';
+  static const players = 'players';
+  static const not_allowed = 'not_allowed';
+  static const pasteFromClipboard = 'pasteFromClipboard';
+  static const new_message = 'new_message';
+  static const search_players = 'search_players';
+  static const search_for_players = 'search_for_players';
+  static const quarter_final = 'quarter_final';
+  static const semi_final = 'semi_final';
+  static const final_ = 'final_';
+  static const no_prizes_available = 'no_prizes_available';
+  static const bracket_not_available = 'bracket_not_available';
+  static const no_players_found = 'no_players_found';
+  static const send = 'send';
+  static const messageSent = 'messageSent';
+  static const shareRoomMessage = 'shareRoomMessage';
+  static const push_invite_title = 'push_invite_title';
+  static const push_invite_body = 'push_invite_body';
+  static const no_public_rooms = 'no_public_rooms';
+  static const public_rooms = 'public_rooms';
+  static const join_table = 'join_table';
+  static const spectate = 'spectate';
+  static const join_next_game = 'join_next_game';
+  static const haptics = 'haptics';
+  static const spectating = 'spectating';
+  static const liveBadge = 'liveBadge';
+  static const playersCount = 'playersCount';
+  static const rounds_6 = 'rounds_6';
+  static const coins_500 = 'coins_500';
+  static const rank_1st = 'rank_1st';
+  static const rank_2nd = 'rank_2nd';
+  static const rank_3rd = 'rank_3rd';
+  static const rank_4th = 'rank_4th';
+  static const tournament_match_ready = 'tournament_match_ready';
+  static const join_match = 'join_match';
+  static const team_a = 'team_a';
+  static const team_b = 'team_b';
+  static const tournament_winner = 'tournament_winner';
+  static const prize_distributed = 'prize_distributed';
+  static const tournament_started = 'tournament_started';
+  static const tournament_full = 'tournament_full';
+  static const table_of_4 = 'table_of_4';
+  static const connection_lost = 'connection_lost';
+  static const reconnecting_in = 'reconnecting_in';
+  static const exit_game = 'exit_game';
+  static const tutorial_tap_to_play = 'tutorial_tap_to_play';
+  static const tutorial_tap_to_play_desc = 'tutorial_tap_to_play_desc';
+  static const tutorial_voice_chat = 'tutorial_voice_chat';
+  static const tutorial_voice_chat_desc = 'tutorial_voice_chat_desc';
+  static const tutorial_chat = 'tutorial_chat';
+  static const tutorial_chat_desc = 'tutorial_chat_desc';
+  static const tutorial_win = 'tutorial_win';
+  static const tutorial_win_desc = 'tutorial_win_desc';
+  static const skip = 'skip';
+  static const tournament_results = 'tournament_results';
+  static const tournament_complete = 'tournament_complete';
+  static const champion = 'champion';
+  static const runner_up = 'runner_up';
+  static const participants = 'participants';
+  static const share_result = 'share_result';
+  static const back_to_home = 'back_to_home';
+
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloot/features/chat/domain/entities/chat.dart';
 
 /// Repository contract for chat operations.
@@ -5,9 +7,18 @@ abstract class ChatRepository {
   /// Returns the list of all conversations.
   Future<List<ChatConversation>> getConversations();
 
-  /// Returns messages for the given [conversationId].
+  /// Returns a real-time stream of messages for the given [conversationId].
+  Stream<List<ChatMessage>> watchMessages(String conversationId);
+
+  /// Returns messages for the given [conversationId] (one-shot, mocked fallback).
   Future<List<ChatMessage>> getMessages(String conversationId);
 
   /// Sends a [message] to [conversationId].
-  Future<List<ChatMessage>> sendMessage(String conversationId, String message);
+  Future<void> sendMessage(String conversationId, String message);
+
+  /// Searches users by [query] across displayName and username.
+  Future<List<ChatConversation>> searchUsers(String query);
+
+  /// Creates or retrieves an existing direct conversation with [otherUserId].
+  Future<ChatConversation> createDirectConversation(String otherUserId);
 }

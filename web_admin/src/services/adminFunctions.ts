@@ -13,6 +13,7 @@ export const adminFunctions = {
 
   // Reports
   resolveReport: call<{ reportId: string; resolution: string }, { success: boolean }>('resolveReport'),
+  dismissReport: call<{ reportId: string }, { success: boolean }>('dismissReport'),
   escalateReport: call<{ reportId: string }, { success: boolean }>('escalateReport'),
 
   // Rooms

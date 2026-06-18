@@ -55,13 +55,19 @@ extension GameStatePatterns on GameState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( GameInitial value)?  initial,TResult Function( GameLoading value)?  loading,TResult Function( GameLoaded value)?  loaded,TResult Function( GameError value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( GameInitial value)?  initial,TResult Function( GameLoading value)?  loading,TResult Function( GameDealing value)?  dealing,TResult Function( GameBidding value)?  bidding,TResult Function( GameBonusClaim value)?  bonusClaim,TResult Function( GamePlaying value)?  playing,TResult Function( GameTrickEnd value)?  trickEnd,TResult Function( GameRoundEnd value)?  roundEnd,TResult Function( GameGameEnd value)?  gameEnd,TResult Function( GameError value)?  error,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case GameInitial() when initial != null:
 return initial(_that);case GameLoading() when loading != null:
-return loading(_that);case GameLoaded() when loaded != null:
-return loaded(_that);case GameError() when error != null:
+return loading(_that);case GameDealing() when dealing != null:
+return dealing(_that);case GameBidding() when bidding != null:
+return bidding(_that);case GameBonusClaim() when bonusClaim != null:
+return bonusClaim(_that);case GamePlaying() when playing != null:
+return playing(_that);case GameTrickEnd() when trickEnd != null:
+return trickEnd(_that);case GameRoundEnd() when roundEnd != null:
+return roundEnd(_that);case GameGameEnd() when gameEnd != null:
+return gameEnd(_that);case GameError() when error != null:
 return error(_that);case _:
   return orElse();
 
@@ -80,13 +86,19 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( GameInitial value)  initial,required TResult Function( GameLoading value)  loading,required TResult Function( GameLoaded value)  loaded,required TResult Function( GameError value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( GameInitial value)  initial,required TResult Function( GameLoading value)  loading,required TResult Function( GameDealing value)  dealing,required TResult Function( GameBidding value)  bidding,required TResult Function( GameBonusClaim value)  bonusClaim,required TResult Function( GamePlaying value)  playing,required TResult Function( GameTrickEnd value)  trickEnd,required TResult Function( GameRoundEnd value)  roundEnd,required TResult Function( GameGameEnd value)  gameEnd,required TResult Function( GameError value)  error,}){
 final _that = this;
 switch (_that) {
 case GameInitial():
 return initial(_that);case GameLoading():
-return loading(_that);case GameLoaded():
-return loaded(_that);case GameError():
+return loading(_that);case GameDealing():
+return dealing(_that);case GameBidding():
+return bidding(_that);case GameBonusClaim():
+return bonusClaim(_that);case GamePlaying():
+return playing(_that);case GameTrickEnd():
+return trickEnd(_that);case GameRoundEnd():
+return roundEnd(_that);case GameGameEnd():
+return gameEnd(_that);case GameError():
 return error(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -104,13 +116,19 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( GameInitial value)?  initial,TResult? Function( GameLoading value)?  loading,TResult? Function( GameLoaded value)?  loaded,TResult? Function( GameError value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( GameInitial value)?  initial,TResult? Function( GameLoading value)?  loading,TResult? Function( GameDealing value)?  dealing,TResult? Function( GameBidding value)?  bidding,TResult? Function( GameBonusClaim value)?  bonusClaim,TResult? Function( GamePlaying value)?  playing,TResult? Function( GameTrickEnd value)?  trickEnd,TResult? Function( GameRoundEnd value)?  roundEnd,TResult? Function( GameGameEnd value)?  gameEnd,TResult? Function( GameError value)?  error,}){
 final _that = this;
 switch (_that) {
 case GameInitial() when initial != null:
 return initial(_that);case GameLoading() when loading != null:
-return loading(_that);case GameLoaded() when loaded != null:
-return loaded(_that);case GameError() when error != null:
+return loading(_that);case GameDealing() when dealing != null:
+return dealing(_that);case GameBidding() when bidding != null:
+return bidding(_that);case GameBonusClaim() when bonusClaim != null:
+return bonusClaim(_that);case GamePlaying() when playing != null:
+return playing(_that);case GameTrickEnd() when trickEnd != null:
+return trickEnd(_that);case GameRoundEnd() when roundEnd != null:
+return roundEnd(_that);case GameGameEnd() when gameEnd != null:
+return gameEnd(_that);case GameError() when error != null:
 return error(_that);case _:
   return null;
 
@@ -128,12 +146,18 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( Game game,  bool controlsVisible,  int? selectedCardIndex)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( Game game,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)?  dealing,TResult Function( Game game,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)?  bidding,TResult Function( Game game,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)?  bonusClaim,TResult Function( Game game,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)?  playing,TResult Function( Game game,  int winnerSeat,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)?  trickEnd,TResult Function( Game game,  int teamAPoints,  int teamBPoints,  String? fellTeam,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)?  roundEnd,TResult Function( Game game,  String winnerTeam,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)?  gameEnd,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case GameInitial() when initial != null:
 return initial();case GameLoading() when loading != null:
-return loading();case GameLoaded() when loaded != null:
-return loaded(_that.game,_that.controlsVisible,_that.selectedCardIndex);case GameError() when error != null:
+return loading();case GameDealing() when dealing != null:
+return dealing(_that.game,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameBidding() when bidding != null:
+return bidding(_that.game,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameBonusClaim() when bonusClaim != null:
+return bonusClaim(_that.game,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GamePlaying() when playing != null:
+return playing(_that.game,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameTrickEnd() when trickEnd != null:
+return trickEnd(_that.game,_that.winnerSeat,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameRoundEnd() when roundEnd != null:
+return roundEnd(_that.game,_that.teamAPoints,_that.teamBPoints,_that.fellTeam,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameGameEnd() when gameEnd != null:
+return gameEnd(_that.game,_that.winnerTeam,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameError() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -152,12 +176,18 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( Game game,  bool controlsVisible,  int? selectedCardIndex)  loaded,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( Game game,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)  dealing,required TResult Function( Game game,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)  bidding,required TResult Function( Game game,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)  bonusClaim,required TResult Function( Game game,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)  playing,required TResult Function( Game game,  int winnerSeat,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)  trickEnd,required TResult Function( Game game,  int teamAPoints,  int teamBPoints,  String? fellTeam,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)  roundEnd,required TResult Function( Game game,  String winnerTeam,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)  gameEnd,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case GameInitial():
 return initial();case GameLoading():
-return loading();case GameLoaded():
-return loaded(_that.game,_that.controlsVisible,_that.selectedCardIndex);case GameError():
+return loading();case GameDealing():
+return dealing(_that.game,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameBidding():
+return bidding(_that.game,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameBonusClaim():
+return bonusClaim(_that.game,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GamePlaying():
+return playing(_that.game,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameTrickEnd():
+return trickEnd(_that.game,_that.winnerSeat,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameRoundEnd():
+return roundEnd(_that.game,_that.teamAPoints,_that.teamBPoints,_that.fellTeam,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameGameEnd():
+return gameEnd(_that.game,_that.winnerTeam,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameError():
 return error(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -175,12 +205,18 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( Game game,  bool controlsVisible,  int? selectedCardIndex)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( Game game,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)?  dealing,TResult? Function( Game game,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)?  bidding,TResult? Function( Game game,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)?  bonusClaim,TResult? Function( Game game,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)?  playing,TResult? Function( Game game,  int winnerSeat,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)?  trickEnd,TResult? Function( Game game,  int teamAPoints,  int teamBPoints,  String? fellTeam,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)?  roundEnd,TResult? Function( Game game,  String winnerTeam,  bool controlsVisible,  int? selectedCardIndex,  bool chatOpen,  List<RoomChatMessage> chatMessages,  bool actionInProgress,  String? lastActionError)?  gameEnd,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case GameInitial() when initial != null:
 return initial();case GameLoading() when loading != null:
-return loading();case GameLoaded() when loaded != null:
-return loaded(_that.game,_that.controlsVisible,_that.selectedCardIndex);case GameError() when error != null:
+return loading();case GameDealing() when dealing != null:
+return dealing(_that.game,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameBidding() when bidding != null:
+return bidding(_that.game,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameBonusClaim() when bonusClaim != null:
+return bonusClaim(_that.game,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GamePlaying() when playing != null:
+return playing(_that.game,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameTrickEnd() when trickEnd != null:
+return trickEnd(_that.game,_that.winnerSeat,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameRoundEnd() when roundEnd != null:
+return roundEnd(_that.game,_that.teamAPoints,_that.teamBPoints,_that.fellTeam,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameGameEnd() when gameEnd != null:
+return gameEnd(_that.game,_that.winnerTeam,_that.controlsVisible,_that.selectedCardIndex,_that.chatOpen,_that.chatMessages,_that.actionInProgress,_that.lastActionError);case GameError() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -256,45 +292,55 @@ String toString() {
 /// @nodoc
 
 
-class GameLoaded implements GameState {
-  const GameLoaded({required this.game, this.controlsVisible = true, this.selectedCardIndex});
+class GameDealing implements GameState {
+  const GameDealing({required this.game, this.controlsVisible = true, this.selectedCardIndex, this.chatOpen = false, final  List<RoomChatMessage> chatMessages = const <RoomChatMessage>[], this.actionInProgress = false, this.lastActionError}): _chatMessages = chatMessages;
   
 
  final  Game game;
 @JsonKey() final  bool controlsVisible;
  final  int? selectedCardIndex;
+@JsonKey() final  bool chatOpen;
+ final  List<RoomChatMessage> _chatMessages;
+@JsonKey() List<RoomChatMessage> get chatMessages {
+  if (_chatMessages is EqualUnmodifiableListView) return _chatMessages;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_chatMessages);
+}
+
+@JsonKey() final  bool actionInProgress;
+ final  String? lastActionError;
 
 /// Create a copy of GameState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$GameLoadedCopyWith<GameLoaded> get copyWith => _$GameLoadedCopyWithImpl<GameLoaded>(this, _$identity);
+$GameDealingCopyWith<GameDealing> get copyWith => _$GameDealingCopyWithImpl<GameDealing>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GameLoaded&&(identical(other.game, game) || other.game == game)&&(identical(other.controlsVisible, controlsVisible) || other.controlsVisible == controlsVisible)&&(identical(other.selectedCardIndex, selectedCardIndex) || other.selectedCardIndex == selectedCardIndex));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GameDealing&&(identical(other.game, game) || other.game == game)&&(identical(other.controlsVisible, controlsVisible) || other.controlsVisible == controlsVisible)&&(identical(other.selectedCardIndex, selectedCardIndex) || other.selectedCardIndex == selectedCardIndex)&&(identical(other.chatOpen, chatOpen) || other.chatOpen == chatOpen)&&const DeepCollectionEquality().equals(other._chatMessages, _chatMessages)&&(identical(other.actionInProgress, actionInProgress) || other.actionInProgress == actionInProgress)&&(identical(other.lastActionError, lastActionError) || other.lastActionError == lastActionError));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,game,controlsVisible,selectedCardIndex);
+int get hashCode => Object.hash(runtimeType,game,controlsVisible,selectedCardIndex,chatOpen,const DeepCollectionEquality().hash(_chatMessages),actionInProgress,lastActionError);
 
 @override
 String toString() {
-  return 'GameState.loaded(game: $game, controlsVisible: $controlsVisible, selectedCardIndex: $selectedCardIndex)';
+  return 'GameState.dealing(game: $game, controlsVisible: $controlsVisible, selectedCardIndex: $selectedCardIndex, chatOpen: $chatOpen, chatMessages: $chatMessages, actionInProgress: $actionInProgress, lastActionError: $lastActionError)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $GameLoadedCopyWith<$Res> implements $GameStateCopyWith<$Res> {
-  factory $GameLoadedCopyWith(GameLoaded value, $Res Function(GameLoaded) _then) = _$GameLoadedCopyWithImpl;
+abstract mixin class $GameDealingCopyWith<$Res> implements $GameStateCopyWith<$Res> {
+  factory $GameDealingCopyWith(GameDealing value, $Res Function(GameDealing) _then) = _$GameDealingCopyWithImpl;
 @useResult
 $Res call({
- Game game, bool controlsVisible, int? selectedCardIndex
+ Game game, bool controlsVisible, int? selectedCardIndex, bool chatOpen, List<RoomChatMessage> chatMessages, bool actionInProgress, String? lastActionError
 });
 
 
@@ -302,21 +348,539 @@ $Res call({
 
 }
 /// @nodoc
-class _$GameLoadedCopyWithImpl<$Res>
-    implements $GameLoadedCopyWith<$Res> {
-  _$GameLoadedCopyWithImpl(this._self, this._then);
+class _$GameDealingCopyWithImpl<$Res>
+    implements $GameDealingCopyWith<$Res> {
+  _$GameDealingCopyWithImpl(this._self, this._then);
 
-  final GameLoaded _self;
-  final $Res Function(GameLoaded) _then;
+  final GameDealing _self;
+  final $Res Function(GameDealing) _then;
 
 /// Create a copy of GameState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? game = null,Object? controlsVisible = null,Object? selectedCardIndex = freezed,}) {
-  return _then(GameLoaded(
+@pragma('vm:prefer-inline') $Res call({Object? game = null,Object? controlsVisible = null,Object? selectedCardIndex = freezed,Object? chatOpen = null,Object? chatMessages = null,Object? actionInProgress = null,Object? lastActionError = freezed,}) {
+  return _then(GameDealing(
 game: null == game ? _self.game : game // ignore: cast_nullable_to_non_nullable
 as Game,controlsVisible: null == controlsVisible ? _self.controlsVisible : controlsVisible // ignore: cast_nullable_to_non_nullable
 as bool,selectedCardIndex: freezed == selectedCardIndex ? _self.selectedCardIndex : selectedCardIndex // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,chatOpen: null == chatOpen ? _self.chatOpen : chatOpen // ignore: cast_nullable_to_non_nullable
+as bool,chatMessages: null == chatMessages ? _self._chatMessages : chatMessages // ignore: cast_nullable_to_non_nullable
+as List<RoomChatMessage>,actionInProgress: null == actionInProgress ? _self.actionInProgress : actionInProgress // ignore: cast_nullable_to_non_nullable
+as bool,lastActionError: freezed == lastActionError ? _self.lastActionError : lastActionError // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class GameBidding implements GameState {
+  const GameBidding({required this.game, this.controlsVisible = true, this.selectedCardIndex, this.chatOpen = false, final  List<RoomChatMessage> chatMessages = const <RoomChatMessage>[], this.actionInProgress = false, this.lastActionError}): _chatMessages = chatMessages;
+  
+
+ final  Game game;
+@JsonKey() final  bool controlsVisible;
+ final  int? selectedCardIndex;
+@JsonKey() final  bool chatOpen;
+ final  List<RoomChatMessage> _chatMessages;
+@JsonKey() List<RoomChatMessage> get chatMessages {
+  if (_chatMessages is EqualUnmodifiableListView) return _chatMessages;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_chatMessages);
+}
+
+@JsonKey() final  bool actionInProgress;
+ final  String? lastActionError;
+
+/// Create a copy of GameState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$GameBiddingCopyWith<GameBidding> get copyWith => _$GameBiddingCopyWithImpl<GameBidding>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GameBidding&&(identical(other.game, game) || other.game == game)&&(identical(other.controlsVisible, controlsVisible) || other.controlsVisible == controlsVisible)&&(identical(other.selectedCardIndex, selectedCardIndex) || other.selectedCardIndex == selectedCardIndex)&&(identical(other.chatOpen, chatOpen) || other.chatOpen == chatOpen)&&const DeepCollectionEquality().equals(other._chatMessages, _chatMessages)&&(identical(other.actionInProgress, actionInProgress) || other.actionInProgress == actionInProgress)&&(identical(other.lastActionError, lastActionError) || other.lastActionError == lastActionError));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,game,controlsVisible,selectedCardIndex,chatOpen,const DeepCollectionEquality().hash(_chatMessages),actionInProgress,lastActionError);
+
+@override
+String toString() {
+  return 'GameState.bidding(game: $game, controlsVisible: $controlsVisible, selectedCardIndex: $selectedCardIndex, chatOpen: $chatOpen, chatMessages: $chatMessages, actionInProgress: $actionInProgress, lastActionError: $lastActionError)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $GameBiddingCopyWith<$Res> implements $GameStateCopyWith<$Res> {
+  factory $GameBiddingCopyWith(GameBidding value, $Res Function(GameBidding) _then) = _$GameBiddingCopyWithImpl;
+@useResult
+$Res call({
+ Game game, bool controlsVisible, int? selectedCardIndex, bool chatOpen, List<RoomChatMessage> chatMessages, bool actionInProgress, String? lastActionError
+});
+
+
+
+
+}
+/// @nodoc
+class _$GameBiddingCopyWithImpl<$Res>
+    implements $GameBiddingCopyWith<$Res> {
+  _$GameBiddingCopyWithImpl(this._self, this._then);
+
+  final GameBidding _self;
+  final $Res Function(GameBidding) _then;
+
+/// Create a copy of GameState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? game = null,Object? controlsVisible = null,Object? selectedCardIndex = freezed,Object? chatOpen = null,Object? chatMessages = null,Object? actionInProgress = null,Object? lastActionError = freezed,}) {
+  return _then(GameBidding(
+game: null == game ? _self.game : game // ignore: cast_nullable_to_non_nullable
+as Game,controlsVisible: null == controlsVisible ? _self.controlsVisible : controlsVisible // ignore: cast_nullable_to_non_nullable
+as bool,selectedCardIndex: freezed == selectedCardIndex ? _self.selectedCardIndex : selectedCardIndex // ignore: cast_nullable_to_non_nullable
+as int?,chatOpen: null == chatOpen ? _self.chatOpen : chatOpen // ignore: cast_nullable_to_non_nullable
+as bool,chatMessages: null == chatMessages ? _self._chatMessages : chatMessages // ignore: cast_nullable_to_non_nullable
+as List<RoomChatMessage>,actionInProgress: null == actionInProgress ? _self.actionInProgress : actionInProgress // ignore: cast_nullable_to_non_nullable
+as bool,lastActionError: freezed == lastActionError ? _self.lastActionError : lastActionError // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class GameBonusClaim implements GameState {
+  const GameBonusClaim({required this.game, this.controlsVisible = true, this.selectedCardIndex, this.chatOpen = false, final  List<RoomChatMessage> chatMessages = const <RoomChatMessage>[], this.actionInProgress = false, this.lastActionError}): _chatMessages = chatMessages;
+  
+
+ final  Game game;
+@JsonKey() final  bool controlsVisible;
+ final  int? selectedCardIndex;
+@JsonKey() final  bool chatOpen;
+ final  List<RoomChatMessage> _chatMessages;
+@JsonKey() List<RoomChatMessage> get chatMessages {
+  if (_chatMessages is EqualUnmodifiableListView) return _chatMessages;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_chatMessages);
+}
+
+@JsonKey() final  bool actionInProgress;
+ final  String? lastActionError;
+
+/// Create a copy of GameState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$GameBonusClaimCopyWith<GameBonusClaim> get copyWith => _$GameBonusClaimCopyWithImpl<GameBonusClaim>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GameBonusClaim&&(identical(other.game, game) || other.game == game)&&(identical(other.controlsVisible, controlsVisible) || other.controlsVisible == controlsVisible)&&(identical(other.selectedCardIndex, selectedCardIndex) || other.selectedCardIndex == selectedCardIndex)&&(identical(other.chatOpen, chatOpen) || other.chatOpen == chatOpen)&&const DeepCollectionEquality().equals(other._chatMessages, _chatMessages)&&(identical(other.actionInProgress, actionInProgress) || other.actionInProgress == actionInProgress)&&(identical(other.lastActionError, lastActionError) || other.lastActionError == lastActionError));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,game,controlsVisible,selectedCardIndex,chatOpen,const DeepCollectionEquality().hash(_chatMessages),actionInProgress,lastActionError);
+
+@override
+String toString() {
+  return 'GameState.bonusClaim(game: $game, controlsVisible: $controlsVisible, selectedCardIndex: $selectedCardIndex, chatOpen: $chatOpen, chatMessages: $chatMessages, actionInProgress: $actionInProgress, lastActionError: $lastActionError)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $GameBonusClaimCopyWith<$Res> implements $GameStateCopyWith<$Res> {
+  factory $GameBonusClaimCopyWith(GameBonusClaim value, $Res Function(GameBonusClaim) _then) = _$GameBonusClaimCopyWithImpl;
+@useResult
+$Res call({
+ Game game, bool controlsVisible, int? selectedCardIndex, bool chatOpen, List<RoomChatMessage> chatMessages, bool actionInProgress, String? lastActionError
+});
+
+
+
+
+}
+/// @nodoc
+class _$GameBonusClaimCopyWithImpl<$Res>
+    implements $GameBonusClaimCopyWith<$Res> {
+  _$GameBonusClaimCopyWithImpl(this._self, this._then);
+
+  final GameBonusClaim _self;
+  final $Res Function(GameBonusClaim) _then;
+
+/// Create a copy of GameState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? game = null,Object? controlsVisible = null,Object? selectedCardIndex = freezed,Object? chatOpen = null,Object? chatMessages = null,Object? actionInProgress = null,Object? lastActionError = freezed,}) {
+  return _then(GameBonusClaim(
+game: null == game ? _self.game : game // ignore: cast_nullable_to_non_nullable
+as Game,controlsVisible: null == controlsVisible ? _self.controlsVisible : controlsVisible // ignore: cast_nullable_to_non_nullable
+as bool,selectedCardIndex: freezed == selectedCardIndex ? _self.selectedCardIndex : selectedCardIndex // ignore: cast_nullable_to_non_nullable
+as int?,chatOpen: null == chatOpen ? _self.chatOpen : chatOpen // ignore: cast_nullable_to_non_nullable
+as bool,chatMessages: null == chatMessages ? _self._chatMessages : chatMessages // ignore: cast_nullable_to_non_nullable
+as List<RoomChatMessage>,actionInProgress: null == actionInProgress ? _self.actionInProgress : actionInProgress // ignore: cast_nullable_to_non_nullable
+as bool,lastActionError: freezed == lastActionError ? _self.lastActionError : lastActionError // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class GamePlaying implements GameState {
+  const GamePlaying({required this.game, this.controlsVisible = true, this.selectedCardIndex, this.chatOpen = false, final  List<RoomChatMessage> chatMessages = const <RoomChatMessage>[], this.actionInProgress = false, this.lastActionError}): _chatMessages = chatMessages;
+  
+
+ final  Game game;
+@JsonKey() final  bool controlsVisible;
+ final  int? selectedCardIndex;
+@JsonKey() final  bool chatOpen;
+ final  List<RoomChatMessage> _chatMessages;
+@JsonKey() List<RoomChatMessage> get chatMessages {
+  if (_chatMessages is EqualUnmodifiableListView) return _chatMessages;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_chatMessages);
+}
+
+@JsonKey() final  bool actionInProgress;
+ final  String? lastActionError;
+
+/// Create a copy of GameState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$GamePlayingCopyWith<GamePlaying> get copyWith => _$GamePlayingCopyWithImpl<GamePlaying>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GamePlaying&&(identical(other.game, game) || other.game == game)&&(identical(other.controlsVisible, controlsVisible) || other.controlsVisible == controlsVisible)&&(identical(other.selectedCardIndex, selectedCardIndex) || other.selectedCardIndex == selectedCardIndex)&&(identical(other.chatOpen, chatOpen) || other.chatOpen == chatOpen)&&const DeepCollectionEquality().equals(other._chatMessages, _chatMessages)&&(identical(other.actionInProgress, actionInProgress) || other.actionInProgress == actionInProgress)&&(identical(other.lastActionError, lastActionError) || other.lastActionError == lastActionError));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,game,controlsVisible,selectedCardIndex,chatOpen,const DeepCollectionEquality().hash(_chatMessages),actionInProgress,lastActionError);
+
+@override
+String toString() {
+  return 'GameState.playing(game: $game, controlsVisible: $controlsVisible, selectedCardIndex: $selectedCardIndex, chatOpen: $chatOpen, chatMessages: $chatMessages, actionInProgress: $actionInProgress, lastActionError: $lastActionError)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $GamePlayingCopyWith<$Res> implements $GameStateCopyWith<$Res> {
+  factory $GamePlayingCopyWith(GamePlaying value, $Res Function(GamePlaying) _then) = _$GamePlayingCopyWithImpl;
+@useResult
+$Res call({
+ Game game, bool controlsVisible, int? selectedCardIndex, bool chatOpen, List<RoomChatMessage> chatMessages, bool actionInProgress, String? lastActionError
+});
+
+
+
+
+}
+/// @nodoc
+class _$GamePlayingCopyWithImpl<$Res>
+    implements $GamePlayingCopyWith<$Res> {
+  _$GamePlayingCopyWithImpl(this._self, this._then);
+
+  final GamePlaying _self;
+  final $Res Function(GamePlaying) _then;
+
+/// Create a copy of GameState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? game = null,Object? controlsVisible = null,Object? selectedCardIndex = freezed,Object? chatOpen = null,Object? chatMessages = null,Object? actionInProgress = null,Object? lastActionError = freezed,}) {
+  return _then(GamePlaying(
+game: null == game ? _self.game : game // ignore: cast_nullable_to_non_nullable
+as Game,controlsVisible: null == controlsVisible ? _self.controlsVisible : controlsVisible // ignore: cast_nullable_to_non_nullable
+as bool,selectedCardIndex: freezed == selectedCardIndex ? _self.selectedCardIndex : selectedCardIndex // ignore: cast_nullable_to_non_nullable
+as int?,chatOpen: null == chatOpen ? _self.chatOpen : chatOpen // ignore: cast_nullable_to_non_nullable
+as bool,chatMessages: null == chatMessages ? _self._chatMessages : chatMessages // ignore: cast_nullable_to_non_nullable
+as List<RoomChatMessage>,actionInProgress: null == actionInProgress ? _self.actionInProgress : actionInProgress // ignore: cast_nullable_to_non_nullable
+as bool,lastActionError: freezed == lastActionError ? _self.lastActionError : lastActionError // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class GameTrickEnd implements GameState {
+  const GameTrickEnd({required this.game, required this.winnerSeat, this.controlsVisible = true, this.selectedCardIndex, this.chatOpen = false, final  List<RoomChatMessage> chatMessages = const <RoomChatMessage>[], this.actionInProgress = false, this.lastActionError}): _chatMessages = chatMessages;
+  
+
+ final  Game game;
+ final  int winnerSeat;
+@JsonKey() final  bool controlsVisible;
+ final  int? selectedCardIndex;
+@JsonKey() final  bool chatOpen;
+ final  List<RoomChatMessage> _chatMessages;
+@JsonKey() List<RoomChatMessage> get chatMessages {
+  if (_chatMessages is EqualUnmodifiableListView) return _chatMessages;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_chatMessages);
+}
+
+@JsonKey() final  bool actionInProgress;
+ final  String? lastActionError;
+
+/// Create a copy of GameState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$GameTrickEndCopyWith<GameTrickEnd> get copyWith => _$GameTrickEndCopyWithImpl<GameTrickEnd>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GameTrickEnd&&(identical(other.game, game) || other.game == game)&&(identical(other.winnerSeat, winnerSeat) || other.winnerSeat == winnerSeat)&&(identical(other.controlsVisible, controlsVisible) || other.controlsVisible == controlsVisible)&&(identical(other.selectedCardIndex, selectedCardIndex) || other.selectedCardIndex == selectedCardIndex)&&(identical(other.chatOpen, chatOpen) || other.chatOpen == chatOpen)&&const DeepCollectionEquality().equals(other._chatMessages, _chatMessages)&&(identical(other.actionInProgress, actionInProgress) || other.actionInProgress == actionInProgress)&&(identical(other.lastActionError, lastActionError) || other.lastActionError == lastActionError));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,game,winnerSeat,controlsVisible,selectedCardIndex,chatOpen,const DeepCollectionEquality().hash(_chatMessages),actionInProgress,lastActionError);
+
+@override
+String toString() {
+  return 'GameState.trickEnd(game: $game, winnerSeat: $winnerSeat, controlsVisible: $controlsVisible, selectedCardIndex: $selectedCardIndex, chatOpen: $chatOpen, chatMessages: $chatMessages, actionInProgress: $actionInProgress, lastActionError: $lastActionError)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $GameTrickEndCopyWith<$Res> implements $GameStateCopyWith<$Res> {
+  factory $GameTrickEndCopyWith(GameTrickEnd value, $Res Function(GameTrickEnd) _then) = _$GameTrickEndCopyWithImpl;
+@useResult
+$Res call({
+ Game game, int winnerSeat, bool controlsVisible, int? selectedCardIndex, bool chatOpen, List<RoomChatMessage> chatMessages, bool actionInProgress, String? lastActionError
+});
+
+
+
+
+}
+/// @nodoc
+class _$GameTrickEndCopyWithImpl<$Res>
+    implements $GameTrickEndCopyWith<$Res> {
+  _$GameTrickEndCopyWithImpl(this._self, this._then);
+
+  final GameTrickEnd _self;
+  final $Res Function(GameTrickEnd) _then;
+
+/// Create a copy of GameState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? game = null,Object? winnerSeat = null,Object? controlsVisible = null,Object? selectedCardIndex = freezed,Object? chatOpen = null,Object? chatMessages = null,Object? actionInProgress = null,Object? lastActionError = freezed,}) {
+  return _then(GameTrickEnd(
+game: null == game ? _self.game : game // ignore: cast_nullable_to_non_nullable
+as Game,winnerSeat: null == winnerSeat ? _self.winnerSeat : winnerSeat // ignore: cast_nullable_to_non_nullable
+as int,controlsVisible: null == controlsVisible ? _self.controlsVisible : controlsVisible // ignore: cast_nullable_to_non_nullable
+as bool,selectedCardIndex: freezed == selectedCardIndex ? _self.selectedCardIndex : selectedCardIndex // ignore: cast_nullable_to_non_nullable
+as int?,chatOpen: null == chatOpen ? _self.chatOpen : chatOpen // ignore: cast_nullable_to_non_nullable
+as bool,chatMessages: null == chatMessages ? _self._chatMessages : chatMessages // ignore: cast_nullable_to_non_nullable
+as List<RoomChatMessage>,actionInProgress: null == actionInProgress ? _self.actionInProgress : actionInProgress // ignore: cast_nullable_to_non_nullable
+as bool,lastActionError: freezed == lastActionError ? _self.lastActionError : lastActionError // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class GameRoundEnd implements GameState {
+  const GameRoundEnd({required this.game, required this.teamAPoints, required this.teamBPoints, this.fellTeam, this.controlsVisible = true, this.selectedCardIndex, this.chatOpen = false, final  List<RoomChatMessage> chatMessages = const <RoomChatMessage>[], this.actionInProgress = false, this.lastActionError}): _chatMessages = chatMessages;
+  
+
+ final  Game game;
+ final  int teamAPoints;
+ final  int teamBPoints;
+ final  String? fellTeam;
+@JsonKey() final  bool controlsVisible;
+ final  int? selectedCardIndex;
+@JsonKey() final  bool chatOpen;
+ final  List<RoomChatMessage> _chatMessages;
+@JsonKey() List<RoomChatMessage> get chatMessages {
+  if (_chatMessages is EqualUnmodifiableListView) return _chatMessages;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_chatMessages);
+}
+
+@JsonKey() final  bool actionInProgress;
+ final  String? lastActionError;
+
+/// Create a copy of GameState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$GameRoundEndCopyWith<GameRoundEnd> get copyWith => _$GameRoundEndCopyWithImpl<GameRoundEnd>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GameRoundEnd&&(identical(other.game, game) || other.game == game)&&(identical(other.teamAPoints, teamAPoints) || other.teamAPoints == teamAPoints)&&(identical(other.teamBPoints, teamBPoints) || other.teamBPoints == teamBPoints)&&(identical(other.fellTeam, fellTeam) || other.fellTeam == fellTeam)&&(identical(other.controlsVisible, controlsVisible) || other.controlsVisible == controlsVisible)&&(identical(other.selectedCardIndex, selectedCardIndex) || other.selectedCardIndex == selectedCardIndex)&&(identical(other.chatOpen, chatOpen) || other.chatOpen == chatOpen)&&const DeepCollectionEquality().equals(other._chatMessages, _chatMessages)&&(identical(other.actionInProgress, actionInProgress) || other.actionInProgress == actionInProgress)&&(identical(other.lastActionError, lastActionError) || other.lastActionError == lastActionError));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,game,teamAPoints,teamBPoints,fellTeam,controlsVisible,selectedCardIndex,chatOpen,const DeepCollectionEquality().hash(_chatMessages),actionInProgress,lastActionError);
+
+@override
+String toString() {
+  return 'GameState.roundEnd(game: $game, teamAPoints: $teamAPoints, teamBPoints: $teamBPoints, fellTeam: $fellTeam, controlsVisible: $controlsVisible, selectedCardIndex: $selectedCardIndex, chatOpen: $chatOpen, chatMessages: $chatMessages, actionInProgress: $actionInProgress, lastActionError: $lastActionError)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $GameRoundEndCopyWith<$Res> implements $GameStateCopyWith<$Res> {
+  factory $GameRoundEndCopyWith(GameRoundEnd value, $Res Function(GameRoundEnd) _then) = _$GameRoundEndCopyWithImpl;
+@useResult
+$Res call({
+ Game game, int teamAPoints, int teamBPoints, String? fellTeam, bool controlsVisible, int? selectedCardIndex, bool chatOpen, List<RoomChatMessage> chatMessages, bool actionInProgress, String? lastActionError
+});
+
+
+
+
+}
+/// @nodoc
+class _$GameRoundEndCopyWithImpl<$Res>
+    implements $GameRoundEndCopyWith<$Res> {
+  _$GameRoundEndCopyWithImpl(this._self, this._then);
+
+  final GameRoundEnd _self;
+  final $Res Function(GameRoundEnd) _then;
+
+/// Create a copy of GameState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? game = null,Object? teamAPoints = null,Object? teamBPoints = null,Object? fellTeam = freezed,Object? controlsVisible = null,Object? selectedCardIndex = freezed,Object? chatOpen = null,Object? chatMessages = null,Object? actionInProgress = null,Object? lastActionError = freezed,}) {
+  return _then(GameRoundEnd(
+game: null == game ? _self.game : game // ignore: cast_nullable_to_non_nullable
+as Game,teamAPoints: null == teamAPoints ? _self.teamAPoints : teamAPoints // ignore: cast_nullable_to_non_nullable
+as int,teamBPoints: null == teamBPoints ? _self.teamBPoints : teamBPoints // ignore: cast_nullable_to_non_nullable
+as int,fellTeam: freezed == fellTeam ? _self.fellTeam : fellTeam // ignore: cast_nullable_to_non_nullable
+as String?,controlsVisible: null == controlsVisible ? _self.controlsVisible : controlsVisible // ignore: cast_nullable_to_non_nullable
+as bool,selectedCardIndex: freezed == selectedCardIndex ? _self.selectedCardIndex : selectedCardIndex // ignore: cast_nullable_to_non_nullable
+as int?,chatOpen: null == chatOpen ? _self.chatOpen : chatOpen // ignore: cast_nullable_to_non_nullable
+as bool,chatMessages: null == chatMessages ? _self._chatMessages : chatMessages // ignore: cast_nullable_to_non_nullable
+as List<RoomChatMessage>,actionInProgress: null == actionInProgress ? _self.actionInProgress : actionInProgress // ignore: cast_nullable_to_non_nullable
+as bool,lastActionError: freezed == lastActionError ? _self.lastActionError : lastActionError // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class GameGameEnd implements GameState {
+  const GameGameEnd({required this.game, required this.winnerTeam, this.controlsVisible = true, this.selectedCardIndex, this.chatOpen = false, final  List<RoomChatMessage> chatMessages = const <RoomChatMessage>[], this.actionInProgress = false, this.lastActionError}): _chatMessages = chatMessages;
+  
+
+ final  Game game;
+ final  String winnerTeam;
+@JsonKey() final  bool controlsVisible;
+ final  int? selectedCardIndex;
+@JsonKey() final  bool chatOpen;
+ final  List<RoomChatMessage> _chatMessages;
+@JsonKey() List<RoomChatMessage> get chatMessages {
+  if (_chatMessages is EqualUnmodifiableListView) return _chatMessages;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_chatMessages);
+}
+
+@JsonKey() final  bool actionInProgress;
+ final  String? lastActionError;
+
+/// Create a copy of GameState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$GameGameEndCopyWith<GameGameEnd> get copyWith => _$GameGameEndCopyWithImpl<GameGameEnd>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GameGameEnd&&(identical(other.game, game) || other.game == game)&&(identical(other.winnerTeam, winnerTeam) || other.winnerTeam == winnerTeam)&&(identical(other.controlsVisible, controlsVisible) || other.controlsVisible == controlsVisible)&&(identical(other.selectedCardIndex, selectedCardIndex) || other.selectedCardIndex == selectedCardIndex)&&(identical(other.chatOpen, chatOpen) || other.chatOpen == chatOpen)&&const DeepCollectionEquality().equals(other._chatMessages, _chatMessages)&&(identical(other.actionInProgress, actionInProgress) || other.actionInProgress == actionInProgress)&&(identical(other.lastActionError, lastActionError) || other.lastActionError == lastActionError));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,game,winnerTeam,controlsVisible,selectedCardIndex,chatOpen,const DeepCollectionEquality().hash(_chatMessages),actionInProgress,lastActionError);
+
+@override
+String toString() {
+  return 'GameState.gameEnd(game: $game, winnerTeam: $winnerTeam, controlsVisible: $controlsVisible, selectedCardIndex: $selectedCardIndex, chatOpen: $chatOpen, chatMessages: $chatMessages, actionInProgress: $actionInProgress, lastActionError: $lastActionError)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $GameGameEndCopyWith<$Res> implements $GameStateCopyWith<$Res> {
+  factory $GameGameEndCopyWith(GameGameEnd value, $Res Function(GameGameEnd) _then) = _$GameGameEndCopyWithImpl;
+@useResult
+$Res call({
+ Game game, String winnerTeam, bool controlsVisible, int? selectedCardIndex, bool chatOpen, List<RoomChatMessage> chatMessages, bool actionInProgress, String? lastActionError
+});
+
+
+
+
+}
+/// @nodoc
+class _$GameGameEndCopyWithImpl<$Res>
+    implements $GameGameEndCopyWith<$Res> {
+  _$GameGameEndCopyWithImpl(this._self, this._then);
+
+  final GameGameEnd _self;
+  final $Res Function(GameGameEnd) _then;
+
+/// Create a copy of GameState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? game = null,Object? winnerTeam = null,Object? controlsVisible = null,Object? selectedCardIndex = freezed,Object? chatOpen = null,Object? chatMessages = null,Object? actionInProgress = null,Object? lastActionError = freezed,}) {
+  return _then(GameGameEnd(
+game: null == game ? _self.game : game // ignore: cast_nullable_to_non_nullable
+as Game,winnerTeam: null == winnerTeam ? _self.winnerTeam : winnerTeam // ignore: cast_nullable_to_non_nullable
+as String,controlsVisible: null == controlsVisible ? _self.controlsVisible : controlsVisible // ignore: cast_nullable_to_non_nullable
+as bool,selectedCardIndex: freezed == selectedCardIndex ? _self.selectedCardIndex : selectedCardIndex // ignore: cast_nullable_to_non_nullable
+as int?,chatOpen: null == chatOpen ? _self.chatOpen : chatOpen // ignore: cast_nullable_to_non_nullable
+as bool,chatMessages: null == chatMessages ? _self._chatMessages : chatMessages // ignore: cast_nullable_to_non_nullable
+as List<RoomChatMessage>,actionInProgress: null == actionInProgress ? _self.actionInProgress : actionInProgress // ignore: cast_nullable_to_non_nullable
+as bool,lastActionError: freezed == lastActionError ? _self.lastActionError : lastActionError // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

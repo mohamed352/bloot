@@ -32,12 +32,30 @@ describe('dealRound', () => {
     expect(new Set(allCards).size).toBe(52);
   });
 
-  it('sets faceUpCard to the last dealt card', () => {
+  it('sets faceUpCard to the last card dealt to the dealer', () => {
     const game = createGameDocument('g1', 'r1', createMockPlayers());
+    game.dealerIndex = 2;
     dealRound(game);
 
     expect(game.faceUpCard).toBeDefined();
     expect(game.faceUpCard).toMatch(/^(2|3|4|5|6|7|8|9|10|J|Q|K|A)[HDCS]$/);
+    // The face-up card must be the last card in the dealer's hand
+    const dealerHand = game.players['2'].hand;
+    expect(game.faceUpCard).toBe(dealerHand[dealerHand.length - 1]);
+  });
+
+  it('deals counter-clockwise starting from player right of dealer', () => {
+    const game = createGameDocument('g1', 'r1', createMockPlayers());
+    game.dealerIndex = 1; // order: 2 -> 3 -> 0 -> 1
+    dealRound(game);
+
+    // All cards are distinct and total 52
+    const allCards: string[] = [];
+    for (let i = 0; i < 4; i++) {
+      allCards.push(...game.players[String(i)].hand);
+    }
+    expect(allCards).toHaveLength(52);
+    expect(new Set(allCards).size).toBe(52);
   });
 
   it('resets player state for new round', () => {

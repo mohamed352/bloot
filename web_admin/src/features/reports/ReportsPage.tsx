@@ -259,7 +259,7 @@ function ReportModal({
             variant="danger"
             isLoading={loadingAction === 'dismiss'}
             disabled={!canDismiss}
-            onClick={() => onAction(() => adminFunctions.resolveReport({ reportId: report.id, resolution: 'Dismissed' }), 'dismiss')}
+            onClick={() => onAction(() => adminFunctions.dismissReport({ reportId: report.id }), 'dismiss')}
           >
             Dismiss
           </Button>

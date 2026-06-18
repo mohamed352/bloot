@@ -17,4 +17,39 @@ class GameRepositoryImpl implements GameRepository {
     final model = await _remoteDataSource.getGameById(id);
     return model.toEntity();
   }
+
+  @override
+  Stream<Game> watchGame(String id) {
+    return _remoteDataSource.watchGame(id).map((model) => model.toEntity());
+  }
+
+  @override
+  Stream<Game> watchGameAsSpectator(String id) {
+    return _remoteDataSource.watchGameAsSpectator(id).map((model) => model.toEntity());
+  }
+
+  @override
+  Future<void> placeBid(String gameId, String bid) async {
+    return _remoteDataSource.placeBid(gameId, bid);
+  }
+
+  @override
+  Future<void> playCard(String gameId, String card) async {
+    return _remoteDataSource.playCard(gameId, card);
+  }
+
+  @override
+  Future<void> claimBonuses(String gameId, List<Map<String, dynamic>> bonuses) async {
+    return _remoteDataSource.claimBonuses(gameId, bonuses);
+  }
+
+  @override
+  Future<void> dealNextRound(String gameId) async {
+    return _remoteDataSource.dealNextRound(gameId);
+  }
+
+  @override
+  Future<void> rematch(String roomId) async {
+    return _remoteDataSource.rematch(roomId);
+  }
 }

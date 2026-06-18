@@ -1,8 +1,9 @@
 import * as functions from 'firebase-functions';
 import { db } from '../config/admin';
 import { requireAppCheck } from '../utils/appCheck';
-import { resolveBonusClaims } from '../engine/bonuses';
+import { detectBnaga, detectMosal, resolveBonusClaims } from '../engine/bonuses';
 import { BonusClaim } from '../models/game';
+import { buildGameUpdate, deepCloneGame } from '../utils/gameUpdate';
 
 export const claimBonuses = functions.https.onCall(async (request) => {
   if (!request.auth) {
@@ -25,6 +26,7 @@ export const claimBonuses = functions.https.onCall(async (request) => {
     }
 
     const game = gameDoc.data() as any;
+    const originalGame = deepCloneGame(game);
 
     if (game.status !== 'bonusClaim') {
       throw new functions.https.HttpsError('failed-precondition', 'Not in bonus claim phase');
@@ -45,9 +47,13 @@ export const claimBonuses = functions.https.onCall(async (request) => {
     const seatIndex = parseInt(playerEntry[0], 10);
     const player = game.players[String(seatIndex)];
 
-    // Validate claimed bonuses against actual hand
+    // Validate claimed bonuses against actual hand and real detectable bonuses
     const claimed = bonuses as BonusClaim[];
+    const detectedBnaga = detectBnaga(player.hand);
+    const detectedMosal = detectMosal(player.hand);
+
     for (const claim of claimed) {
+      // All claimed cards must be in the player's hand
       for (const card of claim.cards) {
         if (!player.hand.includes(card)) {
           throw new functions.https.HttpsError(
@@ -55,6 +61,58 @@ export const claimBonuses = functions.https.onCall(async (request) => {
             `Card ${card} not in hand`,
           );
         }
+      }
+
+      if (claim.type === 'bnaga') {
+        if (!detectedBnaga) {
+          throw new functions.https.HttpsError(
+            'failed-precondition',
+            'No valid bnaga in hand',
+          );
+        }
+        // Claimed sequence must match the detected best sequence exactly
+        const claimedSet = new Set(claim.cards);
+        const detectedSet = new Set(detectedBnaga.sequence);
+        if (claimedSet.size !== detectedSet.size ||
+            ![...claimedSet].every((c) => detectedSet.has(c))) {
+          throw new functions.https.HttpsError(
+            'failed-precondition',
+            'Invalid bnaga claim',
+          );
+        }
+        if (claim.points !== detectedBnaga.points) {
+          throw new functions.https.HttpsError(
+            'failed-precondition',
+            'Incorrect bnaga points',
+          );
+        }
+      } else if (claim.type === 'mosal') {
+        if (!detectedMosal) {
+          throw new functions.https.HttpsError(
+            'failed-precondition',
+            'No valid mosal in hand',
+          );
+        }
+        const claimedSet = new Set(claim.cards);
+        const detectedSet = new Set(detectedMosal.cards);
+        if (claimedSet.size !== detectedSet.size ||
+            ![...claimedSet].every((c) => detectedSet.has(c))) {
+          throw new functions.https.HttpsError(
+            'failed-precondition',
+            'Invalid mosal claim',
+          );
+        }
+        if (claim.points !== detectedMosal.points) {
+          throw new functions.https.HttpsError(
+            'failed-precondition',
+            'Incorrect mosal points',
+          );
+        }
+      } else {
+        throw new functions.https.HttpsError(
+          'failed-precondition',
+          `Unknown bonus type: ${claim.type}`,
+        );
       }
     }
 
@@ -80,28 +138,21 @@ export const claimBonuses = functions.https.onCall(async (request) => {
 
       const resolved = resolveBonusClaims(teamABonuses, teamBBonuses);
 
-      // Store resolved bonus points on the game document for scoring
+      // Store resolved bonus points on the game document for scoring.
+      // Player.bonuses arrays are intentionally left intact so scoring can
+      // include both teams' bonuses in a Hokm fall.
       game.resolvedBonuses = {
         teamA: resolved.teamAPoints,
         teamB: resolved.teamBPoints,
       };
-
-      // Mark only winning team's bonuses as valid
-      for (const [, p] of Object.entries(game.players) as [string, any][]) {
-        if (p.team === 'A' && resolved.teamAPoints === 0) {
-          p.bonuses = [];
-        } else if (p.team === 'B' && resolved.teamBPoints === 0) {
-          p.bonuses = [];
-        }
-      }
 
       game.status = 'playing';
       game.turnIndex = game.hokmBidder ?? game.sunBidder ?? 0;
       game.currentTrick.trickLeaderIndex = game.turnIndex;
     }
 
-    game.updatedAt = new Date();
-    transaction.update(gameRef, game);
+    const update = buildGameUpdate(originalGame, game);
+    transaction.update(gameRef, update);
 
     return { success: true, status: game.status, allReady };
   });

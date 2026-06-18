@@ -1,9 +1,19 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_performance/firebase_performance.dart';
+import 'package:flutter/foundation.dart';
 import 'package:bloot/core/di/injection.dart';
 import 'package:bloot/core/error/global_error_handler.dart';
 import 'package:bloot/core/logger/app_logger.dart';
+import 'package:bloot/core/network/cache_helper.dart';
 import 'package:bloot/core/network/cache_keys.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:bloot/core/services/agora_service.dart';
+import 'package:bloot/core/config/app_check_config.dart';
+import 'package:bloot/core/services/audio_service.dart';
+import 'package:bloot/core/services/notification_service.dart';
+import 'package:bloot/core/services/remote_config_service.dart';
 import 'package:bloot/firebase_options.dart';
 
 abstract class AppInitializer {
@@ -25,9 +35,83 @@ abstract class AppInitializer {
     );
     AppLogger.info('Firebase initialized', tag: LogTags.init);
 
+    // Activate Firebase App Check to protect callable functions and Firestore.
+    await _activateAppCheck();
+
+    // Initialize Crashlytics in non-debug builds.
+    await _initializeCrashlytics();
+
+    // Initialize Performance Monitoring.
+    await FirebasePerformance.instance.setPerformanceCollectionEnabled(!kDebugMode);
+
     await configureDependencies();
     AppLogger.info('DI configured', tag: LogTags.init);
 
+    // Initialize Remote Config.
+    await getIt<RemoteConfigService>().initialize();
+
+    // Initialize push notifications
+    await getIt<NotificationService>().initialize();
+    AppLogger.info('Notification service initialized', tag: LogTags.init);
+
+    // Initialize audio service
+    await getIt<AudioService>().initialize();
+    AppLogger.info('Audio service initialized', tag: LogTags.init);
+
+    // Crash recovery: clean up orphaned Agora channel
+    await _cleanupOrphanedAgoraChannel();
+
     AppLogger.info('Initialization complete', tag: LogTags.init);
+  }
+
+  static Future<void> _activateAppCheck() async {
+    try {
+      final appCheck = FirebaseAppCheck.instance;
+      if (kDebugMode) {
+        await appCheck.activate(
+          providerAndroid: const AndroidDebugProvider(),
+          providerApple: const AppleDebugProvider(),
+          providerWeb: ReCaptchaV3Provider(AppCheckConfig.recaptchaSiteKey),
+        );
+      } else {
+        await appCheck.activate(
+          providerApple: const AppleAppAttestProvider(),
+          providerWeb: ReCaptchaV3Provider(AppCheckConfig.recaptchaSiteKey),
+        );
+      }
+      AppLogger.info('App Check activated', tag: LogTags.init);
+    } catch (e) {
+      AppLogger.error('Failed to activate App Check', error: e);
+    }
+  }
+
+  static Future<void> _initializeCrashlytics() async {
+    try {
+      if (kDebugMode) {
+        await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
+      } else {
+        await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+      }
+    } catch (e) {
+      AppLogger.error('Failed to initialize Crashlytics', error: e);
+    }
+  }
+
+  static Future<void> _cleanupOrphanedAgoraChannel() async {
+    try {
+      final cacheHelper = getIt<CacheHelper>();
+      final channelId = cacheHelper.getData(key: CacheKeys.activeChannelId);
+      if (channelId != null && channelId.isNotEmpty) {
+        AppLogger.warning(
+          'Found orphaned Agora channel: $channelId. Cleaning up.',
+          tag: LogTags.init,
+        );
+        final agoraService = getIt<AgoraService>();
+        await agoraService.leaveChannel();
+        await cacheHelper.removeData(key: CacheKeys.activeChannelId);
+      }
+    } catch (e) {
+      AppLogger.error('Failed to cleanup orphaned Agora channel', error: e);
+    }
   }
 }
