@@ -19,10 +19,6 @@ class AuthCubit extends Cubit<AuthState> {
 
   final AuthRepository _authRepository;
   final RemoteConfigService _remoteConfigService;
-  String? _phoneNumber;
-
-  /// The phone number used for the current OTP session.
-  String? get phoneNumber => _phoneNumber;
 
   Future<void> signInWithGoogle() async {
     emit(const AuthState.loading());
@@ -50,72 +46,29 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> sendOtp(String phoneNumber) async {
+  Future<void> signInWithApple() async {
     emit(const AuthState.loading());
     try {
-      await _authRepository.sendOtp(phoneNumber);
-      _phoneNumber = phoneNumber;
-      emit(AuthState.otpSent(phoneNumber: phoneNumber));
-    } on AuthException catch (e) {
-      emit(AuthState.error(message: e.message));
-    } catch (e) {
-      AppLogger.error('Failed to send OTP', error: e);
-      emit(
-        const AuthState.error(message: 'Failed to send OTP. Please try again.'),
-      );
-    }
-  }
-
-  Future<void> resendOtp() async {
-    final phone = _phoneNumber;
-    if (phone == null || phone.isEmpty) {
-      emit(
-        const AuthState.error(
-          message: 'Phone number not found. Please start over.',
-        ),
-      );
-      return;
-    }
-    emit(const AuthState.loading());
-    try {
-      await _authRepository.sendOtp(phone);
-      emit(AuthState.otpSent(phoneNumber: phone));
-    } on AuthException catch (e) {
-      emit(AuthState.error(message: e.message));
-    } catch (e) {
-      AppLogger.error('Failed to resend OTP', error: e);
-      emit(
-        const AuthState.error(
-          message: 'Failed to resend OTP. Please try again.',
-        ),
-      );
-    }
-  }
-
-  Future<void> verifyOtp(String otp) async {
-    emit(const AuthState.loading());
-    try {
-      await _authRepository.verifyOtp(otp);
-      final isComplete = await _authRepository.isProfileComplete();
-      if (isComplete) {
-        final user = await _authRepository.getCurrentUser();
-        if (user != null) {
-          emit(AuthState.authenticated(user: user));
-        } else {
-          emit(
-            const AuthState.error(
-              message: 'User not found after verification.',
-            ),
-          );
-        }
+      final user = await _authRepository.signInWithApple();
+      if (user == null) {
+        // User canceled the Apple sign-in flow.
+        emit(const AuthState.initial());
+        return;
+      }
+      if (user.isProfileComplete) {
+        emit(AuthState.authenticated(user: user));
       } else {
         emit(const AuthState.profileRequired());
       }
     } on AuthException catch (e) {
       emit(AuthState.error(message: e.message));
     } catch (e) {
-      AppLogger.error('Failed to verify OTP', error: e);
-      emit(const AuthState.error(message: 'Invalid OTP. Please try again.'));
+      AppLogger.error('Failed to sign in with Apple', error: e);
+      emit(
+        const AuthState.error(
+          message: 'Failed to sign in with Apple. Please try again.',
+        ),
+      );
     }
   }
 
@@ -186,7 +139,6 @@ class AuthCubit extends Cubit<AuthState> {
     emit(const AuthState.loading());
     try {
       await _authRepository.signOut();
-      _phoneNumber = null;
       emit(const AuthState.initial());
     } catch (e) {
       AppLogger.error('Sign out failed', error: e);
@@ -212,7 +164,6 @@ class AuthCubit extends Cubit<AuthState> {
     emit(const AuthState.loading());
     try {
       await _authRepository.deleteAccount();
-      _phoneNumber = null;
       emit(const AuthState.initial());
     } on AuthException catch (e) {
       emit(AuthState.error(message: e.message));

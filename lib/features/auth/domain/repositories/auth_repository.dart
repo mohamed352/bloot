@@ -5,16 +5,13 @@ abstract class AuthRepository {
   /// Signs in with Google and returns the authenticated user.
   Future<User?> signInWithGoogle();
 
-  /// Sends an OTP to the given [phoneNumber].
-  Future<void> sendOtp(String phoneNumber);
-
-  /// Verifies the [otp] code for the current session.
-  Future<void> verifyOtp(String otp);
+  /// Signs in with Apple and returns the authenticated user.
+  Future<User?> signInWithApple();
 
   /// Returns whether the current user has a complete profile.
   Future<bool> isProfileComplete();
 
-  /// Completes the user profile after first-time OTP verification.
+  /// Completes the user profile after first-time social sign-in.
   Future<User> completeProfile({
     required String name,
     required String username,

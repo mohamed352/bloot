@@ -2,38 +2,8 @@
 class AuthValidators {
   AuthValidators._();
 
-  /// Validates a full international phone number.
-  /// Returns `null` if valid, otherwise an error message key or raw message.
-  static String? validatePhone(String? phone) {
-    if (phone == null || phone.trim().isEmpty) {
-      return 'phone_required';
-    }
-    final digitsOnly = phone.replaceAll(RegExp(r'\D'), '');
-    if (digitsOnly.length < 7 || digitsOnly.length > 15) {
-      return 'phone_invalid';
-    }
-    return null;
-  }
-
-  /// Normalizes a phone number by stripping non-digits and duplicate country codes.
-  static String normalizePhone(String countryCode, String localNumber) {
-    final codeDigits = countryCode.replaceAll(RegExp(r'\D'), '');
-    var numberDigits = localNumber.replaceAll(RegExp(r'\D'), '');
-
-    // Remove leading zero if present (common for local numbers with country code)
-    if (numberDigits.startsWith('0')) {
-      numberDigits = numberDigits.substring(1);
-    }
-
-    // Avoid duplicate country code if user typed it manually
-    if (numberDigits.startsWith(codeDigits)) {
-      numberDigits = numberDigits.substring(codeDigits.length);
-    }
-
-    return '+$codeDigits$numberDigits';
-  }
-
   /// Validates a display name.
+  /// Returns `null` if valid, otherwise an error message key or raw message.
   static String? validateDisplayName(String? name) {
     if (name == null || name.trim().isEmpty) {
       return 'name_required';

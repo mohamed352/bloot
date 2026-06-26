@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
@@ -12,15 +13,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bloot/features/game/domain/entities/game.dart';
 import 'package:bloot/features/game/domain/repositories/game_repository.dart';
 import 'package:bloot/features/game/presentation/cubit/game_cubit.dart';
+import 'package:bloot/features/game/presentation/cubit/local_game_simulator.dart';
 import 'package:bloot/core/services/agora_service.dart';
+import 'package:bloot/core/style/app_colors.dart';
 import 'package:bloot/core/services/audio_service.dart';
 import 'package:bloot/core/network/connectivity_cubit.dart';
 import 'package:bloot/features/game/presentation/pages/game_play_page.dart';
+import 'package:bloot/features/game/presentation/widgets/playing_card/playing_card.dart';
 import 'package:bloot/features/room/domain/repositories/room_repository.dart';
 
 class MockGameRepository extends Mock implements GameRepository {}
 
 class MockRoomRepository extends Mock implements RoomRepository {}
+
 class MockAudioService extends Mock implements AudioService {}
 
 class MockAgoraService extends Mock implements AgoraService {
@@ -128,7 +133,7 @@ void main() {
 
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'game_tutorial_seen': true});
     EasyLocalization.logger.enableBuildModes = [];
     await EasyLocalization.ensureInitialized();
   });
@@ -161,8 +166,13 @@ void main() {
             BlocProvider<GameCubit>.value(value: cubit),
             BlocProvider<ConnectivityCubit>(create: (_) => ConnectivityCubit()),
           ],
-          child: RepositoryProvider<AgoraService>(
-            create: (_) => mockAgoraService,
+          child: MultiRepositoryProvider(
+            providers: [
+              RepositoryProvider<AgoraService>(create: (_) => mockAgoraService),
+              RepositoryProvider<AudioService>(
+                create: (_) => MockAudioService(),
+              ),
+            ],
             child: child,
           ),
         ),
@@ -181,12 +191,50 @@ void main() {
     const testGame = Game(
       id: 'g1',
       players: [
-        GamePlayer(uid: 'p0', name: 'Khalid', avatarUrl: '', team: 'A', seatIndex: 0),
-        GamePlayer(uid: 'p1', name: 'Faisal', avatarUrl: '', team: 'B', seatIndex: 1),
-        GamePlayer(uid: 'p2', name: 'Omar', avatarUrl: '', team: 'A', seatIndex: 2),
-        GamePlayer(uid: 'p3', name: 'You', avatarUrl: '', team: 'B', seatIndex: 3),
+        GamePlayer(
+          uid: 'p0',
+          name: 'Khalid',
+          avatarUrl: '',
+          team: 'A',
+          seatIndex: 0,
+        ),
+        GamePlayer(
+          uid: 'p1',
+          name: 'Faisal',
+          avatarUrl: '',
+          team: 'B',
+          seatIndex: 1,
+        ),
+        GamePlayer(
+          uid: 'p2',
+          name: 'Omar',
+          avatarUrl: '',
+          team: 'A',
+          seatIndex: 2,
+        ),
+        GamePlayer(
+          uid: 'p3',
+          name: 'You',
+          avatarUrl: '',
+          team: 'B',
+          seatIndex: 3,
+        ),
       ],
-      myHand: ['AH', 'KH', 'QH', 'JH', '10H', '9H', '8H', '7H', '6H', '5H', '4H', '3H', '2H'],
+      myHand: [
+        'AH',
+        'KH',
+        'QH',
+        'JH',
+        '10H',
+        '9H',
+        '8H',
+        '7H',
+        '6H',
+        '5H',
+        '4H',
+        '3H',
+        '2H',
+      ],
       mySeatIndex: 3,
       playedCards: [null, null, null, null],
       scoreUs: 10,
@@ -201,11 +249,14 @@ void main() {
     );
 
     testWidgets('renders without error in loading state', (tester) async {
-      when(() => mockRepository.watchGame('g1')).thenAnswer(
-        (_) => const Stream.empty(),
-      );
+      when(
+        () => mockRepository.watchGame('g1'),
+      ).thenAnswer((_) => const Stream.empty());
 
-      await tester.pumpWidget(buildTestableWidget(const GamePlayPage(id: 'g1')));
+      cubit.watchGame('g1');
+      await tester.pumpWidget(
+        buildTestableWidget(const GamePlayPage(id: 'g1')),
+      );
       await tester.pump();
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -216,11 +267,14 @@ void main() {
 
     testWidgets('shows player names when playing', (tester) async {
       await runWithFakeHttp(() async {
-        when(() => mockRepository.watchGame('g1')).thenAnswer(
-          (_) => Stream.value(testGame),
-        );
+        when(
+          () => mockRepository.watchGame('g1'),
+        ).thenAnswer((_) => Stream.value(testGame));
 
-        await tester.pumpWidget(buildTestableWidget(const GamePlayPage(id: 'g1')));
+        cubit.watchGame('g1');
+        await tester.pumpWidget(
+          buildTestableWidget(const GamePlayPage(id: 'g1')),
+        );
         await tester.pumpAndSettle();
 
         expect(find.text('You'), findsOneWidget);
@@ -235,11 +289,14 @@ void main() {
 
     testWidgets('shows score numbers', (tester) async {
       await runWithFakeHttp(() async {
-        when(() => mockRepository.watchGame('g1')).thenAnswer(
-          (_) => Stream.value(testGame),
-        );
+        when(
+          () => mockRepository.watchGame('g1'),
+        ).thenAnswer((_) => Stream.value(testGame));
 
-        await tester.pumpWidget(buildTestableWidget(const GamePlayPage(id: 'g1')));
+        cubit.watchGame('g1');
+        await tester.pumpWidget(
+          buildTestableWidget(const GamePlayPage(id: 'g1')),
+        );
         await tester.pumpAndSettle();
 
         // Score chip shows 10 and 20
@@ -247,6 +304,135 @@ void main() {
         expect(find.text('20'), findsWidgets);
 
         // Let the auto-hide timer fire
+        await tester.pump(const Duration(seconds: 4));
+      });
+    });
+
+    testWidgets('plays card on tap when it is my turn', (tester) async {
+      await runWithFakeHttp(() async {
+        when(
+          () => mockRepository.watchGame('g1'),
+        ).thenAnswer((_) => Stream.value(testGame));
+        when(
+          () => mockRepository.playCard('g1', 'AH'),
+        ).thenAnswer((_) async {});
+
+        cubit.watchGame('g1');
+        await tester.pumpWidget(
+          buildTestableWidget(const GamePlayPage(id: 'g1')),
+        );
+        await tester.pumpAndSettle();
+
+        final cardFinder = find.byType(PlayingCardWidget);
+        expect(cardFinder, findsWidgets);
+
+        await tester.tap(cardFinder.first);
+        await tester.pumpAndSettle();
+
+        verify(() => mockRepository.playCard('g1', 'AH')).called(1);
+
+        // Let the auto-hide timer fire
+        await tester.pump(const Duration(seconds: 4));
+      });
+    });
+
+    testWidgets('plays card on drag to table when it is my turn', (
+      tester,
+    ) async {
+      await runWithFakeHttp(() async {
+        when(
+          () => mockRepository.watchGame('g1'),
+        ).thenAnswer((_) => Stream.value(testGame));
+        when(
+          () => mockRepository.playCard('g1', 'AH'),
+        ).thenAnswer((_) async {});
+
+        cubit.watchGame('g1');
+        await tester.pumpWidget(
+          buildTestableWidget(const GamePlayPage(id: 'g1')),
+        );
+        await tester.pumpAndSettle();
+
+        final cardFinder = find.byType(PlayingCardWidget);
+        expect(cardFinder, findsWidgets);
+
+        final cardRect = tester.getRect(cardFinder.first);
+        final cardCenter = cardRect.center;
+
+        // The game table is the only AspectRatio in the layout.
+        final tableFinder = find.byType(AspectRatio);
+        expect(tableFinder, findsOneWidget);
+        final tableCenter = tester.getCenter(tableFinder);
+
+        await tester.drag(
+          cardFinder.first,
+          tableCenter - cardCenter,
+        );
+        await tester.pumpAndSettle();
+
+        verify(() => mockRepository.playCard('g1', 'AH')).called(1);
+
+        // Let the auto-hide timer fire
+        await tester.pump(const Duration(seconds: 4));
+      });
+    });
+  });
+
+  group('GamePlayPage with LocalGameSimulator', () {
+    setUp(() {
+      final getIt = GetIt.instance;
+      getIt.registerSingleton<RoomRepository>(MockRoomRepository());
+      getIt.registerSingleton<AgoraService>(mockAgoraService);
+      getIt.registerSingleton<AudioService>(MockAudioService());
+    });
+
+    tearDown(() async {
+      await GetIt.instance.reset();
+    });
+
+    Widget buildSimWidget() {
+      return EasyLocalization(
+        supportedLocales: const [Locale('en'), Locale('ar')],
+        path: 'assets/translations',
+        fallbackLocale: const Locale('en'),
+        assetLoader: _TestAssetLoader(),
+        child: MaterialApp(
+          theme: ThemeData.dark().copyWith(
+            extensions: const <ThemeExtension<dynamic>>[AppColors.dark],
+          ),
+          home: MultiBlocProvider(
+            providers: [
+              BlocProvider<GameCubit>(
+                create: (_) => LocalGameSimulator()..watchGame('sim_1'),
+              ),
+              BlocProvider<ConnectivityCubit>(
+                create: (_) => ConnectivityCubit(),
+              ),
+            ],
+            child: RepositoryProvider<AgoraService>(
+              create: (_) => mockAgoraService,
+              child: const GamePlayPage(id: 'sim_1'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('renders dealing state and does not show camera loading', (
+      tester,
+    ) async {
+      await runWithFakeHttp(() async {
+        await tester.pumpWidget(buildSimWidget());
+        await tester.pump();
+
+        // Should be in loading/dealing state briefly.
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+
+        // Wait for the microtask and the dealing state to be emitted.
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+
+        // Let the auto-hide timer fire.
         await tester.pump(const Duration(seconds: 4));
       });
     });

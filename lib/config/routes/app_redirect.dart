@@ -32,7 +32,6 @@ abstract class AppRedirect {
       RoutePaths.splash,
       RoutePaths.welcome,
       RoutePaths.login,
-      RoutePaths.otp,
       RoutePaths.terms,
       RoutePaths.privacy,
       RoutePaths.forceUpdate,
@@ -40,11 +39,10 @@ abstract class AppRedirect {
       RoutePaths.offline,
     ].contains(currentPath);
 
-    // Pure authentication flow routes (welcome → login → otp).
+    // Pure authentication flow routes (welcome → login).
     final isAuthRoute = [
       RoutePaths.welcome,
       RoutePaths.login,
-      RoutePaths.otp,
     ].contains(currentPath);
 
     // Authenticated users that already have a profile should not re-enter auth.

@@ -27,22 +27,6 @@ class AccountSettingsPage extends StatelessWidget {
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(
-              Icons.phone_rounded,
-              color: ColorManager.primary,
-            ),
-            title: Text(
-              'phone_number'.tr(),
-              style: const TextStyle(color: ColorManager.darkTextPrimary),
-            ),
-            subtitle: const Text(
-              'Verified',
-              style: TextStyle(color: ColorManager.darkTextSecondary),
-            ),
-          ),
-          const Divider(color: ColorManager.darkBorderSoft),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(
               Icons.person_rounded,
               color: ColorManager.primary,
             ),

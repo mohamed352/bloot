@@ -36,8 +36,6 @@ abstract class  LocaleKeys {
   static const validationPasswordMinLength = 'validationPasswordMinLength';
   static const validationNameRequired = 'validationNameRequired';
   static const validationNameMinLength = 'validationNameMinLength';
-  static const validationPhoneRequired = 'validationPhoneRequired';
-  static const validationPhoneInvalid = 'validationPhoneInvalid';
   static const validationFieldRequired = 'validationFieldRequired';
   static const timeNow = 'timeNow';
   static const timeMinutesAgo = 'timeMinutesAgo';
@@ -109,7 +107,6 @@ abstract class  LocaleKeys {
   static const earpiece = 'earpiece';
   static const edit_profile = 'edit_profile';
   static const empty = 'empty';
-  static const enter_the_4_digit_code_sent_to = 'enter_the_4_digit_code_sent_to';
   static const entry = 'entry';
   static const everyone = 'everyone';
   static const failed_to_send = 'failed_to_send';
@@ -134,6 +131,7 @@ abstract class  LocaleKeys {
   static const game = 'game';
   static const game_speed = 'game_speed';
   static const game_type = 'game_type';
+  static const proposed_trump = 'proposed_trump';
   static const games = 'games';
   static const get_started = 'get_started';
   static const gg = 'gg';
@@ -172,6 +170,7 @@ abstract class  LocaleKeys {
   static const leave_room = 'leave_room';
   static const lets_go = 'lets_go';
   static const lets_play_again_tonight = 'lets_play_again_tonight';
+  static const level = 'level';
   static const level_1 = 'level_1';
   static const like = 'like';
   static const linked_accounts = 'linked_accounts';
@@ -180,6 +179,7 @@ abstract class  LocaleKeys {
   static const live_now = 'live_now';
   static const live_stream = 'live_stream';
   static const live_voice_and_video = 'live_voice_and_video';
+  static const liveStream = 'liveStream';
   static const locked = 'locked';
   static const log_out = 'log_out';
   static const log_out_question = 'log_out_question';
@@ -217,10 +217,10 @@ abstract class  LocaleKeys {
   static const overall_win_rate = 'overall_win_rate';
   static const participants_23_64 = 'participants_23_64';
   static const perfect_ill_create_a_room = 'perfect_ill_create_a_room';
-  static const phone_number = 'phone_number';
   static const play_baloot_go_live = 'play_baloot_go_live';
   static const play_with_friends = 'play_with_friends';
   static const play_with_friends_face_to_face = 'play_with_friends_face_to_face';
+  static const play_with_bots = 'play_with_bots';
   static const popular = 'popular';
   static const premium_baloot_platform = 'premium_baloot_platform';
   static const privacy = 'privacy';
@@ -240,11 +240,10 @@ abstract class  LocaleKeys {
   static const registration_closes_in_2_hours = 'registration_closes_in_2_hours';
   static const relaxed = 'relaxed';
   static const report_a_problem = 'report_a_problem';
-  static const resend_code = 'resend_code';
-  static const resend_code_in = 'resend_code_in';
   static const retry = 'retry';
   static const riyadh_open = 'riyadh_open';
   static const riyadh_saudi_arabia = 'riyadh_saudi_arabia';
+  static const room = 'room';
   static const room_code = 'room_code';
   static const room_invitation = 'room_invitation';
   static const room_lobby = 'room_lobby';
@@ -262,7 +261,6 @@ abstract class  LocaleKeys {
   static const select_bonus_cards = 'select_bonus_cards';
   static const search_streams_players = 'search_streams_players';
   static const see_all = 'see_all';
-  static const send_code = 'send_code';
   static const sent_a_room_invitation = 'sent_a_room_invitation';
   static const settings = 'settings';
   static const share = 'share';
@@ -307,8 +305,6 @@ abstract class  LocaleKeys {
   static const us_52_them_48 = 'us_52_them_48';
   static const username = 'username';
   static const username_taken = 'username_taken';
-  static const phone_required = 'phone_required';
-  static const phone_invalid = 'phone_invalid';
   static const name_required = 'name_required';
   static const name_too_short = 'name_too_short';
   static const name_too_long = 'name_too_long';
@@ -316,8 +312,6 @@ abstract class  LocaleKeys {
   static const username_too_short = 'username_too_short';
   static const username_too_long = 'username_too_long';
   static const username_invalid = 'username_invalid';
-  static const verify = 'verify';
-  static const verify_your_phone = 'verify_your_phone';
   static const view_all = 'view_all';
   static const voice_chat = 'voice_chat';
   static const voice_only = 'voice_only';
@@ -340,7 +334,6 @@ abstract class  LocaleKeys {
   static const your_name = 'your_name';
   static const your_partner = 'your_partner';
   static const your_voice_your_passion_your_table = 'your_voice_your_passion_your_table';
-  static const authPhoneHint = 'authPhoneHint';
   static const placeholderPlayerName = 'placeholderPlayerName';
   static const roomPlayerCount = 'roomPlayerCount';
   static const labelNew = 'labelNew';
@@ -415,5 +408,16 @@ abstract class  LocaleKeys {
   static const participants = 'participants';
   static const share_result = 'share_result';
   static const back_to_home = 'back_to_home';
+  static const bid_not_allowed = 'bid_not_allowed';
+  static const hokm_after_hokm = 'hokm_after_hokm';
+  static const hokm_requires_trump_suit = 'hokm_requires_trump_suit';
+  static const not_your_turn_bid = 'not_your_turn_bid';
+  static const not_your_turn_bonus = 'not_your_turn_bonus';
+  static const not_your_turn_card = 'not_your_turn_card';
+  static const card_not_allowed = 'card_not_allowed';
+  static const simulator_camera_unavailable = 'simulator_camera_unavailable';
+  static const simulator_chat_unavailable = 'simulator_chat_unavailable';
+  static const simulator_mic_unavailable = 'simulator_mic_unavailable';
+  static const sun_after_sun = 'sun_after_sun';
 
 }

@@ -119,7 +119,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => thirdPartyModule.packageInfo,
       preResolve: true,
     );
-    gh.factory<_i838.LocalGameSimulator>(() => _i838.LocalGameSimulator());
     gh.lazySingleton<_i59.FirebaseAuth>(() => thirdPartyModule.auth);
     gh.lazySingleton<_i974.FirebaseFirestore>(() => thirdPartyModule.firestore);
     gh.lazySingleton<_i457.FirebaseStorage>(() => thirdPartyModule.storage);
@@ -157,6 +156,12 @@ extension GetItInjectableX on _i174.GetIt {
         firebaseAuth: gh<_i59.FirebaseAuth>(),
         firestore: gh<_i974.FirebaseFirestore>(),
         functions: gh<_i809.FirebaseFunctions>(),
+      ),
+    );
+    gh.factory<_i838.LocalGameSimulator>(
+      () => _i838.LocalGameSimulator(
+        humanTurnTimeout: gh<Duration>(),
+        humanCardTimeout: gh<Duration>(),
       ),
     );
     gh.singleton<_i681.CacheHelper>(

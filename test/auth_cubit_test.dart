@@ -23,13 +23,10 @@ void main() {
     when(() => remoteConfigService.allowNewSignups).thenReturn(true);
   });
 
-  const phone = '+966501234567';
-  const otp = '123456';
   const name = 'Ali';
   const username = 'ali_ahmed';
   const user = User(
     uid: 'u1',
-    phoneNumber: phone,
     displayName: name,
     username: username,
     isProfileComplete: true,
@@ -40,82 +37,13 @@ void main() {
         remoteConfigService: remoteConfigService,
       );
 
-  group('sendOtp', () {
-    blocTest<AuthCubit, AuthState>(
-      'emits loading then otpSent on success',
-      build: buildCubit,
-      act: (cubit) => cubit.sendOtp(phone),
-      setUp: () {
-        when(() => authRepository.sendOtp(phone)).thenAnswer((_) async {});
-      },
-      expect: () => [
-        const AuthState.loading(),
-        const AuthState.otpSent(phoneNumber: phone),
-      ],
-      verify: (_) {
-        verify(() => authRepository.sendOtp(phone)).called(1);
-      },
-    );
-
-    blocTest<AuthCubit, AuthState>(
-      'emits loading then error on failure',
-      build: buildCubit,
-      act: (cubit) => cubit.sendOtp(phone),
-      setUp: () {
-        when(() => authRepository.sendOtp(phone))
-            .thenThrow(const AuthException('Failed to send'));
-      },
-      expect: () => [
-        const AuthState.loading(),
-        const AuthState.error(message: 'Failed to send'),
-      ],
-    );
-  });
-
-  group('resendOtp', () {
-    blocTest<AuthCubit, AuthState>(
-      'emits error when no phone number was stored',
-      build: buildCubit,
-      act: (cubit) => cubit.resendOtp(),
-      expect: () => [
-        const AuthState.error(
-          message: 'Phone number not found. Please start over.',
-        ),
-      ],
-    );
-
-    blocTest<AuthCubit, AuthState>(
-      'emits loading then otpSent when phone is available',
-      build: buildCubit,
-      act: (cubit) async {
-        await cubit.sendOtp(phone);
-        await cubit.resendOtp();
-      },
-      setUp: () {
-        when(() => authRepository.sendOtp(phone)).thenAnswer((_) async {});
-      },
-      expect: () => [
-        const AuthState.loading(),
-        const AuthState.otpSent(phoneNumber: phone),
-        const AuthState.loading(),
-        const AuthState.otpSent(phoneNumber: phone),
-      ],
-      verify: (_) {
-        verify(() => authRepository.sendOtp(phone)).called(2);
-      },
-    );
-  });
-
-  group('verifyOtp', () {
+  group('signInWithGoogle', () {
     blocTest<AuthCubit, AuthState>(
       'emits authenticated when profile is complete',
       build: buildCubit,
-      act: (cubit) => cubit.verifyOtp(otp),
+      act: (cubit) => cubit.signInWithGoogle(),
       setUp: () {
-        when(() => authRepository.verifyOtp(otp)).thenAnswer((_) async {});
-        when(() => authRepository.isProfileComplete())
-            .thenAnswer((_) async => true);
-        when(() => authRepository.getCurrentUser())
+        when(() => authRepository.signInWithGoogle())
             .thenAnswer((_) async => user);
       },
       expect: () => [
@@ -127,11 +55,10 @@ void main() {
     blocTest<AuthCubit, AuthState>(
       'emits profileRequired when profile is incomplete',
       build: buildCubit,
-      act: (cubit) => cubit.verifyOtp(otp),
+      act: (cubit) => cubit.signInWithGoogle(),
       setUp: () {
-        when(() => authRepository.verifyOtp(otp)).thenAnswer((_) async {});
-        when(() => authRepository.isProfileComplete())
-            .thenAnswer((_) async => false);
+        when(() => authRepository.signInWithGoogle())
+            .thenAnswer((_) async => const User(uid: 'u1'));
       },
       expect: () => [
         const AuthState.loading(),
@@ -140,16 +67,74 @@ void main() {
     );
 
     blocTest<AuthCubit, AuthState>(
-      'emits error when OTP verification fails',
+      'emits initial when user cancels',
       build: buildCubit,
-      act: (cubit) => cubit.verifyOtp(otp),
+      act: (cubit) => cubit.signInWithGoogle(),
       setUp: () {
-        when(() => authRepository.verifyOtp(otp))
-            .thenThrow(const AuthException('Invalid OTP'));
+        when(() => authRepository.signInWithGoogle())
+            .thenAnswer((_) async => null);
       },
       expect: () => [
         const AuthState.loading(),
-        const AuthState.error(message: 'Invalid OTP'),
+        const AuthState.initial(),
+      ],
+    );
+
+    blocTest<AuthCubit, AuthState>(
+      'emits error on failure',
+      build: buildCubit,
+      act: (cubit) => cubit.signInWithGoogle(),
+      setUp: () {
+        when(() => authRepository.signInWithGoogle())
+            .thenThrow(const AuthException('Google sign in failed'));
+      },
+      expect: () => [
+        const AuthState.loading(),
+        const AuthState.error(message: 'Google sign in failed'),
+      ],
+    );
+  });
+
+  group('signInWithApple', () {
+    blocTest<AuthCubit, AuthState>(
+      'emits authenticated when profile is complete',
+      build: buildCubit,
+      act: (cubit) => cubit.signInWithApple(),
+      setUp: () {
+        when(() => authRepository.signInWithApple())
+            .thenAnswer((_) async => user);
+      },
+      expect: () => [
+        const AuthState.loading(),
+        const AuthState.authenticated(user: user),
+      ],
+    );
+
+    blocTest<AuthCubit, AuthState>(
+      'emits initial when user cancels',
+      build: buildCubit,
+      act: (cubit) => cubit.signInWithApple(),
+      setUp: () {
+        when(() => authRepository.signInWithApple())
+            .thenAnswer((_) async => null);
+      },
+      expect: () => [
+        const AuthState.loading(),
+        const AuthState.initial(),
+      ],
+    );
+
+    blocTest<AuthCubit, AuthState>(
+      'emits error on failure',
+      build: buildCubit,
+      act: (cubit) => cubit.signInWithApple(),
+      setUp: () {
+        when(() => authRepository.signInWithApple())
+            .thenThrow(const AuthException('Apple sign in failed'));
+      },
+      expect: () => [
+        const AuthState.loading(),
+        const AuthState.error(message: 'Apple sign in failed'),
       ],
     );
   });
@@ -227,7 +212,7 @@ void main() {
       act: (cubit) => cubit.checkAuthStatus(),
       setUp: () {
         when(() => authRepository.getCurrentUser())
-            .thenAnswer((_) async => const User(uid: 'u1', phoneNumber: phone));
+            .thenAnswer((_) async => const User(uid: 'u1'));
       },
       expect: () => [
         const AuthState.loading(),

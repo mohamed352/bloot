@@ -19,11 +19,10 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> sendOtp(String phoneNumber) =>
-      _remoteDataSource.sendOtp(phoneNumber);
-
-  @override
-  Future<void> verifyOtp(String otp) => _remoteDataSource.verifyOtp(otp);
+  Future<User?> signInWithApple() async {
+    final model = await _remoteDataSource.signInWithApple();
+    return model?.toEntity();
+  }
 
   @override
   Future<bool> isProfileComplete() => _remoteDataSource.isProfileComplete();

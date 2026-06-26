@@ -2,7 +2,6 @@
 class User {
   const User({
     required this.uid,
-    required this.phoneNumber,
     this.displayName,
     this.username,
     this.avatarUrl,
@@ -10,7 +9,6 @@ class User {
   });
 
   final String uid;
-  final String phoneNumber;
   final String? displayName;
   final String? username;
   final String? avatarUrl;

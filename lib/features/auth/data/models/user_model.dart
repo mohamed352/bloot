@@ -9,7 +9,6 @@ part 'user_model.g.dart';
 abstract class UserModel with _$UserModel {
   const factory UserModel({
     required String uid,
-    required String phoneNumber,
     String? displayName,
     String? username,
     String? avatarUrl,
@@ -23,7 +22,6 @@ abstract class UserModel with _$UserModel {
 extension UserModelX on UserModel {
   User toEntity() => User(
     uid: uid,
-    phoneNumber: phoneNumber,
     displayName: displayName,
     username: username,
     avatarUrl: avatarUrl,

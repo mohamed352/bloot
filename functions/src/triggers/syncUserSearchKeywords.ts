@@ -16,7 +16,6 @@ function buildKeywords(data: Record<string, unknown>): string[] {
 
   add(data.displayName);
   add(data.username);
-  add(data.phoneNumber);
   add(data.email);
 
   return Array.from(new Set(tokens));

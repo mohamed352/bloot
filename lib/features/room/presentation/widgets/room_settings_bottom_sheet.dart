@@ -22,105 +22,112 @@ class RoomSettingsBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: ColorManager.darkSurface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: const EdgeInsetsDirectional.only(
-        start: AppSpacing.lg,
-        end: AppSpacing.lg,
-        top: AppSpacing.lg,
-        bottom: AppSpacing.xxl,
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: ColorManager.darkTextMuted.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(AppRadius.full),
+    return Material(
+      color: ColorManager.darkSurface,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.only(
+          start: AppSpacing.lg,
+          end: AppSpacing.lg,
+          top: AppSpacing.lg,
+          bottom: AppSpacing.xxl,
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: ColorManager.darkTextMuted.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(AppRadius.full),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              'room_settings'.tr(),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: ColorManager.darkTextPrimary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            _buildSettingRow(
-              Icons.mic_rounded,
-              'voice_chat'.tr(),
-              room.voiceEnabled ? LocaleKeys.labelOn.tr() : LocaleKeys.off.tr(),
-            ),
-            const Divider(color: ColorManager.darkBorderSoft, height: 16),
-            _buildSettingRow(
-              Icons.videocam_rounded,
-              'camera'.tr(),
-              room.cameraEnabled ? LocaleKeys.labelOn.tr() : LocaleKeys.off.tr(),
-            ),
-            const Divider(color: ColorManager.darkBorderSoft, height: 16),
-            _buildSettingRow(
-              Icons.visibility_rounded,
-              'spectators'.tr(),
-              room.allowSpectators ? 'allowed'.tr() : 'not_allowed'.tr(),
-            ),
-            const Divider(color: ColorManager.darkBorderSoft, height: 16),
-            _buildSettingRow(
-              Icons.meeting_room_rounded,
-              'room_type'.tr(),
-              room.type.name.tr(),
-            ),
-            const SizedBox(height: AppSpacing.xxl),
-            ListTile(
-              leading: const Icon(
-                Icons.notifications_rounded,
-                color: ColorManager.primary,
-              ),
-              title: Text(
-                'notifications'.tr(),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                'room_settings'.tr(),
+                textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
                   color: ColorManager.darkTextPrimary,
                 ),
               ),
-              trailing: const Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 14,
-                color: ColorManager.darkTextMuted,
+              const SizedBox(height: AppSpacing.lg),
+              _buildSettingRow(
+                Icons.mic_rounded,
+                'voice_chat'.tr(),
+                room.voiceEnabled
+                    ? LocaleKeys.labelOn.tr()
+                    : LocaleKeys.off.tr(),
               ),
-              onTap: () {
-                context.pop();
-                context.pushNamed(RouteNames.notifications);
-              },
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            ListTile(
-              leading: const Icon(
-                Icons.logout_rounded,
-                color: ColorManager.error,
+              const Divider(color: ColorManager.darkBorderSoft, height: 16),
+              _buildSettingRow(
+                Icons.videocam_rounded,
+                'camera'.tr(),
+                room.cameraEnabled
+                    ? LocaleKeys.labelOn.tr()
+                    : LocaleKeys.off.tr(),
               ),
-              title: Text(
-                'leave_room'.tr(),
-                style: const TextStyle(fontSize: 14, color: ColorManager.error),
+              const Divider(color: ColorManager.darkBorderSoft, height: 16),
+              _buildSettingRow(
+                Icons.visibility_rounded,
+                'spectators'.tr(),
+                room.allowSpectators ? 'allowed'.tr() : 'not_allowed'.tr(),
               ),
-              onTap: () {
-                context.pop();
-                _showLeaveConfirmation(context);
-              },
-            ),
-          ],
+              const Divider(color: ColorManager.darkBorderSoft, height: 16),
+              _buildSettingRow(
+                Icons.meeting_room_rounded,
+                'room_type'.tr(),
+                room.type.name.tr(),
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+              ListTile(
+                leading: const Icon(
+                  Icons.notifications_rounded,
+                  color: ColorManager.primary,
+                ),
+                title: Text(
+                  'notifications'.tr(),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: ColorManager.darkTextPrimary,
+                  ),
+                ),
+                trailing: const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: ColorManager.darkTextMuted,
+                ),
+                onTap: () {
+                  context.pop();
+                  context.pushNamed(RouteNames.notifications);
+                },
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              ListTile(
+                leading: const Icon(
+                  Icons.logout_rounded,
+                  color: ColorManager.error,
+                ),
+                title: Text(
+                  'leave_room'.tr(),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: ColorManager.error,
+                  ),
+                ),
+                onTap: () {
+                  context.pop();
+                  _showLeaveConfirmation(context);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

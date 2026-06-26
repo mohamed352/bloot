@@ -30,11 +30,18 @@ class RoomLobbyPage extends StatefulWidget {
 class _RoomLobbyPageState extends State<RoomLobbyPage>
     with WidgetsBindingObserver {
   final _chatController = TextEditingController();
+  AgoraService? _agoraService;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _agoraService ??= context.read<AgoraService>();
   }
 
   @override
@@ -46,7 +53,9 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final agoraService = context.read<AgoraService>();
+    if (!mounted) return;
+    final agoraService = _agoraService;
+    if (agoraService == null) return;
     if (state == AppLifecycleState.paused) {
       agoraService.enterBackgroundMode();
     } else if (state == AppLifecycleState.resumed) {

@@ -13,6 +13,7 @@ import 'package:bloot/core/extension/context_values.dart';
 import 'package:bloot/core/localization/language_manager.dart';
 import 'package:bloot/core/network/connectivity_cubit.dart';
 import 'package:bloot/core/services/agora_service.dart';
+import 'package:bloot/core/services/audio_service.dart';
 import 'package:bloot/core/services/deep_link_service.dart';
 import 'package:bloot/core/services/notification_service.dart';
 import 'package:bloot/core/style/colors.dart';
@@ -155,6 +156,7 @@ class _BlootAppState extends State<BlootApp> {
     return MultiProvider(
       providers: [
         Provider<AgoraService>(create: (_) => getIt<AgoraService>()),
+        Provider<AudioService>(create: (_) => getIt<AudioService>()),
         BlocProvider(create: (_) => ConnectivityCubit()),
         BlocProvider(create: (_) => getIt<AuthCubit>()),
       ],

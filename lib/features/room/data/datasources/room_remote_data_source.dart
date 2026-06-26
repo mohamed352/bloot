@@ -87,7 +87,7 @@ class RoomRemoteDataSource {
           'isMicOn': voiceEnabled,
           'isCameraOn': cameraEnabled,
           'agoraUid': user.uid.hashCode.abs(),
-          'joinedAt': FieldValue.serverTimestamp(),
+          'joinedAt': DateTime.now(),
         },
       ],
       'playerUids': [user.uid],
@@ -481,7 +481,7 @@ class RoomRemoteDataSource {
         'isMicOn': docData['voiceEnabled'] == true,
         'isCameraOn': docData['cameraEnabled'] == true,
         'agoraUid': currentUid.hashCode.abs(),
-        'joinedAt': FieldValue.serverTimestamp(),
+        'joinedAt': DateTime.now(),
       });
       playerUids.add(currentUid);
 

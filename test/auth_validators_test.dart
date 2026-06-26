@@ -3,62 +3,6 @@ import 'package:bloot/features/auth/domain/utils/auth_validators.dart';
 
 void main() {
   group('AuthValidators', () {
-    group('validatePhone', () {
-      test('returns phone_required for null or empty input', () {
-        expect(AuthValidators.validatePhone(null), 'phone_required');
-        expect(AuthValidators.validatePhone(''), 'phone_required');
-        expect(AuthValidators.validatePhone('   '), 'phone_required');
-      });
-
-      test('returns phone_invalid for too short numbers', () {
-        expect(AuthValidators.validatePhone('+123'), 'phone_invalid');
-        expect(AuthValidators.validatePhone('+123456'), 'phone_invalid');
-      });
-
-      test('returns phone_invalid for too long numbers', () {
-        expect(
-          AuthValidators.validatePhone('+1${"2" * 15}'),
-          'phone_invalid',
-        );
-      });
-
-      test('returns null for valid international numbers', () {
-        expect(AuthValidators.validatePhone('+966501234567'), isNull);
-        expect(AuthValidators.validatePhone('+971501234567'), isNull);
-        expect(AuthValidators.validatePhone('+1234567890'), isNull);
-      });
-    });
-
-    group('normalizePhone', () {
-      test('combines country code and local number', () {
-        expect(
-          AuthValidators.normalizePhone('+966', '501234567'),
-          '+966501234567',
-        );
-      });
-
-      test('strips leading zero from local number', () {
-        expect(
-          AuthValidators.normalizePhone('+966', '0501234567'),
-          '+966501234567',
-        );
-      });
-
-      test('avoids duplicate country code', () {
-        expect(
-          AuthValidators.normalizePhone('+966', '966501234567'),
-          '+966501234567',
-        );
-      });
-
-      test('strips non-digit characters', () {
-        expect(
-          AuthValidators.normalizePhone('+966', '50 123 4567'),
-          '+966501234567',
-        );
-      });
-    });
-
     group('validateDisplayName', () {
       test('returns name_required for null or empty input', () {
         expect(AuthValidators.validateDisplayName(null), 'name_required');

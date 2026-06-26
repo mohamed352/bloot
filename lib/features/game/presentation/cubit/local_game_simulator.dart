@@ -11,6 +11,8 @@ import 'package:bloot/features/game/domain/repositories/game_repository.dart';
 import 'package:bloot/features/game/presentation/cubit/game_cubit.dart';
 import 'package:bloot/features/game/presentation/cubit/game_state.dart';
 import 'package:bloot/features/room/domain/repositories/room_repository.dart';
+import 'package:bloot/generated/locale_keys.g.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// A fake repository that does nothing — the simulator manages all state locally.
 class _FakeGameRepository implements GameRepository {
@@ -27,7 +29,10 @@ class _FakeGameRepository implements GameRepository {
   Future<void> playCard(String gameId, String card) async {}
 
   @override
-  Future<void> claimBonuses(String gameId, List<Map<String, dynamic>> bonuses) async {}
+  Future<void> claimBonuses(
+    String gameId,
+    List<Map<String, dynamic>> bonuses,
+  ) async {}
 
   @override
   Future<void> dealNextRound(String gameId) async {}
@@ -53,16 +58,26 @@ class _FakeGameRepository implements GameRepository {
 /// - Fall scoring (120 Sun / 152 Hokm) and last-trick +10 bonus.
 @injectable
 class LocalGameSimulator extends GameCubit {
-  LocalGameSimulator()
-    : super(
+  LocalGameSimulator({
+    Duration humanTurnTimeout = _defaultHumanTurnTimeout,
+    Duration? humanCardTimeout,
+  }) : _humanTurnTimeout = humanTurnTimeout,
+       _humanCardTimeout = humanCardTimeout ?? humanTurnTimeout,
+       super(
         gameRepository: _FakeGameRepository(),
         roomRepository: GetIt.I<RoomRepository>(),
         agoraService: GetIt.I<AgoraService>(),
         audioService: GetIt.I<AudioService>(),
       );
 
-  final _random = Random();
+  final Random _random = Random();
   Timer? _botTimer;
+  Timer? _humanTurnCountdownTimer;
+
+  /// Default timeout for human auto-play. Can be overridden in tests.
+  static const _defaultHumanTurnTimeout = Duration(seconds: 15);
+  final Duration _humanTurnTimeout;
+  final Duration _humanCardTimeout;
 
   // Internal mutable game state
   late SimGame _game;
@@ -70,6 +85,7 @@ class LocalGameSimulator extends GameCubit {
   bool _humanBidPending = false;
   bool _humanCardPending = false;
   bool _humanBonusPending = false;
+  int _bidWinnerSeat = 0;
 
   // Bot names and avatars for realism
   static const _botNames = ['Faisal', 'Omar', 'Khalid'];
@@ -78,7 +94,9 @@ class LocalGameSimulator extends GameCubit {
   @override
   void watchGame(String id) {
     emit(const GameState.loading());
-    _startNewGame(id);
+    // Defer dealing setup so the Bloc listener is attached before the state
+    // changes — prevents the transition from being swallowed during create.
+    Future.microtask(() => _startNewGame(id));
   }
 
   @override
@@ -86,6 +104,7 @@ class LocalGameSimulator extends GameCubit {
 
   void _startNewGame(String id) {
     _botTimer?.cancel();
+    _stopTurnCountdown();
     _humanBidPending = false;
     _humanCardPending = false;
     _humanBonusPending = false;
@@ -98,6 +117,30 @@ class LocalGameSimulator extends GameCubit {
     _botTimer = Timer(const Duration(milliseconds: 1200), () {
       _startBidding();
     });
+  }
+
+  void _startTurnCountdown(Duration duration) {
+    _stopTurnCountdown();
+    final totalSeconds = max(1, duration.inSeconds);
+    humanTurnSecondsLeft.value = totalSeconds;
+    var secondsLeft = totalSeconds;
+    _humanTurnCountdownTimer = Timer.periodic(const Duration(seconds: 1), (
+      timer,
+    ) {
+      // Ignore ticks from a stale timer that was replaced before it fired.
+      if (timer != _humanTurnCountdownTimer) return;
+      secondsLeft--;
+      humanTurnSecondsLeft.value = secondsLeft > 0 ? secondsLeft : null;
+      if (secondsLeft <= 0) {
+        timer.cancel();
+      }
+    });
+  }
+
+  void _stopTurnCountdown() {
+    _humanTurnCountdownTimer?.cancel();
+    _humanTurnCountdownTimer = null;
+    humanTurnSecondsLeft.value = null;
   }
 
   void _startBidding() {
@@ -117,14 +160,20 @@ class LocalGameSimulator extends GameCubit {
 
     final turn = _game.turnIndex;
 
-    // If human's turn, wait for UI input
+    // If human's turn, wait for UI input (with an auto-pass fallback).
     if (turn == _humanSeat) {
       _humanBidPending = true;
+      _startTurnCountdown(_humanTurnTimeout);
+      _botTimer = Timer(_humanTurnTimeout, () {
+        if (!_humanBidPending) return;
+        placeBid('pass');
+      });
       return;
     }
 
     // Bot bid with a realistic delay
     final delay = Duration(milliseconds: 600 + _random.nextInt(1200));
+    _startTurnCountdown(delay);
     _botTimer = Timer(delay, () {
       _botBid(turn);
       _game.nextTurn();
@@ -173,16 +222,14 @@ class LocalGameSimulator extends GameCubit {
     _game.gameType = _game.winningBidType;
     _game.trump = _game.winningTrumpSuit;
     _game.turnIndex = winner;
+    _bidWinnerSeat = winner;
 
-    // Brief pause to show bid result
-    _emitGameState('bidding');
-    _botTimer = Timer(const Duration(milliseconds: 1000), () {
-      if (_game.gameType == 'hokm') {
-        _startBonusClaim();
-      } else {
-        _startTrickPlay();
-      }
-    });
+    // Move straight into the next phase so the UI doesn't linger on bidding.
+    if (_game.gameType == 'hokm') {
+      _startBonusClaim();
+    } else {
+      _startTrickPlay();
+    }
   }
 
   void _startBonusClaim() {
@@ -194,9 +241,8 @@ class LocalGameSimulator extends GameCubit {
     _emitGameState('bonusClaim');
 
     if (_game.allBonusesClaimed) {
-      _botTimer = Timer(const Duration(milliseconds: 800), () {
-        _startTrickPlay();
-      });
+      // Don't keep the player waiting on the bonus overlay.
+      _startTrickPlay();
       return;
     }
 
@@ -204,10 +250,16 @@ class LocalGameSimulator extends GameCubit {
 
     if (turn == _humanSeat) {
       _humanBonusPending = true;
+      _startTurnCountdown(_humanTurnTimeout);
+      _botTimer = Timer(_humanTurnTimeout, () {
+        if (!_humanBonusPending) return;
+        claimBonuses(_game.autoDetectBonuses(_humanSeat));
+      });
       return;
     }
 
     final delay = Duration(milliseconds: 500 + _random.nextInt(1000));
+    _startTurnCountdown(delay);
     _botTimer = Timer(delay, () {
       final bonuses = _game.autoDetectBonuses(turn);
       _game.claimBonuses(turn, bonuses);
@@ -217,6 +269,9 @@ class LocalGameSimulator extends GameCubit {
   }
 
   void _startTrickPlay() {
+    // Trick play always starts with the bid winner, regardless of where the
+    // bonus-claim rotation ended.
+    _game.turnIndex = _bidWinnerSeat;
     _game.startNewTrick();
     _emitGameState('playing');
     _advanceCardTurn();
@@ -231,15 +286,22 @@ class LocalGameSimulator extends GameCubit {
 
     final turn = _game.turnIndex;
 
-    // If human's turn, wait for UI input
+    // If human's turn, wait for UI input (with an auto-play fallback).
     if (turn == _humanSeat) {
       _humanCardPending = true;
       _emitGameState('playing');
+      _startTurnCountdown(_humanTurnTimeout);
+      _botTimer = Timer(_humanCardTimeout, () {
+        if (!_humanCardPending) return;
+        final legal = _game.legalCards(_humanSeat);
+        if (legal.isNotEmpty) playCard(legal.first);
+      });
       return;
     }
 
     // Bot plays with realistic delay
     final delay = Duration(milliseconds: 800 + _random.nextInt(1500));
+    _startTurnCountdown(delay);
     _botTimer = Timer(delay, () {
       _botPlayCard(turn);
       _game.nextTurn();
@@ -286,27 +348,34 @@ class LocalGameSimulator extends GameCubit {
     _game.status = 'roundEnd';
     _emitRoundEndState(teamAPoints, teamBPoints);
 
-    _botTimer = Timer(const Duration(milliseconds: 2500), () {
-      // Check game end
-      final usScore = _humanTeam == 'A' ? _game.teamAScore : _game.teamBScore;
-      final themScore = _humanTeam == 'A' ? _game.teamBScore : _game.teamAScore;
-      final target = _game.targetScore;
+    _botTimer = Timer(
+      const Duration(milliseconds: 2500),
+      _proceedAfterRoundEnd,
+    );
+  }
 
-      if (usScore >= target || themScore >= target) {
-        _game.status = 'gameEnd';
-        _emitGameEndState(usScore >= themScore ? _humanTeam : (_humanTeam == 'A' ? 'B' : 'A'));
-      } else {
-        // Next round
-        _game.currentRound++;
-        _game.dealerIndex = (_game.dealerIndex + 1) % 4;
-        _game.resetForNewRound();
-        _game.deal();
-        _emitGameState('dealing');
-        _botTimer = Timer(const Duration(milliseconds: 1200), () {
-          _startBidding();
-        });
-      }
-    });
+  void _proceedAfterRoundEnd() {
+    // Check game end
+    final usScore = _humanTeam == 'A' ? _game.teamAScore : _game.teamBScore;
+    final themScore = _humanTeam == 'A' ? _game.teamBScore : _game.teamAScore;
+    final target = _game.targetScore;
+
+    if (usScore >= target || themScore >= target) {
+      _game.status = 'gameEnd';
+      _emitGameEndState(
+        usScore >= themScore ? _humanTeam : (_humanTeam == 'A' ? 'B' : 'A'),
+      );
+    } else {
+      // Next round
+      _game.currentRound++;
+      _game.dealerIndex = (_game.dealerIndex + 1) % 4;
+      _game.resetForNewRound();
+      _game.deal();
+      _emitGameState('dealing');
+      _botTimer = Timer(const Duration(milliseconds: 1200), () {
+        _startBidding();
+      });
+    }
   }
 
   String get _humanTeam => _game.players[_humanSeat].team;
@@ -314,9 +383,44 @@ class LocalGameSimulator extends GameCubit {
   // ——— Human actions ———
 
   @override
+  Duration get humanTurnTimeoutDuration => _humanTurnTimeout;
+
+  @override
   Future<void> placeBid(String bid) async {
-    if (!_humanBidPending) return;
-    if (!_game.isValidBid(_humanSeat, bid)) return;
+    if (!_humanBidPending) {
+      emitActionError(LocaleKeys.not_your_turn_bid.tr());
+      return;
+    }
+    if (!_game.isValidBid(_humanSeat, bid)) {
+      if (bid == 'hokm') {
+        final trumpSuit = _game.faceUpSuit;
+        if (trumpSuit == null ||
+            !_game.players[_humanSeat].hand.any(
+              (c) => c.substring(c.length - 1) == trumpSuit,
+            )) {
+          emitActionError(LocaleKeys.hokm_requires_trump_suit.tr());
+        } else {
+          emitActionError(LocaleKeys.hokm_after_hokm.tr());
+        }
+      } else if (bid == 'sun') {
+        final existingBids = _game.players
+            .map((p) => p.bid)
+            .whereType<String>()
+            .toList();
+        if (existingBids.contains('sun')) {
+          emitActionError(LocaleKeys.sun_after_sun.tr());
+        } else if (existingBids.contains('hokm')) {
+          emitActionError(LocaleKeys.hokm_after_hokm.tr());
+        } else {
+          emitActionError(LocaleKeys.bid_not_allowed.tr());
+        }
+      } else {
+        emitActionError(LocaleKeys.bid_not_allowed.tr());
+      }
+      return;
+    }
+    _botTimer?.cancel();
+    _stopTurnCountdown();
     _humanBidPending = false;
     _game.placeBid(_humanSeat, bid);
     _game.nextTurn();
@@ -325,9 +429,17 @@ class LocalGameSimulator extends GameCubit {
 
   @override
   Future<void> playCard(String card) async {
-    if (!_humanCardPending) return;
-    if (!_game.legalCards(_humanSeat).contains(card)) return;
+    if (!_humanCardPending) {
+      emitActionError(LocaleKeys.not_your_turn_card.tr());
+      return;
+    }
+    if (!_game.legalCards(_humanSeat).contains(card)) {
+      emitActionError(LocaleKeys.card_not_allowed.tr());
+      return;
+    }
 
+    _botTimer?.cancel();
+    _stopTurnCountdown();
     _humanCardPending = false;
     _game.playCard(_humanSeat, card);
     _game.nextTurn();
@@ -336,11 +448,50 @@ class LocalGameSimulator extends GameCubit {
 
   @override
   Future<void> claimBonuses(List<Map<String, dynamic>> bonuses) async {
-    if (!_humanBonusPending) return;
+    if (!_humanBonusPending) {
+      emitActionError(LocaleKeys.not_your_turn_bonus.tr());
+      return;
+    }
+    _botTimer?.cancel();
+    _stopTurnCountdown();
     _humanBonusPending = false;
     _game.claimBonuses(_humanSeat, bonuses);
     _game.nextTurn();
     _advanceBonusClaimTurn();
+  }
+
+  @override
+  Future<void> dealNextRound() async {
+    // In the simulator we auto-advance, but if the user taps the overlay
+    // button before the timer fires, proceed immediately.
+    if (state is GameRoundEnd) {
+      _botTimer?.cancel();
+      _proceedAfterRoundEnd();
+    }
+  }
+
+  @override
+  Future<void> rematch() async {
+    // Simulator has no room; just start a fresh game with the same id.
+    _botTimer?.cancel();
+    _stopTurnCountdown();
+    emit(const GameState.loading());
+    Future.microtask(() => _startNewGame(_game.id));
+  }
+
+  @override
+  Future<void> toggleMic() async {
+    emitActionError(LocaleKeys.simulator_mic_unavailable.tr());
+  }
+
+  @override
+  Future<void> toggleCamera() async {
+    emitActionError(LocaleKeys.simulator_camera_unavailable.tr());
+  }
+
+  @override
+  Future<void> sendChatMessage(String message) async {
+    emitActionError(LocaleKeys.simulator_chat_unavailable.tr());
   }
 
   // ——— State emission ———
@@ -353,10 +504,7 @@ class LocalGameSimulator extends GameCubit {
 
   void _emitTrickEndState(int winnerSeat) {
     final g = _game.toEntity(_humanSeat);
-    emit(GameState.trickEnd(
-      game: g,
-      winnerSeat: winnerSeat,
-    ));
+    emit(GameState.trickEnd(game: g, winnerSeat: winnerSeat));
   }
 
   void _emitRoundEndState(int teamAPoints, int teamBPoints) {
@@ -364,19 +512,18 @@ class LocalGameSimulator extends GameCubit {
     // RoundScoreOverlay labels teamA/teamB as Us/Them, so emit local perspective.
     final usPoints = _humanTeam == 'A' ? teamAPoints : teamBPoints;
     final themPoints = _humanTeam == 'A' ? teamBPoints : teamAPoints;
-    emit(GameState.roundEnd(
-      game: g,
-      teamAPoints: usPoints,
-      teamBPoints: themPoints,
-    ));
+    emit(
+      GameState.roundEnd(
+        game: g,
+        teamAPoints: usPoints,
+        teamBPoints: themPoints,
+      ),
+    );
   }
 
   void _emitGameEndState(String winnerTeam) {
     final g = _game.toEntity(_humanSeat);
-    emit(GameState.gameEnd(
-      game: g,
-      winnerTeam: winnerTeam,
-    ));
+    emit(GameState.gameEnd(game: g, winnerTeam: winnerTeam));
   }
 
   void _emitStateFromGame(Game game) {
@@ -390,19 +537,31 @@ class LocalGameSimulator extends GameCubit {
       case 'playing':
         emit(GameState.playing(game: game));
       case 'trickEnd':
-        emit(GameState.trickEnd(game: game, winnerSeat: game.currentTrick?.winnerSeat ?? game.currentTrick?.trickLeaderIndex ?? 0));
+        emit(
+          GameState.trickEnd(
+            game: game,
+            winnerSeat:
+                game.currentTrick?.winnerSeat ??
+                game.currentTrick?.trickLeaderIndex ??
+                0,
+          ),
+        );
       case 'roundEnd':
-        emit(GameState.roundEnd(
-          game: game,
-          teamAPoints: game.scoreUs,
-          teamBPoints: game.scoreThem,
-          fellTeam: game.fellTeam,
-        ));
+        emit(
+          GameState.roundEnd(
+            game: game,
+            teamAPoints: game.scoreUs,
+            teamBPoints: game.scoreThem,
+            fellTeam: game.fellTeam,
+          ),
+        );
       case 'gameEnd':
-        emit(GameState.gameEnd(
-          game: game,
-          winnerTeam: game.teamAScore >= game.teamBScore ? 'A' : 'B',
-        ));
+        emit(
+          GameState.gameEnd(
+            game: game,
+            winnerTeam: game.teamAScore >= game.teamBScore ? 'A' : 'B',
+          ),
+        );
       default:
         emit(GameState.playing(game: game));
     }
@@ -411,6 +570,7 @@ class LocalGameSimulator extends GameCubit {
   @override
   Future<void> close() async {
     _botTimer?.cancel();
+    _stopTurnCountdown();
     return super.close();
   }
 }
@@ -475,7 +635,9 @@ class SimGame {
   bool _allPassed() => players.every((p) => p.bid == 'pass');
 
   String? get winningBidType {
-    final bidders = players.where((p) => p.bid != null && p.bid != 'pass').toList();
+    final bidders = players
+        .where((p) => p.bid != null && p.bid != 'pass')
+        .toList();
     if (bidders.isEmpty) return null;
     final anyHokm = bidders.any((p) => p.bid == 'hokm');
     return anyHokm ? 'hokm' : 'sun';
@@ -488,14 +650,20 @@ class SimGame {
 
   String? get faceUpSuit => faceUpCard == null ? null : _suitOf(faceUpCard!);
 
-  List<int> get _biddingOrder => [1, 2, 3, 4].map((o) => (dealerIndex + o) % 4).toList();
+  List<int> get _biddingOrder =>
+      [1, 2, 3, 4].map((o) => (dealerIndex + o) % 4).toList();
 
   int? get winningBidder {
-    final bidders = players.where((p) => p.bid != null && p.bid != 'pass').toList();
+    final bidders = players
+        .where((p) => p.bid != null && p.bid != 'pass')
+        .toList();
     if (bidders.isEmpty) return null;
 
     final order = _biddingOrder;
-    bidders.sort((a, b) => order.indexOf(a.seatIndex).compareTo(order.indexOf(b.seatIndex)));
+    bidders.sort(
+      (a, b) =>
+          order.indexOf(a.seatIndex).compareTo(order.indexOf(b.seatIndex)),
+    );
 
     final bidType = winningBidType;
     if (bidType == 'hokm') {
@@ -514,9 +682,24 @@ class SimGame {
   void deal() {
     players = [
       SimPlayer(uid: 'human', name: 'You', team: 'A', seatIndex: 0),
-      SimPlayer(uid: 'bot1', name: LocalGameSimulator._botNames[0], team: LocalGameSimulator._botTeams[0], seatIndex: 1),
-      SimPlayer(uid: 'bot2', name: LocalGameSimulator._botNames[1], team: LocalGameSimulator._botTeams[1], seatIndex: 2),
-      SimPlayer(uid: 'bot3', name: LocalGameSimulator._botNames[2], team: LocalGameSimulator._botTeams[2], seatIndex: 3),
+      SimPlayer(
+        uid: 'bot1',
+        name: LocalGameSimulator._botNames[0],
+        team: LocalGameSimulator._botTeams[0],
+        seatIndex: 1,
+      ),
+      SimPlayer(
+        uid: 'bot2',
+        name: LocalGameSimulator._botNames[1],
+        team: LocalGameSimulator._botTeams[1],
+        seatIndex: 2,
+      ),
+      SimPlayer(
+        uid: 'bot3',
+        name: LocalGameSimulator._botNames[2],
+        team: LocalGameSimulator._botTeams[2],
+        seatIndex: 3,
+      ),
     ];
 
     final deck = _createDeck()..shuffle(_random);
@@ -636,7 +819,11 @@ class SimGame {
 
     // Base card points
     for (final p in players) {
-      final points = p.takenCards.fold(0, (sum, card) => sum + cardPoints(card, gameType == 'hokm' ? faceUpSuit : null));
+      final points = p.takenCards.fold(
+        0,
+        (sum, card) =>
+            sum + cardPoints(card, gameType == 'hokm' ? faceUpSuit : null),
+      );
       if (p.team == 'A') teamAPoints += points;
       if (p.team == 'B') teamBPoints += points;
     }
@@ -669,7 +856,9 @@ class SimGame {
     }
 
     // Apply fall rules
-    final biddingTeamWon = biddingTeam == 'A' ? teamAPoints > teamBPoints : teamBPoints > teamAPoints;
+    final biddingTeamWon = biddingTeam == 'A'
+        ? teamAPoints > teamBPoints
+        : teamBPoints > teamAPoints;
     final totalPoints = gameType == 'hokm' ? 152 : 120;
 
     if (!biddingTeamWon) {
@@ -685,7 +874,9 @@ class SimGame {
     return (teamAPoints + teamABonus, teamBPoints + teamBBonus);
   }
 
-  ({int mosal, int bnaga, List<String> bnagaCards}) _teamBestBonuses(String team) {
+  ({int mosal, int bnaga, List<String> bnagaCards}) _teamBestBonuses(
+    String team,
+  ) {
     var bestMosal = 0;
     var bestBnaga = 0;
     List<String> bestBnagaCards = [];
@@ -693,7 +884,9 @@ class SimGame {
       for (final bonus in p.claimedBonuses) {
         final points = (bonus['points'] as num?)?.toInt() ?? 0;
         final type = bonus['type'] as String? ?? '';
-        final cards = (bonus['cards'] as List<dynamic>?)?.cast<String>().toList() ?? <String>[];
+        final cards =
+            (bonus['cards'] as List<dynamic>?)?.cast<String>().toList() ??
+            <String>[];
         if (type == 'mosal' && points > bestMosal) {
           bestMosal = points;
         }
@@ -746,10 +939,23 @@ class SimGame {
   int _highestSequenceCard(List<String> cards) {
     // Sequence high-card ranking: A > K > Q > J > 10 > 9 > ... > 2
     const rankOrder = {
-      '2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6,
-      '9': 7, '10': 8, 'J': 9, 'Q': 10, 'K': 11, 'A': 12,
+      '2': 0,
+      '3': 1,
+      '4': 2,
+      '5': 3,
+      '6': 4,
+      '7': 5,
+      '8': 6,
+      '9': 7,
+      '10': 8,
+      'J': 9,
+      'Q': 10,
+      'K': 11,
+      'A': 12,
     };
-    return cards.map((c) => rankOrder[_rankOf(c)] ?? 0).reduce((a, b) => a > b ? a : b);
+    return cards
+        .map((c) => rankOrder[_rankOf(c)] ?? 0)
+        .reduce((a, b) => a > b ? a : b);
   }
 
   void resetForNewRound() {
@@ -790,7 +996,10 @@ class SimGame {
       if (suitCards.length < 3) continue;
 
       final sorted = suitCards.toList()
-        ..sort((a, b) => _sequenceRank(_rankOf(b)).compareTo(_sequenceRank(_rankOf(a))));
+        ..sort(
+          (a, b) =>
+              _sequenceRank(_rankOf(b)).compareTo(_sequenceRank(_rankOf(a))),
+        );
 
       List<String> currentSeq = [sorted.first];
       List<String>? bestSeq;
@@ -815,7 +1024,11 @@ class SimGame {
 
       if (bestSeq != null) {
         final length = bestSeq.length;
-        final points = length == 3 ? 20 : length == 4 ? 50 : 100;
+        final points = length == 3
+            ? 20
+            : length == 4
+            ? 50
+            : 100;
         bonuses.add({
           'type': 'bnaga',
           'points': points,
@@ -832,9 +1045,15 @@ class SimGame {
         final lenA = (a['length'] as num?)?.toInt() ?? 0;
         final lenB = (b['length'] as num?)?.toInt() ?? 0;
         if (lenA != lenB) return lenA > lenB ? a : b;
-        final cardsA = (a['cards'] as List<dynamic>?)?.cast<String>().toList() ?? <String>[];
-        final cardsB = (b['cards'] as List<dynamic>?)?.cast<String>().toList() ?? <String>[];
-        return _highestSequenceCard(cardsA) >= _highestSequenceCard(cardsB) ? a : b;
+        final cardsA =
+            (a['cards'] as List<dynamic>?)?.cast<String>().toList() ??
+            <String>[];
+        final cardsB =
+            (b['cards'] as List<dynamic>?)?.cast<String>().toList() ??
+            <String>[];
+        return _highestSequenceCard(cardsA) >= _highestSequenceCard(cardsB)
+            ? a
+            : b;
       });
       bonuses.removeWhere((b) => b['type'] == 'bnaga');
       bonuses.add(best);
@@ -880,6 +1099,8 @@ class SimGame {
         tricksWon: p.tricksWon,
         bid: p.bid,
         isActive: p.seatIndex == turnIndex,
+        hasCamera: false,
+        isMuted: true,
       );
     }).toList();
 
@@ -928,8 +1149,25 @@ class SimGame {
 
   static List<String> _createDeck() {
     final suits = ['S', 'H', 'D', 'C'];
-    final ranks = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
-    return [for (final s in suits) for (final r in ranks) '$r$s'];
+    final ranks = [
+      'A',
+      'K',
+      'Q',
+      'J',
+      '10',
+      '9',
+      '8',
+      '7',
+      '6',
+      '5',
+      '4',
+      '3',
+      '2',
+    ];
+    return [
+      for (final s in suits)
+        for (final r in ranks) '$r$s',
+    ];
   }
 
   static String _suitOf(String card) => card.substring(card.length - 1);
@@ -990,7 +1228,12 @@ class SimGame {
     return _rankOrder(_rankOf(a)).compareTo(_rankOrder(_rankOf(b)));
   }
 
-  static bool cardBeats(String candidate, String current, String leadingSuit, String? trumpSuit) {
+  static bool cardBeats(
+    String candidate,
+    String current,
+    String leadingSuit,
+    String? trumpSuit,
+  ) {
     final candSuit = _suitOf(candidate);
     final currSuit = _suitOf(current);
     final candRank = _rankOf(candidate);
@@ -1008,8 +1251,14 @@ class SimGame {
     if (candSuit != leadingSuit && currSuit == leadingSuit) return false;
 
     // Same suit — higher rank wins
-    final candPower = _rankOrder(candRank, isTrump: isTrump && candSuit == trumpSuit);
-    final currPower = _rankOrder(currRank, isTrump: isTrump && currSuit == trumpSuit);
+    final candPower = _rankOrder(
+      candRank,
+      isTrump: isTrump && candSuit == trumpSuit,
+    );
+    final currPower = _rankOrder(
+      currRank,
+      isTrump: isTrump && currSuit == trumpSuit,
+    );
     return candPower > currPower;
   }
 

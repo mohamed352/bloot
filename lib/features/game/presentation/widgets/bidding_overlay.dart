@@ -20,12 +20,14 @@ class BiddingOverlay extends StatefulWidget {
     required this.onBid,
     this.timeLeft = 30,
     this.isEnabled = true,
+    this.faceUpCard,
   });
 
   final String currentBidder;
   final ValueChanged<String> onBid;
   final int timeLeft;
   final bool isEnabled;
+  final String? faceUpCard;
 
   @override
   State<BiddingOverlay> createState() => _BiddingOverlayState();
@@ -108,6 +110,16 @@ class _BiddingOverlayState extends State<BiddingOverlay> {
                   color: colors.textSecondary,
                 ),
               ),
+              if (widget.faceUpCard != null) ...[
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  '${'proposed_trump'.tr()}: ${widget.faceUpCard}',
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
               const SizedBox(height: AppSpacing.xxxl),
               Row(
                 children: [

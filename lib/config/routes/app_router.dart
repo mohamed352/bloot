@@ -11,7 +11,6 @@ import 'package:bloot/features/auth/presentation/cubit/auth_state.dart';
 import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/features/auth/presentation/pages/complete_profile_page.dart';
 import 'package:bloot/features/auth/presentation/pages/login_page.dart';
-import 'package:bloot/features/auth/presentation/pages/otp_page.dart';
 import 'package:bloot/features/chat/presentation/cubit/chat_cubit.dart';
 import 'package:bloot/features/chat/presentation/cubit/new_message_cubit.dart';
 import 'package:bloot/features/chat/domain/entities/chat.dart';
@@ -85,11 +84,6 @@ final GoRouter appRouter = GoRouter(
       path: RoutePaths.login,
       name: RouteNames.login,
       builder: (context, state) => const LoginPage(),
-    ),
-    GoRoute(
-      path: RoutePaths.otp,
-      name: RouteNames.otp,
-      builder: (context, state) => const OtpPage(),
     ),
     GoRoute(
       path: RoutePaths.completeProfile,
@@ -196,8 +190,11 @@ final GoRouter appRouter = GoRouter(
       name: RouteNames.gamePlay,
       builder: (context, state) {
         final id = state.pathParameters['id']!;
+        final isSim = id.startsWith('sim_');
         return BlocProvider(
-          create: (_) => getIt<GameCubit>()..loadGame(id),
+          create: (_) => isSim
+              ? (getIt<LocalGameSimulator>()..watchGame(id))
+              : (getIt<GameCubit>()..loadGame(id)),
           child: GamePlayPage(id: id),
         );
       },

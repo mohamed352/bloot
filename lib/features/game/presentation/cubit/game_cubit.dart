@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
@@ -36,11 +37,21 @@ class GameCubit extends Cubit<GameState> {
   String? _lastRoomId;
   String? _joinedAgoraChannelName;
 
+  /// Countdown seconds left for the current turn. Null when no timer is active
+  /// (e.g., non-simulator games). In the local simulator this is updated for
+  /// every active seat (human and bots) so the UI can show a turn timer.
+  final ValueNotifier<int?> humanTurnSecondsLeft = ValueNotifier<int?>(null);
+
+  /// Timeout duration used for local human-turn feedback and bidding overlays.
+  /// Online games default to 30s; simulator subclasses can override this.
+  Duration get humanTurnTimeoutDuration => const Duration(seconds: 30);
+
   /// Alias for [watchGame] to maintain backward compatibility.
   void loadGame(String id) => watchGame(id);
 
   /// Starts watching the game in real-time.
-  void watchGame(String id) => _startWatching(id, _gameRepository.watchGame(id));
+  void watchGame(String id) =>
+      _startWatching(id, _gameRepository.watchGame(id));
 
   /// Starts watching the game as a spectator.
   void watchGameAsSpectator(String id) =>
@@ -299,6 +310,9 @@ class GameCubit extends Cubit<GameState> {
     );
   }
 
+  /// Exposes action-error emission for subclasses (e.g. local simulator).
+  void emitActionError(String message) => _emitActionError(message);
+
   /// Clears any transient action error shown to the user.
   void clearLastActionError() {
     final current = state;
@@ -516,6 +530,7 @@ class GameCubit extends Cubit<GameState> {
   Future<void> close() async {
     await _gameSubscription?.cancel();
     await _chatSubscription?.cancel();
+    humanTurnSecondsLeft.dispose();
 
     // Leave the Agora channel if this cubit joined it.
     if (_joinedAgoraChannelName != null) {

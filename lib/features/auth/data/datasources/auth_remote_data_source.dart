@@ -1,10 +1,9 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import 'package:bloot/core/logger/app_logger.dart';
 import 'package:bloot/features/auth/data/models/user_model.dart';
@@ -16,16 +15,13 @@ class AuthRemoteDataSource {
     required firebase_auth.FirebaseAuth firebaseAuth,
     required FirebaseFirestore firestore,
     required FirebaseFunctions functions,
-  }) : _firebaseAuth = firebaseAuth,
-       _firestore = firestore,
-       _functions = functions;
+  })  : _firebaseAuth = firebaseAuth,
+        _firestore = firestore,
+        _functions = functions;
 
   final firebase_auth.FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
   final FirebaseFunctions _functions;
-
-  String? _verificationId;
-  int? _resendToken;
 
   Future<UserModel?> signInWithGoogle() async {
     try {
@@ -71,91 +67,45 @@ class AuthRemoteDataSource {
     }
   }
 
-  Future<void> sendOtp(String phoneNumber) async {
-    final completer = Completer<void>();
-
-    await _firebaseAuth.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      timeout: const Duration(seconds: 60),
-      verificationCompleted: (credential) async {
-        // Auto-verification (e.g., on Android with Google Play Services)
-        AppLogger.info('Phone auto-verification completed', tag: 'Auth');
-        try {
-          await _firebaseAuth.signInWithCredential(credential);
-        } on firebase_auth.FirebaseAuthException catch (e) {
-          AppLogger.error('Auto-verification sign-in failed', error: e, tag: 'Auth');
-          if (!completer.isCompleted) {
-            completer.completeError(
-              AuthException(
-                e.message ?? 'Auto-verification failed. Please try again.',
-                code: e.code,
-              ),
-            );
-          }
-          return;
-        }
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      },
-      verificationFailed: (error) {
-        AppLogger.error('Phone verification failed', error: error, tag: 'Auth');
-        if (!completer.isCompleted) {
-          completer.completeError(
-            AuthException(
-              error.message ?? 'Phone verification failed. Please try again.',
-              code: error.code,
-            ),
-          );
-        }
-      },
-      codeSent: (verificationId, resendToken) {
-        AppLogger.info('OTP code sent', tag: 'Auth');
-        _verificationId = verificationId;
-        _resendToken = resendToken;
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      },
-      codeAutoRetrievalTimeout: (verificationId) {
-        AppLogger.info('Auto retrieval timeout', tag: 'Auth');
-        _verificationId = verificationId;
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      },
-      forceResendingToken: _resendToken,
-    );
-
-    return completer.future;
-  }
-
-  Future<void> verifyOtp(String otp) async {
-    final verificationId = _verificationId;
-    if (verificationId == null || verificationId.isEmpty) {
-      throw const AuthException(
-        'Verification ID not found. Please request a new code.',
-        code: 'MISSING_VERIFICATION_ID',
-      );
-    }
-
+  Future<UserModel?> signInWithApple() async {
     try {
-      final credential = firebase_auth.PhoneAuthProvider.credential(
-        verificationId: verificationId,
-        smsCode: otp,
+      AppLogger.info('Starting Apple Sign In', tag: 'Auth');
+
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
       );
-      await _firebaseAuth.signInWithCredential(credential);
+
+      final oauthCredential = firebase_auth.OAuthProvider('apple.com').credential(
+        idToken: credential.identityToken,
+        accessToken: credential.authorizationCode,
+      );
+
+      await _firebaseAuth.signInWithCredential(oauthCredential);
+      AppLogger.info('Apple Sign In successful', tag: 'Auth');
+      return getCurrentUser();
     } on firebase_auth.FirebaseAuthException catch (e) {
-      AppLogger.error('OTP verification failed', error: e, tag: 'Auth');
+      AppLogger.error('Apple sign in failed', error: e, tag: 'Auth');
       throw AuthException(
-        e.message ?? 'Invalid OTP. Please try again.',
+        e.message ?? 'Apple sign in failed. Please try again.',
         code: e.code,
       );
+    } on SignInWithAppleAuthorizationException catch (e) {
+      AppLogger.error('Apple sign in failed', error: e, tag: 'Auth');
+      if (e.code == AuthorizationErrorCode.canceled) {
+        return null;
+      }
+      throw AuthException(
+        e.message,
+        code: e.code.name,
+      );
     } catch (e) {
-      AppLogger.error('OTP verification error', error: e, tag: 'Auth');
+      AppLogger.error('Apple sign in failed', error: e, tag: 'Auth');
       throw const AuthException(
-        'Failed to verify OTP. Please try again.',
-        code: 'UNKNOWN_ERROR',
+        'Apple sign in failed. Please try again.',
+        code: 'APPLE_SIGN_IN_ERROR',
       );
     }
   }
@@ -194,7 +144,6 @@ class AuthRemoteDataSource {
 
     final userData = <String, dynamic>{
       'uid': user.uid,
-      'phoneNumber': user.phoneNumber ?? '',
       'displayName': name.trim(),
       'username': username.trim().toLowerCase(),
       'avatarUrl': avatarUrl,
@@ -253,7 +202,6 @@ class AuthRemoteDataSource {
 
     return UserModel(
       uid: user.uid,
-      phoneNumber: user.phoneNumber ?? '',
       displayName: name.trim(),
       username: username.trim().toLowerCase(),
       avatarUrl: avatarUrl,
@@ -269,12 +217,11 @@ class AuthRemoteDataSource {
       final doc = await _firestore.collection('users').doc(user.uid).get();
       if (!doc.exists) {
         // User authenticated but no Firestore profile yet
-        return UserModel(uid: user.uid, phoneNumber: user.phoneNumber ?? '');
+        return UserModel(uid: user.uid);
       }
       final data = doc.data()!;
       return UserModel(
         uid: user.uid,
-        phoneNumber: user.phoneNumber ?? '',
         displayName: data['displayName'] as String?,
         username: data['username'] as String?,
         avatarUrl: data['avatarUrl'] as String?,
@@ -282,7 +229,7 @@ class AuthRemoteDataSource {
       );
     } catch (e) {
       AppLogger.error('Failed to get current user', error: e, tag: 'Auth');
-      return UserModel(uid: user.uid, phoneNumber: user.phoneNumber ?? '');
+      return UserModel(uid: user.uid);
     }
   }
 
@@ -308,8 +255,6 @@ class AuthRemoteDataSource {
     } catch (e) {
       AppLogger.error('Failed to sign out from Google', error: e, tag: 'Auth');
     }
-    _verificationId = null;
-    _resendToken = null;
   }
 
   Future<bool> isUsernameAvailable(String username) async {
@@ -350,6 +295,4 @@ class AuthRemoteDataSource {
       throw const AuthException('Failed to delete account. Please try again.');
     }
   }
-
-  String? get verificationId => _verificationId;
 }
