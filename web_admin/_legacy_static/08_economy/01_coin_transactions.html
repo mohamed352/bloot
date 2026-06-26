@@ -60,9 +60,6 @@ tailwind.config = {
             <a href="../03_reports/01_report_review.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
                 <span class="material-symbols-outlined text-xl">flag</span>Reports
             </a>
-            <a href="../04_tournaments/01_tournament_management.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
-                <span class="material-symbols-outlined text-xl">emoji_events</span>Tournaments
-            </a>
             <a href="../05_games/01_game_monitor.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
                 <span class="material-symbols-outlined text-xl">casino</span>Games
             </a>
@@ -158,7 +155,7 @@ tailwind.config = {
                 <div class="bg-b-surface-elevated rounded-xl border border-b-border p-5">
                     <div class="flex items-center gap-3 mb-1">
                         <span class="material-symbols-outlined text-red-400 text-xl">trending_down</span>
-                        <span class="text-sm text-b-on-surface-muted">Coins Spent (Gifts + Tournaments)</span>
+                        <span class="text-sm text-b-on-surface-muted">Coins Spent (Gifts + Rooms)</span>
                     </div>
                     <p class="text-2xl font-bold text-red-400">891,200</p>
                 </div>
@@ -181,7 +178,6 @@ tailwind.config = {
                         <option value="spend">Spend</option>
                         <option value="gift">Gift</option>
                         <option value="purchase">Purchase</option>
-                        <option value="tournament">Tournament</option>
                         <option value="bonus">Bonus</option>
                     </select>
                 </div>
@@ -261,23 +257,6 @@ tailwind.config = {
                                 <td class="px-5 py-3.5 text-b-on-surface-muted">2026-05-11 12:00</td>
                                 <td class="px-5 py-3.5 text-right">
                                     <button onclick="viewTransaction('TXN-94819')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="View"><span class="material-symbols-outlined text-lg">visibility</span></button>
-                                </td>
-                            </tr>
-                            <tr data-type="tournament" class="border-b border-b-border hover:bg-b-surface-hover transition-colors">
-                                <td class="px-5 py-3.5 text-b-on-surface-muted font-mono text-xs">#TXN-94818</td>
-                                <td class="px-5 py-3.5">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-7 h-7 rounded-full bg-blue-500/30 flex items-center justify-center text-xs font-bold text-blue-400">LA</div>
-                                        <span class="text-b-on-surface font-medium">LadyAmira</span>
-                                    </div>
-                                </td>
-                                <td class="px-5 py-3.5"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400">Tournament</span></td>
-                                <td class="px-5 py-3.5 text-red-400 font-medium">-1,000</td>
-                                <td class="px-5 py-3.5 text-b-on-surface-muted">4,670</td>
-                                <td class="px-5 py-3.5 text-b-on-surface-muted font-mono text-xs">Tournament #T-482</td>
-                                <td class="px-5 py-3.5 text-b-on-surface-muted">2026-05-11 11:30</td>
-                                <td class="px-5 py-3.5 text-right">
-                                    <button onclick="viewTransaction('TXN-94818')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="View"><span class="material-symbols-outlined text-lg">visibility</span></button>
                                 </td>
                             </tr>
                             <tr data-type="spend" class="border-b border-b-border hover:bg-b-surface-hover transition-colors">
@@ -458,7 +437,6 @@ tailwind.config = {
                 'TXN-94821': { user: 'SultanAce', type: 'Gift', amount: '-5,000', balance: '12,450', ref: 'Gift to MiraRouge', date: '2026-05-11 14:23', details: 'Crown gift sent during live stream #STM-2847' },
                 'TXN-94820': { user: 'MiraRouge', type: 'Purchase', amount: '+25,000', balance: '31,820', ref: 'SAR 625.00', date: '2026-05-11 13:45', details: 'In-app coin purchase via Apple Pay' },
                 'TXN-94819': { user: 'KingZayed', type: 'Earn', amount: '+2,500', balance: '84,100', ref: 'Daily reward', date: '2026-05-11 12:00', details: 'Daily login bonus claimed' },
-                'TXN-94818': { user: 'LadyAmira', type: 'Tournament', amount: '-1,000', balance: '4,670', ref: 'Tournament #T-482', date: '2026-05-11 11:30', details: 'Tournament entry fee for Hokm Championship' },
             };
             const tx = transactions[txId] || { user: 'Unknown', type: 'N/A', amount: '0', balance: '0', ref: '-', date: '-', details: 'No details available' };
             const content = `

@@ -33,7 +33,8 @@ abstract class RoomRepository {
   });
 
   /// Joins a room by [inviteCode].
-  Future<Room> joinRoomByCode(String inviteCode);
+  /// [password] is required when the room is private and has a password.
+  Future<Room> joinRoomByCode(String inviteCode, {String? password});
 
   /// Starts the game for [roomId]. Returns the created game ID.
   Future<String> startGame(String roomId);

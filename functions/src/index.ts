@@ -20,10 +20,6 @@ export {
   removeFromStream,
   warnHost,
   suspendHost,
-  adminCreateTournament,
-  adminUpdateTournament,
-  adminCancelTournament,
-  adminStartTournament,
   forceEndGame,
   rematchGame,
   adjustBalance,
@@ -58,10 +54,6 @@ export { updateViewerCount } from './triggers/updateViewerCount';
 export { syncUserSearchKeywords } from './triggers/syncUserSearchKeywords';
 export { syncReportSearchKeywords } from './triggers/syncReportSearchKeywords';
 export { cleanStaleRooms } from './scheduler/cleanStaleRooms';
-export { createTournament } from './https/createTournament';
-export { joinTournament } from './https/joinTournament';
-export { leaveTournament } from './https/leaveTournament';
-export { startTournament } from './https/startTournament';
 export { startStream } from './https/startStream';
 export { endStream } from './https/endStream';
 export { deleteAccount } from './https/deleteAccount';

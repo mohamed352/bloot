@@ -25,12 +25,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
     super.initState();
     _notifications = const [
       _NotificationItem(
-        icon: Icons.emoji_events_rounded,
-        title: 'Tournament Starting Soon',
-        body: 'Gulf Champions Cup begins in 15 minutes.',
-        time: '15m ago',
-      ),
-      _NotificationItem(
         icon: Icons.videogame_asset_rounded,
         title: 'Room Invitation',
         body: 'Khalid invited you to play Baloot.',

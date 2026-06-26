@@ -672,7 +672,7 @@ The main action button. Used for "Continue", "Start Game", "Join Room", etc.
 
 ### 8.2 Gold Button
 
-Used for exciting CTAs — "Start Playing", "Join Tournament", room invitations.
+Used for exciting CTAs — "Start Playing", room invitations.
 
 | Property | Value |
 |----------|-------|
@@ -832,7 +832,7 @@ The central playing area during Baloot.
 | Border radius | 9999px |
 | Border | `1px solid rgba(245,158,11,0.30)` |
 
-**Used for:** VIP status, achievement badges, premium indicators, tournament prizes.
+**Used for:** VIP status, achievement badges, premium indicators.
 
 ### 8.10 Mic/Camera Indicator
 

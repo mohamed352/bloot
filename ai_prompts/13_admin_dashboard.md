@@ -15,7 +15,7 @@ The admin dashboard is a web application for platform operations staff. It uses 
 ### Shared Layout
 
 Every admin screen shares this layout:
-- **Left sidebar** (w-64): Dark elevated surface (`#161622`), Bloot logo + "Admin" label in gold, 13 navigation items with material symbols icons, user info at bottom
+- **Left sidebar** (w-64): Dark elevated surface (`#161622`), Bloot logo + "Admin" label in gold, 12 navigation items with material symbols icons, user info at bottom
 - **Main content** (flex-1): Dark surface (`#0A0A0F`), sticky header with page title and action buttons, scrollable content area with p-8 padding
 - **Active nav state**: `bg-purple-500/10 text-purple-400 border-r-2 border-purple-400`
 
@@ -63,19 +63,7 @@ Every admin screen shares this layout:
 
 **Output:** HTML report review
 
-### 04 Tournament Management
-
-**Requirements:**
-- Gold "Create Tournament" button
-- Tabs: Upcoming / Active / Completed / All
-- Stats: Total / Active / Upcoming / Completed
-- Table: Name (EN+AR) | Type | Status | Start Date | Players | Prize | Fee | Actions
-- Create/Edit modal: Name EN/AR, Description EN/AR, Type, Game mode, Max players, Entry fee, Prize distribution, Rules config, Banner image, Status
-- Bracket view for active tournaments
-
-**Output:** HTML tournament management
-
-### 05 Game Monitor
+### 04 Game Monitor
 
 **Requirements:**
 - Filters: Mode, Status, Date, Player
@@ -87,7 +75,7 @@ Every admin screen shares this layout:
 
 **Output:** HTML game monitor
 
-### 06 Room Monitor
+### 05 Room Monitor
 
 **Requirements:**
 - Tabs: Active / Waiting / All
@@ -100,7 +88,7 @@ Every admin screen shares this layout:
 
 **Output:** HTML room monitor
 
-### 07 Stream Moderation
+### 06 Stream Moderation
 
 **Requirements:**
 - Tabs: Live Now / Recently Ended / Reported / All
@@ -110,19 +98,19 @@ Every admin screen shares this layout:
 
 **Output:** HTML stream moderation
 
-### 08 Coin Transactions
+### 07 Coin Transactions
 
 **Requirements:**
 - Summary cards: Total in Circulation, Purchased (SAR), Spent, Net Flow
 - Filters: Type, User, Amount threshold, Date
 - Table: ID | User | Type | Amount (+/-) | Balance | Reference | Date | Actions
-- Type badges: Earn (green), Spend (red), Gift (purple), Purchase (gold), Tournament (blue)
+- Type badges: Earn (green), Spend (red), Gift (purple), Purchase (gold)
 - Flagged transactions section (orange border)
 - Transaction detail: Full details, balance history
 
 **Output:** HTML coin transactions
 
-### 09 Achievement Management
+### 08 Achievement Management
 
 **Requirements:**
 - Tabs: All / Games / Social / Streaming / Milestones
@@ -132,7 +120,7 @@ Every admin screen shares this layout:
 
 **Output:** HTML achievement management
 
-### 10 Leaderboard Management
+### 09 Leaderboard Management
 
 **Requirements:**
 - Tabs: Weekly / Monthly / All Time / Custom
@@ -144,7 +132,7 @@ Every admin screen shares this layout:
 
 **Output:** HTML leaderboard management
 
-### 11 Notification Broadcast
+### 10 Notification Broadcast
 
 **Requirements:**
 - Tabs: Compose / History / Templates
@@ -154,7 +142,7 @@ Every admin screen shares this layout:
 
 **Output:** HTML notification broadcast
 
-### 12 Analytics
+### 11 Analytics
 
 **Requirements:**
 - Date range picker (7d/30d/90d/custom) + Export button
@@ -166,13 +154,13 @@ Every admin screen shares this layout:
 
 **Output:** HTML analytics dashboard
 
-### 13 System Settings
+### 12 System Settings
 
 **Requirements:**
 - Expandable section cards:
   - Game Rules: Sun target, Hokm rounds, Turn time, Mode toggles
-  - Feature Flags: Tournaments, Streaming, Voice, Camera, Gifting, Coins, Guest mode
-  - Economy: Daily bonus, Coin packages table, Gift amounts, Tournament fees, Commission %
+  - Feature Flags: Streaming, Voice, Camera, Gifting, Coins, Guest mode
+  - Economy: Daily bonus, Coin packages table, Gift amounts, Commission %
   - Moderation: Auto-ban threshold, Escalation rules, Profanity filter (AR+EN), Stream retention
   - Maintenance: Mode toggle, Force update version, Announcement banner (EN+AR)
   - Admin Users: Table with Role badges (Super Admin purple, Moderator blue, Support gray), Add Admin button
@@ -191,6 +179,6 @@ Every admin screen shares this layout:
 - All screens share the sidebar navigation (identical HTML in each file)
 - Interactive elements (modals, drawers) use smooth transitions
 - Status badges use consistent colors across all screens
-- Gold accents used sparingly for tournament prizes, VIP, and premium elements
+- Gold accents used sparingly for achievements, VIP, and premium elements
 - Tables should support sorting, filtering, and pagination (visual only in prototypes)
 - Mobile responsiveness is NOT required for admin (desktop only for MVP)

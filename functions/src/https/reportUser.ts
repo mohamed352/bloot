@@ -20,7 +20,7 @@ export const reportUser = functions.https.onCall(async (request) => {
     );
   }
 
-  const validTypes = ['user', 'room', 'stream', 'message', 'tournament'];
+  const validTypes = ['user', 'room', 'stream', 'message'];
   if (!validTypes.includes(targetType)) {
     throw new functions.https.HttpsError('invalid-argument', 'Invalid targetType');
   }

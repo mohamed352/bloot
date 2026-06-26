@@ -122,7 +122,6 @@ Arabic text is typically **20-30% longer** than English for the same content. Th
 | "Live Now" | 8 chars | "مباشر الآن" | 10 chars (~25%) |
 | "Send Gift" | 9 chars | "أرسل هدية" | 9 chars (~0%) |
 | "Followers" | 9 chars | "المتابعون" | 9 chars (~0%) |
-| "Tournament" | 10 chars | "البطولة" | 7 chars (~-30%) |
 
 ### Design Implications
 
@@ -374,7 +373,7 @@ PositionedDirectional(start: 0, end: 0, top: 0) // Works in both directions
 | Event | Timing | Bloot Adaptation |
 |---|---|---|
 | Ramadan | Varies (lunar calendar) | Special Ramadan theme, iftar timing, reduced notifications during fasting hours |
-| Eid Al-Fitr | After Ramadan | Celebration theme, special gifts, tournament |
+| Eid Al-Fitr | After Ramadan | Celebration theme, special gifts |
 | Eid Al-Adha | ~70 days after Eid Al-Fitr | Celebration theme, special achievements |
 | Saudi National Day | Sept 23 | Green theme variant, special card backs |
 | Kuwait National Day | Feb 25 | Kuwaiti flag colors in decorations |
@@ -457,7 +456,6 @@ output-localization-file: app_localizations.dart
   },
   "viewersWatching": "{count} يشاهدون",
   "coinsBalance": "{count} عملة",
-  "tournamentStartsIn": "تبدأ البطولة خلال {time}",
   "achievementUnlocked": "فتحت إنجاز جديد!",
   "playerJoined": "انضم {name} للغرفة",
   "@playerJoined": {
@@ -503,7 +501,6 @@ output-localization-file: app_localizations.dart
   "followers": "{count} followers",
   "viewersWatching": "{count} watching",
   "coinsBalance": "{count} coins",
-  "tournamentStartsIn": "Tournament starts in {time}",
   "achievementUnlocked": "Achievement Unlocked!",
   "playerJoined": "{name} joined the room",
   "gameModeSun": "Sun",

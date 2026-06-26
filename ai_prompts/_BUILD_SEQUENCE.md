@@ -25,8 +25,8 @@ Follow this strict order to build the Bloot UI.
 ## Phase 2: The Core (Home & Discovery)
 
 3. **03_home.md**
-   - Why: The primary user experience. Live streams, quick actions, tournaments.
-   - Screens: Home (Hero, Quick Actions, Live Streams, Tournaments)
+   - Why: The primary user experience. Live streams, quick actions, and social discovery.
+   - Screens: Home (Hero, Quick Actions, Live Streams)
 
 4. **04_discover_streams.md**
    - Why: Stream discovery with filters. The social discovery engine.
@@ -62,7 +62,7 @@ Follow this strict order to build the Bloot UI.
 
 ---
 
-## Phase 5: Identity (Profile & Settings)
+## Phase 5: Identity, Settings & Admin
 
 10. **10_profile.md**
     - Why: Player stats, level, previous games. Social proof and identity.
@@ -72,17 +72,9 @@ Follow this strict order to build the Bloot UI.
     - Why: App settings, privacy, legal, error states.
     - Screens: Settings, Privacy, Terms, Error, Offline, Loading, Success
 
----
-
-## Phase 6: Competition & Admin (Tournaments + Admin Dashboard)
-
-12. **09_tournaments.md**
-    - Why: Competitive play, prize pools. Long-term retention driver.
-    - Screens: Tournament List, Tournament Detail, Join Tournament
-
-13. **13_admin_dashboard.md**
-    - Why: Platform management. Critical for operations, moderation, tournament creation, and economy.
-    - Screens: Dashboard, Users, Reports, Tournaments, Games, Rooms, Streams, Economy, Achievements, Leaderboards, Notifications, Analytics, Settings
+12. **13_admin_dashboard.md**
+    - Why: Platform management. Critical for operations, moderation, and economy.
+    - Screens: Dashboard, Users, Reports, Games, Rooms, Streams, Economy, Achievements, Leaderboards, Notifications, Analytics, Settings
 
 ---
 

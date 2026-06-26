@@ -91,7 +91,7 @@
 
 #### Home
 - [ ] Home screen with hero banner ("Baloot Live")
-- [ ] Quick action cards (4): Play with Friends, Voice Tables, Live Stream, Tournaments
+- [ ] Quick action cards (3): Play with Friends, Voice Tables, Live Stream
 - [ ] Live streams list (real-time Firestore listener)
 - [ ] Empty state for no streams
 - [ ] Bottom navigation (5 items: Home, Discover, Play, Chat, Profile)
@@ -207,7 +207,7 @@
 
 #### Stream Discovery
 - [ ] Search bar with real-time search
-- [ ] Filter tabs (Popular, New, Top Rated, Tournaments, Voice Only, Following)
+- [ ] Filter tabs (Popular, New, Top Rated, Voice Only, Following)
 - [ ] Advanced filter bottom sheet
 - [ ] Stream card grid (2 columns)
 - [ ] Pull-to-refresh
@@ -230,51 +230,7 @@
 
 ---
 
-## 6. Phase 4: Tournaments
-
-**Goal:** Tournament listing, brackets, and participation.
-
-### 6.1 Feature Checklist
-
-#### Tournament List
-- [ ] Tournament list with filter tabs
-- [ ] Tournament cards (name, prize, participants, status, date)
-- [ ] Gold border for premium tournaments
-- [ ] Status badges (Live, Upcoming, Completed)
-- [ ] Empty state
-
-#### Tournament Detail
-- [ ] Hero section (banner, name, prize pool)
-- [ ] Details card (date, game type, format, rounds, entry)
-- [ ] Rules card (Khaleeji rules summary)
-- [ ] Participants card (avatar scroll, count)
-- [ ] Bracket visualization (for active tournaments)
-- [ ] Join/Withdraw button
-- [ ] Prize distribution section
-
-#### Tournament Flow
-- [ ] Join tournament (deduct entry fee, add to participants)
-- [ ] Check-in before tournament start
-- [   ] Tournament start (generate brackets)
-- [ ] Match progression (advance winners)
-- [ ] Tournament end (distribute prizes)
-
-### 6.2 QA Tests
-
-| Test | Method | Criteria |
-|------|--------|----------|
-| View tournaments | Manual | List loads, filters work |
-| Tournament detail | Manual | All sections visible, prize pool prominent |
-| Join free tournament | Manual | User added to participants |
-| Join paid tournament | Manual | Coins deducted, user added |
-| Tournament full | Manual | "Tournament Full" button disabled |
-| Bracket display | Manual | Matches and progression visible |
-| Tournament start | Integration | Brackets generated correctly |
-| Prize distribution | Integration | Winners receive coins |
-
----
-
-## 7. Phase 5: Social & Polish
+## 6. Phase 4: Social & Polish
 
 **Goal:** Chat, profile, settings, error handling, offline support, and final polish.
 
@@ -338,7 +294,7 @@
 
 ---
 
-## 8. Testing Strategy
+## 7. Testing Strategy
 
 ### 8.1 Unit Tests
 
@@ -347,7 +303,7 @@
 | Baloot engine | Card dealing, trick resolution, score calculation, valid card detection |
 | Cubits | State transitions for every event (loading, success, error) |
 | Models | Freezed fromJson/toJson, copyWith, equality |
-| Use cases | Business logic validation (join room, play card, join tournament) |
+| Use cases | Business logic validation (join room, play card) |
 | Repositories | Data mapping between models and entities |
 
 ### 8.2 Widget Tests
@@ -388,13 +344,13 @@
 
 ---
 
-## 9. Post-MVP Roadmap
+## 8. Post-MVP Roadmap
 
 | Priority | Feature | Notes |
 |----------|---------|-------|
 | P1 | Light theme | Design system supports it; implementation deferred |
 | P1 | Social auth | Apple Sign In, Google Sign In |
-| P1 | Push notifications | FCM for room invites, tournament alerts |
+| P1 | Push notifications | FCM for room invites |
 | P2 | Replay | Watch completed games |
 | P2 | Spectator chat | Chat in streams with moderation |
 | P2 | Gifting system | Virtual gifts with coin economy |

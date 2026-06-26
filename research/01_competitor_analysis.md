@@ -41,7 +41,6 @@ Bloot enters a market where Baloot apps exist but none combine live voice/video,
 - No live streaming feature
 - Baloot rules implementation has known bugs (scoring edge cases)
 - Aggressive ad placement disrupts experience
-- No tournament system
 - Limited spectator experience
 
 **Market Position:** Market leader by user count, but vulnerable on experience quality and social depth.
@@ -76,7 +75,6 @@ Bloot enters a market where Baloot apps exist but none combine live voice/video,
 - No voice or video chat
 - No social features
 - No streaming or spectating
-- No tournaments
 - Poor mobile browser experience
 - No RTL optimization
 
@@ -114,7 +112,6 @@ Bloot enters a market where Baloot apps exist but none combine live voice/video,
 - Multiplayer is unreliable
 - No social features beyond basic matchmaking
 - No streaming
-- No tournament support
 - Limited to Android
 - AI opponents are predictable
 
@@ -151,7 +148,6 @@ Bloot enters a market where Baloot apps exist but none combine live voice/video,
 - UI feels like a chat room, not a premium experience
 - No video support
 - No streaming or spectating
-- Limited tournament features
 - Voice chat has echo/quality issues
 - Monetization feels aggressive
 
@@ -206,7 +202,6 @@ Bloot enters a market where Baloot apps exist but none combine live voice/video,
 | Video/Camera | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Live Streaming | ❌ | ❌ | ❌ | ❌ | Some | ✅ |
 | Spectating | Limited | ❌ | ❌ | ❌ | Some | ✅ |
-| Tournaments | ❌ | ❌ | ❌ | ❌ | Some | ✅ |
 | Gifting System | ❌ | ❌ | ❌ | ❌ | Some | ✅ |
 | Arabic RTL | ✅ | Partial | ✅ | ✅ | ❌ | ✅ |
 | Premium Dark UI | ❌ | ❌ | ❌ | ❌ | Some | ✅ |
@@ -265,5 +260,5 @@ Bloot enters a market where Baloot apps exist but none combine live voice/video,
 - **TAM:** 40M+ Arabic card game players in MENA
 - **SAM:** 10M+ Gulf-region Baloot players (Saudi, Kuwait, Bahrain, UAE, Qatar)
 - **SOM (Year 1):** 100K-500K MAU targeting Saudi and Kuwait initially
-- **Revenue model:** Freemium with virtual gifting, premium subscriptions, tournament entry fees
+- **Revenue model:** Freemium with virtual gifting and premium subscriptions
 - **Key insight:** No one owns the "premium Baloot + social" position — it's an open wedge

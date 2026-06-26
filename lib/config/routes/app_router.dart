@@ -57,11 +57,6 @@ import 'package:bloot/features/settings/presentation/pages/privacy_settings_page
 import 'package:bloot/features/settings/presentation/pages/settings_page.dart';
 import 'package:bloot/features/settings/presentation/pages/terms_page.dart';
 import 'package:bloot/features/shell/presentation/widgets/main_shell_widget.dart';
-import 'package:bloot/features/tournament/presentation/cubit/tournament_cubit.dart';
-import 'package:bloot/features/tournament/presentation/pages/tournament_bracket_page.dart';
-import 'package:bloot/features/tournament/presentation/pages/tournament_detail_page.dart';
-import 'package:bloot/features/tournament/presentation/pages/tournament_list_page.dart';
-import 'package:bloot/features/tournament/presentation/pages/tournament_results_page.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: RoutePaths.splash,
@@ -167,14 +162,6 @@ final GoRouter appRouter = GoRouter(
 
     // Feature Screens (outside shell)
     GoRoute(
-      path: '/tournaments',
-      name: RouteNames.tournamentsTab,
-      builder: (context, state) => BlocProvider(
-        create: (_) => getIt<TournamentCubit>()..loadTournaments(),
-        child: const TournamentListPage(),
-      ),
-    ),
-    GoRoute(
       path: RoutePaths.roomLobby,
       name: RouteNames.roomLobby,
       builder: (context, state) {
@@ -217,45 +204,6 @@ final GoRouter appRouter = GoRouter(
         return BlocProvider(
           create: (_) => getIt<DiscoverCubit>()..loadStream(id),
           child: WatchStreamPage(id: id),
-        );
-      },
-    ),
-    GoRoute(
-      path: RoutePaths.tournamentDetail,
-      name: RouteNames.tournamentDetail,
-      builder: (context, state) {
-        final id = state.pathParameters['id']!;
-        return BlocProvider(
-          create: (_) => getIt<TournamentCubit>()..loadTournament(id),
-          child: TournamentDetailPage(id: id),
-        );
-      },
-    ),
-    GoRoute(
-      path: RoutePaths.tournamentBracket,
-      name: RouteNames.tournamentBracket,
-      builder: (context, state) {
-        final id = state.pathParameters['id']!;
-        return BlocProvider(
-          create: (_) => getIt<TournamentCubit>()..loadTournament(id),
-          child: TournamentBracketPage(id: id),
-        );
-      },
-    ),
-    GoRoute(
-      path: RoutePaths.tournamentResults,
-      name: RouteNames.tournamentResults,
-      builder: (context, state) {
-        final id = state.pathParameters['id']!;
-        final extra = state.extra as Map<String, dynamic>?;
-        return TournamentResultsPage(
-          tournamentId: id,
-          tournamentName: extra?['tournamentName'] as String? ?? '',
-          championName: extra?['championName'] as String? ?? '',
-          prizeAmount: extra?['prizeAmount'] as int?,
-          prizeCurrency: extra?['prizeCurrency'] as String? ?? 'SAR',
-          runnerUpName: extra?['runnerUpName'] as String?,
-          playerCount: extra?['playerCount'] as int? ?? 0,
         );
       },
     ),

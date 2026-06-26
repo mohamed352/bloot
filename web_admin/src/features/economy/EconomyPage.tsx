@@ -16,13 +16,11 @@ const typeVariant: Record<string, 'default' | 'success' | 'warning' | 'danger' |
   reward: 'info',
   gameWin: 'success',
   gameLoss: 'danger',
-  tournamentEntry: 'warning',
-  tournamentPrize: 'success',
   transfer: 'info',
   adminAdjustment: 'warning',
 };
 
-const typeOptions = ['purchase', 'reward', 'gameWin', 'gameLoss', 'tournamentEntry', 'tournamentPrize', 'transfer', 'adminAdjustment'];
+const typeOptions = ['purchase', 'reward', 'gameWin', 'gameLoss', 'transfer', 'adminAdjustment'];
 
 export function EconomyPage() {
   const [typeFilter, setTypeFilter] = useState('');

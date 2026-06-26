@@ -33,7 +33,6 @@ All UI screens MUST be generated in **English only**. Add RTL implementation not
   - Show Profile (dropdown: Everyone/Followers/Private)
   - Notifications (toggle + subsections):
     - Room Invitations (toggle)
-    - Tournament Alerts (toggle)
     - New Followers (toggle)
     - Game Results (toggle)
   - Muted Users (chevron)
@@ -80,7 +79,6 @@ All UI screens MUST be generated in **English only**. Add RTL implementation not
   - Account responsibilities
   - Gameplay rules (fair play, no cheating)
   - Streaming rules (no prohibited content)
-  - Tournament rules
   - Virtual currency/coins policy
   - Prohibited behavior (harassment, cheating, exploiting)
   - Account suspension/termination
@@ -147,7 +145,6 @@ All UI screens MUST be generated in **English only**. Add RTL implementation not
   - Description (optional)
 - Examples:
   - "Room created successfully"
-  - "You joined the tournament!"
   - "Profile updated"
 - Auto-dismiss or manual close
 

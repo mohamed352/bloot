@@ -16,10 +16,6 @@ describe('Admin function exports', () => {
     expect(admin.removeFromStream).toBeDefined();
     expect(admin.warnHost).toBeDefined();
     expect(admin.suspendHost).toBeDefined();
-    expect(admin.adminCreateTournament).toBeDefined();
-    expect(admin.adminUpdateTournament).toBeDefined();
-    expect(admin.adminCancelTournament).toBeDefined();
-    expect(admin.adminStartTournament).toBeDefined();
     expect(admin.forceEndGame).toBeDefined();
     expect(admin.rematchGame).toBeDefined();
     expect(admin.adjustBalance).toBeDefined();

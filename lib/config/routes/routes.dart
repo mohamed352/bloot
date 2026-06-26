@@ -9,7 +9,6 @@ abstract class RouteNames {
   static const String home = 'home';
   static const String discover = 'discover';
   static const String play = 'play';
-  static const String tournamentsTab = 'tournamentsTab';
   static const String chat = 'chat';
   static const String profile = 'profile';
 
@@ -18,9 +17,6 @@ abstract class RouteNames {
   static const String roomLobby = 'roomLobby';
   static const String gamePlay = 'gamePlay';
   static const String watchStream = 'watchStream';
-  static const String tournamentDetail = 'tournamentDetail';
-  static const String tournamentBracket = 'tournamentBracket';
-  static const String tournamentResults = 'tournamentResults';
   static const String directMessage = 'directMessage';
   static const String roomInvitation = 'roomInvitation';
   static const String editProfile = 'editProfile';
@@ -64,9 +60,6 @@ abstract class RoutePaths {
   static const String roomLobby = '/room/:id';
   static const String gamePlay = '/game/:id';
   static const String watchStream = '/stream/:id';
-  static const String tournamentDetail = '/tournament/:id';
-  static const String tournamentBracket = '/tournament/:id/bracket';
-  static const String tournamentResults = '/tournament/:id/results';
   static const String directMessage = '/chat/:conversationId';
   static const String roomInvitation = '/room-invite/:id';
   static const String editProfile = '/edit-profile';

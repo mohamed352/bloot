@@ -198,8 +198,6 @@ class _NotificationTile extends StatelessWidget {
 
   IconData _iconForType(String type) {
     switch (type) {
-      case 'tournament':
-        return Icons.emoji_events_rounded;
       case 'room_invite':
         return Icons.videogame_asset_rounded;
       case 'follow':

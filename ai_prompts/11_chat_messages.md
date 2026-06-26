@@ -19,7 +19,6 @@ All UI screens MUST be generated in **English only**. Add RTL implementation not
   - "All" (active, purple)
   - "Rooms" (invitation icon)
   - "Direct" (chat icon)
-  - "Tournaments" (trophy icon)
 - Chat list (vertical):
   - Each item:
     - Avatar (circle, 48px)

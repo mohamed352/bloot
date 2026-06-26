@@ -1,6 +1,6 @@
 # Bloot Admin Web
 
-React + TypeScript + Vite admin dashboard for Bloot. Manages users, reports, tournaments, games, rooms, streams, economy, achievements, leaderboards, notifications, analytics, and settings.
+React + TypeScript + Vite admin dashboard for Bloot. Manages users, reports, games, rooms, streams, economy, achievements, leaderboards, notifications, analytics, and settings.
 
 ## Tech Stack
 

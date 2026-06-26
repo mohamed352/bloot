@@ -92,14 +92,14 @@
         نظام التصميم v1.0
     </div>
     <h1>بلوت</h1>
-    <p>منصة بلوت الاجتماعية المتميزة — صوت وفيديو مباشر، بث، بطولات. نظام تصميم متكامل بشاشات أنيقة بثيم داكن بألوان البنفسجي والذهبي.</p>
+    <p>منصة بلوت الاجتماعية المتميزة — صوت وفيديو مباشر، وبث. نظام تصميم متكامل بشاشات أنيقة بثيم داكن بألوان البنفسجي والذهبي.</p>
     <div class="hero-stats">
         <div class="hero-stat">
-            <span class="num">25</span>
+            <span class="num">23</span>
             <span class="label">شاشة</span>
         </div>
         <div class="hero-stat">
-            <span class="num">13</span>
+            <span class="num">12</span>
             <span class="label">قسم</span>
         </div>
         <div class="hero-stat">
@@ -123,7 +123,6 @@
         <a class="nav-item" href="#room">الغرفة</a>
         <a class="nav-item" href="#game">اللعب</a>
         <a class="nav-item" href="#create">إنشاء غرفة</a>
-        <a class="nav-item" href="#tournaments">البطولات</a>
         <a class="nav-item" href="#profile">الملف الشخصي</a>
         <a class="nav-item" href="#chat">المحادثة</a>
         <a class="nav-item" href="#settings">الإعدادات</a>
@@ -156,8 +155,8 @@ const screens = [
         { folder: "otp_verification_screen", name: "التحقق من الرمز", desc: "تحقق برمز ٤ أرقام مع التركيز التلقائي", type: "عمودي" },
         { folder: "complete_profile_screen", name: "إكمال الملف الشخصي", desc: "الاسم المعروض واسم المستخدم والصورة الشخصية وقبول الشروط", type: "عمودي" },
     ]},
-    { section: "03_home", id: "home", num: "٠٣", title: "الشاشة الرئيسية", desc: "المركز الرئيسي — البث المباشر والإجراءات السريعة والبطولات والاكتشاف.", items: [
-        { folder: "home_screen", name: "الشاشة الرئيسية", desc: "بانر رئيسي وإجراءات سريعة وبث مباشر وبطولات", type: "عمودي" },
+    { section: "03_home", id: "home", num: "٠٣", title: "الشاشة الرئيسية", desc: "المركز الرئيسي — البث المباشر والإجراءات السريعة والاكتشاف.", items: [
+        { folder: "home_screen", name: "الشاشة الرئيسية", desc: "بانر رئيسي وإجراءات سريعة وبث مباشر", type: "عمودي" },
     ]},
     { section: "04_discover_streams", id: "discover", num: "٠٤", title: "استكشاف البث", desc: "تصفح وتصفية بثات بلوت المباشرة — محرك الاكتشاف الاجتماعي.", items: [
         { folder: "discover_streams", name: "استكشاف البث", desc: "بحث وتبويبات تصفية وبطاقات بث وشارات نوع", type: "عمودي" },
@@ -174,24 +173,20 @@ const screens = [
     { section: "08_create_room", id: "create", num: "٠٨", title: "إنشاء غرفة", desc: "نموذج إنشاء الغرفة — الاسم والنوع وإعدادات الصوت والكاميرا وخيارات الدعوة.", items: [
         { folder: "create_room", name: "إنشاء غرفة", desc: "اختيار نوع الغرفة وإعدادات التبديل وخيارات الدعوة", type: "عمودي" },
     ]},
-    { section: "09_tournaments", id: "tournaments", num: "٠٩", title: "البطولات", desc: "تصفح والانضمام وإدارة بطولات بلوت مع الجوائز والأدوار.", items: [
-        { folder: "tournament_list", name: "قائمة البطولات", desc: "بطولات نشطة وقادمة ومنتهية مع تصفية", type: "عمودي" },
-        { folder: "tournament_detail", name: "تفاصيل البطولة", desc: "التفاصيل والجوائز والمشاركين ومعاينة الأدوار", type: "عمودي" },
-    ]},
-    { section: "10_profile", id: "profile", num: "١٠", title: "الملف الشخصي", desc: "هوية اللاعب — الإحصائيات والإنجازات وسجل الألعاب والتأثير الاجتماعي.", items: [
+    { section: "10_profile", id: "profile", num: "٠٩", title: "الملف الشخصي", desc: "هوية اللاعب — الإحصائيات والإنجازات وسجل الألعاب والتأثير الاجتماعي.", items: [
         { folder: "user_profile", name: "الملف الشخصي", desc: "الإحصائيات ونسبة الفوز والإنجازات وتبويبات سجل الألعاب", type: "عمودي" },
         { folder: "edit_profile", name: "تعديل الملف الشخصي", desc: "الصورة والاسم المعروض واسم المستخدم والنبذة", type: "عمودي" },
     ]},
-    { section: "11_chat", id: "chat", num: "١١", title: "المحادثة", desc: "الرسائل المباشرة ودعوات الغرف والمحادثات السريعة.", items: [
+    { section: "11_chat", id: "chat", num: "١٠", title: "المحادثة", desc: "الرسائل المباشرة ودعوات الغرف والمحادثات السريعة.", items: [
         { folder: "chat_list", name: "قائمة المحادثات", desc: "قائمة المحادثات مع شارات غير المقروء ودعوات الغرف", type: "عمودي" },
         { folder: "direct_message", name: "رسالة مباشرة", desc: "محادثة مباشرة مع أزرار الإجراءات السريعة ومعلومات الغرفة", type: "عمودي" },
         { folder: "room_invitation_modal", name: "دعوة الغرفة", desc: "نافذة دعوة الغرفة مع أزرار الانضمام والرفض", type: "عمودي" },
     ]},
-    { section: "12_settings", id: "settings", num: "١٢", title: "الإعدادات", desc: "إعدادات التطبيق والحساب والشروط.", items: [
+    { section: "12_settings", id: "settings", num: "١١", title: "الإعدادات", desc: "إعدادات التطبيق والحساب والشروط.", items: [
         { folder: "settings", name: "الإعدادات", desc: "إعدادات الحساب واللعب والصوت والكاميرا والإشعارات", type: "عمودي" },
         { folder: "terms_of_service", name: "شروط الخدمة", desc: "قواعد اللعب والبث وسياسات الحساب", type: "عمودي" },
     ]},
-    { section: "13_edge_cases", id: "edge", num: "١٣", title: "الحالات الخاصة", desc: "حالات الخطأ وعدم الاتصال والتحميل والنجاح — معالجة سلسة للأعطال.", items: [
+    { section: "13_edge_cases", id: "edge", num: "١٢", title: "الحالات الخاصة", desc: "حالات الخطأ وعدم الاتصال والتحميل والنجاح — معالجة سلسة للأعطال.", items: [
         { folder: "error_state", name: "حالة الخطأ", desc: "خطأ في الاتصال مع إجراء إعادة المحاولة", type: "عمودي" },
         { folder: "offline_screen", name: "حالة عدم الاتصال", desc: "لا يوجد اتصال مع تأكيد البيانات المحفوظة", type: "عمودي" },
         { folder: "loading_state", name: "حالة التحميل", desc: "مؤشر تحميل سياقي مع رسائل ذات طابع اللعب", type: "عمودي" },

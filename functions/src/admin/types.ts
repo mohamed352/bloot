@@ -50,36 +50,6 @@ export interface RemoveFromStreamInput {
   uid: string;
 }
 
-export interface CreateTournamentInput {
-  name: string;
-  description?: string;
-  type: 'singleElimination' | 'roundRobin' | 'swiss';
-  gameType: 'sun' | 'hokm' | 'both';
-  maxParticipants: number;
-  entryFee: number;
-  prizePool: number;
-  prizes?: Record<string, number>;
-  rules?: Record<string, unknown>;
-  startDate: string;
-  endDate: string;
-  registrationDeadline: string;
-  imageUrl?: string;
-  isPremium?: boolean;
-}
-
-export interface UpdateTournamentInput {
-  tournamentId: string;
-  updates: Partial<CreateTournamentInput>;
-}
-
-export interface CancelTournamentInput {
-  tournamentId: string;
-}
-
-export interface StartTournamentInput {
-  tournamentId: string;
-}
-
 export interface ForceEndGameInput {
   gameId: string;
 }

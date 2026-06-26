@@ -19,7 +19,6 @@ const navItems: NavItem[] = [
   { to: '/', icon: 'dashboard', label: 'Dashboard' },
   { to: '/users', icon: 'person', label: 'Users', requiredPermission: 'moderate' },
   { to: '/reports', icon: 'flag', label: 'Reports', requiredPermission: 'moderate' },
-  { to: '/tournaments', icon: 'emoji_events', label: 'Tournaments', requiredPermission: 'manage' },
   { to: '/games', icon: 'casino', label: 'Games', requiredPermission: 'view' },
   { to: '/rooms', icon: 'meeting_room', label: 'Rooms', requiredPermission: 'view' },
   { to: '/streams', icon: 'videocam', label: 'Streams', requiredPermission: 'moderate' },

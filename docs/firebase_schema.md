@@ -12,7 +12,6 @@
 | `rooms` | Game rooms, players, settings | Auto-generated ID |
 | `games` | Active and completed games | Auto-generated ID |
 | `streams` | Stream metadata and viewer info | Same as room ID |
-| `tournaments` | Tournament definitions and brackets | Auto-generated ID |
 | `messages` | Direct messages and room chat | Auto-generated ID |
 | `reports` | User/player reports | Auto-generated ID |
 | `coin_transactions` | Coin/virtual currency transactions | Auto-generated ID |
@@ -72,7 +71,6 @@
 | `showOnlineStatus` | bool | true | Show online status to others |
 | `profileVisibility` | string | "everyone" | "everyone", "followers", "private" |
 | `notifyRoomInvitations` | bool | true | Push notifications for room invites |
-| `notifyTournamentAlerts` | bool | true | Push notifications for tournaments |
 | `notifyNewFollowers` | bool | true | Push notifications for followers |
 | `notifyGameResults` | bool | true | Push notifications for game results |
 
@@ -347,125 +345,7 @@
 - `streams/{streamId}/viewers`: `joinedAt` (desc)
 - `streams/{streamId}/chat`: `createdAt` (asc)
 
----
-
-## 6. `tournaments` Collection
-
-**Document ID:** Auto-generated
-
-### Fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | string | yes | Document ID |
-| `name` | string | yes | Tournament name (max 100 chars) |
-| `description` | string | no | Tournament description (max 1000 chars) |
-| `type` | string | yes | "singleElimination", "roundRobin", "swiss" |
-| `status` | string | yes | "upcoming", "registration", "active", "completed", "cancelled" |
-| `gameType` | string | yes | "sun", "hokm", or "both" |
-| `maxParticipants` | int | yes | Maximum number of participants (powers of 2: 8, 16, 32, 64) |
-| `currentParticipants` | int | yes | Current number of registered participants |
-| `entryFee` | int | yes | Coin entry fee (0 for free) |
-| `prizePool` | int | yes | Total prize pool in coins |
-| `prizes` | map | yes | Prize distribution (see below) |
-| `rules` | map | yes | Tournament rules (see below) |
-| `startDate` | timestamp | yes | Tournament start date/time |
-| `endDate` | timestamp | yes | Tournament end date/time |
-| `registrationDeadline` | timestamp | yes | Last date to register |
-| `hostUid` | string | yes | UID of tournament host/admin |
-| `participants` | array | yes | Array of participant UIDs |
-| `brackets` | map | no | Bracket matchups (populated when tournament starts) |
-| `imageUrl` | string | no | Tournament banner image URL |
-| `isPremium` | bool | yes | Premium tournament with gold border (default: false) |
-| `createdAt` | timestamp | yes | Creation timestamp |
-| `updatedAt` | timestamp | yes | Last update timestamp |
-
-### `prizes` Map Structure
-
-```
-{
-  "1st": 2500,       // Coins for 1st place
-  "2nd": 1500,       // Coins for 2nd place
-  "3rd": 700,        // Coins for 3rd place
-  "4th": 300         // Coins for 4th place
-}
-```
-
-### `rules` Map Structure
-
-```
-{
-  "ruleSet": "khaleeji",        // "khaleeji" (standard Gulf rules)
-  "sunTarget": 120,              // Points to win Sun round
-  "hokmRounds": 8,               // Number of Hokm rounds
-  "turnTimeLimit": 30,            // Seconds per turn
-  "allowSpectators": true,
-  "minLevel": 0,                  // Minimum player level to join
-  "maxLevel": null                // No max level by default
-}
-```
-
-### `brackets` Map Structure (Single Elimination)
-
-```
-{
-  "round1": [
-    {
-      "matchId": "m1",
-      "team1": { "uid1": "...", "uid2": "...", "score": 0 },
-      "team2": { "uid1": "...", "uid2": "...", "score": 0 },
-      "winner": null,
-      "status": "upcoming"
-    },
-    // ... more matches
-  ],
-  "round2": [ ... ],
-  "final": [ ... ]
-}
-```
-
-### Subcollections
-
-#### `tournaments/{tournamentId}/participants`
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `uid` | string | Participant UID |
-| `displayName` | string | Display name |
-| `avatarUrl` | string | Avatar URL |
-| `level` | int | Player level at time of registration |
-| `registeredAt` | timestamp | Registration timestamp |
-| `teamPartnerUid` | string | UID of chosen partner (for 2v2 tournaments) |
-| `status` | string | "registered", "checkedIn", "eliminated", "active" |
-
-#### `tournaments/{tournamentId}/matches`
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `matchId` | string | Auto-generated |
-| `round` | int | Bracket round number |
-| `matchIndex` | int | Match position in round |
-| `team1Uids` | array | [uid, uid] for team 1 |
-| `team2Uids` | array | [uid, uid] for team 2 |
-| `team1Score` | int | Team 1 score |
-| `team2Score` | int | Team 2 score |
-| `winner` | string | "team1" or "team2" or null |
-| `status` | string | "upcoming", "inProgress", "completed" |
-| `gameId` | string | Reference to games collection (if game started) |
-| `scheduledAt` | timestamp | Match scheduled time |
-| `startedAt` | timestamp | Match start time |
-| `endedAt` | timestamp | Match end time |
-
-### Indexes
-
-- `tournaments`: `status` (asc), `startDate` (asc), `gameType` (asc), `entryFee`, `isPremium`
-- `tournaments`: `status` == "registration" ORDER BY `startDate` ASC
-- `tournaments/{id}/participants`: `registeredAt` (asc), `level`
-- `tournaments/{id}/matches`: `round` (asc), `matchIndex` (asc), `status`
-
----
-
-## 7. `messages` Collection
+## 6. `messages` Collection
 
 **Document ID:** Auto-generated
 
@@ -509,7 +389,7 @@
 
 ---
 
-## 8. `reports` Collection
+## 7. `reports` Collection
 
 **Document ID:** Auto-generated
 
@@ -538,7 +418,7 @@
 
 ---
 
-## 9. `coin_transactions` Collection
+## 8. `coin_transactions` Collection
 
 **Document ID:** Auto-generated
 
@@ -548,13 +428,13 @@
 |-------|------|----------|-------------|
 | `id` | string | yes | Document ID |
 | `uid` | string | yes | UID of the user involved in transaction |
-| `type` | string | yes | "earn", "spend", "gift_send", "gift_receive", "tournament_entry", "tournament_prize", "purchase", "daily_bonus", "achievement_reward" |
+| `type` | string | yes | "earn", "spend", "gift_send", "gift_receive", "purchase", "daily_bonus", "achievement_reward" |
 | `amount` | int | yes | Amount of coins (positive for credit, negative for debit) |
 | `balanceAfter` | int | yes | User's coin balance after this transaction |
 | `description` | string | no | Human-readable description (max 200 chars) |
 | `descriptionAr` | string | no | Arabic description (max 200 chars) |
-| `referenceType` | string | no | "game", "tournament", "gift", "purchase", "daily_bonus", "achievement", "stream_gift" |
-| `referenceId` | string | no | ID of the referenced entity (game ID, tournament ID, etc.) |
+| `referenceType` | string | no | "game", "gift", "purchase", "daily_bonus", "achievement", "stream_gift" |
+| `referenceId` | string | no | ID of the referenced entity (game ID, purchase ID, etc.) |
 | `counterpartyUid` | string | no | UID of the other user in gift/send transactions |
 | `metadata` | map | no | Additional transaction-specific data |
 | `createdAt` | timestamp | yes | Transaction timestamp |
@@ -564,7 +444,6 @@
 ```
 {
   "gameType": "sun",            // For game earnings
-  "placement": "1st",           // For tournament prizes
   "giftType": "rose",           // For stream gifts
   "productId": "coins_500",     // For purchases
 }
@@ -579,7 +458,7 @@
 
 ---
 
-## 10. `achievements` Collection
+## 9. `achievements` Collection
 
 **Document ID:** Achievement ID (e.g., "first_win", "streak_10", "streamer_100")
 
@@ -594,11 +473,11 @@
 | `descriptionAr` | string | yes | Achievement description in Arabic (max 150 chars) |
 | `iconUrl` | string | yes | Firebase Storage URL for achievement badge icon |
 | `iconInactiveUrl` | string | yes | Greyed-out version for locked achievements |
-| `category` | string | yes | "gameplay", "social", "streaming", "tournament", "special" |
+| `category` | string | yes | "gameplay", "social", "streaming", "special" |
 | `rarity` | string | yes | "common", "rare", "epic", "legendary" |
 | `xpReward` | int | yes | XP awarded on unlock (default: 0) |
 | `coinReward` | int | yes | Coins awarded on unlock (default: 0) |
-| `conditionType` | string | yes | "games_won", "games_played", "streak", "followers", "hours_streamed", "tournaments_won", "custom" |
+| `conditionType` | string | yes | "games_won", "games_played", "streak", "followers", "hours_streamed", "custom" |
 | `conditionThreshold` | int | yes | Numeric threshold to unlock (e.g., 10 for 10 wins) |
 | `isSecret` | bool | yes | Hidden until unlocked (default: false) |
 | `displayOrder` | int | yes | Sort order in achievement list |
@@ -625,7 +504,7 @@
 
 ---
 
-## 11. `leaderboards` Collection
+## 10. `leaderboards` Collection
 
 **Document ID:** Composite ID (e.g., "weekly_2025_W20", "monthly_2025_05", "all_time_sun", "all_time_hokm")
 
@@ -637,7 +516,7 @@
 | `type` | string | yes | "weekly", "monthly", "allTime" |
 | `period` | string | yes | Period identifier (e.g., "2025-W20", "2025-05", "all_time") |
 | `gameType` | string | yes | "sun", "hokm", or "overall" |
-| `metric` | string | yes | "gamesWon", "winRate", "xp", "tournamentsWon", "coinsEarned" |
+| `metric` | string | yes | "gamesWon", "winRate", "xp", "coinsEarned" |
 | `startDate` | timestamp | yes | Leaderboard period start |
 | `endDate` | timestamp | no | Leaderboard period end (null for allTime) |
 | `status` | string | yes | "active", "finalized", "archived" |
@@ -682,7 +561,7 @@
 
 ---
 
-## 12. `notifications` Collection
+## 11. `notifications` Collection
 
 **Document ID:** Auto-generated
 
@@ -692,7 +571,7 @@
 |-------|------|----------|-------------|
 | `id` | string | yes | Document ID |
 | `uid` | string | yes | Recipient user UID |
-| `type` | string | yes | "roomInvite", "tournamentAlert", "newFollower", "gameResult", "achievement", "gift", "friendRequest", "levelUp", "system", "promo" |
+| `type` | string | yes | "roomInvite", "newFollower", "gameResult", "achievement", "gift", "friendRequest", "levelUp", "system", "promo" |
 | `title` | string | yes | Notification title in English (max 100 chars) |
 | `titleAr` | string | yes | Notification title in Arabic (max 100 chars) |
 | `body` | string | yes | Notification body in English (max 500 chars) |
@@ -713,9 +592,6 @@
 ```
 // Room invite
 { "roomId": "abc123", "roomName": "...", "action": "open_room" }
-
-// Tournament alert
-{ "tournamentId": "xyz789", "action": "open_tournament" }
 
 // Game result
 { "gameId": "game123", "result": "won", "action": "open_game_summary" }
@@ -739,7 +615,7 @@
 
 ---
 
-## 13. Cloud Functions
+## 12. Cloud Functions
 
 ### Auth Triggers
 
@@ -773,8 +649,6 @@
 | `leaveRoom` | Atomically remove player from room (transaction) |
 | `startGame` | Validate all players ready, create game document |
 | `playCard` | Validate and process card play (with game rules) |
-| `joinTournament` | Atomically add participant to tournament |
-| `leaveTournament` | Atomically remove participant from tournament |
 | `reportUser` | Create a report document |
 | `markNotificationRead` | Mark a notification as read |
 | `getLeaderboard` | Fetch leaderboard entries with user's rank |
@@ -782,7 +656,7 @@
 
 ---
 
-## 14. Security Rules Summary
+## 13. Security Rules Summary
 
 ```
 // Users can read any user profile, write only their own
@@ -811,14 +685,6 @@ match /games/{gameId} {
 match /streams/{streamId} {
   allow read: if true;
   allow write: if request.auth != null &&
-    request.auth.uid == resource.data.hostUid;
-}
-
-// Tournaments: read any, write by host/admin
-match /tournaments/{tournamentId} {
-  allow read: if true;
-  allow create: if request.auth != null;
-  allow update: if request.auth != null &&
     request.auth.uid == resource.data.hostUid;
 }
 

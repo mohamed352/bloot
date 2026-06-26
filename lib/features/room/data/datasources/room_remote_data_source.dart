@@ -49,6 +49,7 @@ class RoomRemoteDataSource {
     required bool cameraEnabled,
     required bool allowSpectators,
     required String gameSpeed,
+    String? password,
   }) async {
     final user = _firebaseAuth.currentUser;
     if (user == null) {
@@ -75,6 +76,7 @@ class RoomRemoteDataSource {
       'cameraEnabled': cameraEnabled,
       'allowSpectators': allowSpectators,
       'gameSpeed': gameSpeed,
+      if (password != null && password.isNotEmpty) 'password': password,
       'inviteCode': inviteCode,
       'players': [
         {
@@ -115,6 +117,7 @@ class RoomRemoteDataSource {
       cameraEnabled: cameraEnabled,
       allowSpectators: allowSpectators,
       gameSpeed: gameSpeed,
+      password: password,
       creatorUid: user.uid,
       inviteCode: inviteCode,
       players: [
@@ -417,7 +420,10 @@ class RoomRemoteDataSource {
     });
   }
 
-  Future<RoomModel> joinRoomByCode(String inviteCode) async {
+  Future<RoomModel> joinRoomByCode(
+    String inviteCode, {
+    String? password,
+  }) async {
     final currentUid = _currentUid;
     if (currentUid.isEmpty) throw const UnauthenticatedException();
 
@@ -434,6 +440,15 @@ class RoomRemoteDataSource {
 
     final roomDoc = query.docs.first;
     final roomRef = roomDoc.reference;
+    final roomType = roomDoc.data()['type'] as String? ?? 'private';
+    final roomPassword = roomDoc.data()['password'] as String?;
+
+    if (roomType == 'private' &&
+        roomPassword != null &&
+        roomPassword.isNotEmpty &&
+        roomPassword != password) {
+      throw const WrongPasswordException();
+    }
 
     // Get user profile
     final userDoc = await _firestore.collection('users').doc(currentUid).get();

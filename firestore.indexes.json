@@ -35,22 +35,6 @@
       ]
     },
     {
-      "collectionGroup": "tournaments",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "startAt", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "tournaments",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "startAt", "order": "DESCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "conversations",
       "queryScope": "COLLECTION",
       "fields": [
@@ -151,14 +135,6 @@
     },
     {
       "collectionGroup": "rooms",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "tournaments",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "status", "order": "ASCENDING" },

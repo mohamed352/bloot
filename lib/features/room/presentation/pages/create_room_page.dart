@@ -28,9 +28,8 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
   bool _voiceOn = true;
   bool _cameraOn = false;
   bool _spectatorsOn = true;
-  bool _showAdvanced = false;
-  int _selectedSpeed = 1; // 0=Relaxed, 1=Normal, 2=Fast
   final _nameController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   final _roomTypes = [
     _RoomTypeData(
@@ -53,11 +52,10 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
     ),
   ];
 
-  final _speedOptions = ['relaxed'.tr(), 'normal'.tr(), 'fast'.tr()];
-
   @override
   void dispose() {
     _nameController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -269,92 +267,41 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                     _spectatorsOn,
                     (v) => setState(() => _spectatorsOn = v),
                   ),
-                  const SizedBox(height: AppSpacing.lg),
-                  // Advanced settings
-                  GestureDetector(
-                    onTap: () => setState(() => _showAdvanced = !_showAdvanced),
-                    child: Row(
-                      children: [
-                        Text(
-                          'advanced_settings'.tr(),
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: ColorManager.darkTextPrimary,
+                  // Password for private rooms
+                  if (_selectedType == 0) ...[
+                    const SizedBox(height: AppSpacing.xxl),
+                    _buildLabel('room_password'.tr()),
+                    const SizedBox(height: AppSpacing.sm),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      style: const TextStyle(
+                        color: ColorManager.darkTextPrimary,
+                        fontSize: 15,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'enter_password'.tr(),
+                        filled: true,
+                        fillColor: ColorManager.darkSectionGray,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.cardCompact),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.cardCompact),
+                          borderSide: const BorderSide(
+                            color: ColorManager.darkBorderSoft,
                           ),
                         ),
-                        const Spacer(),
-                        Icon(
-                          _showAdvanced
-                              ? Icons.keyboard_arrow_up_rounded
-                              : Icons.keyboard_arrow_down_rounded,
-                          color: ColorManager.darkTextMuted,
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.cardCompact),
+                          borderSide: const BorderSide(
+                            color: ColorManager.primary,
+                            width: 1.5,
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                  if (_showAdvanced) ...[
-                    const SizedBox(height: AppSpacing.md),
-                    _buildDropdown('minimum_level'.tr(), 'level_1'.tr()),
-                    const SizedBox(height: AppSpacing.md),
-                    // Game Speed segmented buttons
-                    _buildLabel('game_speed'.tr()),
-                    const SizedBox(height: AppSpacing.sm),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: ColorManager.darkSurface,
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                        border: Border.all(color: ColorManager.darkBorderSoft),
-                      ),
-                      child: Row(
-                        children: _speedOptions.asMap().entries.map((e) {
-                          final isSelected = e.key == _selectedSpeed;
-                          return Expanded(
-                            child: GestureDetector(
-                              onTap: () =>
-                                  setState(() => _selectedSpeed = e.key),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: AppSpacing.md,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? ColorManager.primary.withValues(
-                                          alpha: 0.2,
-                                        )
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(
-                                    AppRadius.md,
-                                  ),
-                                  border: isSelected
-                                      ? Border.all(
-                                          color: ColorManager.primary
-                                              .withValues(alpha: 0.5),
-                                        )
-                                      : null,
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    e.value,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: isSelected
-                                          ? FontWeight.w600
-                                          : FontWeight.w400,
-                                      color: isSelected
-                                          ? ColorManager.primary
-                                          : ColorManager.darkTextSecondary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    _buildDropdown('room_password'.tr(), 'none'.tr()),
                   ],
                   const SizedBox(height: AppSpacing.xxl),
                   // Lobby Preview with player avatars in a row
@@ -487,7 +434,9 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                                 voiceEnabled: _voiceOn,
                                 cameraEnabled: _cameraOn,
                                 allowSpectators: _spectatorsOn,
-                                gameSpeed: GameSpeed.values[_selectedSpeed],
+                                password: _selectedType == 0
+                                    ? _passwordController.text.trim()
+                                    : null,
                               ),
                             );
                           },
@@ -541,45 +490,6 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
             value: value,
             onChanged: onChanged,
             activeTrackColor: ColorManager.primary,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDropdown(String label, String value) {
-    return Container(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: 14,
-      ),
-      decoration: BoxDecoration(
-        color: ColorManager.darkSectionGray,
-        borderRadius: BorderRadius.circular(AppRadius.cardCompact),
-        border: Border.all(color: ColorManager.darkBorderSoft),
-      ),
-      child: Row(
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 14,
-              color: ColorManager.darkTextPrimary,
-            ),
-          ),
-          const Spacer(),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: ColorManager.primary,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: ColorManager.darkTextMuted,
           ),
         ],
       ),

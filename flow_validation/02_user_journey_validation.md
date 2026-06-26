@@ -11,7 +11,7 @@ Detailed journey tables mapping every step a user takes, the expected outcome, a
 | # | Step | Screen | Action | Expected Outcome | Pain Point / Risk |
 |---|---|---|---|---|---|
 | 1 | App Launch | Splash | Opens app | Splash logo animates, checks version & auth state | Slow cold-start on low-end devices; Firebase init timeout |
-| 2 | Welcome | Welcome Onboarding | Swipes through 3 onboarding cards | Sees value proposition: play Baloot, watch streams, join tournaments | Too much text in Arabic RTL may overflow cards |
+| 2 | Welcome | Welcome Onboarding | Swipes through 3 onboarding cards | Sees value proposition: play Baloot, watch streams, compete for ranking | Too much text in Arabic RTL may overflow cards |
 | 3 | Phone Entry | Auth — Phone Number | Enters Saudi mobile number (+966) | Number validated, OTP sent via Firebase Auth | User enters landline or non-Saudi number; SMS delivery delays |
 | 4 | OTP Verify | Auth — OTP Verification | Types 6-digit code | Auth succeeds, Firestore user doc created | Auto-fill may grab wrong code; timer expires before entry |
 | 5 | Profile Setup | Profile Setup | Picks avatar, enters nickname (Arabic OK) | Profile saved, redirected to Home | Nickname profanity filter rejects entry; avatar CDN slow |
@@ -76,40 +76,16 @@ Detailed journey tables mapping every step a user takes, the expected outcome, a
 
 ---
 
-## 4. Tournament Player Journey
-
-*Competitive player finds a tournament, registers, plays through bracket rounds, and either wins or gets eliminated.*
-
-| # | Step | Screen | Action | Expected Outcome | Pain Point / Risk |
-|---|---|---|---|---|---|
-| 1 | Find Tournament | Home → Tournaments Tab | Taps "Tournaments" | List of upcoming & active tournaments with entry fees/prizes | Empty state if no tournaments available; confusing filters |
-| 2 | Select Tournament | Tournament Detail | Taps tournament card | Detail page: rules, bracket preview, prize breakdown, timer | Too much text — Arabic RTL layout breaks if not carefully designed |
-| 3 | Register | Tournament — Registration Modal | Taps "Join Tournament", confirms entry fee | Player added to bracket; confirmation notification sent | Payment required but wallet empty — need inline top-up |
-| 4 | Wait for Start | Tournament — Bracket View | Watches countdown timer | Bracket populates as players register | Last-minute registrants cause bracket reshuffling |
-| 5 | Match Assigned | Notification → Match Screen | Receives "Your match starts in 5 min" push | Player navigates to match room with opponent info | Notification not delivered; player misses match window |
-| 6 | Enter Match Room | Tournament Match → Room Lobby | Taps "Enter Room" from bracket | Joins tournament room, ready state required | Opponent no-show — need auto-win rule & timeout |
-| 7 | Play Round 1 | Game — Full Play | Plays Baloot game per tournament rules | Score verified, result sent to bracket | Dispute: player claims opponent cheated; need replay log |
-| 8 | Advance | Tournament — Bracket View | Sees "Winner" badge on match | Advances to next round in bracket | Delay between rounds — player unsure if they proceed |
-| 9 | Play Semi-Final | Game — Full Play | Repeats game play | Win/lose recorded | Higher stakes = more tilt / rage quits; need sportsmanship UI |
-| 10 | Lose / Eliminated | Tournament — Round Score | Loses match | "Better Luck Next Time" screen, stats summary | Frustration — need encouragement, "enter another" CTA |
-| 11 | Win / Champion | Tournament — Results | Wins final match | Trophy animation, prize coins deposited, leaderboard update | Prize coins not immediately visible — Firestore write lag |
-| 12 | View Leaderboard | Tournament — Results → Profile | Checks global & tournament leaderboard | Ranking updated with ELO-style score | Leaderboard gaming / smurfing; need anti-abuse detection |
-| 13 | Share Result | Tournament — Results | Taps "Share" | System share sheet with trophy card image | Card generation slow; share link broken on some platforms |
-| 14 | Return Home | Home | Navigates back | Home shows "recently competed" tournament cards | Old tournament card lingers; need archive / dismiss option |
-
----
-
-## Cross-Journey Edge Cases
+## 4. Cross-Journey Edge Cases
 
 | Edge Case | Affected Journeys | Expected Behaviour | Risk if Not Handled |
 |---|---|---|---|
-| Network loss mid-game | Casual, Streamer, Tournament | Reconnect overlay, auto-retry for 30s, game pauses | Game state corrupted; players lose progress |
-| App backgrounded during bidding | Casual, Tournament | Paused state, resume when foregrounded | Bid timer expires unfairly; auto-fold penalty |
+| Network loss mid-game | Casual, Streamer | Reconnect overlay, auto-retry for 30s, game pauses | Game state corrupted; players lose progress |
+| App backgrounded during bidding | Casual | Paused state, resume when foregrounded | Bid timer expires unfairly; auto-fold penalty |
 | Low battery / power save mode | All | Reduce animations, disable video, keep audio | App killed by OS; no graceful save |
-| Simultaneous room invite + match | Casual | Priority queue: tournament > room invite | User confused by stacked modals |
+| Simultaneous room invite + game start | Casual, Streamer | Priority queue: game start > room invite | User confused by stacked modals |
 | Duplicate login on another device | Streamer, Casual | Force logout current session with toast | Session conflict causes data corruption |
 | Push notification disabled | All | In-app notification badge + red dot | User misses critical game start |
-| Arabic text rendering in game cards | Casual, Tournament | Cards use symbols/numbers (Baloot standard) | Suit symbols render incorrectly in RTL |
+| Arabic text rendering in game cards | Casual | Cards use symbols/numbers (Baloot standard) | Suit symbols render incorrectly in RTL |
 | Viewer sends gift at game end | Viewer, Streamer | Gift queued and processed after score screen | Race condition in coin transaction |
-| Tournament round timeout (opponent AFK) | Tournament | Auto-win after configurable timeout (default 2 min) | Bracket stalls; other players blocked |
 | Cloud Firestore rate limit | All | Exponential backoff, local queue, retry | Write failures; score not recorded |

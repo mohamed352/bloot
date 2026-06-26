@@ -8,6 +8,7 @@ class Room {
     this.cameraEnabled = false,
     this.allowSpectators = true,
     this.gameSpeed = GameSpeed.normal,
+    this.password,
     this.creatorUid,
     this.inviteCode,
     this.agoraChannelName,
@@ -26,6 +27,9 @@ class Room {
   final bool cameraEnabled;
   final bool allowSpectators;
   final GameSpeed gameSpeed;
+
+  /// Optional password for private rooms.
+  final String? password;
   final String? creatorUid;
   final String? inviteCode;
   final String? agoraChannelName;
@@ -44,6 +48,7 @@ class Room {
     bool? cameraEnabled,
     bool? allowSpectators,
     GameSpeed? gameSpeed,
+    String? password,
     String? creatorUid,
     String? inviteCode,
     String? agoraChannelName,
@@ -61,6 +66,7 @@ class Room {
     cameraEnabled: cameraEnabled ?? this.cameraEnabled,
     allowSpectators: allowSpectators ?? this.allowSpectators,
     gameSpeed: gameSpeed ?? this.gameSpeed,
+    password: password ?? this.password,
     creatorUid: creatorUid ?? this.creatorUid,
     inviteCode: inviteCode ?? this.inviteCode,
     agoraChannelName: agoraChannelName ?? this.agoraChannelName,

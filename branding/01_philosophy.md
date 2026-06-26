@@ -15,7 +15,7 @@ Bloot is the definitive digital home for Balout — the Gulf's most beloved card
 | **Social** | Every feature encourages connection — voice, video, chat, streaming |
 | **Premium** | Dark, refined, polished. No ads clutter. No cheap feeling. |
 | **Live** | Real-time voice, video, and streaming. Never asynchronous. |
-| **Competitive** | Rankings, tournaments, stats. The thrill of winning matters. |
+| **Competitive** | Rankings, stats, leaderboards. The thrill of winning matters. |
 | **Gulf** | Arabic-first, RTL-first. Built for Khaleeji players by Khaleeji players. |
 
 ---
@@ -66,7 +66,7 @@ Bloot transforms Balout from a physical card game into a **live social digital e
 2. **Live Video** — See the players, read reactions, bring the diwaniya online
 3. **Streaming** — Broadcast games to an audience. Build followers. Grow a community.
 4. **Social** — Chat, follow, gift, interact. Watching Balout is now entertainment.
-5. **Competitive** — Rankings, tournaments, stats. Prove you're the best.
+5. **Competitive** — Rankings, stats, leaderboards. Prove you're the best.
 6. **Premium** — Dark theme, smooth animations, beautiful card designs. No corners cut.
 
 ---
@@ -91,7 +91,7 @@ Balout (بلوت) is more than a card game. It's a **social institution**:
 - **Ramadan Gatherings** — Balout nights during Ramadan are legendary. Families and friends gather after Iftar for hours of play.
 - **4-Player Ritual** — Unlike solo games, Balout is always 4 players in 2 teams. It's inherently social. You can't play alone.
 - **Generational** — Fathers teach sons. Uncles coach nephews. The game passes through generations.
-- **Competitive** — Local tournaments, betting on skill, tracking wins. The competitive spirit is real.
+- **Competitive** — Friendly competition, betting on skill, tracking wins. The competitive spirit is real.
 
 ### Design Implications
 

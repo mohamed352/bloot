@@ -87,14 +87,6 @@ import '../../features/settings/domain/repositories/settings_repository.dart'
     as _i674;
 import '../../features/settings/presentation/cubit/settings_cubit.dart'
     as _i792;
-import '../../features/tournament/data/datasources/tournament_remote_data_source.dart'
-    as _i636;
-import '../../features/tournament/data/repositories/tournament_repository_impl.dart'
-    as _i689;
-import '../../features/tournament/domain/repositories/tournament_repository.dart'
-    as _i107;
-import '../../features/tournament/presentation/cubit/tournament_cubit.dart'
-    as _i234;
 import '../network/cache_helper.dart' as _i681;
 import '../services/agora_service.dart' as _i890;
 import '../services/audio_service.dart' as _i15;
@@ -218,12 +210,6 @@ extension GetItInjectableX on _i174.GetIt {
         firebaseAuth: gh<_i59.FirebaseAuth>(),
       ),
     );
-    gh.lazySingleton<_i636.TournamentRemoteDataSource>(
-      () => _i636.TournamentRemoteDataSource(
-        firestore: gh<_i974.FirebaseFirestore>(),
-        firebaseAuth: gh<_i59.FirebaseAuth>(),
-      ),
-    );
     gh.lazySingleton<_i783.GameRemoteDataSource>(
       () => _i783.GameRemoteDataSource(
         firestore: gh<_i974.FirebaseFirestore>(),
@@ -250,11 +236,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i0.HomeRepository>(
       () => _i76.HomeRepositoryImpl(
         remoteDataSource: gh<_i362.HomeRemoteDataSource>(),
-      ),
-    );
-    gh.lazySingleton<_i107.TournamentRepository>(
-      () => _i689.TournamentRepositoryImpl(
-        remoteDataSource: gh<_i636.TournamentRemoteDataSource>(),
       ),
     );
     gh.lazySingleton<_i787.AuthRepository>(
@@ -284,18 +265,16 @@ extension GetItInjectableX on _i174.GetIt {
         remoteConfigService: gh<_i858.RemoteConfigService>(),
       ),
     );
-    gh.lazySingleton<_i420.ChatRepository>(
-      () => _i504.ChatRepositoryImpl(
-        remoteDataSource: gh<_i980.ChatRemoteDataSource>(),
-      ),
-    );
     gh.factory<_i9.HomeCubit>(
       () => _i9.HomeCubit(
         homeRepository: gh<_i0.HomeRepository>(),
         profileRepository: gh<_i894.ProfileRepository>(),
-        tournamentRepository: gh<_i107.TournamentRepository>(),
         notificationsRepository: gh<_i563.NotificationsRepository>(),
-        remoteConfigService: gh<_i858.RemoteConfigService>(),
+      ),
+    );
+    gh.lazySingleton<_i420.ChatRepository>(
+      () => _i504.ChatRepositoryImpl(
+        remoteDataSource: gh<_i980.ChatRemoteDataSource>(),
       ),
     );
     gh.lazySingleton<_i32.GameRepository>(
@@ -316,12 +295,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i792.SettingsCubit>(
       () => _i792.SettingsCubit(
         settingsRepository: gh<_i674.SettingsRepository>(),
-      ),
-    );
-    gh.factory<_i234.TournamentCubit>(
-      () => _i234.TournamentCubit(
-        tournamentRepository: gh<_i107.TournamentRepository>(),
-        profileRepository: gh<_i894.ProfileRepository>(),
       ),
     );
     gh.factory<_i192.GameCubit>(

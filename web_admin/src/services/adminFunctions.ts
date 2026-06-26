@@ -31,14 +31,6 @@ export const adminFunctions = {
   warnHost: call<{ streamId: string }, { success: boolean }>('warnHost'),
   suspendHost: call<{ streamId: string }, { success: boolean }>('suspendHost'),
 
-  // Tournaments
-  adminCreateTournament: call<Record<string, unknown>, { success: boolean; tournamentId: string }>('adminCreateTournament'),
-  adminUpdateTournament: call<{ tournamentId: string; updates: Record<string, unknown> }, { success: boolean }>(
-    'adminUpdateTournament'
-  ),
-  adminCancelTournament: call<{ tournamentId: string }, { success: boolean }>('adminCancelTournament'),
-  adminStartTournament: call<{ tournamentId: string }, { success: boolean }>('adminStartTournament'),
-
   // Games
   forceEndGame: call<{ gameId: string }, { success: boolean }>('forceEndGame'),
   rematchGame: call<{ gameId: string }, { success: boolean }>('rematchGame'),

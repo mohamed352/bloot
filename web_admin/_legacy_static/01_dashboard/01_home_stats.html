@@ -49,7 +49,6 @@
                 <li><a href="../01_dashboard/01_home_stats.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 bg-purple-500/10 text-purple-400"><span class="material-symbols-outlined text-xl">dashboard</span>Dashboard</a></li>
                 <li><a href="../02_users/01_user_management.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">person</span>Users</a></li>
                 <li><a href="../03_reports/01_report_review.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">flag</span>Reports</a></li>
-                <li><a href="../04_tournaments/01_tournament_management.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">emoji_events</span>Tournaments</a></li>
                 <li><a href="../05_games/01_game_monitor.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">casino</span>Games</a></li>
                 <li><a href="../06_rooms/01_room_monitor.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">meeting_room</span>Rooms</a></li>
                 <li><a href="../07_streams/01_stream_moderation.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">videocam</span>Streams</a></li>
@@ -159,10 +158,6 @@
                     <div class="flex items-start gap-3 p-2 rounded-lg hover:bg-b-surface-muted transition-colors">
                         <span class="material-symbols-outlined text-red-400 text-lg mt-0.5">flag</span>
                         <div class="flex-1"><p class="text-sm text-b-on-surface">Report filed against <span class="text-red-400 font-medium">@فهد_2024</span> — abusive language</p><p class="text-xs text-b-on-surface-secondary mt-0.5">5 minutes ago</p></div>
-                    </div>
-                    <div class="flex items-start gap-3 p-2 rounded-lg hover:bg-b-surface-muted transition-colors">
-                        <span class="material-symbols-outlined text-b-purple text-lg mt-0.5">emoji_events</span>
-                        <div class="flex-1"><p class="text-sm text-b-on-surface">Tournament <span class="text-b-gold font-medium">Weekend Masters</span> started</p><p class="text-xs text-b-on-surface-secondary mt-0.5">12 minutes ago</p></div>
                     </div>
                     <div class="flex items-start gap-3 p-2 rounded-lg hover:bg-b-surface-muted transition-colors">
                         <span class="material-symbols-outlined text-b-gold text-lg mt-0.5">payments</span>
@@ -283,10 +278,10 @@
         new Chart(document.getElementById('coinChart'), {
             type: 'doughnut',
             data: {
-                labels: ['Purchases', 'Gifts', 'Tournament Fees', 'Bonuses'],
+                labels: ['Purchases', 'Gifts', 'Bonuses'],
                 datasets: [{
-                    data: [42, 23, 20, 15],
-                    backgroundColor: ['#8B5CF6', '#F59E0B', '#EF4444', '#10B981'],
+                    data: [42, 23, 15],
+                    backgroundColor: ['#8B5CF6', '#F59E0B', '#10B981'],
                     borderColor: '#161622',
                     borderWidth: 3
                 }]

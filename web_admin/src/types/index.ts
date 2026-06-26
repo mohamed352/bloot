@@ -61,7 +61,6 @@ export interface UserSettings {
   showOnlineStatus?: boolean;
   profileVisibility?: string;
   notifyRoomInvitations?: boolean;
-  notifyTournamentAlerts?: boolean;
   notifyNewFollowers?: boolean;
   notifyGameResults?: boolean;
 }
@@ -128,40 +127,6 @@ export interface Stream {
   updatedAt: Timestamp;
 }
 
-export interface Tournament {
-  id: string;
-  name: string;
-  description?: string;
-  type: 'singleElimination' | 'roundRobin' | 'swiss';
-  status: 'upcoming' | 'registration' | 'active' | 'completed' | 'cancelled';
-  gameType: 'sun' | 'hokm' | 'both';
-  maxParticipants: number;
-  currentParticipants: number;
-  entryFee: number;
-  prizePool: number;
-  prizes?: Record<string, number>;
-  rules?: TournamentRules;
-  startDate: Timestamp;
-  endDate: Timestamp;
-  registrationDeadline: Timestamp;
-  hostUid: string;
-  participants: string[];
-  brackets?: Record<string, unknown>;
-  imageUrl?: string;
-  isPremium: boolean;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-}
-
-export interface TournamentRules {
-  ruleSet?: string;
-  sunTarget?: number;
-  hokmRounds?: number;
-  turnTimeLimit?: number;
-  allowSpectators?: boolean;
-  minLevel?: number;
-  maxLevel?: number | null;
-}
 
 export interface Game {
   id: string;

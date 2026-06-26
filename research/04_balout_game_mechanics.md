@@ -416,7 +416,7 @@ The team that wins the **last trick** (13th trick) receives a **10-point bonus**
 ### Etiquette Rules (for Bloot implementation)
 
 - Players cannot communicate about their hands to partners (voice chat is general, no whispering)
-- In ranked/tournament games, voice chat may be restricted to prevent cheating
+- In ranked games, voice chat may be restricted to prevent cheating
 - Timer per turn: 30 seconds default; auto-play lowest card if time expires
 
 ---

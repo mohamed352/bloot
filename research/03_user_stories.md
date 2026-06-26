@@ -291,58 +291,6 @@ Acceptance Criteria:
 
 ---
 
-## Tournaments
-
-### P1
-
-**US-TO01: Browse Tournaments**
-As a player, I want to browse upcoming tournaments so that I can find ones to participate in.
-
-Acceptance Criteria:
-- Tournament list on dedicated tab/screen
-- Shows: name, date/time, entry requirement, prize pool, registered count
-- Filter by: status (upcoming/active/completed), entry fee, prize
-- Tournament detail screen with full rules
-
----
-
-**US-TO02: Join a Tournament**
-As a player, I want to join a tournament so that I can compete for prizes and recognition.
-
-Acceptance Criteria:
-- Join button on tournament detail screen
-- Entry requirements validated (level, coins)
-- Entry fee deducted upon join
-- Confirmation with tournament schedule
-- Push notification before tournament starts
-- Refund if tournament is cancelled
-
----
-
-### P2
-
-**US-TO03: Tournament Bracket View**
-As a player or viewer, I want to see the tournament bracket so that I can follow the progression.
-
-Acceptance Criteria:
-- Visual bracket showing all matches
-- Current round highlighted
-- Player names and results in each match
-- My position highlighted if I'm in the tournament
-- Live match indicator for ongoing games
-
----
-
-**US-TO04: Tournament Results and History**
-As a player, I want to see tournament results so that I can track my competitive performance.
-
-Acceptance Criteria:
-- Past tournament results with placements
-- Personal tournament history on profile
-- Prizes won summary
-
----
-
 ## Profile
 
 ### P0
@@ -416,10 +364,9 @@ Acceptance Criteria:
 | Room & Game | 5 | 3 | 2 | 10 |
 | Streaming | 1 | 3 | 2 | 6 |
 | Social | 0 | 3 | 3 | 6 |
-| Tournaments | 0 | 2 | 2 | 4 |
 | Profile | 2 | 2 | 1 | 5 |
-| **Total** | **8** | **13** | **10** | **31** |
+| **Total** | **8** | **11** | **8** | **27** |
 
 ### MVP (P0) Story Count: 8 stories
-### V1.0 (P0 + P1) Story Count: 21 stories
-### V2.0 (All) Story Count: 31 stories
+### V1.0 (P0 + P1) Story Count: 19 stories
+### V2.0 (All) Story Count: 27 stories

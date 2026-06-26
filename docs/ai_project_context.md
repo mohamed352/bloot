@@ -78,12 +78,12 @@ home/
 │   ├── entities/
 │   │   └── home_feed.dart               # Aggregated feed entity
 │   └── repositories/
-│       └── home_repository.dart          # getLiveStreams(), getTournaments(), getQuickActions()
+│       └── home_repository.dart          # getLiveStreams(), getQuickActions()
 ├── data/
 │   ├── models/
 │   │   └── home_feed_model.dart
 │   ├── datasources/
-│   │   └── home_remote_data_source.dart  # Firestore queries for streams + tournaments
+│   │   └── home_remote_data_source.dart  # Firestore queries for streams
 │   └── repositories/
 │       └── home_repository_impl.dart
 └── presentation/
@@ -91,12 +91,11 @@ home/
     │   ├── home_cubit.dart               # States: initial, loading, loaded, error
     │   └── home_state.dart
     ├── pages/
-    │   └── home_page.dart                # Hero banner, quick actions, live streams, tournaments
+    │   └── home_page.dart                # Hero banner, quick actions, live streams
     └── widgets/
         ├── hero_banner.dart
         ├── quick_action_card.dart
-        ├── live_stream_list.dart
-        └── tournament_preview_card.dart
+        └── live_stream_list.dart
 ```
 
 #### `discover/`
@@ -230,38 +229,6 @@ stream/
         └── interaction_buttons.dart
 ```
 
-#### `tournaments/`
-```
-tournaments/
-├── domain/
-│   ├── entities/
-│   │   ├── tournament.dart              # Tournament entity
-│   │   └── bracket.dart                # Bracket/matchup entity
-│   └── repositories/
-│       └── tournament_repository.dart    # getTournaments(), getTournament(id), joinTournament()
-├── data/
-│   ├── models/
-│   │   ├── tournament_model.dart
-│   │   └── bracket_model.dart
-│   ├── datasources/
-│   │   └── tournament_remote_data_source.dart
-│   └── repositories/
-│       └── tournament_repository_impl.dart
-└── presentation/
-    ├── cubit/
-    │   ├── tournament_list_cubit.dart
-│   │   ├── tournament_detail_cubit.dart
-    │   └── tournament_list_state.dart
-    │   └── tournament_detail_state.dart
-    ├── pages/
-    │   ├── tournament_list_page.dart
-    │   └── tournament_detail_page.dart
-    └── widgets/
-        ├── tournament_card.dart
-        ├── bracket_widget.dart
-        └── prize_distribution_card.dart
-```
-
 #### `chat/`
 ```
 chat/
@@ -366,7 +333,6 @@ class HomeState with _$HomeState {
   const factory HomeState.loading() = HomeLoading;
   const factory HomeState.loaded({
     required List<StreamItem> liveStreams,
-    required List<Tournament> upcomingTournaments,
   }) = HomeLoaded;
   const factory HomeState.error({required String message}) = HomeError;
 }
@@ -384,10 +350,8 @@ class HomeCubit extends Cubit<HomeState> {
     emit(const HomeState.loading());
     try {
       final streams = await _repository.getLiveStreams();
-      final tournaments = await _repository.getUpcomingTournaments();
       emit(HomeState.loaded(
         liveStreams: streams,
-        upcomingTournaments: tournaments,
       ));
     } catch (e) {
       emit(HomeState.error(message: e.toString()));
@@ -406,9 +370,8 @@ BlocProvider(
       return state.when(
         initial: () => const SizedBox.shrink(),
         loading: () => const HomeLoadingWidget(),
-        loaded: (streams, tournaments) => HomeContentWidget(
+        loaded: (streams) => HomeContentWidget(
           streams: streams,
-          tournaments: tournaments,
         ),
         error: (message) => HomeErrorWidget(message: message),
       );
@@ -541,7 +504,6 @@ See `docs/firebase_schema.md` for the complete schema. Key collections:
 - `rooms` — Game rooms, players, settings
 - `games` — Active games, state, cards, tricks
 - `streams` — Stream metadata, viewer counts
-- `tournaments` — Tournament definitions, brackets
 - `messages` — Direct messages and room chat
 - `reports` — User/player reports
 
@@ -652,8 +614,6 @@ final router = GoRouter(
     GoRoute(path: '/room/:id', builder: (_, state) => RoomLobbyPage(roomId: state.pathParameters['id']!)),
     GoRoute(path: '/game/:id', builder: (_, state) => GamePlayPage(gameId: state.pathParameters['id']!)),
     GoRoute(path: '/stream/:id', builder: (_, state) => StreamViewerPage(streamId: state.pathParameters['id']!)),
-    GoRoute(path: '/tournaments', builder: (_, __) => const TournamentListPage()),
-    GoRoute(path: '/tournaments/:id', builder: (_, state) => TournamentDetailPage(tournamentId: state.pathParameters['id']!)),
     GoRoute(path: '/chat', builder: (_, __) => const ChatListPage()),
     GoRoute(path: '/chat/:id', builder: (_, state) => DmPage(conversationId: state.pathParameters['id']!)),
     GoRoute(path: '/profile', builder: (_, __) => const ProfilePage()),

@@ -141,13 +141,6 @@ class WelcomePage extends StatelessWidget {
                   subtitle: 'build_your_audience'.tr(),
                   color: ColorManager.secondary,
                 ),
-                const SizedBox(height: AppSpacing.md),
-                _FeatureCard(
-                  icon: Icons.emoji_events_rounded,
-                  title: 'tournaments'.tr(),
-                  subtitle: 'compete_and_win_prizes'.tr(),
-                  color: ColorManager.success,
-                ),
                 const SizedBox(height: AppSpacing.xxl),
                 // Pagination dots
                 const Row(

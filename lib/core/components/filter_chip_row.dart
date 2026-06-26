@@ -6,7 +6,7 @@ import 'package:bloot/core/extension/context_values.dart';
 
 /// Horizontal scrollable row of selectable filter chips.
 ///
-/// Use on discover, tournament, and chat list screens for category filtering.
+/// Use on discover and chat list screens for category filtering.
 class FilterChipRow extends StatelessWidget {
   const FilterChipRow({
     super.key,

@@ -11,7 +11,7 @@
 
 ### 1.1 What Was Reviewed
 - **Design & spec documents:** `docs/DESIGN.md`, `docs/game_rules.md`, `docs/implementation_plan.md`, `docs/firebase_schema.md`, `docs/AGENTS.md`.
-- **Flutter app:** All major features (auth, home, discover, rooms, game, stream, tournaments, chat, profile, settings).
+- **Flutter app:** All major features (auth, home, discover, rooms, game, stream, chat, profile, settings).
 - **Backend:** Cloud Functions game engine (dealing, bidding, trick play, scoring, bonuses, autoplay).
 - **Tests:** Flutter unit/bloc/widget tests + Cloud Functions Jest tests.
 - **Local gameplay:** `LocalGameSimulator` (1 human + 3 bots) and simulated full games.
@@ -24,7 +24,6 @@
 | Flutter game UI | ⚠️ Mostly works | Landscape-only; some dead controls. |
 | Auth & onboarding | ⚠️ Functional but gaps | Phone OTP works; social login placeholders. |
 | Streaming/spectator | ⚠️ Partial | Stream discovery exists; viewer interactions mostly placeholders. |
-| Tournaments | ⚠️ Backend exists | UI present but full tournament flow not verified end-to-end. |
 | Social/chat | ⚠️ Partial | DM and room chat exist; room invites via chat may need verification. |
 | Localization | ⚠️ Mostly good | Some hardcoded English on operational screens. |
 | Integration/E2E tests | ❌ Missing | No Flutter integration tests; no automated 4-player online test. |
@@ -52,7 +51,6 @@
 - **Command:** `cd functions && npm test`
 - **Build:** ✅ `cd functions && npm run build` — compiles cleanly
 - **Result:** 85 tests passed, 0 failed
-- **Fix applied:** Added explicit `TournamentTransactionResult` return type in `functions/src/triggers/processGameEnd.ts` to resolve `string | undefined` type errors when calling `declareChampion` and `createTournamentMatchRoom`.
 - **Warning:** `scoring.test.ts` logs `console.error("Scoring mismatch...")` because unit tests use partial card distributions. This is expected in unit tests but indicates the engine will loudly flag any real dealing/trick-taking bug.
 
 ### 2.3 Coverage Gaps
@@ -130,15 +128,6 @@
 | Stream chat | ✅ | ⚠️ | Chat list/input present; gifts/likes not wired. | Medium |
 | Stream end handling | ✅ | ⚠️ | Trigger exists but not manually verified. | Low |
 
-### Phase 4 — Tournaments
-| Feature | Spec Status | Implemented | Issues | Priority |
-|---------|-------------|-------------|--------|----------|
-| Tournament list | ✅ | ⚠️ | UI present; full backend flow exists but not E2E verified. | Medium |
-| Tournament detail / bracket | ✅ | ⚠️ | UI present; bracket visualization limited. | Medium |
-| Join tournament | ✅ | ⚠️ | Backend supports entry fee deduction; not verified end-to-end. | Medium |
-| Tournament start / bracket generation | ✅ | ⚠️ | Cloud Function exists; not verified with real participants. | Medium |
-| Prize distribution | ✅ | ⚠️ | Trigger logic exists; not verified. | Low |
-
 ### Phase 5 — Social, Profile, Settings, Edge Cases
 | Feature | Spec Status | Implemented | Issues | Priority |
 |---------|-------------|-------------|--------|----------|
@@ -179,7 +168,6 @@
 - **Files:** `functions/src/engine/*.ts`.
 - **Test coverage:** Comprehensive Jest suite covering deck, deal, bidding, trick, scoring, bonuses, autoplay, and full integration.
 - **Bugs found and fixed during review:**
-  1. **`functions/src/triggers/processGameEnd.ts` TypeScript compile errors** — `transactionResult` fields were inferred as `string | undefined`, breaking `npm test`. Fixed by introducing an explicit `TournamentTransactionResult` return type and narrowing inside the transaction.
   2. **`functions/src/engine/bonuses.ts` sequence tiebreak bug** — `getHighestSequenceCard` ranked `10` above `J`, `Q`, and `K` in sequence tiebreaks. Fixed to the correct order `A > K > Q > J > 10 > 9 > ... > 2` and added a regression test.
 - **Confidence:** High that the authoritative engine is now correct.
 

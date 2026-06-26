@@ -5,7 +5,6 @@ import { Dashboard } from './pages/Dashboard';
 import { NotFound } from './pages/NotFound';
 import { UsersPage } from './features/users/UsersPage';
 import { ReportsPage } from './features/reports/ReportsPage';
-import { TournamentsPage } from './features/tournaments/TournamentsPage';
 import { GamesPage } from './features/games/GamesPage';
 import { RoomsPage } from './features/rooms/RoomsPage';
 import { StreamsPage } from './features/streams/StreamsPage';
@@ -39,7 +38,6 @@ export function App() {
           <Route path="/streams" element={<StreamsPage />} />
         </Route>
         <Route element={<RoleRoute requiredPermission="manage" />}>
-          <Route path="/tournaments" element={<TournamentsPage />} />
           <Route path="/economy" element={<EconomyPage />} />
           <Route path="/achievements" element={<AchievementsPage />} />
           <Route path="/leaderboards" element={<LeaderboardsPage />} />

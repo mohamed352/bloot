@@ -101,7 +101,7 @@ This document defines the phased delivery plan for Bloot, from MVP through full 
 
 ## Phase 2: Social & Streaming (Months 5-8)
 
-**Goal:** Add full streaming, gifting, tournaments, and social features to increase retention and monetization.
+**Goal:** Add full streaming, gifting, and social features to increase retention and monetization.
 
 ### Features
 
@@ -130,17 +130,6 @@ This document defines the phased delivery plan for Bloot, from MVP through full 
 | Game invite via chat | Send room invite in DM | P2 |
 | Contacts import | Find friends from phone contacts | P2 |
 
-#### Tournaments
-
-| Feature | Description | Priority |
-|---|---|---|
-| Tournament list | Browse upcoming and active tournaments | P1 |
-| Tournament detail | Rules, entry requirements, prize pool | P1 |
-| Join tournament | Pay entry fee, register for event | P1 |
-| Tournament play | Automated bracket matching | P1 |
-| Spectate tournament | Watch tournament matches | P2 |
-| Bracket view | Visual tournament bracket | P2 |
-
 #### Leaderboards
 
 | Feature | Description | Priority |
@@ -162,7 +151,6 @@ This document defines the phased delivery plan for Bloot, from MVP through full 
 | Dependency | Blocker | Resolution |
 |---|---|---|
 | Gift/coin economy | In-app purchase setup (Apple/Google) | Register merchant accounts early |
-| Tournaments | Scheduled server-side logic | Firebase Functions with cron triggers |
 | Leaderboards | High Firestore read volume | Cache with Firestore bundles |
 | DM system | Real-time message delivery | Firestore snapshots + FCM |
 
@@ -175,7 +163,6 @@ This document defines the phased delivery plan for Bloot, from MVP through full 
 | Active streamers | 50 |
 | Average concurrent viewers per stream | 20 |
 | Gifts sent per day | 500 |
-| Tournament participation rate | 15% of MAU |
 | 30-day retention | 20% |
 | Revenue (coins) | $2,000/month |
 
@@ -216,7 +203,6 @@ This document defines the phased delivery plan for Bloot, from MVP through full 
 | Avatar marketplace | Purchase premium avatars and frames | P2 |
 | Table themes | Custom card backs and table skins | P2 |
 | Seasonal pass | Battle pass with exclusive rewards | P2 |
-| Sponsored tournaments | Brand-sponsored events | P2 |
 
 #### Platform Expansion
 
@@ -280,11 +266,6 @@ This document defines the phased delivery plan for Bloot, from MVP through full 
 | Friend system | — | ✅ | — |
 | Direct messages | — | ✅ | — |
 | Online status | — | ✅ | — |
-| **Tournaments** | | | |
-| Browse tournaments | — | ✅ | — |
-| Join tournament | — | ✅ | — |
-| Bracket view | — | ✅ | — |
-| Sponsored tournaments | — | — | ✅ |
 | **Leaderboards** | | | |
 | Weekly/monthly | — | ✅ | — |
 | Seasonal | — | — | ✅ |
@@ -323,7 +304,7 @@ This document defines the phased delivery plan for Bloot, from MVP through full 
 | Firestore costs scale faster than revenue | Medium | Medium | Monitor usage daily, optimize queries, implement caching early |
 | Agora costs exceed budget | Medium | Medium | Default to voice-only, optimize video quality, evaluate LiveKit migration |
 | Streaming feature sees low adoption | Medium | Medium | Incentivize streaming with coin rewards, feature top streamers |
-| Tournament cheating/collusion | Medium | Medium | Anti-cheat detection, report system, fair play policy |
+| Cheating/collusion | Medium | Medium | Anti-cheat detection, report system, fair play policy |
 | Competition from Jawaker adding features | Low-Medium | Medium | First-mover on video/streaming, build social lock-in |
 
 ### Low Risks
@@ -359,11 +340,10 @@ This document defines the phased delivery plan for Bloot, from MVP through full 
 | Sprint 9 | 17-18 | Go Live | Streamer setup, start stream, viewer count |
 | Sprint 10 | 19-20 | Social graph | Follow system, friend requests, online status |
 | Sprint 11 | 21-22 | Gifting | Coin economy, gift tray, gift animations, transactions |
-| Sprint 12 | 23-24 | Tournaments v1 | Tournament list, join, bracket matching |
-| Sprint 13 | 25-26 | Chat & DM | Direct messages, game invites via chat |
-| Sprint 14 | 27-28 | Leaderboards & Achievements | Weekly/monthly rankings, badge system |
-| Sprint 15 | 29-30 | Contacts & Discovery | Import contacts, friend suggestions, advanced stream search |
-| Sprint 16 | 31-32 | Polish + Launch | Full QA, performance, public launch marketing |
+| Sprint 12 | 23-24 | Chat & DM | Direct messages, game invites via chat |
+| Sprint 13 | 25-26 | Leaderboards & Achievements | Weekly/monthly rankings, badge system |
+| Sprint 14 | 27-28 | Contacts & Discovery | Import contacts, friend suggestions, advanced stream search |
+| Sprint 15 | 29-30 | Polish + Launch | Full QA, performance, public launch marketing |
 
 ### Phase 3: Advanced & Scale (24 weeks)
 
@@ -394,7 +374,7 @@ This document defines the phased delivery plan for Bloot, from MVP through full 
 
 | Role | Count | Focus |
 |---|---|---|
-| Flutter Developer | 2-3 | Social features, streaming, tournaments |
+| Flutter Developer | 2-3 | Social features, streaming |
 | Backend Developer | 1 | Coin economy, matchmaking, cron jobs |
 | UI/UX Designer | 1 | New feature designs |
 | QA Tester | 1 | Feature testing |

@@ -177,7 +177,6 @@ class AuthRemoteDataSource {
         'showOnlineStatus': true,
         'profileVisibility': 'everyone',
         'notifyRoomInvitations': true,
-        'notifyTournamentAlerts': true,
         'notifyNewFollowers': true,
         'notifyGameResults': true,
       },

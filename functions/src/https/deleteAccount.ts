@@ -123,28 +123,7 @@ export const deleteAccount = functions.https.onCall(async (request) => {
       }
     }
 
-    // 6. Remove the user from tournaments they joined (upcoming only).
-    const tournamentsSnap = await db
-      .collection('tournaments')
-      .where('participantIds', 'array-contains', uid)
-      .get();
-    for (const tournamentDoc of tournamentsSnap.docs) {
-      const tournamentData = tournamentDoc.data();
-      if (tournamentData.status === 'upcoming') {
-        const participantIds = ((tournamentData.participantIds ?? []) as string[]).filter(
-          (id) => id !== uid,
-        );
-        const maxParticipants = (tournamentData.maxParticipants as number) ?? 64;
-        await tournamentDoc.ref.update({
-          participantIds,
-          participants: `${participantIds.length}/${maxParticipants}`,
-          currentParticipants: participantIds.length,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
-      }
-    }
-
-    // 7. Delete streams hosted by the user.
+    // 6. Delete streams hosted by the user.
     const streamsSnap = await db.collection('streams').where('hostUid', '==', uid).get();
     for (const streamDoc of streamsSnap.docs) {
       await deleteSubcollection(streamDoc.ref, 'viewers');

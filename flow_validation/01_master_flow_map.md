@@ -23,7 +23,6 @@ Complete Mermaid diagram showing ALL screens and transitions for the Bloot app.
 | `home` | `#8B5CF6` | Home / Discovery |
 | `room` | `#F59E0B` | Room / Game |
 | `stream` | `#EC4899` | Streaming |
-| `tournament` | `#10B981` | Tournaments |
 | `chat` | `#3B82F6` | Chat / Messages |
 | `profile` | `#8B5CF6` | Profile |
 | `settings` | `#6B7280` | Settings |
@@ -68,23 +67,19 @@ graph TD
 
     %% ── HOME ────────────────────────────────────────────────────
     HOME[Home Screen]:::home
-    HOME_HERO[Hero Banner — Featured Stream / Tournament]:::home
+    HOME_HERO[Hero Banner — Featured Stream]:::home
     HOME_QUICK[Quick Actions — Create / Join Room]:::home
     HOME_LIVE[Live Streams Carousel]:::home
-    HOME_TOURNAMENTS[Active Tournaments]:::home
     HOME_FRIENDS[Online Friends Bar]:::home
 
     HOME --> HOME_HERO
     HOME --> HOME_QUICK
     HOME --> HOME_LIVE
-    HOME --> HOME_TOURNAMENTS
     HOME --> HOME_FRIENDS
     HOME_HERO -->|tap stream| STREAM_WATCH
-    HOME_HERO -->|tap tournament| TOURNAMENT_DETAIL
     HOME_QUICK -->|create| ROOM_CREATE
     HOME_QUICK -->|join| ROOM_JOIN
     HOME_LIVE -->|tap stream| STREAM_WATCH
-    HOME_TOURNAMENTS -->|tap| TOURNAMENT_DETAIL
     HOME_FRIENDS -->|tap friend| PROFILE_VIEW
 
     %% ── ROOM FLOW ───────────────────────────────────────────────
@@ -146,29 +141,6 @@ graph TD
     STREAM_END -->|follow host| PROFILE_VIEW
     STREAM_END --> HOME
 
-    %% ── TOURNAMENT FLOW ──────────────────────────────────────────
-    TOURNAMENT_LIST[Tournament List]:::tournament
-    TOURNAMENT_DETAIL[Tournament Detail]:::tournament
-    TOURNAMENT_REGISTER[Registration Modal]:::tournament
-    TOURNAMENT_BRACKET[Bracket View]:::tournament
-    TOURNAMENT_MATCH[Tournament Match — Enter Room]:::tournament
-    TOURNAMENT_RESULTS[Tournament Results]:::tournament
-    TOURNAMENT_FULL[Tournament Full Toast]:::error
-    TOURNAMENT_EXPIRED[Registration Closed]:::error
-
-    HOME -->|tournaments tab| TOURNAMENT_LIST
-    TOURNAMENT_LIST -->|tap| TOURNAMENT_DETAIL
-    TOURNAMENT_DETAIL -->|register| TOURNAMENT_REGISTER
-    TOURNAMENT_REGISTER -->|success| TOURNAMENT_BRACKET
-    TOURNAMENT_REGISTER -->|full| TOURNAMENT_FULL
-    TOURNAMENT_REGISTER -->|closed| TOURNAMENT_EXPIRED
-    TOURNAMENT_DETAIL -->|view bracket| TOURNAMENT_BRACKET
-    TOURNAMENT_BRACKET -->|match ready| TOURNAMENT_MATCH
-    TOURNAMENT_MATCH -->|enter room| ROOM_LOBBY
-    ROOM_LOBBY -->|all ready| GAME_PLAY
-    GAME_SCORE_FINAL -->|tournament match| TOURNAMENT_BRACKET
-    TOURNAMENT_BRACKET -->|eliminated / champion| TOURNAMENT_RESULTS
-    TOURNAMENT_RESULTS --> HOME
 
     %% ── CHAT FLOW ───────────────────────────────────────────────
     MESSAGES[Messages List]:::chat
@@ -184,7 +156,6 @@ graph TD
     HOME -->|bell icon| NOTIFICATIONS
     NOTIFICATIONS -->|room invite| ROOM_INVITE_MODAL
     NOTIFICATIONS -->|match starting| GAME_PLAY
-    NOTIFICATIONS -->|tournament alert| TOURNAMENT_DETAIL
     NOTIFICATIONS -->|stream live| STREAM_WATCH
     ROOM_INVITE_MODAL -->|accept| ROOM_LOBBY
     ROOM_INVITE_MODAL -->|decline| MESSAGES
@@ -237,7 +208,6 @@ graph TD
     ROOM_LOBBY -->|network fail| ERROR_NETWORK
     GAME_PLAY -->|network fail| ERROR_NETWORK
     STREAM_WATCH -->|network fail| ERROR_NETWORK
-    TOURNAMENT_REGISTER -->|server error| ERROR_SERVER
     ERROR_NETWORK -->|retry| HOME
     ERROR_SERVER -->|retry| HOME
     ERROR_GENERAL --> HOME
@@ -249,7 +219,6 @@ graph TD
     classDef home fill:#8B5CF6,stroke:#6D28D9,color:#fff
     classDef room fill:#F59E0B,stroke:#D97706,color:#000
     classDef stream fill:#EC4899,stroke:#DB2777,color:#fff
-    classDef tournament fill:#10B981,stroke:#059669,color:#fff
     classDef chat fill:#3B82F6,stroke:#2563EB,color:#fff
     classDef profile fill:#8B5CF6,stroke:#6D28D9,color:#fff
     classDef settings fill:#6B7280,stroke:#4B5563,color:#fff
@@ -264,15 +233,14 @@ graph TD
 |---|---:|
 | App Launch | 4 |
 | Authentication | 6 |
-| Home | 6 |
+| Home | 5 |
 | Room / Game | 14 |
 | Stream Viewing | 7 |
-| Tournament | 8 |
 | Chat | 5 |
 | Profile | 6 |
 | Settings | 7 |
 | Error / Edge | 4 |
-| **Total** | **67** |
+| **Total** | **58** |
 
 ---
 
@@ -288,7 +256,6 @@ graph TD
 | Room Lobby → Game Play | All 4 ready | Realtime DB ready-state listener |
 | Game Score Round → Game Bid | Next round | Baloot standard 13-round cycle |
 | Discover → Stream Watch | Tap card | Agora token fetched on entry |
-| Tournament Register → Bracket | Registered | Firestore tournament doc updated |
 | Messages → Room Invite | Tap invite | Deep link / FCFM notification |
 | Profile → Edit | Tap edit | Image picker + Firestore update |
 | Any → Error Network | Connectivity loss | Retry with exponential backoff |

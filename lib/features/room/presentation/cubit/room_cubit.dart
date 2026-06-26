@@ -176,10 +176,16 @@ class RoomCubit extends Cubit<RoomState> {
     });
   }
 
-  Future<void> joinRoomByCode(String inviteCode) async {
+  Future<void> joinRoomByCode(
+    String inviteCode, {
+    String? password,
+  }) async {
     emit(const RoomState.loading());
     try {
-      final room = await _roomRepository.joinRoomByCode(inviteCode);
+      final room = await _roomRepository.joinRoomByCode(
+        inviteCode,
+        password: password,
+      );
       emit(RoomState.created(room: room));
     } on RoomException catch (e) {
       emit(RoomState.error(message: e.message));

@@ -25,6 +25,7 @@ class JoinRoomPage extends StatefulWidget {
 
 class _JoinRoomPageState extends State<JoinRoomPage> {
   final _codeController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _isValid = false;
 
   @override
@@ -36,6 +37,7 @@ class _JoinRoomPageState extends State<JoinRoomPage> {
   @override
   void dispose() {
     _codeController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -50,7 +52,10 @@ class _JoinRoomPageState extends State<JoinRoomPage> {
   void _joinRoom() {
     final code = _codeController.text.trim().toUpperCase();
     if (code.length == 6) {
-      context.read<RoomCubit>().joinRoomByCode(code);
+      context.read<RoomCubit>().joinRoomByCode(
+            code,
+            password: _passwordController.text.trim(),
+          );
     }
   }
 
@@ -149,6 +154,51 @@ class _JoinRoomPageState extends State<JoinRoomPage> {
                       LocaleKeys.pasteFromClipboard.tr(),
                       style: TextStyle(color: colors.primary),
                     ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xxxl),
+                // Password (required for private rooms that have one)
+                Text(
+                  'room_password'.tr(),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: colors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  enabled: !isLoading,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'enter_password'.tr(),
+                    hintStyle: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: colors.textPlaceholder,
+                    ),
+                    filled: true,
+                    fillColor: colors.surfaceVariant,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: colors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: colors.primary, width: 1.5),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 18),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xxxl),

@@ -51,7 +51,6 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
               children: [
                 _buildToggle('Room Invites', 'notif_room_invites'),
                 _buildToggle('Game Starts', 'notif_game_starts'),
-                _buildToggle('Tournaments', 'notif_tournaments'),
                 _buildToggle('Messages', 'notif_messages'),
                 _buildToggle('Streams', 'notif_streams'),
               ],

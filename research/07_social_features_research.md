@@ -133,7 +133,6 @@ coins_economy/
   │
   └── Coin Spending:
         ├── Gifts to streamers (5-200 coins each)
-        ├── Tournament entry fees (optional)
         └── Avatar/frame purchases (future)
 ```
 
@@ -173,8 +172,7 @@ wallets/{userId}/
   └── transactions/ (subcollection)
         └── {transactionId}/
               ├── type: 'purchase' | 'gift_sent' | 'gift_received' |
-              │        'daily_bonus' | 'game_reward' | 'tournament_prize'
-              ├── amount: Number
+              │        'daily_bonus' | 'game_reward'              ├── amount: Number
               ├── fromUserId: String (optional)
               ├── toUserId: String (optional)
               ├── giftId: String (optional)
@@ -300,7 +298,6 @@ class EloCalculator {
 | Streaming | First Stream, 100 Viewers Peak, 1K Total Viewers | Common → Epic |
 | Gifting | First Gift Sent, Generous (1K coins gifted), Philanthropist | Common → Rare |
 | Streak | 3-Day Streak, 7-Day Streak, 30-Day Streak | Common → Legendary |
-| Tournament | Tournament Participant, Quarter-Finalist, Champion | Common → Legendary |
 
 ### Achievement Data Model
 
@@ -311,8 +308,7 @@ achievements/{achievementId}/
   ├── description: String
   ├── descriptionAr: String
   ├── iconAsset: String
-  ├── category: 'gameplay' | 'social' | 'streaming' | 'gifting' | 'streak' | 'tournament'
-  ├── rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
+  ├── category: 'gameplay' | 'social' | 'streaming' | 'gifting' | 'streak'  ├── rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
   ├── condition: { type: String, value: Number }
   ├── coinReward: Number
   └── isActive: Boolean
@@ -462,7 +458,6 @@ Future<List<BlootUser>> findContactsOnBloot() async {
 | Friend request | High | Default | "طلب صداقة جديد من [اسم]" |
 | Game invite | High | Custom ring | "دعوة لعبة من [اسم]" |
 | Achievement unlock | Medium | Short ding | "فتحت إنجاز جديد! [اسم]" |
-| Tournament starting | High | Alert | "البطولة تبدأ خلال 30 دقيقة!" |
 | Daily bonus | Low | None | "مكافأتك اليومية بانتظارك!" |
 | Gift received | Medium | Coin sound | "أرسل [اسم] لك [هدية]!" |
 | Level up | Medium | Level up sound | "ارتقيت إلى المستوى [رقم]!" |

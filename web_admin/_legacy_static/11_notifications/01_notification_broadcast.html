@@ -48,7 +48,6 @@
                 <li><a href="../01_dashboard/01_home_stats.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">dashboard</span>Dashboard</a></li>
                 <li><a href="../02_users/01_user_management.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">person</span>Users</a></li>
                 <li><a href="../03_reports/01_report_review.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">flag</span>Reports</a></li>
-                <li><a href="../04_tournaments/01_tournament_management.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">emoji_events</span>Tournaments</a></li>
                 <li><a href="../05_games/01_game_monitor.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">casino</span>Games</a></li>
                 <li><a href="../06_rooms/01_room_monitor.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">meeting_room</span>Rooms</a></li>
                 <li><a href="../07_streams/01_stream_moderation.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-white/5 text-gray-400 hover:text-white"><span class="material-symbols-outlined text-xl">videocam</span>Streams</a></li>
@@ -201,7 +200,6 @@
                                 <select class="w-full bg-b-surface border border-b-border rounded-lg px-4 py-2.5 text-sm text-b-on-surface focus:border-b-purple focus:outline-none transition-colors">
                                     <option value="none">None</option>
                                     <option value="room">Open Room</option>
-                                    <option value="tournament">Open Tournament</option>
                                     <option value="profile">Open Profile</option>
                                 </select>
                             </div>
@@ -273,15 +271,6 @@
                         </thead>
                         <tbody>
                             <tr class="border-b border-b-border hover:bg-b-surface-hover transition-colors">
-                                <td class="px-4 py-3 font-medium">Weekend Tournament Starting!</td>
-                                <td class="px-4 py-3">24,531</td>
-                                <td class="px-4 py-3">23,871</td>
-                                <td class="px-4 py-3">15,412</td>
-                                <td class="px-4 py-3 text-green-400 font-medium">64.6%</td>
-                                <td class="px-4 py-3 text-b-on-surface-muted">May 10, 2025</td>
-                                <td class="px-4 py-3"><div class="flex items-center gap-2"><button onclick="showToast('Viewing details','info')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-on-surface transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button><button onclick="showToast('Notification resent','info')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-on-surface transition-colors"><span class="material-symbols-outlined text-lg">refresh</span></button></div></td>
-                            </tr>
-                            <tr class="border-b border-b-border hover:bg-b-surface-hover transition-colors">
                                 <td class="px-4 py-3 font-medium">New Feature: Voice Chat</td>
                                 <td class="px-4 py-3">24,531</td>
                                 <td class="px-4 py-3">23,102</td>
@@ -306,15 +295,6 @@
                                 <td class="px-4 py-3">312</td>
                                 <td class="px-4 py-3 text-yellow-400 font-medium">26.3%</td>
                                 <td class="px-4 py-3 text-b-on-surface-muted">May 3, 2025</td>
-                                <td class="px-4 py-3"><div class="flex items-center gap-2"><button onclick="showToast('Viewing details','info')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-on-surface transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button><button onclick="showToast('Notification resent','info')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-on-surface transition-colors"><span class="material-symbols-outlined text-lg">refresh</span></button></div></td>
-                            </tr>
-                            <tr class="border-b border-b-border hover:bg-b-surface-hover transition-colors">
-                                <td class="px-4 py-3 font-medium">VIP Tournament Invite</td>
-                                <td class="px-4 py-3">542</td>
-                                <td class="px-4 py-3">531</td>
-                                <td class="px-4 py-3">289</td>
-                                <td class="px-4 py-3 text-green-400 font-medium">54.4%</td>
-                                <td class="px-4 py-3 text-b-on-surface-muted">May 1, 2025</td>
                                 <td class="px-4 py-3"><div class="flex items-center gap-2"><button onclick="showToast('Viewing details','info')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-on-surface transition-colors"><span class="material-symbols-outlined text-lg">visibility</span></button><button onclick="showToast('Notification resent','info')" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-on-surface transition-colors"><span class="material-symbols-outlined text-lg">refresh</span></button></div></td>
                             </tr>
                             <tr class="border-b border-b-border hover:bg-b-surface-hover transition-colors">
@@ -352,18 +332,6 @@
 
         <div data-tab-content="templates" style="display:none">
             <div class="grid grid-cols-2 gap-4">
-                <div class="bg-b-surface-elevated rounded-xl border border-b-border p-5 hover:border-b-purple/30 transition-colors">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-b-purple text-xl">emoji_events</span>
-                            <h4 class="font-semibold text-b-on-surface">Tournament Starting</h4>
-                        </div>
-                    </div>
-                    <p class="text-sm text-b-on-surface-muted mb-4">Notify all users about upcoming tournaments with details and deep link to join.</p>
-                    <div class="flex items-center gap-4 text-xs text-b-on-surface-secondary mb-4">
-                        <span>Used <span class="text-b-on-surface font-medium">12</span> times</span>
-                        <span>Last: <span class="text-b-on-surface font-medium">2 days ago</span></span>
-                    </div>
                     <div class="flex items-center gap-2">
                         <button onclick="showToast('Template loaded','info')" class="px-3 py-1.5 rounded-lg bg-b-purple text-white text-xs font-medium hover:bg-b-purple-dark transition-colors">Use Template</button>
                         <button onclick="showToast('Edit template','info')" class="px-3 py-1.5 rounded-lg border border-b-border text-b-on-surface-muted text-xs font-medium hover:bg-b-surface-muted transition-colors">Edit</button>

@@ -40,7 +40,6 @@ class DiscoverStreamsPage extends StatelessWidget {
           'popular'.tr(),
           LocaleKeys.labelNew.tr(),
           'top_rated'.tr(),
-          'tournaments'.tr(),
           'voice_only'.tr(),
           'following'.tr(),
         ];

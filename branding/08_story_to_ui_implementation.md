@@ -53,7 +53,7 @@ Video Square:
 | Score display | Large, always visible during game | Win/loss is the core loop — always know the score |
 | Ranking badge | On profile and on player cards | Competitive players need visible proof of skill |
 | Gold accents on achievements | Gold (#F59E0B) for wins, streaks, milestones | Gold = earned, not given — visual reward |
-| Tournament banner | Prominent on home screen | Tournaments are the competitive outlet |
+| Competition banner | Prominent on home screen | Rankings and leaderboards are the competitive outlet |
 | Post-game stats | Detailed breakdown after each hand | Competitive players love data |
 | Win/rank animation | Confetti + gold shimmer on victories | Winning should FEEL like winning |
 

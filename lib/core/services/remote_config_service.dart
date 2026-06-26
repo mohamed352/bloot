@@ -14,7 +14,6 @@ abstract class RemoteConfigKeys {
   static const String maintenanceMode = 'maintenance_mode';
   static const String maintenanceMessage = 'maintenance_message';
   static const String minSupportedVersion = 'min_supported_version';
-  static const String enableTournaments = 'enable_tournaments';
   static const String enableStreaming = 'enable_streaming';
   static const String agoraAppId = 'agora_app_id';
 }
@@ -51,7 +50,6 @@ class RemoteConfigService {
     RemoteConfigKeys.maintenanceMode: false,
     RemoteConfigKeys.maintenanceMessage: '',
     RemoteConfigKeys.minSupportedVersion: '',
-    RemoteConfigKeys.enableTournaments: true,
     RemoteConfigKeys.enableStreaming: true,
     RemoteConfigKeys.agoraAppId: '',
   };
@@ -163,8 +161,7 @@ class RemoteConfigService {
       if (firestoreValue is bool) return firestoreValue;
     }
 
-    if (flag == RemoteConfigKeys.enableTournaments ||
-        flag == RemoteConfigKeys.enableStreaming) {
+    if (flag == RemoteConfigKeys.enableStreaming) {
       return getBool(flag);
     }
 
@@ -186,10 +183,6 @@ class RemoteConfigService {
   /// Minimum supported app version.
   String get minSupportedVersion =>
       getString(RemoteConfigKeys.minSupportedVersion);
-
-  /// Whether tournaments are enabled.
-  bool get enableTournaments =>
-      isFeatureEnabled(RemoteConfigKeys.enableTournaments);
 
   /// Whether streaming is enabled.
   bool get enableStreaming =>

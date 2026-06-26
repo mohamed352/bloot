@@ -62,9 +62,6 @@ tailwind.config = {
             <a href="../03_reports/01_report_review.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
                 <span class="material-symbols-outlined text-xl">flag</span>Reports
             </a>
-            <a href="../04_tournaments/01_tournament_management.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
-                <span class="material-symbols-outlined text-xl">emoji_events</span>Tournaments
-            </a>
             <a href="../05_games/01_game_monitor.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-b-on-surface-muted hover:bg-b-surface-hover hover:text-b-on-surface transition-colors">
                 <span class="material-symbols-outlined text-xl">casino</span>Games
             </a>
@@ -329,34 +326,6 @@ tailwind.config = {
                                     </div>
                                 </td>
                             </tr>
-                            <tr data-category="games" class="border-b border-b-border hover:bg-b-surface-hover transition-colors">
-                                <td class="px-5 py-3.5">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-lg bg-b-gold/10 flex items-center justify-center">
-                                            <span class="material-symbols-outlined text-b-gold text-lg">emoji_events</span>
-                                        </div>
-                                        <span class="text-b-on-surface font-medium">Tournament Champion</span>
-                                    </div>
-                                </td>
-                                <td class="px-5 py-3.5 text-b-on-surface-muted" dir="rtl">بطل البطولة</td>
-                                <td class="px-5 py-3.5"><span class="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400">Games</span></td>
-                                <td class="px-5 py-3.5"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-500/10 text-b-gold">Legendary</span></td>
-                                <td class="px-5 py-3.5 text-b-on-surface-muted text-xs">Win 10 tournaments</td>
-                                <td class="px-5 py-3.5 text-b-purple font-medium">15,000</td>
-                                <td class="px-5 py-3.5 text-b-gold font-medium">7,500</td>
-                                <td class="px-5 py-3.5">
-                                    <label class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" class="sr-only peer" onchange="toggleAchievement(this, 'Tournament Champion')">
-                                        <div class="w-9 h-5 bg-b-surface-muted peer-checked:bg-b-purple rounded-full peer-focus:outline-none after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4"></div>
-                                    </label>
-                                </td>
-                                <td class="px-5 py-3.5 text-right">
-                                    <div class="flex items-center justify-end gap-1">
-                                        <button onclick="openEditModal(6)" class="p-1.5 rounded-lg hover:bg-b-surface-muted text-b-on-surface-muted hover:text-b-purple transition-colors" title="Edit"><span class="material-symbols-outlined text-lg">edit</span></button>
-                                        <button onclick="deleteAchievement('Tournament Champion')" class="p-1.5 rounded-lg hover:bg-red-500/10 text-b-on-surface-muted hover:text-red-400 transition-colors" title="Delete"><span class="material-symbols-outlined text-lg">delete</span></button>
-                                    </div>
-                                </td>
-                            </tr>
                             <tr data-category="social" class="hover:bg-b-surface-hover transition-colors">
                                 <td class="px-5 py-3.5">
                                     <div class="flex items-center gap-3">
@@ -496,7 +465,6 @@ tailwind.config = {
                             <option value="games_played">Games Played</option>
                             <option value="streaming_hours">Streaming Hours</option>
                             <option value="gifts_sent">Gifts Sent</option>
-                            <option value="tournaments_won">Tournaments Won</option>
                             <option value="followers">Followers</option>
                             <option value="level_reached">Level Reached</option>
                         </select>
@@ -548,7 +516,6 @@ tailwind.config = {
             { name: 'Hokm Master', nameAr: 'ماستر الحكم', icon: 'workspace_premium', category: 'games', rarity: 'legendary', conditionType: 'games_won', threshold: 500, xp: 10000, coins: 5000, secret: false, order: 4, active: true },
             { name: '100 Games', nameAr: '100 لعبة', icon: 'star', category: 'milestones', rarity: 'uncommon', conditionType: 'games_played', threshold: 100, xp: 500, coins: 250, secret: false, order: 5, active: true },
             { name: 'Gift Giver', nameAr: 'مهدي الهدية', icon: 'favorite', category: 'social', rarity: 'epic', conditionType: 'gifts_sent', threshold: 50, xp: 2500, coins: 1200, secret: false, order: 6, active: true },
-            { name: 'Tournament Champion', nameAr: 'بطل البطولة', icon: 'emoji_events', category: 'games', rarity: 'legendary', conditionType: 'tournaments_won', threshold: 10, xp: 15000, coins: 7500, secret: false, order: 7, active: false },
             { name: 'Social Butterfly', nameAr: 'فراشة اجتماعية', icon: 'groups', category: 'social', rarity: 'common', conditionType: 'followers', threshold: 100, xp: 250, coins: 100, secret: false, order: 8, active: true },
         ];
 

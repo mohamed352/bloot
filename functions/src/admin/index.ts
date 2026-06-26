@@ -27,13 +27,6 @@ export {
 } from './streamAdmin';
 
 export {
-  adminCreateTournament,
-  adminUpdateTournament,
-  adminCancelTournament,
-  adminStartTournament,
-} from './tournamentAdmin';
-
-export {
   forceEndGame,
   rematchGame,
 } from './gameAdmin';

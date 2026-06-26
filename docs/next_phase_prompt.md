@@ -1,7 +1,7 @@
 # Phase L Prompt: Chat List Firestore Integration
 
 > **For:** New conversation continuation  
-> **Previous phases completed:** A–K (Profile fully wired, Settings wired, Tournament list/detail wired, Notifications wired)  
+> **Previous phases completed:** A–K (Profile fully wired, Settings wired, Notifications wired)  
 > **Next:** Wire Chat List to Firestore `conversations` collection
 
 ---
@@ -92,7 +92,7 @@ Create documents in a `conversations` collection with this shape:
   'lastMessage': 'good_game_yesterday',
   'lastMessageAt': Timestamp,
   'unread': 2,
-  'type': 'direct',       // 'direct' | 'rooms' | 'tournaments'
+  'type': 'direct',       // 'direct' | 'rooms'
   'participantIds': ['uid1', 'uid2'],
 }
 ```
@@ -150,7 +150,7 @@ The data source currently has no constructor parameters. After adding Firestore/
 
 ## 5. Code Pattern to Follow
 
-Use the exact same pattern as `TournamentRemoteDataSource` (Phase I) and `NotificationsRemoteDataSource` (Phase H):
+Use the exact same pattern as `NotificationsRemoteDataSource` (Phase H):
 
 ```dart
 @lazySingleton
@@ -217,7 +217,7 @@ class ChatRemoteDataSource {
 
 The `chat_list_page.dart` uses `.tr()` for:
 - `'messages'` — title
-- `'all'`, `'rooms'`, `'direct'`, `'tournaments'` — filter chips
+- `'all'`, `'rooms'`, `'direct'` — filter chips
 
 The `lastMessage` field from Firestore should store **localization keys** (e.g., `'good_game_yesterday'`) so that `.tr()` works in the UI. OR store raw text and skip `.tr()` for lastMessage. The current UI does NOT call `.tr()` on `lastMessage` — it displays it as-is. So storing raw text in Firestore is fine.
 

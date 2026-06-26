@@ -131,13 +131,13 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( UserProfile? profile,  List<HomeStream> streams,  List<Tournament>? tournaments,  int unreadNotificationsCount)?  loaded,TResult Function( UserProfile? profile,  List<Tournament>? tournaments,  int unreadNotificationsCount)?  empty,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( UserProfile? profile,  List<HomeStream> streams,  int unreadNotificationsCount)?  loaded,TResult Function( UserProfile? profile,  int unreadNotificationsCount)?  empty,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case HomeInitial() when initial != null:
 return initial();case HomeLoading() when loading != null:
 return loading();case HomeLoaded() when loaded != null:
-return loaded(_that.profile,_that.streams,_that.tournaments,_that.unreadNotificationsCount);case HomeEmpty() when empty != null:
-return empty(_that.profile,_that.tournaments,_that.unreadNotificationsCount);case HomeError() when error != null:
+return loaded(_that.profile,_that.streams,_that.unreadNotificationsCount);case HomeEmpty() when empty != null:
+return empty(_that.profile,_that.unreadNotificationsCount);case HomeError() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -156,13 +156,13 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( UserProfile? profile,  List<HomeStream> streams,  List<Tournament>? tournaments,  int unreadNotificationsCount)  loaded,required TResult Function( UserProfile? profile,  List<Tournament>? tournaments,  int unreadNotificationsCount)  empty,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( UserProfile? profile,  List<HomeStream> streams,  int unreadNotificationsCount)  loaded,required TResult Function( UserProfile? profile,  int unreadNotificationsCount)  empty,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case HomeInitial():
 return initial();case HomeLoading():
 return loading();case HomeLoaded():
-return loaded(_that.profile,_that.streams,_that.tournaments,_that.unreadNotificationsCount);case HomeEmpty():
-return empty(_that.profile,_that.tournaments,_that.unreadNotificationsCount);case HomeError():
+return loaded(_that.profile,_that.streams,_that.unreadNotificationsCount);case HomeEmpty():
+return empty(_that.profile,_that.unreadNotificationsCount);case HomeError():
 return error(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -180,13 +180,13 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( UserProfile? profile,  List<HomeStream> streams,  List<Tournament>? tournaments,  int unreadNotificationsCount)?  loaded,TResult? Function( UserProfile? profile,  List<Tournament>? tournaments,  int unreadNotificationsCount)?  empty,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( UserProfile? profile,  List<HomeStream> streams,  int unreadNotificationsCount)?  loaded,TResult? Function( UserProfile? profile,  int unreadNotificationsCount)?  empty,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case HomeInitial() when initial != null:
 return initial();case HomeLoading() when loading != null:
 return loading();case HomeLoaded() when loaded != null:
-return loaded(_that.profile,_that.streams,_that.tournaments,_that.unreadNotificationsCount);case HomeEmpty() when empty != null:
-return empty(_that.profile,_that.tournaments,_that.unreadNotificationsCount);case HomeError() when error != null:
+return loaded(_that.profile,_that.streams,_that.unreadNotificationsCount);case HomeEmpty() when empty != null:
+return empty(_that.profile,_that.unreadNotificationsCount);case HomeError() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -263,7 +263,7 @@ String toString() {
 
 
 class HomeLoaded implements HomeState {
-  const HomeLoaded({required this.profile, required final  List<HomeStream> streams, final  List<Tournament>? tournaments, this.unreadNotificationsCount = 0}): _streams = streams,_tournaments = tournaments;
+  const HomeLoaded({required this.profile, required final  List<HomeStream> streams, this.unreadNotificationsCount = 0}): _streams = streams;
   
 
  final  UserProfile? profile;
@@ -272,15 +272,6 @@ class HomeLoaded implements HomeState {
   if (_streams is EqualUnmodifiableListView) return _streams;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_streams);
-}
-
- final  List<Tournament>? _tournaments;
- List<Tournament>? get tournaments {
-  final value = _tournaments;
-  if (value == null) return null;
-  if (_tournaments is EqualUnmodifiableListView) return _tournaments;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(value);
 }
 
 @JsonKey() final  int unreadNotificationsCount;
@@ -295,16 +286,16 @@ $HomeLoadedCopyWith<HomeLoaded> get copyWith => _$HomeLoadedCopyWithImpl<HomeLoa
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomeLoaded&&(identical(other.profile, profile) || other.profile == profile)&&const DeepCollectionEquality().equals(other._streams, _streams)&&const DeepCollectionEquality().equals(other._tournaments, _tournaments)&&(identical(other.unreadNotificationsCount, unreadNotificationsCount) || other.unreadNotificationsCount == unreadNotificationsCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomeLoaded&&(identical(other.profile, profile) || other.profile == profile)&&const DeepCollectionEquality().equals(other._streams, _streams)&&(identical(other.unreadNotificationsCount, unreadNotificationsCount) || other.unreadNotificationsCount == unreadNotificationsCount));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,profile,const DeepCollectionEquality().hash(_streams),const DeepCollectionEquality().hash(_tournaments),unreadNotificationsCount);
+int get hashCode => Object.hash(runtimeType,profile,const DeepCollectionEquality().hash(_streams),unreadNotificationsCount);
 
 @override
 String toString() {
-  return 'HomeState.loaded(profile: $profile, streams: $streams, tournaments: $tournaments, unreadNotificationsCount: $unreadNotificationsCount)';
+  return 'HomeState.loaded(profile: $profile, streams: $streams, unreadNotificationsCount: $unreadNotificationsCount)';
 }
 
 
@@ -315,7 +306,7 @@ abstract mixin class $HomeLoadedCopyWith<$Res> implements $HomeStateCopyWith<$Re
   factory $HomeLoadedCopyWith(HomeLoaded value, $Res Function(HomeLoaded) _then) = _$HomeLoadedCopyWithImpl;
 @useResult
 $Res call({
- UserProfile? profile, List<HomeStream> streams, List<Tournament>? tournaments, int unreadNotificationsCount
+ UserProfile? profile, List<HomeStream> streams, int unreadNotificationsCount
 });
 
 
@@ -332,12 +323,11 @@ class _$HomeLoadedCopyWithImpl<$Res>
 
 /// Create a copy of HomeState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? profile = freezed,Object? streams = null,Object? tournaments = freezed,Object? unreadNotificationsCount = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? profile = freezed,Object? streams = null,Object? unreadNotificationsCount = null,}) {
   return _then(HomeLoaded(
 profile: freezed == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
 as UserProfile?,streams: null == streams ? _self._streams : streams // ignore: cast_nullable_to_non_nullable
-as List<HomeStream>,tournaments: freezed == tournaments ? _self._tournaments : tournaments // ignore: cast_nullable_to_non_nullable
-as List<Tournament>?,unreadNotificationsCount: null == unreadNotificationsCount ? _self.unreadNotificationsCount : unreadNotificationsCount // ignore: cast_nullable_to_non_nullable
+as List<HomeStream>,unreadNotificationsCount: null == unreadNotificationsCount ? _self.unreadNotificationsCount : unreadNotificationsCount // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -349,19 +339,10 @@ as int,
 
 
 class HomeEmpty implements HomeState {
-  const HomeEmpty({this.profile, final  List<Tournament>? tournaments, this.unreadNotificationsCount = 0}): _tournaments = tournaments;
+  const HomeEmpty({this.profile, this.unreadNotificationsCount = 0});
   
 
  final  UserProfile? profile;
- final  List<Tournament>? _tournaments;
- List<Tournament>? get tournaments {
-  final value = _tournaments;
-  if (value == null) return null;
-  if (_tournaments is EqualUnmodifiableListView) return _tournaments;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(value);
-}
-
 @JsonKey() final  int unreadNotificationsCount;
 
 /// Create a copy of HomeState
@@ -374,16 +355,16 @@ $HomeEmptyCopyWith<HomeEmpty> get copyWith => _$HomeEmptyCopyWithImpl<HomeEmpty>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomeEmpty&&(identical(other.profile, profile) || other.profile == profile)&&const DeepCollectionEquality().equals(other._tournaments, _tournaments)&&(identical(other.unreadNotificationsCount, unreadNotificationsCount) || other.unreadNotificationsCount == unreadNotificationsCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomeEmpty&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.unreadNotificationsCount, unreadNotificationsCount) || other.unreadNotificationsCount == unreadNotificationsCount));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,profile,const DeepCollectionEquality().hash(_tournaments),unreadNotificationsCount);
+int get hashCode => Object.hash(runtimeType,profile,unreadNotificationsCount);
 
 @override
 String toString() {
-  return 'HomeState.empty(profile: $profile, tournaments: $tournaments, unreadNotificationsCount: $unreadNotificationsCount)';
+  return 'HomeState.empty(profile: $profile, unreadNotificationsCount: $unreadNotificationsCount)';
 }
 
 
@@ -394,7 +375,7 @@ abstract mixin class $HomeEmptyCopyWith<$Res> implements $HomeStateCopyWith<$Res
   factory $HomeEmptyCopyWith(HomeEmpty value, $Res Function(HomeEmpty) _then) = _$HomeEmptyCopyWithImpl;
 @useResult
 $Res call({
- UserProfile? profile, List<Tournament>? tournaments, int unreadNotificationsCount
+ UserProfile? profile, int unreadNotificationsCount
 });
 
 
@@ -411,11 +392,10 @@ class _$HomeEmptyCopyWithImpl<$Res>
 
 /// Create a copy of HomeState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? profile = freezed,Object? tournaments = freezed,Object? unreadNotificationsCount = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? profile = freezed,Object? unreadNotificationsCount = null,}) {
   return _then(HomeEmpty(
 profile: freezed == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
-as UserProfile?,tournaments: freezed == tournaments ? _self._tournaments : tournaments // ignore: cast_nullable_to_non_nullable
-as List<Tournament>?,unreadNotificationsCount: null == unreadNotificationsCount ? _self.unreadNotificationsCount : unreadNotificationsCount // ignore: cast_nullable_to_non_nullable
+as UserProfile?,unreadNotificationsCount: null == unreadNotificationsCount ? _self.unreadNotificationsCount : unreadNotificationsCount // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }

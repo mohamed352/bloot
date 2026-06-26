@@ -38,7 +38,6 @@ class ChatListPage extends StatelessWidget {
           'all'.tr(),
           'rooms'.tr(),
           'direct'.tr(),
-          'tournaments'.tr(),
         ];
 
         return Scaffold(

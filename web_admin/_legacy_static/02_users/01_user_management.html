@@ -49,7 +49,6 @@
                 <li><a href="../01_dashboard/01_home_stats.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">dashboard</span>Dashboard</a></li>
                 <li><a href="../02_users/01_user_management.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 bg-purple-500/10 text-purple-400"><span class="material-symbols-outlined text-xl">person</span>Users</a></li>
                 <li><a href="../03_reports/01_report_review.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">flag</span>Reports</a></li>
-                <li><a href="../04_tournaments/01_tournament_management.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">emoji_events</span>Tournaments</a></li>
                 <li><a href="../05_games/01_game_monitor.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">casino</span>Games</a></li>
                 <li><a href="../06_rooms/01_room_monitor.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">meeting_room</span>Rooms</a></li>
                 <li><a href="../07_streams/01_stream_moderation.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-b-surface-hover text-b-on-surface-muted hover:text-b-on-surface"><span class="material-symbols-outlined text-xl">videocam</span>Streams</a></li>
@@ -170,13 +169,13 @@
 const users = [
     { name: 'محمد العلي', handle: '@محمد_العلي', phone: '+966 55 123 4567', level: 42, games: 1847, winRate: 67.3, coins: 12450, status: 'active', joined: '2025-03-15', email: 'mohammed@example.com', xp: 8400, xpMax: 10000, favMode: 'Classic', avgDur: '8m 32s', reportsAgainst: 2, reportsBy: 0 },
     { name: 'فهد الدوسري', handle: '@فهد_2024', phone: '+966 50 987 6543', level: 28, games: 923, winRate: 54.1, coins: 5200, status: 'suspended', joined: '2025-06-20', email: 'fahad@example.com', xp: 4500, xpMax: 7000, favMode: 'Speed', avgDur: '5m 18s', reportsAgainst: 5, reportsBy: 1 },
-    { name: 'نورة السعيد', handle: '@نورة_سعيد', phone: '+966 54 456 7890', level: 56, games: 3210, winRate: 72.8, coins: 89300, status: 'active', joined: '2024-11-01', email: 'noura@example.com', xp: 9200, xpMax: 12000, favMode: 'Tournament', avgDur: '12m 05s', reportsAgainst: 1, reportsBy: 3 },
+    { name: 'نورة السعيد', handle: '@نورة_سعيد', phone: '+966 54 456 7890', level: 56, games: 3210, winRate: 72.8, coins: 89300, status: 'active', joined: '2024-11-01', email: 'noura@example.com', xp: 9200, xpMax: 12000, favMode: 'Classic', avgDur: '12m 05s', reportsAgainst: 1, reportsBy: 3 },
     { name: 'عبدالله القحطاني', handle: '@عبدالله', phone: '+966 56 111 2233', level: 15, games: 342, winRate: 41.2, coins: 980, status: 'active', joined: '2025-09-10', email: 'abdullah@example.com', xp: 2100, xpMax: 4000, favMode: 'Classic', avgDur: '6m 44s', reportsAgainst: 0, reportsBy: 0 },
-    { name: 'سارة الحربي', handle: '@سارة_الحربي', phone: '+966 55 333 4455', level: 63, games: 4500, winRate: 78.5, coins: 156200, status: 'active', joined: '2024-08-15', email: 'sara@example.com', xp: 11500, xpMax: 13000, favMode: 'Tournament', avgDur: '11m 20s', reportsAgainst: 0, reportsBy: 5 },
+    { name: 'سارة الحربي', handle: '@سارة_الحربي', phone: '+966 55 333 4455', level: 63, games: 4500, winRate: 78.5, coins: 156200, status: 'active', joined: '2024-08-15', email: 'sara@example.com', xp: 11500, xpMax: 13000, favMode: 'Classic', avgDur: '11m 20s', reportsAgainst: 0, reportsBy: 5 },
     { name: 'خالد المطيري', handle: '@خالد', phone: '+966 50 555 6677', level: 8, games: 95, winRate: 35.8, coins: 320, status: 'banned', joined: '2025-12-01', email: 'khaled@example.com', xp: 800, xpMax: 2000, favMode: 'Speed', avgDur: '4m 12s', reportsAgainst: 3, reportsBy: 0 },
     { name: 'ريم الغامدي', handle: '@ريم_بث', phone: '+966 54 777 8899', level: 37, games: 1560, winRate: 61.4, coins: 18700, status: 'active', joined: '2025-01-22', email: 'reem@example.com', xp: 6800, xpMax: 9000, favMode: 'Classic', avgDur: '7m 55s', reportsAgainst: 1, reportsBy: 2 },
     { name: 'يوسف الشمري', handle: '@يوسف', phone: '+966 56 999 0011', level: 21, games: 580, winRate: 48.3, coins: 3200, status: 'suspended', joined: '2025-07-05', email: 'yousef@example.com', xp: 3200, xpMax: 6000, favMode: 'Speed', avgDur: '5m 40s', reportsAgainst: 4, reportsBy: 0 },
-    { name: 'مريم العتيبي', handle: '@مريم_الحربي', phone: '+966 55 222 3344', level: 48, games: 2100, winRate: 69.7, coins: 42100, status: 'active', joined: '2024-12-12', email: 'mariam@example.com', xp: 9000, xpMax: 11000, favMode: 'Tournament', avgDur: '9m 30s', reportsAgainst: 0, reportsBy: 1 },
+    { name: 'مريم العتيبي', handle: '@مريم_الحربي', phone: '+966 55 222 3344', level: 48, games: 2100, winRate: 69.7, coins: 42100, status: 'active', joined: '2024-12-12', email: 'mariam@example.com', xp: 9000, xpMax: 11000, favMode: 'Speed', avgDur: '9m 30s', reportsAgainst: 0, reportsBy: 1 },
     { name: 'أحمد الزهراني', handle: '@أحمد_ز', phone: '+966 50 444 5566', level: 3, games: 28, winRate: 25.0, coins: 150, status: 'active', joined: '2026-05-01', email: 'ahmed@example.com', xp: 450, xpMax: 1000, favMode: 'Classic', avgDur: '3m 50s', reportsAgainst: 0, reportsBy: 0 }
 ];
 
@@ -224,7 +223,6 @@ function filterByStatus() {
 function openDrawer(index) {
     const u = users[index];
     const coinTransactions = [
-        { desc: 'Tournament buy-in', amount: -500, date: '2026-05-10' },
         { desc: 'Game win bonus', amount: +120, date: '2026-05-09' },
         { desc: 'Gift received from @سارة', amount: +200, date: '2026-05-08' },
         { desc: 'Coin purchase', amount: +5000, date: '2026-05-07' },

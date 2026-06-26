@@ -19,7 +19,6 @@ lib/
 │   ├── rooms/
 │   ├── game/
 │   ├── stream/
-│   ├── tournaments/
 │   ├── chat/
 │   ├── profile/
 │   └── settings/

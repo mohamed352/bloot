@@ -100,7 +100,6 @@ class _BlootAppState extends State<BlootApp> {
     final type = data['type'] as String?;
     final roomId = data['roomId'] as String?;
     final gameId = data['gameId'] as String?;
-    final tournamentId = data['tournamentId'] as String?;
     final conversationId = data['conversationId'] as String?;
 
     switch (type) {
@@ -108,13 +107,6 @@ class _BlootAppState extends State<BlootApp> {
         if (roomId != null && roomId.isNotEmpty) {
           appRouter.goNamed(
             RouteNames.roomInvitation,
-            pathParameters: {'id': roomId},
-          );
-        }
-      case 'tournamentMatchReady':
-        if (roomId != null && roomId.isNotEmpty) {
-          appRouter.goNamed(
-            RouteNames.roomLobby,
             pathParameters: {'id': roomId},
           );
         }
@@ -130,13 +122,6 @@ class _BlootAppState extends State<BlootApp> {
           appRouter.goNamed(
             RouteNames.gamePlay,
             pathParameters: {'id': gameId},
-          );
-        }
-      case 'tournamentChampion':
-        if (tournamentId != null && tournamentId.isNotEmpty) {
-          appRouter.goNamed(
-            RouteNames.tournamentBracket,
-            pathParameters: {'id': tournamentId},
           );
         }
     }

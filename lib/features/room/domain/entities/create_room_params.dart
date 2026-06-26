@@ -8,7 +8,7 @@ class CreateRoomParams {
     this.voiceEnabled = true,
     this.cameraEnabled = false,
     this.allowSpectators = true,
-    this.gameSpeed = GameSpeed.normal,
+    this.password,
   });
 
   final String name;
@@ -16,5 +16,7 @@ class CreateRoomParams {
   final bool voiceEnabled;
   final bool cameraEnabled;
   final bool allowSpectators;
-  final GameSpeed gameSpeed;
+
+  /// Optional password for private rooms.
+  final String? password;
 }

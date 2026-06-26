@@ -32,3 +32,8 @@ class UnauthenticatedException extends RoomException {
   const UnauthenticatedException()
     : super('User not authenticated', code: 'UNAUTHENTICATED');
 }
+
+class WrongPasswordException extends RoomException {
+  const WrongPasswordException()
+    : super('Incorrect room password', code: 'WRONG_PASSWORD');
+}

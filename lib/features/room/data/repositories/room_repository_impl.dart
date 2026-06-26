@@ -20,7 +20,8 @@ class RoomRepositoryImpl implements RoomRepository {
       voiceEnabled: params.voiceEnabled,
       cameraEnabled: params.cameraEnabled,
       allowSpectators: params.allowSpectators,
-      gameSpeed: params.gameSpeed.name,
+      gameSpeed: 'normal',
+      password: params.password,
     );
     return model.toEntity();
   }
@@ -75,8 +76,14 @@ class RoomRepositoryImpl implements RoomRepository {
   }
 
   @override
-  Future<Room> joinRoomByCode(String inviteCode) async {
-    final model = await _remoteDataSource.joinRoomByCode(inviteCode);
+  Future<Room> joinRoomByCode(
+    String inviteCode, {
+    String? password,
+  }) async {
+    final model = await _remoteDataSource.joinRoomByCode(
+      inviteCode,
+      password: password,
+    );
     return model.toEntity();
   }
 

@@ -35,10 +35,9 @@ All UI screens MUST be generated in **English only**. Add RTL implementation not
 <!-- RTL: "العب بلوت. ابث مباشر. ابنِ جمهورك." -->
 - Subtitle: "The premium Baloot platform for players, streamers, and fans"
 - Illustration: Premium styled Baloot scene — 4 phone screens with video squares around a card table, showing social gaming concept (NOT primitive rectangles — use detailed SVG with gradients, shadows, proper proportions)
-- Feature highlights (3 horizontal cards below illustration):
+- Feature highlights (2 horizontal cards below illustration):
   1. Live Voice & Video — "Play with friends face-to-face"
-  2. Stream to Fans — "Build your audience as you play"
-  3. Tournaments — "Compete and win prizes"
+  2. Rankings & Stats — "Compete and track your progress"
 - Pagination dots (3 screens, currently on 1)
 - Primary CTA: "Get Started" (primary-btn, full width, purple gradient)
 - Secondary link: "Already have an account? Sign In" (b-purple text link)

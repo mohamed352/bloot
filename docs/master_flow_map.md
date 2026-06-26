@@ -93,13 +93,9 @@ flowchart TD
     D --> E[Play with Friends]
     D --> F[Voice Tables]
     D --> G[Live Stream]
-    D --> H[Tournaments]
-
     E --> I[Create Room Screen]
     F --> J[Room List: Voice Only Filter]
     G --> C
-    H --> K[Tournament List Screen]
-
     A --> L[Live Now Section]
     L --> M[Stream Card 1]
     L --> N[Stream Card 2]
@@ -107,13 +103,6 @@ flowchart TD
     M --> P[Watch Stream Screen]
     N --> P
     O --> P
-
-    A --> Q[Upcoming Tournaments Section]
-    Q --> R[Tournament Card 1]
-    Q --> S[Tournament Card 2]
-    R --> K
-    S --> K
-
     A --> T[Bottom Navigation]
     T --> U[Home Tab: Stay]
     T --> V[Discover Tab: Discover Screen]
@@ -358,58 +347,7 @@ flowchart TD
 
 ---
 
-## 7. Tournament Flow
-
-```mermaid
-flowchart TD
-    A[Home: Tournaments] --> B[Tournament List Screen]
-    B --> C[Filter Tabs: All / Active / Upcoming / Completed / My Tournaments]
-    C --> D[Tournament Cards]
-    D --> E[Tap Card: Tournament Detail Screen]
-
-    E --> F[Hero Section: Banner + Status + Name + Prize Pool]
-    F --> G[Details Card: Date, Type, Format, Rounds, Entry]
-    G --> H[Rules Card: Khaleeji Rules Summary]
-    H --> I[Participants Card: Count + Avatar Scroll]
-    I --> J[Bracket Card: If Active]
-
-    E --> K{Join Status}
-    K -->|Not Joined| L{Entry Fee?}
-    L -->|Free| M[Join Tournament Button: Purple]
-    L -->|Paid| N[Join Tournament Button: Gold + Coin Amount]
-    K -->|Joined| O[Withdraw Button: Ghost, Red Text]
-    K -->|Full| P[Tournament Full: Gray, Disabled]
-
-    M --> Q[Deduct Coins if Paid]
-    Q --> R[Add to Participants]
-    R --> S[Show in My Tournaments]
-
-    E --> T[Prize Distribution Section]
-    T --> U[1st: Gold + Amount]
-    T --> V[2nd: Silver + Amount]
-    T --> W[3rd: Bronze + Amount]
-    T --> X[4th: Amount]
-
-    subgraph Tournament Progression
-        Y[Registration Opens]
-        Z[Registration Closes]
-        AA[Check-In Phase]
-        BB[Bracket Generation]
-        CC[Match 1: Team Pair vs Team Pair]
-        DD[Winner Advances]
-        EE[Repeat Until Final]
-        FF[Winner Declared]
-        GG[Prize Distribution]
-        
-        Y --> Z --> AA --> BB --> CC --> DD --> EE --> FF --> GG
-    end
-
-    E --> HH[Tournament Ended: View Results]
-```
-
----
-
-## 8. Profile Flow
+## 7. Profile Flow
 
 ```mermaid
 flowchart TD
@@ -458,12 +396,12 @@ flowchart TD
 
 ---
 
-## 9. Chat Flow
+## 8. Chat Flow
 
 ```mermaid
 flowchart TD
     A[Chat Tab] --> B[Chat List Screen]
-    B --> C[Filter Tabs: All / Rooms / Direct / Tournaments]
+    B --> C[Filter Tabs: All / Rooms / Direct]
     C --> D[Chat Items]
     D --> E[Tap Conversation]
 
@@ -509,7 +447,7 @@ flowchart TD
 
 ---
 
-## 10. Settings Flow
+## 9. Settings Flow
 
 ```mermaid
 flowchart TD
@@ -538,7 +476,6 @@ flowchart TD
     D --> D2[Profile Visibility: Everyone / Followers / Private]
     D --> D3[Notifications]
     D3 --> D3a[Room Invitations Toggle]
-    D3 --> D3b[Tournament Alerts Toggle]
     D3 --> D3c[New Followers Toggle]
     D3 --> D3d[Game Results Toggle]
     D --> D4[Muted Users List]

@@ -18,7 +18,7 @@
 
 Ahmed has played Balout since he was 12 — his father taught him at family gatherings. Now, Ahmed plays weekly with his college friends at a diwaniya. Sometimes they can't all meet in person (someone's traveling, someone's busy), so they want a way to play remotely that still feels like being together.
 
-Ahmed doesn't care about rankings or tournaments. He wants a simple, reliable way to play with his 3 friends, hear their voices, and talk smack from across the city.
+Ahmed doesn't care about rankings or leaderboards. He wants a simple, reliable way to play with his 3 friends, hear their voices, and talk smack from across the city.
 
 ### Goals
 
@@ -71,24 +71,22 @@ Ahmed doesn't care about rankings or tournaments. He wants a simple, reliable wa
 
 ### Faisal's Story
 
-Faisal is serious about Balout. He plays daily — online and in person. He tracks his stats, studies strategies, and wants to be the best. He cares about his ranking, his win rate, and his tournament performance. He wants Bloot to be the platform where real Balout competition happens.
+Faisal is serious about Balout. He plays daily — online and in person. He tracks his stats, studies strategies, and wants to be the best. He cares about his ranking, his win rate, and his competitive performance. He wants Bloot to be the platform where real Balout competition happens.
 
 Faisal hates playing with people who don't take the game seriously. He wants matched opponents, fair play, and visible proof of skill.
 
 ### Goals
 
 1. **See my ranking** — where do I stand?
-2. **Compete in tournaments** — organized, scheduled, with prizes
-3. **Track my stats** — win rate, average score, best partners
-4. **Know the game is fair** — anti-cheat, transparent rules
-5. **Find skilled opponents** — matchmaking based on skill level
+2. **Track my stats** — win rate, average score, best partners
+3. **Know the game is fair** — anti-cheat, transparent rules
+4. **Find skilled opponents** — matchmaking based on skill level
 
 ### Frustrations
 
 - People who quit mid-game
 - Suspected cheating in existing apps
 - No proper ranking systems
-- No organized tournaments
 - Can't see detailed stats about my play history
 
 ### Bloot Features Faisal Needs
@@ -96,7 +94,6 @@ Faisal hates playing with people who don't take the game seriously. He wants mat
 | Feature | Priority | Reason |
 |---------|----------|--------|
 | Ranking system | P0 | Must prove skill |
-| Tournament system | P1 | Competitive outlet |
 | Detailed stats | P0 | Must track performance |
 | Anti-cheat indicators | P0 | Must know game is fair |
 | Skill-based matchmaking | P1 | Better games, less frustration |
@@ -106,7 +103,7 @@ Faisal hates playing with people who don't take the game seriously. He wants mat
 
 - **Profile page must show ranking prominently** — Faisal checks this daily
 - **Stats should be detailed and visual** — charts, graphs, trends
-- **Tournament banners on home screen** — always visible, always exciting
+- **Ranking and stats banners on home screen** — always visible, always motivating
 - **Anti-cheat badge visible on room lobby** — reassures competitive players
 - **Post-game stats** — show more than who won; show strategy breakdown
 
@@ -234,7 +231,6 @@ Sara is Bloot's future player. Today she watches. Tomorrow she plays.
 | Quick Play | P0 | P1 | P2 | — |
 | Voice/Video | P0 | P1 | P0 | P2 |
 | Rankings | P2 | P0 | P1 | P2 |
-| Tournaments | P3 | P0 | P1 | P2 |
 | Streaming | P3 | P3 | P0 | P0 |
 | Chat | P1 | P2 | P0 | P0 |
 | Stats | P2 | P0 | P1 | P2 |

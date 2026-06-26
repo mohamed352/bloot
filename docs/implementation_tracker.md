@@ -24,21 +24,6 @@
 
 ---
 
-### Phase B: Home Tournament Previews + Edge Case Pages
-**Files modified/created:**
-- `lib/features/home/presentation/cubit/home_cubit.dart` — injects `TournamentRepository`, fetches upcoming tournaments (filter `status == 'upcoming'`, cap 3), non-blocking error handling
-- `lib/features/home/presentation/cubit/home_state.dart` — `loaded`/`empty` carry `List<Tournament>? tournaments`
-- `lib/features/home/presentation/pages/home_page.dart` — `_buildTournamentsSection()` with skeletons → real data; `_TournamentCard` uses `tournament.id` for navigation; removed hardcoded `_TournamentPreview` class
-- `lib/features/edge_cases/presentation/pages/loading_page.dart` — new, shimmer skeletons, optional message via `extra`
-- `lib/features/edge_cases/presentation/pages/success_page.dart` — new, animated gold checkmark, optional message via `extra`
-- `lib/config/routes/routes.dart` — added `loading` / `success` route names and paths
-- `lib/config/routes/app_router.dart` — added GoRoutes for loading/success with `extra` message extraction
-- `assets/translations/en.json` & `ar.json` — added `loading_message`, `success_title`, `success_message`, `continue`
-
-**Status:** ✅ Home tournament cards now fetch real data. Loading and Success edge-case pages exist.
-
----
-
 ### Phase C: Edit Profile + Profile About Tab
 **Files modified/created:**
 - `lib/features/profile/domain/entities/user_profile.dart` — added `favoriteMode` field
@@ -98,30 +83,13 @@
 
 ---
 
-### Phase G: Tournament Detail Wiring
-**Files modified/created:**
-- `lib/features/tournament/domain/repositories/tournament_repository.dart` — added `getTournamentById(String id)`
-- `lib/features/tournament/data/repositories/tournament_repository_impl.dart` — implemented `getTournamentById` via remote data source
-- `lib/features/tournament/data/datasources/tournament_remote_data_source.dart` — added `getTournamentById` with Firestore query + fallback to hardcoded list
-- `lib/features/tournament/presentation/cubit/tournament_state.dart` — added `detailLoading`, `detailLoaded`, `detailError` states
-- `lib/features/tournament/presentation/cubit/tournament_cubit.dart` — added `loadTournament(String id)` method
-- `lib/features/tournament/presentation/pages/tournament_detail_page.dart` — complete rewrite of builder: handles all states, shows real `name`, `prize`, `status`, `date`, `participants`, `isJoined`; status badge color adapts; join button shows "View Bracket" if already joined
-- `lib/config/routes/app_router.dart` — tournament detail route calls `loadTournament(id)` instead of `loadTournaments()`
-- Regenerated `tournament_state.freezed.dart` via `build_runner`
-
-**Status:** ✅ Tournament detail page now fetches and displays real tournament data by ID.
-
----
-
 ## Feature Matrix: Real Data vs Mocked
 
 | Feature | Real Data | Mocked / Incomplete | Notes |
 |---|---|---|---|
 | **Auth** | Phone OTP, profile creation | — | `completeProfile` creates full user doc with settings defaults |
-| **Home** | Streams (Firestore), Profile (Firestore), Tournaments (repo) | Hero banner image (Unsplash URL) | Tournament previews fetch from `TournamentRepository` |
 | **Profile** | Header, About tab, Edit Profile, Stats tab, History tab, Achievements | — | Profile feature 100% wired to real data |
 | **Settings** | All toggles + 3 dropdowns persist via SharedPreferences | — | All settings wired |
-| **Tournament** | List queries Firestore `tournaments`, detail fetches by ID, prize distribution from Firestore, bracket from Firestore, join writes to Firestore, participant avatars from user profiles, coin balance from user profile | — | Tournament feature 100% wired |
 | **Chat** | List queries Firestore `conversations`, messages real-time stream, send writes to Firestore, new conversation creation, user search, UI built | Image sending mocked; voice/video call buttons mocked | Chat feature 100% wired to Firestore |
 | **Discover/Streams** | Firestore query for live streams | Stream viewer detail may have gaps | Home and Discover both query `streams` collection |
 | **Room/Game** | UI built, game engine in Cloud Functions | Needs verification of full loop | `game_cubit_test.dart` exists and passes |
@@ -180,14 +148,6 @@ When `AuthRemoteDataSource.completeProfile()` creates a user, it writes:
 - Regenerated `home_state.freezed.dart`, `notification_item_model.freezed.dart` / `.g.dart`, `notifications_state.freezed.dart`, `injection.config.dart` via `build_runner`
 
 **Status:** ✅ Notifications page loads real Firestore data. Home bell badge shows real unread count.
-
----
-
-### Phase I: Tournament List Firestore Integration
-**Files modified/created:**
-- `lib/features/tournament/data/datasources/tournament_remote_data_source.dart` — `getTournaments()` now queries Firestore `tournaments` collection ordered by `createdAt desc`; extracted hardcoded list to `_mockTournaments` constant used as fallback when Firestore empty/unreachable; added `_mapDocToModel` helper shared with `getTournamentById`
-
-**Status:** ✅ Tournament list now queries Firestore. Falls back to mock data if no docs exist. Tournament detail fallback now searches `_mockTournaments` directly.
 
 ---
 
@@ -262,37 +222,6 @@ When `AuthRemoteDataSource.completeProfile()` creates a user, it writes:
 - Regenerated `new_message_state.freezed.dart`, `injection.config.dart` via `build_runner`
 
 **Status:** ✅ Chat is now 100% wired to Firestore. Users can search for other users, start a new direct conversation, send/receive real-time messages, and view conversation list.
-
----
-
-### Phase O: Tournament Bracket & Prize Distribution Wiring
-**Files modified/created:**
-- `lib/features/tournament/domain/entities/tournament.dart` — added `TournamentPrize` (place, amount), `TournamentMatch` (playerA/B names, scores, status, avatars, round, isUserMatch), updated `Tournament` entity with `prizes` and `bracket` fields
-- `lib/features/tournament/data/models/tournament_model.dart` — added `TournamentPrizeModel` and `TournamentMatchModel` as Freezed classes with `fromJson`/`toJson`, updated `TournamentModel` with `prizes` and `bracket` lists
-- `lib/features/tournament/data/datasources/tournament_remote_data_source.dart` — `_mapDocToModel` now reads `prizes` and `bracket` arrays from Firestore; `_mapPrizes` and `_mapBracket` helpers; updated mock data with full bracket (quarter_final ×4, semi_final ×2, final ×1) and prize distributions
-- `lib/features/tournament/presentation/pages/tournament_detail_page.dart` — prize distribution section now iterates `tournament.prizes` dynamically with color mapping by index (1st=secondary, 2nd=darkTextSecondary, 3rd=secondaryDark, 4th+=darkTextMuted); shows `'no_prizes_available'` fallback when empty
-- `lib/features/tournament/presentation/pages/tournament_bracket_page.dart` — complete rewrite: now a `BlocConsumer<TournamentCubit>` that loads tournament by ID, groups matches by round (`quarter_final`, `semi_final`, `final`), renders real `BracketMatchCard` widgets with status parsed from string → `MatchStatus` enum; shows `'bracket_not_available'` empty state; AppBar title shows real tournament name
-- `lib/config/routes/app_router.dart` — `tournamentBracket` route now injects `TournamentCubit` + calls `loadTournament(id)`
-- `assets/translations/en.json` & `ar.json` — added `quarter_final`, `semi_final`, `final`, `no_prizes_available`, `bracket_not_available`
-- Regenerated `tournament_model.freezed.dart` / `.g.dart` via `build_runner`
-
-**Status:** ✅ Tournament prize distribution and bracket visualization now read from Firestore. Mock fallback includes full bracket data. Tournament user journey is complete from list → detail → bracket.
-
----
-
-### Phase P: Tournament Join Firestore Integration
-**Files modified/created:**
-- `lib/features/tournament/domain/entities/tournament.dart` — added `entryFee` (String) and `participantIds` (List<String>) to `Tournament`
-- `lib/features/tournament/data/models/tournament_model.dart` — added `entryFee` and `participantIds` to `TournamentModel`; updated mock data with `entryFee` values ('500', '200', '0', '1,000', '300')
-- `lib/features/tournament/data/datasources/tournament_remote_data_source.dart` — added `firebase_auth.FirebaseAuth` injection; `_mapDocToModel` now reads `entryFee` and `participantIds`, computes `isJoined` dynamically (`participantIds.contains(uid)`); added `joinTournament(String)` with Firestore transaction that checks auth, deduplicates, checks capacity via `_parseMaxParticipants`, adds UID to `participantIds`, updates `participants` count string
-- `lib/features/tournament/domain/repositories/tournament_repository.dart` — added `joinTournament(String)` → `Future<Tournament>`
-- `lib/features/tournament/data/repositories/tournament_repository_impl.dart` — implemented `joinTournament`
-- `lib/features/tournament/presentation/cubit/tournament_cubit.dart` — `joinTournament` now calls `_tournamentRepository.joinTournament()`, catches errors and emits `joinError` with the actual exception message
-- `lib/features/tournament/presentation/pages/tournament_detail_page.dart` — `_showJoinBottomSheet` now passes `tournament.entryFee` (with fallback to '0'); button shows `'view_bracket'` when `isJoined` is true (computed from Firestore participantIds)
-- `lib/features/tournament/presentation/widgets/join_tournament_bottom_sheet.dart` — `entryFee` now displays `'free_entry'.tr()` for '0'/'free_entry'; added optional `balance` parameter (not wired yet); removed hardcoded `'500'` and `'2,450 coins'`
-- Regenerated `tournament_model.freezed.dart` / `.g.dart`, `injection.config.dart` via `build_runner`
-
-**Status:** ✅ Tournament join now writes to Firestore via atomic transaction. `isJoined` is computed dynamically from `participantIds`. Entry fee is real per tournament doc. Participant avatars resolved from user profiles and current coin balance displayed in join bottom sheet.
 
 ---
 
@@ -386,7 +315,6 @@ When `AuthRemoteDataSource.completeProfile()` creates a user, it writes:
 ## Recommended Next Phase: Phase T — Post-MVP Polish & Deep Links
 
 ### Why:
-- Profile, Settings, Notifications, Chat, Tournament, Discover/Streams, and the Room/Game loop are now fully wired.
 - The core MVP feature set is complete. Remaining gaps are primarily UX polish and social features that improve session quality but do not block a playable game.
 
 ### Scope:
@@ -416,7 +344,6 @@ When `AuthRemoteDataSource.completeProfile()` creates a user, it writes:
 - **Spectator mode** — watch streams without playing.
 - **Agora video publisher/subscriber views** — replace placeholder video squares.
 - **Advanced matchmaking / ranked play**.
-- **Automated tournament bracket progression backend**.
 
 ---
 

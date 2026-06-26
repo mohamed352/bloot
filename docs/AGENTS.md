@@ -55,7 +55,6 @@ bloot/
 │   │   ├── rooms/              # Room creation, lobby, private rooms
 │   │   ├── game/               # Baloot game engine, game play UI
 │   │   ├── stream/             # Stream viewing, spectator mode
-│   │   ├── tournaments/        # Tournament list, bracket, join
 │   │   ├── chat/               # DM, room chat, quick messages
 │   │   ├── profile/            # User profile, stats, edit profile
 │   │   └── settings/           # App settings, privacy, about
@@ -144,7 +143,6 @@ Generating UI or implementing features should follow this strict order:
 | 4 | `11_chat_messages.md` | DM, room chat, invitations | Social layer |
 | 5 | `10_profile.md` | Profile, stats, edit | Identity |
 | 5 | `12_settings_edge_cases.md` | Settings, errors, offline | Completion |
-| 6 | `09_tournaments.md` | Tournaments, brackets | Competition, retention |
 
 > **Always** include `00_master_rules.md` as preamble context before any generation.
 

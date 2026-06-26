@@ -1,7 +1,7 @@
 # Bloot — UI-Only Implementation Plan
 
 > **Purpose:** Complete phase-by-phase plan for implementing ALL UI screens, navigation flows, and visual connections as a clickable prototype ready for client review. No backend integration — pure UI/UX with mock data.
-> **Scope:** 37 mobile app screens + shared components + navigation graph.
+> **Scope:** 35 mobile app screens + shared components + navigation graph.
 > **Deliverable:** Fully navigable Flutter app with realistic layouts, mock data, and smooth transitions.
 
 ---
@@ -48,33 +48,27 @@
 | C2 | Room Lobby | `features/room/room_lobby_screen.dart` | `/room/:id` |
 | C3 | Game Play (Landscape) | `features/game/game_play_screen.dart` | `/game/:id` |
 
-### Phase D: Tournaments (2 screens)
-| # | Screen | File | Route |
-|---|--------|------|-------|
-| D1 | Tournament List | `features/tournament/tournament_list_screen.dart` | `/tournaments` (shell) |
-| D2 | Tournament Detail | `features/tournament/tournament_detail_screen.dart` | `/tournament/:id` |
-
-### Phase E: Chat & Social (3 screens)
+### Phase D: Chat & Social (3 screens)
 | # | Screen | File | Route |
 |---|--------|------|-------|
 | E1 | Chat List | `features/chat/chat_list_screen.dart` | `/chat` (shell) |
 | E2 | Direct Message | `features/chat/direct_message_screen.dart` | `/chat/:userId` |
 | E3 | Room Invitation Modal | `features/chat/room_invitation_screen.dart` | `/room-invite/:id` |
 
-### Phase F: Profile (2 screens)
+### Phase E: Profile (2 screens)
 | # | Screen | File | Route |
 |---|--------|------|-------|
 | F1 | User Profile | `features/profile/user_profile_screen.dart` | `/profile` (shell) |
 | F2 | Edit Profile | `features/profile/edit_profile_screen.dart` | `/edit-profile` |
 
-### Phase G: Settings & Legal (3 screens)
+### Phase F: Settings & Legal (3 screens)
 | # | Screen | File | Route |
 |---|--------|------|-------|
 | G1 | Settings | `features/settings/settings_screen.dart` | `/settings` |
 | G2 | Privacy Policy | `features/settings/privacy_policy_screen.dart` | `/privacy` |
 | G3 | Terms of Service | `features/settings/terms_screen.dart` | `/terms` |
 
-### Phase H: Edge Cases (4 screens + overlays)
+### Phase G: Edge Cases (4 screens + overlays)
 | # | Screen | File | Route |
 |---|--------|------|-------|
 | H1 | Error State | `features/edge_cases/error_screen.dart` | `/error` |
@@ -110,7 +104,6 @@ flowchart TD
 
     HOME --> CREATE_ROOM[Create Room]
     HOME --> ROOM_LOBBY[Room Lobby]
-    HOME --> TOURNAMENT_LIST[Tournament List]
     HOME --> WATCH_STREAM[Watch Stream]
 
     DISCOVER --> WATCH_STREAM
@@ -128,8 +121,6 @@ flowchart TD
 
     ROOM_LOBBY --> GAME_PLAY[Game Play Landscape]
     CREATE_ROOM --> ROOM_LOBBY
-
-    TOURNAMENT_LIST --> TOURNAMENT_DETAIL[Tournament Detail]
 
     SETTINGS --> PRIVACY[Privacy Policy]
     SETTINGS --> TERMS[Terms of Service]
@@ -157,8 +148,6 @@ flowchart TD
 | `createRoom` | `/create-room` | root | Full-screen form |
 | `roomLobby` | `/room/:id` | root | Full-screen lobby |
 | `gamePlay` | `/game/:id` | root | Landscape lock |
-| `tournaments` | `/tournaments` | `MainShell` | Tournament list |
-| `tournamentDetail` | `/tournament/:id` | root | Detail view |
 | `chat` | `/chat` | `MainShell` | Conversation list |
 | `directMessage` | `/chat/:userId` | root | DM thread |
 | `roomInvitation` | `/room-invite/:id` | root | Invite modal page |
@@ -189,7 +178,6 @@ flowchart TD
 | Component | Location | Usage |
 |-----------|----------|-------|
 | `StreamCard` | `features/discover/widgets/stream_card.dart` | Discover + Home stream items |
-| `TournamentCard` | `features/tournament/widgets/tournament_card.dart` | Tournament list items |
 | `ChatListItem` | `features/chat/widgets/chat_list_item.dart` | Chat conversation rows |
 | `MessageBubble` | `features/chat/widgets/message_bubble.dart` | DM purple/dark bubbles |
 | `PlayerVideoSquare` | `features/room/widgets/player_video_square.dart` | Lobby + game video seat |
@@ -248,14 +236,13 @@ flowchart TD
 - [ ] **Home Screen:**
   - Top bar: avatar, name+level, coins, notification bell
   - Hero banner: "Baloot Live" with gradient, CTA
-  - Quick Actions: 4 cards (Play, Voice, Live, Tournaments) with navigation
+  - Quick Actions: 3 cards (Play, Voice, Live) with navigation
   - Live Now: vertical list of `StreamCard`s with LIVE badge, viewer count
-  - Upcoming Tournaments: horizontal scroll of `TournamentCard`s
   - Empty state when no streams
   - Pull-to-refresh skeleton
 - [ ] **Discover Streams:**
   - Search bar
-  - Filter tabs: Popular, New, Top Rated, Tournaments, Voice Only, Following
+  - Filter tabs: Popular, New, Top Rated, Voice Only, Following
   - Advanced filter bottom sheet
   - 2-column stream card grid
   - Infinite scroll pagination (mock)
@@ -311,32 +298,11 @@ flowchart TD
 
 ---
 
-### Phase 4: Tournaments (Day 4)
-**Goal:** Tournament browsing and detail view complete.
-
-- [ ] **Tournament List:**
-  - Filter tabs: All, Active, Upcoming, Completed, My Tournaments
-  - Tournament cards: banner, name, prize, participants, status badge
-  - Gold border for premium tournaments
-  - Empty state
-- [ ] **Tournament Detail:**
-  - Hero banner with name + status + prize pool
-  - Details card: date, type, format, rounds, entry fee
-  - Rules card (Khaleeji rules summary)
-  - Participants: avatar scroll + count
-  - Bracket visualization (tree diagram)
-  - Join/Withdraw button states (Free/Paid/Full/Joined)
-  - Prize distribution: 1st Gold, 2nd Silver, 3rd Bronze
-
-**QA:** Tap tournament → Detail. Tap Join → button changes to Withdraw. Toggle tabs → content filters.
-
----
-
-### Phase 5: Chat & Profile (Day 4–5)
+### Phase 4: Chat & Profile (Day 4–5)
 **Goal:** Social features fully visual.
 
 - [ ] **Chat List:**
-  - Filter tabs: All, Rooms, Direct, Tournaments
+  - Filter tabs: All, Rooms, Direct
   - Conversation rows: avatar, name, last message, unread badge, timestamp
   - Compose button → search users
   - Tap → Direct Message
@@ -368,7 +334,7 @@ flowchart TD
 
 ---
 
-### Phase 6: Settings & Edge Cases (Day 5)
+### Phase 5: Settings & Edge Cases (Day 5)
 **Goal:** All auxiliary screens polish the experience.
 
 - [ ] **Settings Screen:**
@@ -414,7 +380,6 @@ class MockStreamRepository {
 
 **Mock data needed for:**
 - Streams (8–10 items)
-- Tournaments (6 items: live, upcoming, completed)
 - Chat conversations (5 items)
 - DM messages (20 items)
 - Profile stats + game history (10 items)
@@ -469,7 +434,7 @@ Before sending to client, verify:
 - [ ] **Purple/Gold:** Primary actions purple, wins/achievements/coins gold
 - [ ] **Typography:** Cairo font, readable sizes, no overflows on small screens
 - [ ] **LIVE Badge:** Red, pulsing, visible on every stream-related screen
-- [ ] **Loading States:** Skeletons on Home, Discover, Chat, Tournaments
+- [ ] **Loading States:** Skeletons on Home, Discover, Chat
 - [ ] **Empty States:** Custom illustration + message + CTA on all list screens
 - [ ] **Error States:** Network error triggers offline banner + retry
 - [ ] **Responsive:** No overflow on iPhone SE (375w) or Pixel 8 (412w)
@@ -543,12 +508,6 @@ lib/
 │   │       ├── game_table.dart
 │   │       ├── trick_area.dart
 │   │       └── score_display.dart
-│   ├── tournament/
-│   │   ├── tournament_list_screen.dart
-│   │   ├── tournament_detail_screen.dart
-│   │   └── widgets/
-│   │       ├── tournament_card.dart
-│   │       └── bracket_widget.dart
 │   ├── chat/
 │   │   ├── chat_list_screen.dart
 │   │   ├── direct_message_screen.dart

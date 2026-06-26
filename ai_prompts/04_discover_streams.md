@@ -25,9 +25,8 @@ All UI screens MUST be generated in **English only**. Add RTL implementation not
   - "Popular" (active, purple underline)
   - "New"
   - "Top Rated"
-  - "Tournaments"
   - "Voice Only"
-  - Following"
+  - "Following"
 - Advanced filter button (top right): Opens bottom sheet
   - Room type: Baloot / Streaming / Competitive / All
   - Status: Playing / Waiting / Finished
@@ -38,7 +37,7 @@ All UI screens MUST be generated in **English only**. Add RTL implementation not
     - Large thumbnail (16:9 ratio)
     - LIVE badge (top left, red pulse)
     - Viewer count (top right, with eye icon)
-    - Stream type badge: "Baloot" (purple) / "Stream" (gold) / "Tournament" (green)
+    - Stream type badge: "Baloot" (purple) / "Stream" (gold)
     - Host avatar (small circle) + Host name (below thumbnail)
     - Stream title (1-2 lines max, truncate)
     - Gold "Support" count with star icon
@@ -66,7 +65,7 @@ All UI screens MUST be generated in **English only**. Add RTL implementation not
 - Discover should feel like browsing a live platform
 - LIVE badges must be immediately visible on every card
 - Stream thumbnails should auto-play preview on hover (when implemented)
-- Purple for game-related badges, Gold for streaming/VIP, Green for tournaments
+- Purple for game-related badges, Gold for streaming/VIP
 - Search should be fast and responsive
 - Filters should be easily accessible but not overwhelming
 - All cards should have subtle hover/press animation

@@ -502,136 +502,7 @@ STREAM ENDS
 
 ---
 
-## 6. Tournaments
-
-### Flow Diagram
-
-```
-TOURNAMENT LIFECYCLE
-  │
-  ├─► ADMIN creates tournament (Cloud Console or admin app)
-  │     /tournaments/{tournamentId} = {
-  │       name, description, type: "single_elim" | "double_elim" | "swiss",
-  │       entryFee: 0 | coins, prizePool: coins,
-  │       maxPlayers: 8 | 16 | 32 | 64,
-  │       registeredPlayers: [],
-  │       status: "upcoming",
-  │       startDate, checkInDate,
-  │       rounds: [], currentRound: 0,
-  │       brackets: { ... },
-  │       rules: { gameVariant: "standard", timePerMove: 15 },
-  │       createdAt
-  │     }
-
-PLAYER REGISTERS
-  │
-  ├─► Player taps "Join Tournament" on detail page
-  │     │
-  │     ├─► Validate:
-  │     │     ├─► Tournament status == "upcoming"?
-  │     │     │     └─► No ──► "التسجيل مغلق"
-  │     │     ├─► registeredPlayers.length < maxPlayers?
-  │     │     │     └─► No ──► "البطولة ممتلئة"
-  │     │     ├─► Player not already registered?
-  │     │     │     └─► Already registered ──► "أنت مسجل بالفعل"
-  │     │     ├─► Player coins >= entryFee?
-  │     │     │     └─► No ──► "رصيدك غير كافٍ" → inline purchase
-  │     │     └─► All checks pass ──► Continue
-  │     │
-  │     ├─► Firestore transaction:
-  │     │     1. Deduct entryFee from player coins
-  │     │     2. Add player to registeredPlayers array
-  │     │     3. Add prizePool += entryFee (if applicable)
-  │     │
-  │     ├─► Schedule Cloud Function: checkInReminder(tournamentId, uid)
-  │     └─► Show confirmation + calendar reminder toggle
-
-CHECK-IN PHASE (30 min before start)
-  │
-  ├─► Send push notification to registered players
-  ├─► Player taps "Check In" on bracket page
-  │     ├─► Update /tournaments/{id}/registeredPlayers/{index}.checkedIn = true
-  │     ├─► If not checked in by start time ──► Auto-drop, refund entry fee
-  │     └─► Replace with waitlisted player (first come first served)
-
-BRACKET GENERATION (at start time)
-  │
-  ├─► Cloud Function: generateBracket(tournamentId)
-  │     ├─► Seed players by ELO rating
-  │     ├─► Generate single-elimination or Swiss pairings
-  │     ├─► Create /tournaments/{id}/matches/{matchId} for each pairing
-  │     │     { matchId, round, player1Uid, player2Uid + teammates,
-  │     │       status: "pending", roomId: null, winner: null }
-  │     ├─► Update tournament status to "active"
-  │     └─► Push notification: "البطولة تبدأ الآن!"
-
-MATCH EXECUTION
-  │
-  ├─► Match assigned notification sent to players
-  │     ├─► Players tap "Enter Match" in bracket view
-  │     ├─► Room auto-created for match:
-  │     │     /rooms/{roomId} = { ...same as regular room, tournamentId, matchId }
-  │     ├─► Players join room (4 total for Baloot — 2v2)
-  │     ├─► Game plays as normal (see Game Lifecycle section)
-  │     └─► Game ends:
-  │           ├─► Update match winner
-  │           ├─► Update bracket: advance winner
-  │           └─► If tournament round complete ──► Generate next round pairings
-
-TOURNAMENT END
-  │
-  ├─► Final match completed
-  │     ├─► Update tournament status to "completed"
-  │     ├─► Calculate final rankings
-  │     ├─► Distribute prizes via Cloud Function:
-  │     │     1st place: 50% of prizePool
-  │     │     2nd place: 30%
-  │     │     3rd-4th: 10% each (for 32+ player tournaments)
-  │     ├─► Update player stats: tournamentWins, earnings, ELO
-  │     ├─► Generate trophy image (dynamic card)
-  │     └─► Push notification: "فزت في البطولة! 🏆" / "حظاً أوفر في المرة القادمة"
-```
-
-### Tournament Match Decision Tree
-
-```
-Is player ready for match?
-  │
-  ├─► Checked in?
-  │     ├─► No ──► Auto-drop, refund entry fee
-  │     └─► Yes ──► Continue
-  │
-  ├─► Match room available?
-  │     ├─► No ──► Show "جاري إعداد الغرفة..." spinner
-  │     └─► Yes ──► Continue
-  │
-  ├─► All 4 players present?
-  │     ├─► No ──► Wait 2 min timeout, then auto-win for present team
-  │     └─► Yes ──► Start game
-  │
-  ├─► Game completed?
-  │     ├─► Disconnect ──► Resume if reconnects in 5 min; else forfeit
-  │     └─► Yes ──► Update bracket
-  │
-  └─► Tournament round complete?
-        ├─► No ──► Wait for other matches
-        └─► Yes ──► Generate next round pairings
-```
-
-### Edge Cases
-
-| Case | Handling |
-|---|---|
-| Player doesn't check in | Auto-drop at deadline; waitlist player promoted; entry fee refunded |
-| 4-player team with 1 AFK | AI takes over; team plays 3v4 at disadvantage |
-| Match dispute (cheating claim) | Replay log stored server-side; admin review queue |
-| Tournament with odd number of players | Highest-seeded player gets BYE in round 1 |
-| Prize distribution failure | Cloud Function retries; manual admin override possible |
-| Bracket reshuffling mid-round | Not allowed once round starts; only between rounds |
-
----
-
-## 7. Notifications
+## 6. Notifications
 
 ### Notification Types & Triggers
 
@@ -639,14 +510,11 @@ Is player ready for match?
 |---|---|---|---|---|
 | Room Invite | Friend invites player | Push + In-app | High | 5 min |
 | Game Starting | All players ready in room | Push + In-app | High | 30s |
-| Tournament Check-in | 30 min before start | Push + In-app | High | 30 min |
-| Tournament Match | Match assigned in bracket | Push + In-app | High | 5 min |
 | Streamer Live | Followed streamer goes live | Push | Normal | 15 min |
 | Chat Message | DM received | In-app (Push if offline) | Normal | No expiry |
 | Gift Received | Viewer sends gift | In-app | Normal | No expiry |
 | Friend Request | New friend request | Push + In-app | Normal | No expiry |
 | Level Up | Player reaches new level | In-app | Low | No expiry |
-| Tournament Result | Tournament concludes | Push + In-app | Normal | 1 hour |
 
 ### Notification Flow
 
@@ -654,7 +522,7 @@ Is player ready for match?
 EVENT TRIGGER
   │
   ├─► Cloud Function triggered by Firestore write
-  │     e.g., onRoomInvite, onGameStart, onTournamentCheckIn
+  │     e.g., onRoomInvite, onGameStart
   │
   ├─► Compose notification payload
   │     {
@@ -675,7 +543,6 @@ EVENT TRIGGER
   ├─► User taps notification
   │     ├─► Room invite ──► Deep link opens room lobby (or auth if logged out)
   │     ├─► Game start ──► Deep link opens game play screen
-  │     ├─► Tournament ──► Deep link opens tournament bracket
   │     ├─► Stream live ──► Deep link opens stream viewer
   │     └─► DM ──► Deep link opens chat conversation
   │
@@ -692,19 +559,17 @@ EVENT TRIGGER
 |---|---|
 | `bloot://room/{roomId}` | Room Lobby |
 | `bloot://game/{gameId}` | Game Play |
-| `bloot://tournament/{id}` | Tournament Detail |
 | `bloot://stream/{streamId}` | Stream Viewer |
 | `bloot://chat/{conversationId}` | Chat Conversation |
 | `bloot://profile/{uid}` | Profile View |
 | `https://bloot.app/r/{roomId}` | Universal link (room) |
-| `https://bloot.app/t/{tournamentId}` | Universal link (tournament) |
 
 ### Edge Cases
 
 | Case | Handling |
 |---|---|
 | User taps notification while logged out | Deep link stored; auth flow first; then redirect to target |
-| Multiple notifications stacked | Collapse by type; show latest only per room/tournament |
+| Multiple notifications stacked | Collapse by type; show latest only per room |
 | iOS notification service extension | Rich notification with game card preview |
 | Android notification channel | Separate channels: Game (high), Social (default), Promotional (low) |
 | Rate limiting | Max 10 push notifications per user per hour (excluding game-start) |

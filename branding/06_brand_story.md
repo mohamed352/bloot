@@ -6,7 +6,7 @@
 
 Not chess. Not poker. Not backgammon. Balout — بلوت — is the card game that defines social gatherings from Kuwait to Oman, from Riyadh to Dubai. It's played in diwaniyas after Isha prayer, during Ramadan nights that stretch until Fajr, in office breaks, at family gatherings, and in dedicated Balout halls.
 
-Every Gulf citizen has a Balout story. The time their uncle called "سنة" on the last hand. The tournament they won at the diwaniya. The friend who always bids too high. The teammate who reads the game like no one else.
+Every Gulf citizen has a Balout story. The time their uncle called "سنة" on the last hand. The big game they won at the diwaniya. The friend who always bids too high. The teammate who reads the game like no one else.
 
 And yet — the digital Balout experience has been an embarrassment. Clunky interfaces. No voice. No video. No way to watch. No community. No streaming. No sense that this game — this **ritual** — deserves a platform that treats it with respect.
 
@@ -26,7 +26,7 @@ We're not digitizing a game. We're bringing the diwaniya online. The voice, the 
 
 **Become the #1 Balout platform in the Gulf — and beyond.**
 
-Every Balout player in the Gulf should know Bloot. Every gathering should have a Bloot room. Every streamer should broadcast on Bloot. Every tournament should run on Bloot. And when the world discovers Balout, Bloot is where they'll learn it.
+Every Balout player in the Gulf should know Bloot. Every gathering should have a Bloot room. Every streamer should broadcast on Bloot. Every competitive match should run on Bloot. And when the world discovers Balout, Bloot is where they'll learn it.
 
 ---
 
@@ -46,7 +46,7 @@ Bloot amplifies this. Voice, video, chat, streaming — every feature exists to 
 
 > Every hand has a strategy. Every game has a winner. Every player wants to be the best.
 
-Bloot celebrates competition. Rankings, tournaments, stats, leaderboards — we give players the tools to prove themselves and track their progress. But competition is joyful, not toxic. We win with class and lose with dignity.
+Bloot celebrates competition. Rankings, stats, leaderboards — we give players the tools to prove themselves and track their progress. But competition is joyful, not toxic. We win with class and lose with dignity.
 
 **Design implication:** Scores are always visible. Rankings are prominent. Gold accents mark achievements. Winning feels meaningful.
 

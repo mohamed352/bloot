@@ -177,7 +177,7 @@ darkOnly: true
 
 ## Overview
 
-Bloot is a premium Baloot social platform — live voice, video, streaming, and tournaments. The design philosophy centers on **Premium Dark Social Gaming**: deep blacks, rich purple accents, gold highlights, and an immersive card-room atmosphere. It feels like entering an exclusive card room — sophisticated, social, and alive.
+Bloot is a premium Baloot social platform — live voice, video, and streaming. The design philosophy centers on **Premium Dark Social Gaming**: deep blacks, rich purple accents, gold highlights, and an immersive card-room atmosphere. It feels like entering an exclusive card room — sophisticated, social, and alive.
 
 **Key Principles:**
 - Social First: Voice, video, and chat always accessible
@@ -318,7 +318,7 @@ Bloot is a premium Baloot social platform — live voice, video, streaming, and 
 - Radius: Full rounded
 - Shadow: Gold button shadow
 - Active state: `scale-[0.97]`
-- Use for: Join actions, game start, tournament entry
+- Use for: Join actions and game start
 
 ### Ghost Button
 - Background: Transparent

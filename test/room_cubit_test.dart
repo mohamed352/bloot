@@ -168,8 +168,12 @@ void main() {
       'emits created state on success',
       build: buildCubit,
       setUp: () {
-        when(() => roomRepository.joinRoomByCode('CODE123'))
-            .thenAnswer((_) async => room);
+        when(
+          () => roomRepository.joinRoomByCode(
+            'CODE123',
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => room);
       },
       act: (cubit) => cubit.joinRoomByCode('CODE123'),
       expect: () => [
@@ -182,8 +186,12 @@ void main() {
       'emits error on RoomException',
       build: buildCubit,
       setUp: () {
-        when(() => roomRepository.joinRoomByCode('CODE123'))
-            .thenThrow(const RoomException('Room full'));
+        when(
+          () => roomRepository.joinRoomByCode(
+            'CODE123',
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(const RoomException('Room full'));
       },
       act: (cubit) => cubit.joinRoomByCode('CODE123'),
       expect: () => [

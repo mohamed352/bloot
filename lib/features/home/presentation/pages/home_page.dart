@@ -15,7 +15,6 @@ import 'package:bloot/core/constants/app_radius.dart';
 import 'package:bloot/features/home/domain/entities/home_stream.dart';
 import 'package:bloot/features/home/presentation/cubit/home_cubit.dart';
 import 'package:bloot/features/home/presentation/cubit/home_state.dart';
-import 'package:bloot/features/tournament/domain/entities/tournament.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -64,8 +63,8 @@ class HomePage extends StatelessWidget {
                                     context.pushNamed(RouteNames.notifications),
                               ),
                               if (state.maybeWhen(
-                                loaded: (profile, streams, tournaments, count) => count > 0,
-                                empty: (profile, tournaments, count) => count > 0,
+                                loaded: (profile, streams, count) => count > 0,
+                                empty: (profile, count) => count > 0,
                                 orElse: () => false,
                               ))
                                 Positioned(
@@ -239,8 +238,8 @@ class HomePage extends StatelessWidget {
                           LayoutBuilder(
                             builder: (context, constraints) {
                               final cardWidth =
-                                  (constraints.maxWidth - 3 * AppSpacing.md) /
-                                  4;
+                                  (constraints.maxWidth - 2 * AppSpacing.md) /
+                                  3;
                               return Row(
                                 children: [
                                   SizedBox(
@@ -276,19 +275,6 @@ class HomePage extends StatelessWidget {
                                       color: ColorManager.live,
                                       onTap: () => context.pushNamed(
                                         RouteNames.discover,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: AppSpacing.md),
-                                  SizedBox(
-                                    width: cardWidth,
-                                    child: _QuickActionCard(
-                                      icon: Icons.emoji_events_rounded,
-                                      title: 'tournaments'.tr(),
-                                      subtitle: 'join_competitions'.tr(),
-                                      color: ColorManager.secondary,
-                                      onTap: () => context.pushNamed(
-                                        RouteNames.tournamentsTab,
                                       ),
                                     ),
                                   ),
@@ -383,43 +369,6 @@ class HomePage extends StatelessWidget {
                   ),
                   // Live streams content based on state
                   _buildStreamsSection(state),
-                  // Upcoming Tournaments header
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsetsDirectional.only(
-                        start: 16,
-                        end: 16,
-                        top: 24,
-                        bottom: 12,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'upcoming_tournaments'.tr(),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: ColorManager.darkTextPrimary,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () =>
-                                context.pushNamed(RouteNames.tournamentsTab),
-                            child: Text(
-                              'view_all'.tr(),
-                              style: const TextStyle(
-                                color: ColorManager.primary,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  _buildTournamentsSection(state),
                   const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
                 ],
               ),
@@ -444,13 +393,13 @@ class HomePage extends StatelessWidget {
           childCount: 3,
         ),
       ),
-      loaded: (profile, streams, tournaments, count) => SliverList(
+      loaded: (profile, streams, count) => SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) => _StreamCard(stream: streams[index]),
           childCount: streams.length,
         ),
       ),
-      empty: (profile, tournaments, count) => SliverToBoxAdapter(
+      empty: (profile, count) => SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: EmptyStateWidget(
@@ -474,58 +423,6 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildTournamentsSection(HomeState state) {
-    final tournaments = state.maybeWhen(
-      loaded: (profile, streams, tournaments, count) => tournaments,
-      empty: (profile, tournaments, count) => tournaments,
-      orElse: () => null,
-    );
-
-    if (state is HomeError) {
-      return const SliverToBoxAdapter(child: SizedBox.shrink());
-    }
-
-    if (state is HomeLoading || tournaments == null) {
-      return SliverToBoxAdapter(
-        child: SizedBox(
-          height: 180,
-          child: ListView.separated(
-            padding: const EdgeInsetsDirectional.symmetric(
-              horizontal: AppSpacing.screenHorizontal,
-            ),
-            scrollDirection: Axis.horizontal,
-            itemCount: 3,
-            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
-            itemBuilder: (context, index) => const SkeletonCard(
-              height: 180,
-              width: 220,
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (tournaments.isEmpty) {
-      return const SliverToBoxAdapter(child: SizedBox.shrink());
-    }
-
-    return SliverToBoxAdapter(
-      child: SizedBox(
-        height: 180,
-        child: ListView.separated(
-          padding: const EdgeInsetsDirectional.symmetric(
-            horizontal: AppSpacing.screenHorizontal,
-          ),
-          scrollDirection: Axis.horizontal,
-          itemCount: tournaments.length,
-          separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
-          itemBuilder: (context, index) => _TournamentCard(
-            tournament: tournaments[index],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _UserAvatar extends StatelessWidget {
@@ -536,8 +433,8 @@ class _UserAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final profile = state.maybeWhen(
-      loaded: (profile, streams, tournaments, count) => profile,
-      empty: (profile, tournaments, count) => profile,
+      loaded: (profile, streams, count) => profile,
+      empty: (profile, count) => profile,
       orElse: () => null,
     );
 
@@ -557,8 +454,8 @@ class _UserInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final profile = state.maybeWhen(
-      loaded: (profile, streams, tournaments, count) => profile,
-      empty: (profile, tournaments, count) => profile,
+      loaded: (profile, streams, count) => profile,
+      empty: (profile, count) => profile,
       orElse: () => null,
     );
 
@@ -865,123 +762,4 @@ class _StreamCard extends StatelessWidget {
   }
 }
 
-class _TournamentCard extends StatelessWidget {
-  const _TournamentCard({required this.tournament});
 
-  final Tournament tournament;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.pushNamed(
-        RouteNames.tournamentDetail,
-        pathParameters: {'id': tournament.id},
-      ),
-      child: Container(
-        width: 220,
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: ColorManager.darkSurface,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(
-            color: tournament.isPremium
-                ? ColorManager.secondary.withValues(alpha: 0.4)
-                : ColorManager.darkBorderSoft,
-            width: tournament.isPremium ? 1.5 : 1,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    tournament.name.tr(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: ColorManager.darkTextPrimary,
-                    ),
-                  ),
-                ),
-                if (tournament.isPremium)
-                  const Icon(
-                    Icons.workspace_premium_rounded,
-                    color: ColorManager.secondary,
-                    size: 16,
-                  ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              tournament.date.tr(),
-              style: const TextStyle(
-                fontSize: 12,
-                color: ColorManager.darkTextSecondary,
-              ),
-            ),
-            const Spacer(),
-            Row(
-              children: [
-                const Icon(
-                  Icons.emoji_events_rounded,
-                  size: 14,
-                  color: ColorManager.secondary,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  tournament.prize,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: ColorManager.secondary,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  tournament.participants,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: ColorManager.darkTextMuted,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            // Join button (gold)
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => context.pushNamed(
-                  RouteNames.tournamentDetail,
-                  pathParameters: {'id': tournament.id},
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorManager.secondary.withValues(
-                    alpha: 0.2,
-                  ),
-                  foregroundColor: ColorManager.secondary,
-                  elevation: 0,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  textStyle: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                child: Text('join'.tr()),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

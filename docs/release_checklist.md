@@ -38,7 +38,6 @@ pass to ship a production-ready app and backend.
      - `min_supported_version` (string)
      - `min_android_version` (string)
      - `min_ios_version` (string)
-     - `enable_tournaments` (boolean, `true`)
      - `enable_streaming` (boolean, `true`)
      - `agora_app_id` (string) — optional; when empty the compiled
        `AgoraConfig.appId` fallback is used.
