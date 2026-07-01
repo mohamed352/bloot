@@ -31,6 +31,7 @@ class RoomCubit extends Cubit<RoomState> {
   bool _chatOpen = false;
   String? _joinedAgoraChannelName;
   Future<void>? _pendingAgoraJoin;
+  bool _gameStartedEmitted = false;
 
   void _emitMergedState() {
     final room = _currentRoom;
@@ -86,13 +87,17 @@ class RoomCubit extends Cubit<RoomState> {
     _audioVolumeSubscription?.cancel();
     _currentRoom = null;
     _chatMessages = [];
+    _gameStartedEmitted = false;
 
     _roomSubscription = _roomRepository.watchRoom(roomId).listen(
       (room) {
         _currentRoom = room;
 
-        // Auto-navigate when game starts
-        if (room.status == RoomStatus.playing && room.gameId != null) {
+        // Auto-navigate when game starts, but only once per room session.
+        if (room.status == RoomStatus.playing &&
+            room.gameId != null &&
+            !_gameStartedEmitted) {
+          _gameStartedEmitted = true;
           emit(RoomState.gameStarted(gameId: room.gameId!));
           return;
         }
@@ -176,6 +181,15 @@ class RoomCubit extends Cubit<RoomState> {
     });
   }
 
+  Future<bool> isPasswordRequired(String inviteCode) async {
+    try {
+      return await _roomRepository.isPasswordRequired(inviteCode);
+    } catch (e) {
+      AppLogger.error('Failed to check password requirement', error: e);
+      return false;
+    }
+  }
+
   Future<void> joinRoomByCode(
     String inviteCode, {
     String? password,
@@ -203,8 +217,13 @@ class RoomCubit extends Cubit<RoomState> {
     final currentState = state;
     emit(const RoomState.loading());
     try {
-      await _roomRepository.startGame(roomId);
-      // Real-time listener will pick up status change and emit gameStarted
+      final gameId = await _roomRepository.startGame(roomId);
+      // Navigate immediately. The stream listener is guarded by
+      // [_gameStartedEmitted] so it will not push a second GamePlayPage.
+      if (!_gameStartedEmitted) {
+        _gameStartedEmitted = true;
+        emit(RoomState.gameStarted(gameId: gameId));
+      }
     } on RoomException catch (e) {
       emit(RoomState.error(message: e.message));
       if (currentState is RoomLoaded) emit(currentState);
@@ -308,6 +327,15 @@ class RoomCubit extends Cubit<RoomState> {
     try {
       await _roomRepository.leaveRoom(roomId);
       await _agoraService.leaveChannel();
+      // Stop listening to the room before emitting the initial state so a
+      // deleted/empty room does not surface a ROOM_NOT_FOUND error after exit.
+      await _roomSubscription?.cancel();
+      _roomSubscription = null;
+      await _chatSubscription?.cancel();
+      _chatSubscription = null;
+      await _audioVolumeSubscription?.cancel();
+      _audioVolumeSubscription = null;
+      _joinedAgoraChannelName = null;
       emit(const RoomState.initial());
     } on RoomException catch (e) {
       emit(RoomState.error(message: e.message));

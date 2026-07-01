@@ -24,8 +24,9 @@ class ChatRemoteDataSource {
       if (uid == null) return [];
 
       final snapshot = await _firestore
+          .collection('users')
+          .doc(uid)
           .collection('conversations')
-          .where('participantUids', arrayContains: uid)
           .orderBy('updatedAt', descending: true)
           .limit(50)
           .get();
@@ -126,11 +127,39 @@ class ChatRemoteDataSource {
       'readBy': [uid],
     });
 
-    // Update conversation lastMessage and updatedAt for the list view
-    await _firestore.collection('conversations').doc(conversationId).update({
-      'lastMessage': message,
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+    // Update main conversation and per-user metadata for the list view
+    final conversationDoc =
+        await _firestore.collection('conversations').doc(conversationId).get();
+    final participantUids = List<String>.from(
+      (conversationDoc.data()?['participantUids'] as List<dynamic>?) ?? [],
+    );
+
+    final batch = _firestore.batch();
+    batch.update(
+      _firestore.collection('conversations').doc(conversationId),
+      {
+        'lastMessage': message,
+        'updatedAt': FieldValue.serverTimestamp(),
+      },
+    );
+
+    for (final participantUid in participantUids) {
+      final isSender = participantUid == uid;
+      batch.update(
+        _firestore
+            .collection('users')
+            .doc(participantUid)
+            .collection('conversations')
+            .doc(conversationId),
+        {
+          'lastMessage': message,
+          'updatedAt': FieldValue.serverTimestamp(),
+          'unread': isSender ? 0 : FieldValue.increment(1),
+        },
+      );
+    }
+
+    await batch.commit();
   }
 
   /// Searches users by [query] across displayName and username.
@@ -194,16 +223,65 @@ class ChatRemoteDataSource {
       final otherUserDoc =
           await _firestore.collection('users').doc(otherUserId).get();
       final otherData = otherUserDoc.data() ?? {};
+      final otherName = otherData['displayName'] ?? 'Unknown';
+      final otherAvatar = otherData['avatarUrl'];
 
-      await conversationRef.set({
+      final currentUserDoc =
+          await _firestore.collection('users').doc(uid).get();
+      final currentData = currentUserDoc.data() ?? {};
+      final currentName = currentData['displayName'] ?? 'Unknown';
+      final currentAvatar = currentData['avatarUrl'];
+
+      final batch = _firestore.batch();
+
+      // Main conversation doc for messages and participant lookup
+      batch.set(conversationRef, {
         'participantUids': [uid, otherUserId],
-        'name': otherData['displayName'] ?? 'Unknown',
-        'avatarUrl': otherData['avatarUrl'],
+        'name': otherName,
+        'avatarUrl': otherAvatar,
         'lastMessage': '',
         'updatedAt': FieldValue.serverTimestamp(),
         'unread': 0,
         'type': 'direct',
       });
+
+      // Per-user metadata for secure list queries
+      batch.set(
+        _firestore
+            .collection('users')
+            .doc(uid)
+            .collection('conversations')
+            .doc(conversationId),
+        {
+          'id': conversationId,
+          'name': otherName,
+          'avatarUrl': otherAvatar,
+          'lastMessage': '',
+          'updatedAt': FieldValue.serverTimestamp(),
+          'unread': 0,
+          'type': 'direct',
+          'participantUids': [uid, otherUserId],
+        },
+      );
+      batch.set(
+        _firestore
+            .collection('users')
+            .doc(otherUserId)
+            .collection('conversations')
+            .doc(conversationId),
+        {
+          'id': conversationId,
+          'name': currentName,
+          'avatarUrl': currentAvatar,
+          'lastMessage': '',
+          'updatedAt': FieldValue.serverTimestamp(),
+          'unread': 0,
+          'type': 'direct',
+          'participantUids': [uid, otherUserId],
+        },
+      );
+
+      await batch.commit();
     }
 
     return _mapDocToModel(await conversationRef.get());

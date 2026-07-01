@@ -29,7 +29,7 @@ class SeatWidget extends StatefulWidget {
     required this.label,
     required this.position,
     this.isCreator = false,
-    this.roomId,
+    this.inviteCode,
     this.onKick,
   });
 
@@ -37,7 +37,7 @@ class SeatWidget extends StatefulWidget {
   final String label;
   final SeatPosition position;
   final bool isCreator;
-  final String? roomId;
+  final String? inviteCode;
   final ValueChanged<String>? onKick;
 
   @override
@@ -147,10 +147,10 @@ class _SeatWidgetState extends State<SeatWidget> {
                 const SizedBox(height: 4),
                 TextButton(
                   onPressed: () {
-                    if (widget.roomId != null) {
+                    if (widget.inviteCode != null) {
                       Share.share(
                         LocaleKeys.shareRoomMessage.tr(
-                          namedArgs: {'code': widget.roomId!},
+                          namedArgs: {'code': widget.inviteCode!},
                         ),
                       );
                     }

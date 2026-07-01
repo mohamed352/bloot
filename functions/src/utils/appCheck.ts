@@ -7,6 +7,14 @@ import * as functions from 'firebase-functions';
  * defense-in-depth check for sensitive functions.
  */
 export function requireAppCheck(request: functions.https.CallableRequest<unknown>) {
+  // Skip App Check verification when running against the Firebase emulator
+  // suite. The Flutter client does not activate App Check in emulator mode, so
+  // callable requests from local development will not include an App Check
+  // token.
+  if (process.env.FUNCTIONS_EMULATOR) {
+    return;
+  }
+
   if (!request.app?.token?.appId) {
     throw new functions.https.HttpsError(
       'permission-denied',

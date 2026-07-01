@@ -30,6 +30,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
   bool _spectatorsOn = true;
   final _nameController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isPasswordValid = false;
 
   final _roomTypes = [
     _RoomTypeData(
@@ -53,10 +54,29 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _nameController.addListener(_onFormChanged);
+    _passwordController.addListener(_onFormChanged);
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _onFormChanged() {
+    if (_selectedType == 0) {
+      final password = _passwordController.text.trim();
+      final isValid = password.isNotEmpty && password.length >= 4;
+      if (isValid != _isPasswordValid) {
+        setState(() => _isPasswordValid = isValid);
+      }
+    } else if (!_isPasswordValid) {
+      setState(() => _isPasswordValid = true);
+    }
   }
 
   @override
@@ -131,7 +151,12 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                       final isSelected = e.key == _selectedType;
                       final isLiveStream = e.key == 2;
                       return GestureDetector(
-                        onTap: () => setState(() => _selectedType = e.key),
+                        onTap: () {
+                          setState(() {
+                            _selectedType = e.key;
+                            _onFormChanged();
+                          });
+                        },
                         child: Container(
                           margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                           padding: const EdgeInsets.all(14),
@@ -281,6 +306,9 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                       ),
                       decoration: InputDecoration(
                         hintText: 'enter_password'.tr(),
+                        errorText: _isPasswordValid
+                            ? null
+                            : 'password_min_length'.tr(),
                         filled: true,
                         fillColor: ColorManager.darkSectionGray,
                         border: OutlineInputBorder(
@@ -300,6 +328,28 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                             width: 1.5,
                           ),
                         ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.cardCompact),
+                          borderSide: const BorderSide(
+                            color: ColorManager.error,
+                            width: 1.5,
+                          ),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.cardCompact),
+                          borderSide: const BorderSide(
+                            color: ColorManager.error,
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      'private_room_password_required'.tr(),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: ColorManager.darkTextMuted,
                       ),
                     ),
                   ],
@@ -423,10 +473,15 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                     gradient: GradientButton.goldGradient,
                     icon: Icons.add_rounded,
                     isLoading: isLoading,
-                    onPressed: isLoading
+                    onPressed: isLoading || (_selectedType == 0 && !_isPasswordValid)
                         ? null
                         : () {
                             final name = _nameController.text.trim();
+                            if (_selectedType == 0 &&
+                                _passwordController.text.trim().length < 4) {
+                              setState(() => _isPasswordValid = false);
+                              return;
+                            }
                             context.read<RoomCubit>().createRoom(
                               CreateRoomParams(
                                 name: name.isNotEmpty ? name : 'room'.tr(),

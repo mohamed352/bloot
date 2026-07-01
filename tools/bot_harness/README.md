@@ -36,11 +36,24 @@ npm install
 
 2. Launch the Flutter app and create a private room. Copy the 6-character invite code (e.g. `ABCD12`).
 
+   Or seed a test room without the app:
+   ```bash
+   npx ts-node scripts/seedRoom.ts TEST12
+   ```
+
 3. Run the harness:
    ```bash
-   npm run start -- --code ABCD12
+   npm run start -- ABCD12
    # or during development
-   npm run dev -- --code ABCD12
+   npx ts-node src/index.ts --code ABCD12
+   ```
+
+   On PowerShell, npm may consume `--code`. If you see `Unknown cli config "--code"`,
+   pass the code as a positional argument instead:
+   ```powershell
+   npm run start -- ABCD12
+   # or
+   npm run start -- "--code=ABCD12"
    ```
 
 4. In the app, tap **Start Game** once all 4 players are ready. The bots will play automatically.

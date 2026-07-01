@@ -32,6 +32,10 @@ abstract class RoomRepository {
     required bool isCameraOn,
   });
 
+  /// Returns true if the waiting room with [inviteCode] is private and has a
+  /// non-empty password.
+  Future<bool> isPasswordRequired(String inviteCode);
+
   /// Joins a room by [inviteCode].
   /// [password] is required when the room is private and has a password.
   Future<Room> joinRoomByCode(String inviteCode, {String? password});

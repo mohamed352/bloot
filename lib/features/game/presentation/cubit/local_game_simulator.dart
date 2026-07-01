@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:get_it/get_it.dart';
-import 'package:injectable/injectable.dart';
 
 import 'package:bloot/core/services/agora_service.dart';
 import 'package:bloot/core/services/audio_service.dart';
@@ -56,7 +55,6 @@ class _FakeGameRepository implements GameRepository {
 /// - Hokm trump suit is the face-up card's suit.
 /// - Trick play with correct trump rank/points.
 /// - Fall scoring (120 Sun / 152 Hokm) and last-trick +10 bonus.
-@injectable
 class LocalGameSimulator extends GameCubit {
   LocalGameSimulator({
     Duration humanTurnTimeout = _defaultHumanTurnTimeout,

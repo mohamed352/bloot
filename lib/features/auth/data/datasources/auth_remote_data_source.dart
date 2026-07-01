@@ -42,7 +42,9 @@ class AuthRemoteDataSource {
 
       await _firebaseAuth.signInWithCredential(credential);
       AppLogger.info('Google Sign In successful', tag: 'Auth');
-      return getCurrentUser();
+      // Force a server read so we never decide profile completeness from stale
+      // local cache after a logout/re-login cycle.
+      return getCurrentUser(forceServer: true);
     } on firebase_auth.FirebaseAuthException catch (e) {
       AppLogger.error('Google sign in failed', error: e, tag: 'Auth');
       throw AuthException(
@@ -85,7 +87,9 @@ class AuthRemoteDataSource {
 
       await _firebaseAuth.signInWithCredential(oauthCredential);
       AppLogger.info('Apple Sign In successful', tag: 'Auth');
-      return getCurrentUser();
+      // Force a server read so we never decide profile completeness from stale
+      // local cache after a logout/re-login cycle.
+      return getCurrentUser(forceServer: true);
     } on firebase_auth.FirebaseAuthException catch (e) {
       AppLogger.error('Apple sign in failed', error: e, tag: 'Auth');
       throw AuthException(
@@ -119,13 +123,26 @@ class AuthRemoteDataSource {
       if (!doc.exists) return false;
       final data = doc.data();
       return data?['isProfileComplete'] == true;
+    } on FirebaseException catch (e) {
+      AppLogger.error(
+        'Failed to check profile completeness',
+        error: e,
+        tag: 'Auth',
+      );
+      throw AuthException(
+        e.message ?? 'Failed to check profile. Please try again.',
+        code: e.code,
+      );
     } catch (e) {
       AppLogger.error(
         'Failed to check profile completeness',
         error: e,
         tag: 'Auth',
       );
-      return false;
+      throw const AuthException(
+        'Failed to check profile. Please try again.',
+        code: 'PROFILE_CHECK_ERROR',
+      );
     }
   }
 
@@ -208,27 +225,55 @@ class AuthRemoteDataSource {
     );
   }
 
-  Future<UserModel?> getCurrentUser() async {
+  Future<UserModel?> getCurrentUser({bool forceServer = false}) async {
     final user = _firebaseAuth.currentUser;
     if (user == null) return null;
 
     try {
-      final doc = await _firestore.collection('users').doc(user.uid).get();
+      final options =
+          forceServer ? const GetOptions(source: Source.server) : null;
+      final doc = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .get(options);
       if (!doc.exists) {
         // User authenticated but no Firestore profile yet
+        AppLogger.info(
+          'No Firestore profile found for uid=${user.uid}',
+          tag: 'Auth',
+        );
         return UserModel(uid: user.uid);
       }
       final data = doc.data()!;
+      final isComplete = data['isProfileComplete'] == true;
+      AppLogger.info(
+        'Firestore profile loaded for uid=${user.uid}, '
+        'isProfileComplete=$isComplete',
+        tag: 'Auth',
+      );
       return UserModel(
         uid: user.uid,
         displayName: data['displayName'] as String?,
         username: data['username'] as String?,
         avatarUrl: data['avatarUrl'] as String?,
-        isProfileComplete: data['isProfileComplete'] == true,
+        isProfileComplete: isComplete,
+      );
+    } on FirebaseException catch (e) {
+      AppLogger.error(
+        'Failed to get current user from Firestore',
+        error: e,
+        tag: 'Auth',
+      );
+      throw AuthException(
+        'Failed to load profile. Please check your connection and try again.',
+        code: e.code,
       );
     } catch (e) {
       AppLogger.error('Failed to get current user', error: e, tag: 'Auth');
-      return UserModel(uid: user.uid);
+      throw const AuthException(
+        'Failed to load profile. Please try again.',
+        code: 'PROFILE_LOAD_ERROR',
+      );
     }
   }
 

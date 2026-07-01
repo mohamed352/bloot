@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:injectable/injectable.dart';
 
+import 'package:bloot/core/config/firebase_emulator_config.dart';
 import 'package:bloot/core/logger/app_logger.dart';
 
 /// Keys for remote-config-backed feature flags and operational values.
@@ -54,8 +55,12 @@ class RemoteConfigService {
     RemoteConfigKeys.agoraAppId: '',
   };
 
-  /// Initializes Remote Config, sets defaults, fetches the latest values, and
-  /// starts listening to admin-managed Firestore settings.
+  /// Initializes Remote Config, fetches the latest values, and starts listening
+  /// to admin-managed Firestore settings.
+  ///
+  /// When running against the Firebase emulator suite, Remote Config fetch is
+  /// skipped because there is no Remote Config emulator; defaults are used
+  /// instead.
   Future<void> initialize() async {
     try {
       await _remoteConfig.setDefaults(_defaults);
@@ -65,7 +70,16 @@ class RemoteConfigService {
           minimumFetchInterval: const Duration(hours: 1),
         ),
       );
-      await _remoteConfig.fetchAndActivate();
+
+      if (!FirebaseEmulatorConfig.enabled) {
+        await _remoteConfig.fetchAndActivate();
+      } else {
+        AppLogger.info(
+          'Remote Config fetch skipped (emulator mode)',
+          tag: LogTags.init,
+        );
+      }
+
       await _loadSystemSettings();
       _listenToSystemSettings();
       AppLogger.info('Remote Config initialized', tag: LogTags.init);

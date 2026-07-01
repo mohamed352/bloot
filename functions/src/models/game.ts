@@ -35,6 +35,12 @@ export interface PlayerState {
   isReady: boolean;
   bonuses: BonusClaim[] | null;
   isConnected: boolean;
+  /** Whether the player's microphone is muted. */
+  isMuted?: boolean;
+  /** Whether the player's camera is enabled. */
+  hasCamera?: boolean;
+  /** Agora UID used for voice/video in this game. */
+  agoraUid?: number;
 }
 
 export interface CurrentTrick {

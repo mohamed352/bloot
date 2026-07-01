@@ -50,8 +50,6 @@ import '../../features/game/data/repositories/game_repository_impl.dart'
     as _i33;
 import '../../features/game/domain/repositories/game_repository.dart' as _i32;
 import '../../features/game/presentation/cubit/game_cubit.dart' as _i192;
-import '../../features/game/presentation/cubit/local_game_simulator.dart'
-    as _i838;
 import '../../features/home/data/datasources/home_remote_data_source.dart'
     as _i362;
 import '../../features/home/data/repositories/home_repository_impl.dart'
@@ -148,12 +146,6 @@ extension GetItInjectableX on _i174.GetIt {
         firebaseAuth: gh<_i59.FirebaseAuth>(),
         firestore: gh<_i974.FirebaseFirestore>(),
         functions: gh<_i809.FirebaseFunctions>(),
-      ),
-    );
-    gh.factory<_i838.LocalGameSimulator>(
-      () => _i838.LocalGameSimulator(
-        humanTurnTimeout: gh<Duration>(),
-        humanCardTimeout: gh<Duration>(),
       ),
     );
     gh.singleton<_i681.CacheHelper>(

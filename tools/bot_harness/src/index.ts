@@ -50,12 +50,17 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const args = process.argv.slice(2);
-const inviteCode = parseArg('--code', args) || parseArg('-c', args);
+const inviteCode =
+  parseArg('--code', args) ||
+  parseArg('-c', args) ||
+  // Fallback for PowerShell/npm users where the --code flag is parsed by npm.
+  args.find((a) => !a.startsWith('-'));
 const projectId = parseArg('--project', args) || 'bloot-89b2b';
 const emulatorHost = parseArg('--host', args) || 'localhost';
 
 if (!inviteCode) {
   console.error('Usage: npx ts-node src/index.ts --code INVITE [--project PROJECT] [--host localhost]');
+  console.error('   or: npm run start -- INVITE');
   process.exit(1);
 }
 const code = inviteCode.toUpperCase();
@@ -65,7 +70,7 @@ function parseArg(flag: string, argv: string[]): string | undefined {
   return idx !== -1 && idx + 1 < argv.length ? argv[idx + 1] : undefined;
 }
 
-const firebaseApp = initializeApp({ projectId });
+const firebaseApp = initializeApp({ projectId, apiKey: 'fake-emulator-api-key' });
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
 const functions = getFunctions(firebaseApp);
@@ -454,6 +459,8 @@ async function main(): Promise<void> {
   const bots: BotPlayer[] = [];
 
   for (let i = 0; i < 3; i++) {
+    // Force a fresh anonymous identity so each bot gets a unique UID.
+    await auth.signOut();
     const user = (await signInAnonymously(auth)).user;
     const name = botNames[i];
     await ensureUserProfile(user, name);

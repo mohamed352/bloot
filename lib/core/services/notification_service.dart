@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 
+import 'package:bloot/core/config/firebase_emulator_config.dart';
 import 'package:bloot/core/logger/app_logger.dart';
 
 @lazySingleton
@@ -43,10 +44,15 @@ class NotificationService {
     // Request permissions
     await requestPermission();
 
-    // Get and save token
-    final token = await getToken();
-    if (token != null) {
-      await _saveToken(token);
+    // Get and save token. FCM has no emulator, so skip the server call when
+    // running against the local Firebase emulator suite.
+    if (!FirebaseEmulatorConfig.enabled) {
+      final token = await getToken();
+      if (token != null) {
+        await _saveToken(token);
+      }
+    } else {
+      AppLogger.info('FCM token fetch skipped (emulator mode)', tag: 'FCM');
     }
 
     // Listen to token refresh

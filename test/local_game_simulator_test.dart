@@ -7,6 +7,7 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:bloot/core/services/agora_service.dart';
 import 'package:bloot/core/services/audio_service.dart';
+import 'package:bloot/features/game/domain/entities/game.dart';
 import 'package:bloot/features/game/presentation/cubit/game_state.dart';
 import 'package:bloot/features/game/presentation/cubit/local_game_simulator.dart';
 import 'package:bloot/features/room/domain/repositories/room_repository.dart';
@@ -455,6 +456,86 @@ void main() {
         subscription.cancel();
         simulator.close();
       });
+    });
+  });
+
+  group('Game legalCards', () {
+    Game makeGame({
+      required List<String> hand,
+      required int turnIndex,
+      required String status,
+      String? leadingSuit,
+    }) {
+      return Game(
+        id: 'test',
+        players: const [],
+        myHand: hand,
+        mySeatIndex: 0,
+        playedCards: const [null, null, null, null],
+        scoreUs: 0,
+        scoreThem: 0,
+        teamAScore: 0,
+        teamBScore: 0,
+        trump: 'H',
+        status: status,
+        turnIndex: turnIndex,
+        currentRound: 1,
+        targetScore: 152,
+        currentTrick: leadingSuit == null
+            ? null
+            : Trick(
+                trickNumber: 1,
+                trickLeaderIndex: 1,
+                leadingSuit: leadingSuit,
+              ),
+      );
+    }
+
+    test('returns empty list when it is not the local player turn', () {
+      final game = makeGame(
+        hand: const ['A♠', 'K♠'],
+        turnIndex: 1,
+        status: 'playing',
+      );
+      expect(game.legalCards, isEmpty);
+    });
+
+    test('returns empty list outside playing phase', () {
+      final game = makeGame(
+        hand: const ['A♠', 'K♠'],
+        turnIndex: 0,
+        status: 'bidding',
+      );
+      expect(game.legalCards, isEmpty);
+    });
+
+    test('returns whole hand when player leads the trick', () {
+      final game = makeGame(
+        hand: const ['A♠', 'K♥', '10♦'],
+        turnIndex: 0,
+        status: 'playing',
+      );
+      expect(game.legalCards, equals(const ['A♠', 'K♥', '10♦']));
+    });
+
+    test('must follow the leading suit when possible', () {
+      final game = makeGame(
+        hand: const ['A♠', 'K♠', '10♥', 'J♦'],
+        turnIndex: 0,
+        status: 'playing',
+        leadingSuit: '♠',
+      );
+      expect(game.legalCards, equals(const ['A♠', 'K♠']));
+    });
+
+    test('allows any card when unable to follow suit', () {
+      final game = makeGame(
+        hand: const ['A♥', 'K♥', '10♥'],
+        turnIndex: 0,
+        status: 'playing',
+        leadingSuit: '♠',
+      );
+      expect(game.legalCards, equals(const ['A♥', 'K♥', '10♥']));
     });
   });
 }

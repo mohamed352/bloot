@@ -233,6 +233,9 @@ abstract class  LocaleKeys {
   static const room_name = 'room_name';
   static const room_password = 'room_password';
   static const enter_password = 'enter_password';
+  static const password_min_length = 'password_min_length';
+  static const private_room_password_required = 'private_room_password_required';
+  static const password_required_for_locked_room = 'password_required_for_locked_room';
   static const room_settings = 'room_settings';
   static const room_type = 'room_type';
   static const rooms = 'rooms';

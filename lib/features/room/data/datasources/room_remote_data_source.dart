@@ -51,13 +51,21 @@ class RoomRemoteDataSource {
     required String gameSpeed,
     String? password,
   }) async {
+    const timeout = Duration(seconds: 10);
     final user = _firebaseAuth.currentUser;
     if (user == null) {
       throw const UnauthenticatedException();
     }
 
     // Get user profile from Firestore
-    final userDoc = await _firestore.collection('users').doc(user.uid).get();
+    AppLogger.info('Fetching user profile for room creation...', tag: 'Room');
+    final userDoc = await _firestore
+        .collection('users')
+        .doc(user.uid)
+        .get()
+        .timeout(timeout, onTimeout: () {
+      throw const RoomException('Timed out reading user profile.');
+    });
     final userData = userDoc.data();
     final displayName = userData?['displayName'] as String? ?? 'Player';
     final avatarUrl = userData?['avatarUrl'] as String?;
@@ -103,7 +111,13 @@ class RoomRemoteDataSource {
       'updatedAt': FieldValue.serverTimestamp(),
     };
 
-    await roomRef.set(roomData);
+    AppLogger.info('Writing room document to Firestore...', tag: 'Room');
+    await roomRef.set(roomData).timeout(
+      timeout,
+      onTimeout: () => throw const RoomException(
+        'Timed out creating room. Is the Firestore emulator running?',
+      ),
+    );
     AppLogger.info('Room created: ${roomRef.id}', tag: 'Room');
 
     // Write notification docs for invited players (deferred to direct-invite UI)
@@ -418,6 +432,26 @@ class RoomRemoteDataSource {
         'updatedAt': FieldValue.serverTimestamp(),
       });
     });
+  }
+
+  /// Returns true if the waiting room with [inviteCode] is private and has a
+  /// non-empty password.
+  Future<bool> isPasswordRequired(String inviteCode) async {
+    final query = await _firestore
+        .collection('rooms')
+        .where('inviteCode', isEqualTo: inviteCode.toUpperCase())
+        .where('status', isEqualTo: 'waiting')
+        .limit(1)
+        .get();
+
+    if (query.docs.isEmpty) return false;
+
+    final data = query.docs.first.data();
+    final roomType = data['type'] as String? ?? 'private';
+    final roomPassword = data['password'] as String?;
+    return roomType == 'private' &&
+        roomPassword != null &&
+        roomPassword.isNotEmpty;
   }
 
   Future<RoomModel> joinRoomByCode(

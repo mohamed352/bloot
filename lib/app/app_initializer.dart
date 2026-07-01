@@ -1,6 +1,10 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_performance/firebase_performance.dart';
@@ -12,6 +16,7 @@ import 'package:bloot/core/network/cache_helper.dart';
 import 'package:bloot/core/network/cache_keys.dart';
 import 'package:bloot/core/services/agora_service.dart';
 import 'package:bloot/core/config/app_check_config.dart';
+import 'package:bloot/core/config/firebase_emulator_config.dart';
 import 'package:bloot/core/services/audio_service.dart';
 import 'package:bloot/core/services/notification_service.dart';
 import 'package:bloot/core/services/remote_config_service.dart';
@@ -43,6 +48,9 @@ abstract class AppInitializer {
       );
     }
 
+    // Point Firebase services at the local emulator suite in debug builds.
+    await _connectFirebaseEmulator();
+
     // Activate Firebase App Check to protect callable functions and Firestore.
     await _activateAppCheck();
 
@@ -58,11 +66,25 @@ abstract class AppInitializer {
     await configureDependencies();
     AppLogger.info('DI configured', tag: LogTags.init);
 
-    // Initialize Remote Config.
-    await getIt<RemoteConfigService>().initialize();
+    // Initialize Remote Config. Cap the call in emulator mode because Remote
+    // Config has no emulator and can hang for its full fetch timeout.
+    await getIt<RemoteConfigService>().initialize().timeout(
+      const Duration(seconds: 5),
+      onTimeout: () => AppLogger.warning(
+        'Remote Config initialization timed out; continuing with defaults',
+        tag: LogTags.init,
+      ),
+    );
 
-    // Initialize push notifications
-    await getIt<NotificationService>().initialize();
+    // Initialize push notifications. FCM token retrieval can be slow on
+    // emulators without Play Services, so don't let it block app launch.
+    await getIt<NotificationService>().initialize().timeout(
+      const Duration(seconds: 5),
+      onTimeout: () => AppLogger.warning(
+        'Notification service initialization timed out; continuing without FCM',
+        tag: LogTags.init,
+      ),
+    );
     AppLogger.info('Notification service initialized', tag: LogTags.init);
 
     // Initialize audio service
@@ -75,7 +97,54 @@ abstract class AppInitializer {
     AppLogger.info('Initialization complete', tag: LogTags.init);
   }
 
+  static Future<void> _connectFirebaseEmulator() async {
+    if (!FirebaseEmulatorConfig.enabled) return;
+    try {
+      final host = FirebaseEmulatorConfig.host;
+      FirebaseFirestore.instance.useFirestoreEmulator(
+        host,
+        FirebaseEmulatorConfig.firestorePort,
+      );
+      FirebaseAuth.instance.useAuthEmulator(
+        host,
+        FirebaseEmulatorConfig.authPort,
+      );
+      FirebaseFunctions.instance.useFunctionsEmulator(
+        host,
+        FirebaseEmulatorConfig.functionsPort,
+      );
+      FirebaseStorage.instance.useStorageEmulator(
+        host,
+        FirebaseEmulatorConfig.storagePort,
+      );
+      AppLogger.info('Firebase emulator connected at $host', tag: LogTags.init);
+
+      // Stale tokens from previous emulator sessions cause INVALID_REFRESH_TOKEN
+      // on Firestore writes. Force a user reload; if it fails, sign out so the
+      // next sign-in gets a fresh emulator token.
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        try {
+          await user.reload();
+          AppLogger.info('Emulator auth token refreshed', tag: LogTags.init);
+        } catch (e) {
+          AppLogger.warning(
+            'Stale emulator auth token detected, signing out: $e',
+            tag: LogTags.init,
+          );
+          await FirebaseAuth.instance.signOut();
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Failed to connect Firebase emulator', error: e);
+    }
+  }
+
   static Future<void> _activateAppCheck() async {
+    if (FirebaseEmulatorConfig.enabled) {
+      AppLogger.info('App Check skipped (emulator mode)', tag: LogTags.init);
+      return;
+    }
     try {
       final appCheck = FirebaseAppCheck.instance;
       if (kDebugMode) {

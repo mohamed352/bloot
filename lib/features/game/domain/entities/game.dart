@@ -122,6 +122,25 @@ class Game {
   /// Returns true if it's the local player's turn.
   bool get isMyTurn => turnIndex == mySeatIndex;
 
+  /// Returns the cards the local player is allowed to play right now.
+  ///
+  /// When a trick is in progress, the player must follow the leading suit if
+  /// possible. If they cannot follow suit, any card may be played. Returns an
+  /// empty list when it is not the local player's turn.
+  List<String> get legalCards {
+    if (!isMyTurn || myHand.isEmpty || status != 'playing') return const [];
+
+    final leading = currentTrick?.leadingSuit;
+    if (leading == null || leading.isEmpty) return myHand;
+
+    final follow = myHand.where((c) {
+      if (c.isEmpty) return false;
+      return c.substring(c.length - 1) == leading;
+    }).toList();
+
+    return follow.isNotEmpty ? follow : List<String>.from(myHand);
+  }
+
   /// Returns the local player.
   GamePlayer get localPlayer {
     try {

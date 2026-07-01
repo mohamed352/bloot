@@ -6,11 +6,20 @@ import { createGameDocument, dealRound } from '../engine/deal';
 import { PlayerState } from '../models/game';
 
 export const startGame = functions.https.onCall(async (request) => {
+  console.log('[startGame] invoked', { uid: request.auth?.uid, roomId: request.data?.roomId });
+
   if (!request.auth) {
+    console.error('[startGame] unauthenticated');
     throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated');
   }
 
-  requireAppCheck(request);
+  try {
+    requireAppCheck(request);
+    console.log('[startGame] App Check passed');
+  } catch (e) {
+    console.error('[startGame] App Check failed', e);
+    throw e;
+  }
 
   const authUid = request.auth.uid;
   const { roomId } = request.data;
@@ -21,7 +30,8 @@ export const startGame = functions.https.onCall(async (request) => {
   const roomRef = db.collection('rooms').doc(roomId);
   const gameRef = db.collection('games').doc();
 
-  return db.runTransaction(async (transaction) => {
+  try {
+  return await db.runTransaction(async (transaction) => {
     const roomDoc = await transaction.get(roomRef);
     if (!roomDoc.exists) {
       throw new functions.https.HttpsError('not-found', 'Room not found');
@@ -42,6 +52,9 @@ export const startGame = functions.https.onCall(async (request) => {
       team: 'A' | 'B';
       seatIndex: number;
       isReady: boolean;
+      isMicOn?: boolean;
+      isCameraOn?: boolean;
+      agoraUid?: number;
     }>;
 
     if (players.length !== 4) {
@@ -67,6 +80,9 @@ export const startGame = functions.https.onCall(async (request) => {
       isReady: false,
       bonuses: null,
       isConnected: true,
+      isMuted: p.isMicOn === false,
+      hasCamera: p.isCameraOn === true,
+      agoraUid: p.agoraUid,
     }));
 
     if (room.status !== 'waiting') {
@@ -112,4 +128,8 @@ export const startGame = functions.https.onCall(async (request) => {
 
     return { gameId: gameRef.id };
   });
+  } catch (e) {
+    console.error('[startGame] transaction failed', e);
+    throw e;
+  }
 });

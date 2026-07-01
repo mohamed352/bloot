@@ -92,8 +92,19 @@ export const deleteAccount = functions.https.onCall(async (request) => {
       .where('participantUids', 'array-contains', uid)
       .get();
     for (const convDoc of conversationsSnap.docs) {
+      const convData = convDoc.data();
+      const participantUids = (convData.participantUids ?? []) as string[];
       await deleteSubcollection(convDoc.ref, 'messages');
       await convDoc.ref.delete();
+      // Clean up per-user conversation metadata.
+      for (const participantUid of participantUids) {
+        await db
+          .collection('users')
+          .doc(participantUid)
+          .collection('conversations')
+          .doc(convDoc.id)
+          .delete();
+      }
     }
 
     // 4. Delete direct messages in the top-level collection.

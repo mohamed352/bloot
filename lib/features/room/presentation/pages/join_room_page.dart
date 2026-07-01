@@ -27,11 +27,14 @@ class _JoinRoomPageState extends State<JoinRoomPage> {
   final _codeController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isValid = false;
+  bool _passwordRequired = false;
+  bool _isCheckingPasswordRequirement = false;
 
   @override
   void initState() {
     super.initState();
     _codeController.addListener(_onCodeChanged);
+    _passwordController.addListener(_onPasswordChanged);
   }
 
   @override
@@ -47,16 +50,45 @@ class _JoinRoomPageState extends State<JoinRoomPage> {
     if (isValid != _isValid) {
       setState(() => _isValid = isValid);
     }
+    if (code.length == 6) {
+      _checkPasswordRequirement(code);
+    } else if (_passwordRequired) {
+      setState(() => _passwordRequired = false);
+    }
+  }
+
+  void _onPasswordChanged() {
+    // Re-evaluate the join button state when password changes.
+    setState(() {});
+  }
+
+  Future<void> _checkPasswordRequirement(String code) async {
+    if (_isCheckingPasswordRequirement) return;
+    setState(() => _isCheckingPasswordRequirement = true);
+    final required = await context.read<RoomCubit>().isPasswordRequired(code);
+    if (mounted) {
+      setState(() {
+        _passwordRequired = required;
+        _isCheckingPasswordRequirement = false;
+      });
+    }
+  }
+
+  bool get _canJoin {
+    if (!_isValid) return false;
+    if (_passwordRequired && _passwordController.text.trim().isEmpty) {
+      return false;
+    }
+    return true;
   }
 
   void _joinRoom() {
     final code = _codeController.text.trim().toUpperCase();
-    if (code.length == 6) {
-      context.read<RoomCubit>().joinRoomByCode(
-            code,
-            password: _passwordController.text.trim(),
-          );
-    }
+    if (!_canJoin) return;
+    context.read<RoomCubit>().joinRoomByCode(
+          code,
+          password: _passwordController.text.trim(),
+        );
   }
 
   void _pasteFromClipboard() async {
@@ -158,13 +190,25 @@ class _JoinRoomPageState extends State<JoinRoomPage> {
                 ),
                 const SizedBox(height: AppSpacing.xxxl),
                 // Password (required for private rooms that have one)
-                Text(
-                  'room_password'.tr(),
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: colors.textSecondary,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      'room_password'.tr(),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                    if (_isCheckingPasswordRequirement) ...[
+                      const SizedBox(width: AppSpacing.sm),
+                      const SizedBox(
+                        width: 12,
+                        height: 12,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 TextField(
@@ -201,11 +245,21 @@ class _JoinRoomPageState extends State<JoinRoomPage> {
                     contentPadding: const EdgeInsets.symmetric(vertical: 18),
                   ),
                 ),
+                if (_passwordRequired) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    LocaleKeys.password_required_for_locked_room.tr(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colors.error,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.xxxl),
                 AppButton(
                   text: LocaleKeys.join_room.tr(),
                   isLoading: isLoading,
-                  onPressed: _isValid && !isLoading ? _joinRoom : null,
+                  onPressed: _canJoin && !isLoading ? _joinRoom : null,
                 ),
               ],
             ),

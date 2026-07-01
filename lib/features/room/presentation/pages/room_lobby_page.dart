@@ -277,7 +277,7 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                           label: LocaleKeys.your_partner.tr(),
                           position: SeatPosition.top,
                           isCreator: isCreator,
-                          roomId: room?.id,
+                          inviteCode: room?.inviteCode,
                           onKick: (uid) => context.read<RoomCubit>().kickPlayer(
                             room!.id,
                             uid,
@@ -320,7 +320,7 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                                 label: LocaleKeys.opponent_1.tr(),
                                 position: SeatPosition.left,
                                 isCreator: isCreator,
-                                roomId: room?.id,
+                                inviteCode: room?.inviteCode,
                                 onKick: (uid) => context
                                     .read<RoomCubit>()
                                     .kickPlayer(room!.id, uid),
@@ -333,7 +333,7 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                                 label: LocaleKeys.opponent_2.tr(),
                                 position: SeatPosition.right,
                                 isCreator: isCreator,
-                                roomId: room?.id,
+                                inviteCode: room?.inviteCode,
                                 onKick: (uid) => context
                                     .read<RoomCubit>()
                                     .kickPlayer(room!.id, uid),
@@ -348,7 +348,7 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                           label: LocaleKeys.you.tr(),
                           position: SeatPosition.bottom,
                           isCreator: isCreator,
-                          roomId: room?.id,
+                          inviteCode: room?.inviteCode,
                           onKick: (uid) => context.read<RoomCubit>().kickPlayer(
                             room!.id,
                             uid,

@@ -102,6 +102,9 @@ class GameRemoteDataSource {
         tricksWon: p['tricksWon'] as int? ?? 0,
         bid: p['bid'] as String?,
         isConnected: p['isConnected'] as bool? ?? true,
+        isMuted: p['isMuted'] as bool? ?? false,
+        hasCamera: p['hasCamera'] as bool? ?? true,
+        agoraUid: (p['agoraUid'] as num?)?.toInt(),
       );
     }).toList();
 

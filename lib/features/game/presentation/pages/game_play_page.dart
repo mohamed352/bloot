@@ -678,12 +678,9 @@ class _GamePlayPageState extends State<GamePlayPage>
         // Game layout
         SafeArea(
           child: Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(
-              8,
-              8,
-              8,
-              controlsVisible ? 76 : 8,
-            ),
+            // Keep bottom padding constant so the game area does not resize
+            // (and therefore zoom) when the control bars hide/show.
+            padding: const EdgeInsetsDirectional.fromSTEB(8, 8, 8, 76),
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final layoutScale = constraints.maxHeight < 420
@@ -912,7 +909,7 @@ class _GamePlayPageState extends State<GamePlayPage>
                         const SizedBox(height: 4),
                         // Cards
                         if (!isDealing && !widget.isSpectator)
-                          _buildHand(game, isMyTurn, layoutScale: layoutScale),
+                          _buildHand(game, layoutScale: layoutScale),
                       ],
                     ),
                   ],
@@ -1122,9 +1119,11 @@ class _GamePlayPageState extends State<GamePlayPage>
     );
   }
 
-  Widget _buildHand(Game game, bool canPlay, {double layoutScale = 1.0}) {
+  Widget _buildHand(Game game, {double layoutScale = 1.0}) {
     final myHand = game.myHand;
     if (myHand.isEmpty) return const SizedBox.shrink();
+
+    final legalCards = game.legalCards;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1152,6 +1151,7 @@ class _GamePlayPageState extends State<GamePlayPage>
             children: myHand.asMap().entries.map((entry) {
               final index = entry.key;
               final card = entry.value;
+              final isPlayable = legalCards.contains(card);
               final key = _cardKeys.putIfAbsent(card, () => GlobalKey());
               return PositionedDirectional(
                 start: index * effectiveOverlap,
@@ -1159,14 +1159,14 @@ class _GamePlayPageState extends State<GamePlayPage>
                 child: GestureDetector(
                   key: key,
                   behavior: HitTestBehavior.opaque,
-                  onTap: canPlay ? () => _playCard(card, game) : null,
+                  onTap: isPlayable ? () => _playCard(card, game) : null,
                   onPanStart:
-                      canPlay
+                      isPlayable
                           ? (details) => _startCardDrag(card, details)
                           : null,
-                  onPanUpdate: canPlay ? _updateCardDrag : null,
+                  onPanUpdate: isPlayable ? _updateCardDrag : null,
                   onPanEnd:
-                      canPlay
+                      isPlayable
                           ? (details) => _endCardDrag(card, game, details)
                           : null,
                   child: SizedBox(
@@ -1177,12 +1177,32 @@ class _GamePlayPageState extends State<GamePlayPage>
                       child: SizedBox(
                         width: effectiveCardWidth,
                         height: effectiveCardHeight,
-                        child: PlayingCardWidget(
-                          card: PlayingCard.fromString(card),
-                          style: PlayingCardStyle.standard.copyWith(
-                            width: effectiveCardWidth,
-                            height: effectiveCardHeight,
-                            centerSuitSize: 20 * scale,
+                        child: Opacity(
+                          opacity: isPlayable ? 1.0 : 0.45,
+                          child: PlayingCardWidget(
+                            card: PlayingCard.fromString(card),
+                            style: PlayingCardStyle.standard.copyWith(
+                              width: effectiveCardWidth,
+                              height: effectiveCardHeight,
+                              centerSuitSize: 20 * scale,
+                              borderColor: isPlayable
+                                  ? ColorManager.primary
+                                  : const Color(0xFFE0E0E0),
+                              borderWidth: isPlayable ? 2.0 : 0.5,
+                              shadow: isPlayable
+                                  ? BoxShadow(
+                                      color: ColorManager.primary.withValues(
+                                        alpha: 0.6,
+                                      ),
+                                      blurRadius: 8,
+                                      spreadRadius: 1,
+                                    )
+                                  : const BoxShadow(
+                                      color: Color(0x40000000),
+                                      blurRadius: 4,
+                                      offset: Offset(0, 2),
+                                    ),
+                            ),
                           ),
                         ),
                       ),

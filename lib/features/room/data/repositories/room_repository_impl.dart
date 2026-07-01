@@ -76,6 +76,10 @@ class RoomRepositoryImpl implements RoomRepository {
   }
 
   @override
+  Future<bool> isPasswordRequired(String inviteCode) =>
+      _remoteDataSource.isPasswordRequired(inviteCode);
+
+  @override
   Future<Room> joinRoomByCode(
     String inviteCode, {
     String? password,

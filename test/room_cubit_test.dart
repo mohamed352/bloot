@@ -201,6 +201,54 @@ void main() {
     );
   });
 
+  group('startGame', () {
+    blocTest<RoomCubit, RoomState>(
+      'emits gameStarted with returned gameId',
+      build: buildCubit,
+      setUp: () {
+        when(() => roomRepository.startGame('r1'))
+            .thenAnswer((_) async => 'g1');
+      },
+      act: (cubit) => cubit.startGame('r1'),
+      expect: () => [
+        const RoomState.loading(),
+        isA<RoomGameStarted>().having((s) => s.gameId, 'gameId', 'g1'),
+      ],
+    );
+
+    blocTest<RoomCubit, RoomState>(
+      'emits error on RoomException',
+      build: buildCubit,
+      setUp: () {
+        when(() => roomRepository.startGame('r1'))
+            .thenThrow(const RoomException('Not ready'));
+      },
+      act: (cubit) => cubit.startGame('r1'),
+      expect: () => [
+        const RoomState.loading(),
+        const RoomState.error(message: 'Not ready'),
+      ],
+    );
+  });
+
+  group('isPasswordRequired', () {
+    test('returns true when repository returns true', () async {
+      when(() => roomRepository.isPasswordRequired('CODE12'))
+          .thenAnswer((_) async => true);
+      final cubit = buildCubit();
+      final result = await cubit.isPasswordRequired('CODE12');
+      expect(result, isTrue);
+    });
+
+    test('returns false when repository throws', () async {
+      when(() => roomRepository.isPasswordRequired('CODE12'))
+          .thenThrow(Exception('network'));
+      final cubit = buildCubit();
+      final result = await cubit.isPasswordRequired('CODE12');
+      expect(result, isFalse);
+    });
+  });
+
   group('toggleReady', () {
     blocTest<RoomCubit, RoomState>(
       'does nothing when not loaded',

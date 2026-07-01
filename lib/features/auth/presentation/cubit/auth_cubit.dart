@@ -29,6 +29,11 @@ class AuthCubit extends Cubit<AuthState> {
         emit(const AuthState.initial());
         return;
       }
+      AppLogger.info(
+        'Google sign-in returned uid=${user.uid}, '
+        'isProfileComplete=${user.isProfileComplete}',
+        tag: 'AuthCubit',
+      );
       if (user.isProfileComplete) {
         emit(AuthState.authenticated(user: user));
       } else {
@@ -55,6 +60,11 @@ class AuthCubit extends Cubit<AuthState> {
         emit(const AuthState.initial());
         return;
       }
+      AppLogger.info(
+        'Apple sign-in returned uid=${user.uid}, '
+        'isProfileComplete=${user.isProfileComplete}',
+        tag: 'AuthCubit',
+      );
       if (user.isProfileComplete) {
         emit(AuthState.authenticated(user: user));
       } else {
