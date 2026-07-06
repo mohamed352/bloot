@@ -34,14 +34,29 @@ function positionalCode(): string | undefined {
 
 const inviteCode = (parseArg('--code') || parseArg('-c') || positionalCode() || 'TEST12').toUpperCase();
 const projectId = parseArg('--project') || 'bloot-89b2b';
+const apiKey = parseArg('--apiKey');
 const emulatorHost = parseArg('--host') || 'localhost';
+const useEmulator = args.includes('--emulator');
 
-const firebaseApp = initializeApp({ projectId, apiKey: 'fake-emulator-api-key' });
+if (!useEmulator && !apiKey) {
+  console.error('Provide --apiKey for production Firebase or --emulator to use the local emulator suite.');
+  process.exit(1);
+}
+
+const firebaseApp = initializeApp({
+  projectId,
+  apiKey: apiKey ?? 'fake-emulator-api-key',
+});
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
 
-connectAuthEmulator(auth, `http://${emulatorHost}:9099`, { disableWarnings: true });
-connectFirestoreEmulator(db, emulatorHost, 8080);
+if (useEmulator) {
+  connectAuthEmulator(auth, `http://${emulatorHost}:9099`, { disableWarnings: true });
+  connectFirestoreEmulator(db, emulatorHost, 8080);
+  console.log(`[Seed] Connected to Firebase emulator at ${emulatorHost}`);
+} else {
+  console.log('[Seed] Connected to production Firebase');
+}
 
 async function main(): Promise<void> {
   // Check if a room with this code already exists.
@@ -109,7 +124,7 @@ async function main(): Promise<void> {
 
   console.log(`✓ Seeded room ${roomRef.id} with invite code ${inviteCode}`);
   console.log(`  Human UID: ${user.uid}`);
-  console.log(`  Run harness with: npm run start -- ${inviteCode} --project ${projectId}`);
+  console.log(`  Run harness with: npm run start -- ${inviteCode} --project ${projectId}${useEmulator ? ' --emulator' : apiKey ? ` --apiKey ${apiKey}` : ''}`);
 }
 
 main().catch((err) => {

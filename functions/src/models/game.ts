@@ -41,6 +41,8 @@ export interface PlayerState {
   hasCamera?: boolean;
   /** Agora UID used for voice/video in this game. */
   agoraUid?: number;
+  /** Whether this player is a bot (single-device testing). */
+  isBot?: boolean;
 }
 
 export interface CurrentTrick {
@@ -84,6 +86,8 @@ export interface GameDocument {
   players: Record<string, PlayerState>;
   /** Resolved bonus points after bonus claim phase (Hokm only). */
   resolvedBonuses?: { teamA: number; teamB: number } | null;
+  /** Team that fell in the last completed round, if any. */
+  fellTeam?: 'A' | 'B' | null;
   gameLog: GameEvent[];
   createdAt: Timestamp;
   updatedAt: Timestamp;

@@ -97,6 +97,11 @@ class RoomRepositoryImpl implements RoomRepository {
   }
 
   @override
+  Future<({String roomId, String gameId})> createRoomWithBots() async {
+    return _remoteDataSource.createRoomWithBots();
+  }
+
+  @override
   Future<void> leaveRoom(String roomId) => _remoteDataSource.leaveRoom(roomId);
 
   @override

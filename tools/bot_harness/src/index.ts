@@ -6,13 +6,10 @@
  * developer can test the full online 4-player game loop.
  *
  * Usage:
- *   1. Start the Firebase emulator suite:
- *        firebase emulators:start
- *   2. Configure the Flutter app to use the emulator (already done in debug
- *      builds that call `useFirebaseEmulator`).
- *   3. Create a room in the app and copy the 6-character invite code.
- *   4. Run the harness:
- *        npx ts-node src/index.ts --code ABCD12
+ *   1. Create a room in the app and copy the 6-character invite code.
+ *   2. Run the harness against production or the emulator:
+ *        npx ts-node src/index.ts --code ABCD12 --apiKey YOUR_WEB_API_KEY
+ *        npx ts-node src/index.ts --emulator --code ABCD12
  *
  * The harness signs in 3 anonymous users, joins them to the room, toggles
  * ready, and then auto-bids / auto-claims / auto-plays for each bot whenever
@@ -56,13 +53,21 @@ const inviteCode =
   // Fallback for PowerShell/npm users where the --code flag is parsed by npm.
   args.find((a) => !a.startsWith('-'));
 const projectId = parseArg('--project', args) || 'bloot-89b2b';
+const apiKey = parseArg('--apiKey', args);
 const emulatorHost = parseArg('--host', args) || 'localhost';
+const useEmulator = args.includes('--emulator');
 
 if (!inviteCode) {
-  console.error('Usage: npx ts-node src/index.ts --code INVITE [--project PROJECT] [--host localhost]');
+  console.error('Usage: npx ts-node src/index.ts --code INVITE [--emulator] [--project PROJECT] [--apiKey KEY] [--host localhost]');
   console.error('   or: npm run start -- INVITE');
   process.exit(1);
 }
+
+if (!useEmulator && !apiKey) {
+  console.error('You must provide --apiKey for production Firebase, or pass --emulator to use the local Firebase Emulator Suite.');
+  process.exit(1);
+}
+
 const code = inviteCode.toUpperCase();
 
 function parseArg(flag: string, argv: string[]): string | undefined {
@@ -70,14 +75,22 @@ function parseArg(flag: string, argv: string[]): string | undefined {
   return idx !== -1 && idx + 1 < argv.length ? argv[idx + 1] : undefined;
 }
 
-const firebaseApp = initializeApp({ projectId, apiKey: 'fake-emulator-api-key' });
+const firebaseApp = initializeApp({
+  projectId,
+  apiKey: apiKey ?? 'fake-emulator-api-key',
+});
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
 const functions = getFunctions(firebaseApp);
 
-connectAuthEmulator(auth, `http://${emulatorHost}:9099`, { disableWarnings: true });
-connectFirestoreEmulator(db, emulatorHost, 8080);
-connectFunctionsEmulator(functions, emulatorHost, 5001);
+if (useEmulator) {
+  connectAuthEmulator(auth, `http://${emulatorHost}:9099`, { disableWarnings: true });
+  connectFirestoreEmulator(db, emulatorHost, 8080);
+  connectFunctionsEmulator(functions, emulatorHost, 5001);
+  console.log(`[Bot Harness] Connected to Firebase emulator at ${emulatorHost}`);
+} else {
+  console.log('[Bot Harness] Connected to production Firebase');
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -445,7 +458,7 @@ async function main(): Promise<void> {
   const q = query(collection(db, 'rooms'), where('inviteCode', '==', code));
   const roomSnap = await getDocs(q);
   if (roomSnap.empty) {
-    console.error('Room not found. Make sure the emulator is running and the invite code is correct.');
+    console.error('Room not found. Make sure the invite code is correct and the project/ emulator flags are set properly.');
     process.exit(1);
   }
 

@@ -43,6 +43,10 @@ abstract class RoomRepository {
   /// Starts the game for [roomId]. Returns the created game ID.
   Future<String> startGame(String roomId);
 
+  /// Creates a real room with the current user plus 3 bot players, then starts
+  /// the game. Returns both the room ID and the game ID.
+  Future<({String roomId, String gameId})> createRoomWithBots();
+
   /// Removes the current user from [roomId].
   Future<void> leaveRoom(String roomId);
 

@@ -137,39 +137,6 @@ class LoginPage extends StatelessWidget {
                             ),
                           ],
                         ),
-                        // Bottom content
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 24, top: 24),
-                          child: Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'dont_have_account'.tr(),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: ColorManager.darkTextSecondary,
-                                  ),
-                                ),
-                                TextButton(
-                                  onPressed: isLoading
-                                      ? null
-                                      : () => context
-                                          .read<AuthCubit>()
-                                          .signInWithGoogle(),
-                                  child: Text(
-                                    'sign_up'.tr(),
-                                    style: const TextStyle(
-                                      color: ColorManager.primary,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),

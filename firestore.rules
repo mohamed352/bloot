@@ -146,10 +146,9 @@ service cloud.firestore {
     // Room chat sub-collection
     // NOTE: Using get() on the room document in a list/read rule breaks query
     // listeners because Firestore cannot evaluate cross-document lookups for
-    // list queries. For local emulator testing we allow any authenticated user
-    // to read room chat. Replace with a query-compatible rule (e.g. an
-    // arrayContains filter on participantUids stored in each message) before
-    // shipping to production.
+    // list queries. We currently allow any authenticated user to read room chat;
+    // tighten this to participants only (e.g. arrayContains on participantUids
+    // stored in each message) before shipping to production.
     function isRoomMember(roomId) {
       let room = get(/databases/$(database)/documents/rooms/$(roomId));
       return request.auth != null &&

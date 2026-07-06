@@ -1,13 +1,12 @@
 import 'package:flutter/foundation.dart';
 
-/// Decides whether the Flutter app should talk to the local Firebase Emulator
-/// Suite and which host to use.
+/// Deprecated: the Bloot app now always connects to the real Firebase project.
 ///
-/// This is only enabled in debug builds running outside the browser. On
-/// Android emulators the host must be `10.0.2.2` so the device can reach the
-/// laptop's localhost; on all other platforms `localhost` works.
+/// This class is kept as a no-op so existing imports do not break. All
+/// emulator-related wiring has been removed from the app.
+@Deprecated('Emulator support has been removed; app uses production Firebase.')
 abstract class FirebaseEmulatorConfig {
-  static const bool enabled = kDebugMode && !kIsWeb;
+  static const bool enabled = false;
   static String get host => _isAndroidEmulator ? '10.0.2.2' : 'localhost';
   static bool get _isAndroidEmulator =>
       defaultTargetPlatform == TargetPlatform.android && !kIsWeb;

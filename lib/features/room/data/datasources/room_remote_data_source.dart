@@ -115,7 +115,7 @@ class RoomRemoteDataSource {
     await roomRef.set(roomData).timeout(
       timeout,
       onTimeout: () => throw const RoomException(
-        'Timed out creating room. Is the Firestore emulator running?',
+        'Timed out creating room. Please check your connection and try again.',
       ),
     );
     AppLogger.info('Room created: ${roomRef.id}', tag: 'Room');
@@ -287,6 +287,20 @@ class RoomRemoteDataSource {
     return data['gameId'] as String;
   }
 
+  /// Creates a real room with the current user plus 3 bot players, then starts
+  /// the game. Returns both the room ID and the game ID.
+  Future<({String roomId, String gameId})> createRoomWithBots() async {
+    final callable = _functions.httpsCallable('createRoomWithBots');
+    final result = await callable.call<Map<String, dynamic>>(<String, dynamic>{});
+    final data = result.data;
+    final roomId = data['roomId'] as String?;
+    final gameId = data['gameId'] as String?;
+    if (roomId == null || gameId == null) {
+      throw const RoomException('Failed to create bot room.');
+    }
+    return (roomId: roomId, gameId: gameId);
+  }
+
   Future<void> leaveRoom(String roomId) async {
     final currentUid = _currentUid;
     if (currentUid.isEmpty) throw const UnauthenticatedException();
@@ -326,7 +340,7 @@ class RoomRemoteDataSource {
         final gameDoc = await transaction.get(gameRef);
         if (gameDoc.exists) {
           final gameData = gameDoc.data()!;
-          final gamePlayers = gameData['players'] as Map<String, dynamic>? ?? {};
+          final gamePlayers = gameData['players'] as Map<String, dynamic>? ?? <String, dynamic>{};
           for (final entry in gamePlayers.entries) {
             final p = entry.value as Map<String, dynamic>;
             if (p['uid'] == currentUid) {

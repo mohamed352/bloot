@@ -80,6 +80,26 @@ class RoomCubit extends Cubit<RoomState> {
     }
   }
 
+  /// Creates a real room with the current user plus 3 bot players, then starts
+  /// the game immediately.
+  Future<void> createRoomWithBots() async {
+    emit(const RoomState.loading());
+    try {
+      final result = await _roomRepository.createRoomWithBots();
+      _gameStartedEmitted = true;
+      emit(RoomState.gameStarted(gameId: result.gameId));
+    } on RoomException catch (e) {
+      emit(RoomState.error(message: e.message));
+    } catch (e) {
+      AppLogger.error('Failed to create bot room', error: e);
+      emit(
+        const RoomState.error(
+          message: 'Failed to start game with bots. Please try again.',
+        ),
+      );
+    }
+  }
+
   void loadRoom(String roomId) {
     emit(const RoomState.loading());
     _roomSubscription?.cancel();
