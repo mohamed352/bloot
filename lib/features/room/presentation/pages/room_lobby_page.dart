@@ -586,6 +586,26 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                           ],
                         ),
                         const SizedBox(height: AppSpacing.md),
+                        // Invite bots to fill empty seats (creator only)
+                        if (room != null &&
+                            room.status == RoomStatus.waiting &&
+                            isCreator &&
+                            players.length < 4)
+                          SizedBox(
+                            width: double.infinity,
+                            child: AppButton(
+                              text: 'invite_bots'.tr(),
+                              isOutlined: true,
+                              onPressed: () => context
+                                  .read<RoomCubit>()
+                                  .inviteBotsToRoom(room.id),
+                            ),
+                          ),
+                        if (room != null &&
+                            room.status == RoomStatus.waiting &&
+                            isCreator &&
+                            players.length < 4)
+                          const SizedBox(height: AppSpacing.md),
                         // Chat toggle
                         TextButton.icon(
                           onPressed: () =>

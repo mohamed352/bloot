@@ -301,6 +301,23 @@ class RoomRemoteDataSource {
     return (roomId: roomId, gameId: gameId);
   }
 
+  /// Invites bots to fill empty seats in an existing [roomId]. If the room
+  /// becomes full, the game is started automatically and the game ID is
+  /// returned.
+  Future<({String roomId, String? gameId})> inviteBotsToRoom(String roomId) async {
+    final callable = _functions.httpsCallable('inviteBotsToRoom');
+    final result = await callable.call<Map<String, dynamic>>({
+      'roomId': roomId,
+    });
+    final data = result.data;
+    final returnedRoomId = data['roomId'] as String?;
+    final gameId = data['gameId'] as String?;
+    if (returnedRoomId == null) {
+      throw const RoomException('Failed to invite bots.');
+    }
+    return (roomId: returnedRoomId, gameId: gameId);
+  }
+
   Future<void> leaveRoom(String roomId) async {
     final currentUid = _currentUid;
     if (currentUid.isEmpty) throw const UnauthenticatedException();

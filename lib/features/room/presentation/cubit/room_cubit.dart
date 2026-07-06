@@ -100,6 +100,27 @@ class RoomCubit extends Cubit<RoomState> {
     }
   }
 
+  /// Invites bots to fill empty seats in the current room. If the room becomes
+  /// full, the game starts automatically.
+  Future<void> inviteBotsToRoom(String roomId) async {
+    final currentState = state;
+    if (currentState is! RoomLoaded) return;
+    try {
+      final result = await _roomRepository.inviteBotsToRoom(roomId);
+      if (result.gameId != null && !_gameStartedEmitted) {
+        _gameStartedEmitted = true;
+        emit(RoomState.gameStarted(gameId: result.gameId!));
+      }
+    } on RoomException catch (e) {
+      emit(RoomState.error(message: e.message));
+      emit(currentState);
+    } catch (e) {
+      AppLogger.error('Failed to invite bots', error: e);
+      emit(const RoomState.error(message: 'Failed to invite bots. Please try again.'));
+      emit(currentState);
+    }
+  }
+
   void loadRoom(String roomId) {
     emit(const RoomState.loading());
     _roomSubscription?.cancel();

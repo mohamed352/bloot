@@ -46,7 +46,7 @@ export { playCard } from './https/playCard';
 export { dealNextRound } from './https/dealNextRound';
 export { autoPlay } from './https/autoPlay';
 export { rematch } from './https/rematch';
-export { createRoomWithBots } from './https/botRoom';
+export { createRoomWithBots, inviteBotsToRoom } from './https/botRoom';
 export { processGameEnd } from './triggers/processGameEnd';
 export { botAutoPlay } from './triggers/botAutoPlay';
 export { sendRoomInviteNotification } from './triggers/sendRoomInviteNotification';

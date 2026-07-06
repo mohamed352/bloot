@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/components/app_button.dart';
@@ -27,6 +29,9 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
   bool _usernameAvailable = true;
   bool _termsAccepted = false;
   bool _isCheckingUsername = false;
+  bool _isUploadingAvatar = false;
+  String? _avatarUrl;
+  File? _avatarFile;
   Timer? _usernameDebounce;
 
   @override
@@ -35,6 +40,32 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
     _usernameController.dispose();
     _usernameDebounce?.cancel();
     super.dispose();
+  }
+
+  Future<void> _pickAvatar() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 512,
+      maxHeight: 512,
+      imageQuality: 85,
+    );
+    if (picked == null || !mounted) return;
+
+    setState(() {
+      _avatarFile = File(picked.path);
+      _isUploadingAvatar = true;
+    });
+
+    final url = await context.read<AuthCubit>().uploadAvatar(File(picked.path));
+
+    if (mounted) {
+      setState(() {
+        _isUploadingAvatar = false;
+        if (url != null) _avatarUrl = url;
+        _avatarFile = null;
+      });
+    }
   }
 
   void _onUsernameChanged(String value) {
@@ -99,40 +130,66 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
                 children: [
                   const SizedBox(height: AppSpacing.lg),
                   // Avatar picker
-                  Stack(
-                    alignment: AlignmentDirectional.bottomEnd,
-                    children: [
-                      Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: ColorManager.darkSurface,
-                          border: Border.all(
-                            color: ColorManager.primary.withValues(alpha: 0.3),
-                            width: 2,
+                  GestureDetector(
+                    onTap: _isUploadingAvatar ? null : _pickAvatar,
+                    child: Stack(
+                      alignment: AlignmentDirectional.bottomEnd,
+                      children: [
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: ColorManager.darkSurface,
+                            border: Border.all(
+                              color: ColorManager.primary.withValues(alpha: 0.3),
+                              width: 2,
+                            ),
+                            image: _avatarFile != null
+                                ? DecorationImage(
+                                    image: FileImage(_avatarFile!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : _avatarUrl != null
+                                    ? DecorationImage(
+                                        image: NetworkImage(_avatarUrl!),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : null,
                           ),
+                          child: _avatarFile == null && _avatarUrl == null
+                              ? const Icon(
+                                  Icons.person_rounded,
+                                  size: 48,
+                                  color: ColorManager.darkTextMuted,
+                                )
+                              : null,
                         ),
-                        child: const Icon(
-                          Icons.person_rounded,
-                          size: 48,
-                          color: ColorManager.darkTextMuted,
-                        ),
-                      ),
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: const BoxDecoration(
-                          color: ColorManager.primary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.camera_alt_rounded,
-                          size: 16,
-                          color: ColorManager.darkTextPrimary,
-                        ),
-                      ),
-                    ],
+                        if (_isUploadingAvatar)
+                          const SizedBox(
+                            width: 32,
+                            height: 32,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: ColorManager.primary,
+                            ),
+                          )
+                        else
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: const BoxDecoration(
+                              color: ColorManager.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.camera_alt_rounded,
+                              size: 16,
+                              color: ColorManager.darkTextPrimary,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xxxl),
                   // Display name
@@ -242,6 +299,7 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
                             context.read<AuthCubit>().completeProfile(
                               name: _displayNameController.text.trim(),
                               username: _usernameController.text.trim(),
+                              avatarUrl: _avatarUrl,
                             );
                           }
                         : null,

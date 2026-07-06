@@ -146,6 +146,7 @@ extension GetItInjectableX on _i174.GetIt {
         firebaseAuth: gh<_i59.FirebaseAuth>(),
         firestore: gh<_i974.FirebaseFirestore>(),
         functions: gh<_i809.FirebaseFunctions>(),
+        storage: gh<_i457.FirebaseStorage>(),
       ),
     );
     gh.singleton<_i681.CacheHelper>(

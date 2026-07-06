@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -15,13 +18,16 @@ class AuthRemoteDataSource {
     required firebase_auth.FirebaseAuth firebaseAuth,
     required FirebaseFirestore firestore,
     required FirebaseFunctions functions,
+    required FirebaseStorage storage,
   })  : _firebaseAuth = firebaseAuth,
         _firestore = firestore,
-        _functions = functions;
+        _functions = functions,
+        _storage = storage;
 
   final firebase_auth.FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
   final FirebaseFunctions _functions;
+  final FirebaseStorage _storage;
 
   Future<UserModel?> signInWithGoogle() async {
     try {
@@ -319,6 +325,34 @@ class AuthRemoteDataSource {
         tag: 'Auth',
       );
       return false;
+    }
+  }
+
+  Future<String> uploadAvatar(File file) async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) {
+      throw const AuthException(
+        'User not authenticated.',
+        code: 'NOT_AUTHENTICATED',
+      );
+    }
+
+    try {
+      final ref = _storage.ref().child('avatars/${user.uid}.jpg');
+      final uploadTask = await ref.putFile(file);
+      return uploadTask.ref.getDownloadURL();
+    } on FirebaseException catch (e) {
+      AppLogger.error('Failed to upload avatar', error: e, tag: 'Auth');
+      throw AuthException(
+        e.message ?? 'Failed to upload avatar. Please try again.',
+        code: e.code,
+      );
+    } catch (e) {
+      AppLogger.error('Failed to upload avatar', error: e, tag: 'Auth');
+      throw const AuthException(
+        'Failed to upload avatar. Please try again.',
+        code: 'AVATAR_UPLOAD_ERROR',
+      );
     }
   }
 

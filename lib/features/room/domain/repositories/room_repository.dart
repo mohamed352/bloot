@@ -47,6 +47,10 @@ abstract class RoomRepository {
   /// the game. Returns both the room ID and the game ID.
   Future<({String roomId, String gameId})> createRoomWithBots();
 
+  /// Invites bots to fill empty seats in an existing room. If the room becomes
+  /// full, the game is started automatically and the game ID is returned.
+  Future<({String roomId, String? gameId})> inviteBotsToRoom(String roomId);
+
   /// Removes the current user from [roomId].
   Future<void> leaveRoom(String roomId);
 

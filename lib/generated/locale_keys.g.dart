@@ -210,6 +210,7 @@ abstract class  LocaleKeys {
   static const play_with_friends = 'play_with_friends';
   static const play_with_friends_face_to_face = 'play_with_friends_face_to_face';
   static const play_with_bots = 'play_with_bots';
+  static const invite_bots = 'invite_bots';
   static const popular = 'popular';
   static const premium_baloot_platform = 'premium_baloot_platform';
   static const privacy = 'privacy';

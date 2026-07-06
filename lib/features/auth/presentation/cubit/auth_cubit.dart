@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
@@ -155,6 +157,26 @@ class AuthCubit extends Cubit<AuthState> {
       emit(
         const AuthState.error(message: 'Failed to sign out. Please try again.'),
       );
+    }
+  }
+
+  Future<String?> uploadAvatar(File file) async {
+    emit(const AuthState.loading());
+    try {
+      final url = await _authRepository.uploadAvatar(file);
+      emit(const AuthState.initial());
+      return url;
+    } on AuthException catch (e) {
+      emit(AuthState.error(message: e.message));
+      return null;
+    } catch (e) {
+      AppLogger.error('Failed to upload avatar', error: e);
+      emit(
+        const AuthState.error(
+          message: 'Failed to upload avatar. Please try again.',
+        ),
+      );
+      return null;
     }
   }
 

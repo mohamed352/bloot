@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:injectable/injectable.dart';
 
 import 'package:bloot/features/auth/data/datasources/auth_remote_data_source.dart';
@@ -53,6 +55,9 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<bool> isUsernameAvailable(String username) =>
       _remoteDataSource.isUsernameAvailable(username);
+
+  @override
+  Future<String> uploadAvatar(File file) => _remoteDataSource.uploadAvatar(file);
 
   @override
   Future<void> deleteAccount() => _remoteDataSource.deleteAccount();

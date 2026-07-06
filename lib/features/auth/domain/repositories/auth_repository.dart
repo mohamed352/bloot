@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bloot/features/auth/domain/entities/user.dart';
 
 /// Repository contract for authentication operations.
@@ -26,6 +28,9 @@ abstract class AuthRepository {
 
   /// Checks if a username is available (not already taken).
   Future<bool> isUsernameAvailable(String username);
+
+  /// Uploads an avatar image to Firebase Storage and returns the download URL.
+  Future<String> uploadAvatar(File file);
 
   /// Deletes the current user's account and all associated data.
   Future<void> deleteAccount();

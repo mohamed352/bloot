@@ -90,20 +90,23 @@ abstract class AppInitializer {
   }
 
   static Future<void> _activateAppCheck() async {
+    // Skip App Check activation in debug builds so testing on emulators and
+    // debug devices works without registering a debug token in the Firebase
+    // console. Release builds still require a valid App Check token.
+    if (kDebugMode) {
+      AppLogger.info(
+        'App Check skipped in debug build (release builds will enforce it)',
+        tag: LogTags.init,
+      );
+      return;
+    }
+
     try {
       final appCheck = FirebaseAppCheck.instance;
-      if (kDebugMode) {
-        await appCheck.activate(
-          providerAndroid: const AndroidDebugProvider(),
-          providerApple: const AppleDebugProvider(),
-          providerWeb: ReCaptchaV3Provider(AppCheckConfig.recaptchaSiteKey),
-        );
-      } else {
-        await appCheck.activate(
-          providerApple: const AppleAppAttestProvider(),
-          providerWeb: ReCaptchaV3Provider(AppCheckConfig.recaptchaSiteKey),
-        );
-      }
+      await appCheck.activate(
+        providerApple: const AppleAppAttestProvider(),
+        providerWeb: ReCaptchaV3Provider(AppCheckConfig.recaptchaSiteKey),
+      );
       AppLogger.info('App Check activated', tag: LogTags.init);
     } catch (e) {
       AppLogger.error('Failed to activate App Check', error: e);
