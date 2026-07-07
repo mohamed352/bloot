@@ -26,14 +26,32 @@ abstract class AppInitializer {
   static bool onboardingCompleted = false;
   static bool isGuest = false;
   static bool _didInitAppDistribution = false;
+  static SharedPreferences? _sharedPreferences;
   static const String _kAppDistSignInAttemptKey = 'app_dist_signin_attempt_ms';
+
+  /// Cached [SharedPreferences] instance from the early initialization.
+  /// This is reused by the dependency injection module so we do not call
+  /// [SharedPreferences.getInstance] twice when the first attempt succeeded.
+  static SharedPreferences? get sharedPreferences => _sharedPreferences;
 
   static Future<void> initialize() async {
     AppLogger.info('Starting initialization...', tag: LogTags.init);
 
-    final prefs = await SharedPreferences.getInstance();
-    onboardingCompleted = prefs.getBool(CacheKeys.onboardingComplete) ?? false;
-    isGuest = prefs.getBool(CacheKeys.isGuest) ?? false;
+    try {
+      _sharedPreferences = await SharedPreferences.getInstance();
+      onboardingCompleted =
+          _sharedPreferences!.getBool(CacheKeys.onboardingComplete) ?? false;
+      isGuest = _sharedPreferences!.getBool(CacheKeys.isGuest) ?? false;
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Failed to initialize SharedPreferences; continuing with defaults',
+        error: e,
+        stackTrace: stackTrace,
+        tag: LogTags.init,
+      );
+      onboardingCompleted = false;
+      isGuest = false;
+    }
 
     GlobalErrorHandler.initialize();
     AppLogger.info('Error handlers installed', tag: LogTags.init);
@@ -188,7 +206,8 @@ abstract class AppInitializer {
         AppLogger.info('isTesterSignedIn=$isTesterSignedIn', tag: LogTags.init);
 
         if (!isTesterSignedIn) {
-          final prefs = await SharedPreferences.getInstance();
+          final prefs = _sharedPreferences ??
+              (await SharedPreferences.getInstance());
           final lastAttempt = prefs.getInt(_kAppDistSignInAttemptKey) ?? 0;
           final now = DateTime.now().millisecondsSinceEpoch;
 

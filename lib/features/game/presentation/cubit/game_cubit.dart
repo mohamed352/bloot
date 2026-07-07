@@ -31,6 +31,7 @@ class GameCubit extends Cubit<GameState> {
   final AudioService _audioService;
   StreamSubscription<Game>? _gameSubscription;
   String? _joinedAgoraChannelName;
+  bool _isClosed = false;
 
   /// Countdown seconds left for the current turn. Null when no timer is active
   /// (e.g., non-simulator games). In the local simulator this is updated for
@@ -453,6 +454,9 @@ class GameCubit extends Cubit<GameState> {
 
   @override
   Future<void> close() async {
+    if (_isClosed) return super.close();
+    _isClosed = true;
+
     await _gameSubscription?.cancel();
     humanTurnSecondsLeft.dispose();
 
