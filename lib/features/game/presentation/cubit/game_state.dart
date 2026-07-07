@@ -1,7 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:bloot/features/game/domain/entities/game.dart';
-import 'package:bloot/features/room/domain/entities/room.dart';
 
 part 'game_state.freezed.dart';
 
@@ -15,8 +14,6 @@ class GameState with _$GameState {
     required Game game,
     @Default(true) bool controlsVisible,
     int? selectedCardIndex,
-    @Default(false) bool chatOpen,
-    @Default(<RoomChatMessage>[]) List<RoomChatMessage> chatMessages,
     @Default(false) bool actionInProgress,
     String? lastActionError,
   }) = GameDealing;
@@ -25,8 +22,6 @@ class GameState with _$GameState {
     required Game game,
     @Default(true) bool controlsVisible,
     int? selectedCardIndex,
-    @Default(false) bool chatOpen,
-    @Default(<RoomChatMessage>[]) List<RoomChatMessage> chatMessages,
     @Default(false) bool actionInProgress,
     String? lastActionError,
   }) = GameBidding;
@@ -35,8 +30,6 @@ class GameState with _$GameState {
     required Game game,
     @Default(true) bool controlsVisible,
     int? selectedCardIndex,
-    @Default(false) bool chatOpen,
-    @Default(<RoomChatMessage>[]) List<RoomChatMessage> chatMessages,
     @Default(false) bool actionInProgress,
     String? lastActionError,
   }) = GameBonusClaim;
@@ -45,8 +38,6 @@ class GameState with _$GameState {
     required Game game,
     @Default(true) bool controlsVisible,
     int? selectedCardIndex,
-    @Default(false) bool chatOpen,
-    @Default(<RoomChatMessage>[]) List<RoomChatMessage> chatMessages,
     @Default(false) bool actionInProgress,
     String? lastActionError,
   }) = GamePlaying;
@@ -56,8 +47,6 @@ class GameState with _$GameState {
     required int winnerSeat,
     @Default(true) bool controlsVisible,
     int? selectedCardIndex,
-    @Default(false) bool chatOpen,
-    @Default(<RoomChatMessage>[]) List<RoomChatMessage> chatMessages,
     @Default(false) bool actionInProgress,
     String? lastActionError,
   }) = GameTrickEnd;
@@ -69,8 +58,6 @@ class GameState with _$GameState {
     String? fellTeam,
     @Default(true) bool controlsVisible,
     int? selectedCardIndex,
-    @Default(false) bool chatOpen,
-    @Default(<RoomChatMessage>[]) List<RoomChatMessage> chatMessages,
     @Default(false) bool actionInProgress,
     String? lastActionError,
   }) = GameRoundEnd;
@@ -80,8 +67,6 @@ class GameState with _$GameState {
     required String winnerTeam,
     @Default(true) bool controlsVisible,
     int? selectedCardIndex,
-    @Default(false) bool chatOpen,
-    @Default(<RoomChatMessage>[]) List<RoomChatMessage> chatMessages,
     @Default(false) bool actionInProgress,
     String? lastActionError,
   }) = GameGameEnd;

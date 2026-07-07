@@ -97,14 +97,11 @@ void main() {
       build: () {
         when(() => roomRepository.watchRoom('r1'))
             .thenAnswer((_) => Stream.value(room));
-        when(() => roomRepository.watchChatMessages('r1'))
-            .thenAnswer((_) => Stream.value(const []));
         return buildCubit();
       },
       act: (cubit) => cubit.loadRoom('r1'),
       expect: () => [
         const RoomState.loading(),
-        isA<RoomLoaded>().having((s) => s.room.id, 'room id', 'r1'),
         isA<RoomLoaded>().having((s) => s.room.id, 'room id', 'r1'),
       ],
     );
@@ -118,8 +115,6 @@ void main() {
         );
         when(() => roomRepository.watchRoom('r1'))
             .thenAnswer((_) => Stream.value(playingRoom));
-        when(() => roomRepository.watchChatMessages('r1'))
-            .thenAnswer((_) => const Stream.empty());
         return buildCubit();
       },
       act: (cubit) => cubit.loadRoom('r1'),
@@ -134,8 +129,6 @@ void main() {
       build: () {
         when(() => roomRepository.watchRoom('r1'))
             .thenAnswer((_) => Stream.error(Exception('network')));
-        when(() => roomRepository.watchChatMessages('r1'))
-            .thenAnswer((_) => Stream.value(const []));
         return buildCubit();
       },
       act: (cubit) => cubit.loadRoom('r1'),
@@ -150,14 +143,11 @@ void main() {
       build: () {
         when(() => roomRepository.watchRoom('r1'))
             .thenAnswer((_) => Stream.value(roomWithMe));
-        when(() => roomRepository.watchChatMessages('r1'))
-            .thenAnswer((_) => Stream.value(const []));
         return buildCubit();
       },
       act: (cubit) => cubit.loadRoom('r1'),
       expect: () => [
         const RoomState.loading(),
-        isA<RoomLoaded>().having((s) => s.room.players.first.isMe, 'isMe', true),
         isA<RoomLoaded>().having((s) => s.room.players.first.isMe, 'isMe', true),
       ],
     );
@@ -255,43 +245,6 @@ void main() {
       build: buildCubit,
       act: (cubit) => cubit.toggleReady('r1'),
       expect: () => const <RoomState>[],
-    );
-  });
-
-  group('sendChatMessage', () {
-    blocTest<RoomCubit, RoomState>(
-      'does nothing when not loaded',
-      build: buildCubit,
-      act: (cubit) => cubit.sendChatMessage('r1', 'hello'),
-      expect: () => const <RoomState>[],
-    );
-  });
-
-  group('toggleChat', () {
-    blocTest<RoomCubit, RoomState>(
-      'toggles chat open flag',
-      build: () {
-        when(() => roomRepository.watchRoom('r1'))
-            .thenAnswer((_) => Stream.value(room));
-        when(() => roomRepository.watchChatMessages('r1'))
-            .thenAnswer((_) => Stream.value(const []));
-        return buildCubit();
-      },
-      act: (cubit) async {
-        cubit.loadRoom('r1');
-        await Future<void>.delayed(Duration.zero);
-        cubit.toggleChat();
-      },
-      expect: () => [
-        const RoomState.loading(),
-        isA<RoomLoaded>().having((s) => s.room.id, 'room id', 'r1'),
-        isA<RoomLoaded>().having((s) => s.room.id, 'room id', 'r1'),
-        isA<RoomLoaded>().having(
-          (s) => s.room.id == 'r1' && s.chatOpen,
-          'chat open',
-          true,
-        ),
-      ],
     );
   });
 

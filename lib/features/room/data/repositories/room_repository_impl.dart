@@ -51,18 +51,6 @@ class RoomRepositoryImpl implements RoomRepository {
   }
 
   @override
-  Future<void> sendChatMessage(String roomId, String message) async {
-    await _remoteDataSource.sendChatMessage(roomId, message);
-  }
-
-  @override
-  Stream<List<RoomChatMessage>> watchChatMessages(String roomId) {
-    return _remoteDataSource
-        .watchChatMessages(roomId)
-        .map((models) => models.map((m) => m.toEntity()).toList());
-  }
-
-  @override
   Future<void> updatePlayerMediaState(
     String roomId, {
     required bool isMicOn,

@@ -72,7 +72,29 @@ pass to ship a production-ready app and backend.
 3. Keep `android/app/upload-keystore.jks` and `key.properties` private and back
    them up securely. They are already ignored by `.gitignore`.
 
+## Firebase App Distribution service account
+
+1. In the Firebase Console, go to **Project settings > Service accounts**.
+2. Click **Generate new private key** for the `firebase-adminsdk` service account.
+3. Save the downloaded JSON as `env/bloot-89b2b-firebase-adminsdk-fbsvc-b70047e82d.json`.
+   - This file is ignored by `.gitignore` and must never be committed.
+   - `env/bloot-89b2b-firebase-adminsdk.json.template` shows the expected shape.
+4. (Optional) Add the tester emails you want in `android/fastlane/Fastfile` under
+   the `testers:` option.
+
 ## Deployment
+
+### Android QA build via Fastlane
+
+```bash
+cd android
+bundle exec fastlane android distribute
+```
+
+This lane runs `flutter clean`, builds a release APK, and uploads it to Firebase
+App Distribution using the service account in `env/bloot-89b2b-firebase-adminsdk.json`.
+
+### Manual builds
 
 ```bash
 # Flutter

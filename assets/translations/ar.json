@@ -375,5 +375,11 @@
   "simulator_camera_unavailable": "الكاميرا غير متاحة في المحاكي.",
   "simulator_chat_unavailable": "الدردشة غير متاحة في المحاكي.",
   "simulator_mic_unavailable": "الميكروفون غير متاح في المحاكي.",
-  "sun_after_sun": "تم المزايدة بالصنّ سابقاً."
+  "sun_after_sun": "تم المزايدة بالصنّ سابقاً.",
+  "victory": "انتصار!",
+  "defeat": "هزيمة",
+  "congratulations_on_win": "تهانينا على فوزك!",
+  "better_luck_next_time": "حظاً أوفر في المرة القادمة!",
+  "rematch": "إعادة اللعب",
+  "you": "أنت"
 }

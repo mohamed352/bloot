@@ -84,6 +84,8 @@ export interface GameDocument {
   roundTricksB: number;
   currentTrick: CurrentTrick;
   players: Record<string, PlayerState>;
+  /** UIDs of all participants; used by Firestore security rules for access control. */
+  playerUids: string[];
   /** Resolved bonus points after bonus claim phase (Hokm only). */
   resolvedBonuses?: { teamA: number; teamB: number } | null;
   /** Team that fell in the last completed round, if any. */

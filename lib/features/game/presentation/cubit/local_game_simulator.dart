@@ -13,6 +13,10 @@ import 'package:bloot/features/room/domain/repositories/room_repository.dart';
 import 'package:bloot/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+String _botAvatarUrl(String name) {
+  return 'https://api.dicebear.com/7.x/bottts/png?seed=$name&backgroundColor=b6e3f4';
+}
+
 /// A fake repository that does nothing — the simulator manages all state locally.
 class _FakeGameRepository implements GameRepository {
   @override
@@ -478,6 +482,13 @@ class LocalGameSimulator extends GameCubit {
   }
 
   @override
+  Future<void> close() async {
+    _botTimer?.cancel();
+    _humanTurnCountdownTimer?.cancel();
+    return super.close();
+  }
+
+  @override
   Future<void> toggleMic() async {
     emitActionError(LocaleKeys.simulator_mic_unavailable.tr());
   }
@@ -485,11 +496,6 @@ class LocalGameSimulator extends GameCubit {
   @override
   Future<void> toggleCamera() async {
     emitActionError(LocaleKeys.simulator_camera_unavailable.tr());
-  }
-
-  @override
-  Future<void> sendChatMessage(String message) async {
-    emitActionError(LocaleKeys.simulator_chat_unavailable.tr());
   }
 
   // ——— State emission ———
@@ -563,13 +569,6 @@ class LocalGameSimulator extends GameCubit {
       default:
         emit(GameState.playing(game: game));
     }
-  }
-
-  @override
-  Future<void> close() async {
-    _botTimer?.cancel();
-    _stopTurnCountdown();
-    return super.close();
   }
 }
 
@@ -1089,7 +1088,7 @@ class SimGame {
       return GamePlayer(
         uid: p.uid,
         name: p.name,
-        avatarUrl: '',
+        avatarUrl: p.seatIndex == humanSeat ? '' : _botAvatarUrl(p.name),
         team: p.team,
         seatIndex: p.seatIndex,
         hand: p.hand,

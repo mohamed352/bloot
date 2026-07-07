@@ -187,8 +187,8 @@ final GoRouter appRouter = GoRouter(
       },
     ),
     GoRoute(
-      path: '/game-sim',
-      name: 'gameSim',
+      path: RoutePaths.gameSim,
+      name: RouteNames.gameSim,
       builder: (context, state) {
         return BlocProvider<GameCubit>(
           create: (_) => getIt<LocalGameSimulator>()..watchGame('sim_1'),

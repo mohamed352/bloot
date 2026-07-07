@@ -13,7 +13,6 @@ class Room {
     this.inviteCode,
     this.agoraChannelName,
     this.players = const [],
-    this.chatMessages = const [],
     this.status = RoomStatus.waiting,
     this.gameId,
     this.isStreaming = false,
@@ -34,7 +33,6 @@ class Room {
   final String? inviteCode;
   final String? agoraChannelName;
   final List<RoomPlayer> players;
-  final List<RoomChatMessage> chatMessages;
   final RoomStatus status;
   final String? gameId;
   final bool isStreaming;
@@ -53,7 +51,6 @@ class Room {
     String? inviteCode,
     String? agoraChannelName,
     List<RoomPlayer>? players,
-    List<RoomChatMessage>? chatMessages,
     RoomStatus? status,
     String? gameId,
     bool? isStreaming,
@@ -71,7 +68,6 @@ class Room {
     inviteCode: inviteCode ?? this.inviteCode,
     agoraChannelName: agoraChannelName ?? this.agoraChannelName,
     players: players ?? this.players,
-    chatMessages: chatMessages ?? this.chatMessages,
     status: status ?? this.status,
     gameId: gameId ?? this.gameId,
     isStreaming: isStreaming ?? this.isStreaming,
@@ -142,16 +138,4 @@ class RoomPlayer {
         agoraUid: agoraUid ?? this.agoraUid,
         isSpeaking: isSpeaking ?? this.isSpeaking,
       );
-}
-
-class RoomChatMessage {
-  const RoomChatMessage({
-    required this.user,
-    required this.text,
-    this.isSystem = false,
-  });
-
-  final String user;
-  final String text;
-  final bool isSystem;
 }

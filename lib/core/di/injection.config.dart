@@ -134,18 +134,23 @@ extension GetItInjectableX on _i174.GetIt {
         functions: gh<_i809.FirebaseFunctions>(),
       ),
     );
-    gh.lazySingleton<_i847.ProfileRemoteDataSource>(
-      () => _i847.ProfileRemoteDataSource(
-        firestore: gh<_i974.FirebaseFirestore>(),
-        firebaseAuth: gh<_i59.FirebaseAuth>(),
-        storage: gh<_i457.FirebaseStorage>(),
-      ),
-    );
     gh.lazySingleton<_i107.AuthRemoteDataSource>(
       () => _i107.AuthRemoteDataSource(
         firebaseAuth: gh<_i59.FirebaseAuth>(),
         firestore: gh<_i974.FirebaseFirestore>(),
         functions: gh<_i809.FirebaseFunctions>(),
+        storage: gh<_i457.FirebaseStorage>(),
+      ),
+    );
+    gh.lazySingleton<_i787.AuthRepository>(
+      () => _i153.AuthRepositoryImpl(
+        remoteDataSource: gh<_i107.AuthRemoteDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i847.ProfileRemoteDataSource>(
+      () => _i847.ProfileRemoteDataSource(
+        firestore: gh<_i974.FirebaseFirestore>(),
+        firebaseAuth: gh<_i59.FirebaseAuth>(),
         storage: gh<_i457.FirebaseStorage>(),
       ),
     );
@@ -229,11 +234,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i0.HomeRepository>(
       () => _i76.HomeRepositoryImpl(
         remoteDataSource: gh<_i362.HomeRemoteDataSource>(),
-      ),
-    );
-    gh.lazySingleton<_i787.AuthRepository>(
-      () => _i153.AuthRepositoryImpl(
-        remoteDataSource: gh<_i107.AuthRemoteDataSource>(),
       ),
     );
     gh.lazySingleton<_i674.SettingsRepository>(

@@ -16,6 +16,7 @@ abstract class RouteNames {
   static const String createRoom = 'createRoom';
   static const String roomLobby = 'roomLobby';
   static const String gamePlay = 'gamePlay';
+  static const String gameSim = 'gameSim';
   static const String watchStream = 'watchStream';
   static const String directMessage = 'directMessage';
   static const String roomInvitation = 'roomInvitation';
@@ -59,6 +60,7 @@ abstract class RoutePaths {
 
   static const String roomLobby = '/room/:id';
   static const String gamePlay = '/game/:id';
+  static const String gameSim = '/game-sim';
   static const String watchStream = '/stream/:id';
   static const String directMessage = '/chat/:conversationId';
   static const String roomInvitation = '/room-invite/:id';

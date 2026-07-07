@@ -10,7 +10,6 @@ import 'package:bloot/core/services/audio_service.dart';
 import 'package:bloot/features/game/domain/entities/game.dart';
 import 'package:bloot/features/game/domain/repositories/game_repository.dart';
 import 'package:bloot/features/game/presentation/cubit/game_state.dart';
-import 'package:bloot/features/room/domain/entities/room.dart';
 import 'package:bloot/features/room/domain/repositories/room_repository.dart';
 
 @injectable
@@ -31,10 +30,6 @@ class GameCubit extends Cubit<GameState> {
   final AgoraService _agoraService;
   final AudioService _audioService;
   StreamSubscription<Game>? _gameSubscription;
-  StreamSubscription<List<RoomChatMessage>>? _chatSubscription;
-  List<RoomChatMessage> _chatMessages = [];
-  bool _chatOpen = false;
-  String? _lastRoomId;
   String? _joinedAgoraChannelName;
 
   /// Countdown seconds left for the current turn. Null when no timer is active
@@ -60,10 +55,6 @@ class GameCubit extends Cubit<GameState> {
   void _startWatching(String id, Stream<Game> stream) {
     emit(const GameState.loading());
     _gameSubscription?.cancel();
-    _chatSubscription?.cancel();
-    _chatMessages = [];
-    _chatOpen = false;
-    _lastRoomId = null;
     _joinedAgoraChannelName = null;
 
     _gameSubscription = stream.listen(
@@ -106,24 +97,6 @@ class GameCubit extends Cubit<GameState> {
       orElse: () => null,
     );
 
-    // Start/replace room chat subscription when roomId is available or changes.
-    final roomId = game.roomId;
-    if (roomId != null && roomId.isNotEmpty && roomId != _lastRoomId) {
-      _lastRoomId = roomId;
-      _chatSubscription?.cancel();
-      _chatSubscription = _roomRepository
-          .watchChatMessages(roomId)
-          .listen(
-            (messages) {
-              _chatMessages = messages;
-              _reemitWithChat();
-            },
-            onError: (Object error) {
-              AppLogger.error('Chat stream error', error: error);
-            },
-          );
-    }
-
     switch (game.status) {
       case 'dealing':
         emit(
@@ -131,8 +104,6 @@ class GameCubit extends Cubit<GameState> {
             game: game,
             controlsVisible: controlsVisible,
             selectedCardIndex: selectedIndex,
-            chatOpen: _chatOpen,
-            chatMessages: _chatMessages,
           ),
         );
       case 'bidding':
@@ -141,8 +112,6 @@ class GameCubit extends Cubit<GameState> {
             game: game,
             controlsVisible: controlsVisible,
             selectedCardIndex: selectedIndex,
-            chatOpen: _chatOpen,
-            chatMessages: _chatMessages,
           ),
         );
       case 'bonusClaim':
@@ -151,8 +120,6 @@ class GameCubit extends Cubit<GameState> {
             game: game,
             controlsVisible: controlsVisible,
             selectedCardIndex: selectedIndex,
-            chatOpen: _chatOpen,
-            chatMessages: _chatMessages,
           ),
         );
       case 'playing':
@@ -161,8 +128,6 @@ class GameCubit extends Cubit<GameState> {
             game: game,
             controlsVisible: controlsVisible,
             selectedCardIndex: selectedIndex,
-            chatOpen: _chatOpen,
-            chatMessages: _chatMessages,
           ),
         );
       case 'trickEnd':
@@ -176,8 +141,6 @@ class GameCubit extends Cubit<GameState> {
                 0,
             controlsVisible: controlsVisible,
             selectedCardIndex: selectedIndex,
-            chatOpen: _chatOpen,
-            chatMessages: _chatMessages,
           ),
         );
       case 'roundEnd':
@@ -189,8 +152,6 @@ class GameCubit extends Cubit<GameState> {
             fellTeam: game.fellTeam,
             controlsVisible: controlsVisible,
             selectedCardIndex: selectedIndex,
-            chatOpen: _chatOpen,
-            chatMessages: _chatMessages,
           ),
         );
       case 'gameEnd':
@@ -201,8 +162,6 @@ class GameCubit extends Cubit<GameState> {
             winnerTeam: winner,
             controlsVisible: controlsVisible,
             selectedCardIndex: selectedIndex,
-            chatOpen: _chatOpen,
-            chatMessages: _chatMessages,
           ),
         );
       default:
@@ -211,8 +170,6 @@ class GameCubit extends Cubit<GameState> {
             game: game,
             controlsVisible: controlsVisible,
             selectedCardIndex: selectedIndex,
-            chatOpen: _chatOpen,
-            chatMessages: _chatMessages,
           ),
         );
     }
@@ -252,19 +209,6 @@ class GameCubit extends Cubit<GameState> {
         _audioService.playGameLoseSound();
       }
     }
-  }
-
-  void _reemitWithChat() {
-    final current = state;
-    current.mapOrNull(
-      dealing: (s) => emit(s.copyWith(chatMessages: _chatMessages)),
-      bidding: (s) => emit(s.copyWith(chatMessages: _chatMessages)),
-      bonusClaim: (s) => emit(s.copyWith(chatMessages: _chatMessages)),
-      playing: (s) => emit(s.copyWith(chatMessages: _chatMessages)),
-      trickEnd: (s) => emit(s.copyWith(chatMessages: _chatMessages)),
-      roundEnd: (s) => emit(s.copyWith(chatMessages: _chatMessages)),
-      gameEnd: (s) => emit(s.copyWith(chatMessages: _chatMessages)),
-    );
   }
 
   bool _bidInProgress = false;
@@ -414,7 +358,6 @@ class GameCubit extends Cubit<GameState> {
     try {
       await _roomRepository.leaveRoom(roomId);
       await _agoraService.leaveChannel();
-      _lastRoomId = null;
       _joinedAgoraChannelName = null;
       emit(const GameState.initial());
     } catch (e) {
@@ -454,24 +397,6 @@ class GameCubit extends Cubit<GameState> {
     } catch (e) {
       AppLogger.error('Failed to toggle camera', error: e);
       _emitActionError('Failed to toggle camera.');
-    }
-  }
-
-  void toggleChat() {
-    _chatOpen = !_chatOpen;
-    _reemitWithChat();
-  }
-
-  Future<void> sendChatMessage(String message) async {
-    final roomId = _getCurrentRoomId();
-    if (roomId == null || roomId.isEmpty) return;
-    if (message.trim().isEmpty) return;
-
-    try {
-      await _roomRepository.sendChatMessage(roomId, message.trim());
-    } catch (e) {
-      AppLogger.error('Failed to send chat message', error: e);
-      _emitActionError('Failed to send message. Please try again.');
     }
   }
 
@@ -529,7 +454,6 @@ class GameCubit extends Cubit<GameState> {
   @override
   Future<void> close() async {
     await _gameSubscription?.cancel();
-    await _chatSubscription?.cancel();
     humanTurnSecondsLeft.dispose();
 
     // Leave the Agora channel if this cubit joined it.

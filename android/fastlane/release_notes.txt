@@ -1,0 +1,4 @@
+Bloot v1.0.0 (build 1) — QA Release
+
+Initial Fastlane + Firebase App Distribution setup.
+Build: clean + release APK

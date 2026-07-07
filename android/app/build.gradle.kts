@@ -36,6 +36,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        missingDimensionStrategy("default", "production")
     }
 
     signingConfigs {
@@ -58,8 +59,17 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
+}
+
+dependencies {
+    // Firebase App Distribution Feedback SDK
+    implementation("com.google.firebase:firebase-appdistribution-api:16.0.0-beta14")
+    implementation("com.google.firebase:firebase-appdistribution:16.0.0-beta14")
 }
 
 flutter {

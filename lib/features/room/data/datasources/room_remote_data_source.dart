@@ -163,29 +163,6 @@ class RoomRemoteDataSource {
         });
   }
 
-  Stream<List<RoomChatMessageModel>> watchChatMessages(String roomId) {
-    return _firestore
-        .collection('rooms')
-        .doc(roomId)
-        .collection('chat')
-        .orderBy('createdAt', descending: false)
-        .limit(50)
-        .snapshots()
-        .map((snapshot) {
-          return snapshot.docs.map((doc) {
-            final data = doc.data();
-            return RoomChatMessageModel(
-              user: data['senderName'] as String? ?? 'Player',
-              text: data['text'] as String? ?? '',
-              isSystem: data['type'] == 'system',
-            );
-          }).toList();
-        })
-        .handleError((Object error) {
-          AppLogger.error('Failed to watch chat', error: error, tag: 'Room');
-        });
-  }
-
   Future<RoomModel> getRoomById(String id) async {
     final doc = await _firestore.collection('rooms').doc(id).get();
     if (!doc.exists) {
@@ -230,24 +207,6 @@ class RoomRemoteDataSource {
     });
 
     return getRoomById(roomId);
-  }
-
-  Future<void> sendChatMessage(String roomId, String message) async {
-    final currentUid = _currentUid;
-    if (currentUid.isEmpty) throw const UnauthenticatedException();
-
-    // Get user name
-    final userDoc = await _firestore.collection('users').doc(currentUid).get();
-    final userData = userDoc.data();
-    final displayName = userData?['displayName'] as String? ?? 'Player';
-
-    await _firestore.collection('rooms').doc(roomId).collection('chat').add({
-      'senderUid': currentUid,
-      'senderName': displayName,
-      'text': message,
-      'type': 'text',
-      'createdAt': FieldValue.serverTimestamp(),
-    });
   }
 
   Future<void> updatePlayerMediaState(

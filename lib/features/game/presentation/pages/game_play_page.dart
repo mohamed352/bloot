@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,8 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/constants/app_radius.dart';
 import 'package:bloot/generated/locale_keys.g.dart';
-import 'package:bloot/core/constants/app_spacing.dart';
-import 'package:bloot/core/extension/context_values.dart';
+import 'package:bloot/core/components/cached_avatar.dart';
 import 'package:bloot/core/services/agora_service.dart';
 import 'package:bloot/core/services/audio_service.dart';
 import 'package:bloot/core/style/colors.dart';
@@ -26,7 +26,7 @@ import 'package:bloot/core/network/connectivity_cubit.dart';
 import 'package:bloot/features/game/presentation/widgets/disconnect_overlay.dart';
 import 'package:bloot/features/game/presentation/widgets/game_tutorial_overlay.dart';
 import 'package:bloot/features/game/presentation/widgets/playing_card/playing_card.dart';
-import 'package:bloot/features/room/domain/entities/room.dart';
+
 
 class GamePlayPage extends StatefulWidget {
   const GamePlayPage({super.key, required this.id, this.isSpectator = false});
@@ -151,79 +151,10 @@ class _GamePlayPageState extends State<GamePlayPage>
       return;
     }
 
-    final cardKey = _cardKeys[card];
-    final cardRenderBox =
-        cardKey?.currentContext?.findRenderObject() as RenderBox?;
-    final tableRenderBox =
-        _tableKey.currentContext?.findRenderObject() as RenderBox?;
-
-    final cardPosition = cardRenderBox?.localToGlobal(Offset.zero);
-    final tablePosition = tableRenderBox?.localToGlobal(Offset.zero);
-    final tableSize = tableRenderBox?.size;
-
-    final hasAnimation =
-        cardPosition != null && tablePosition != null && tableSize != null;
-
-    if (hasAnimation) {
-      final startOffset = cardPosition;
-      final endOffset = Offset(
-        tablePosition.dx +
-            tableSize.width / 2 -
-            PlayingCardStyle.standard.width / 2,
-        tablePosition.dy +
-            tableSize.height / 2 -
-            PlayingCardStyle.standard.height / 2,
-      );
-
-      final overlay = Overlay.of(context);
-      late final OverlayEntry entry;
-
-      final controller = AnimationController(
-        duration: const Duration(milliseconds: 400),
-        vsync: this,
-      );
-      _activeControllers.add(controller);
-
-      final animation = CurvedAnimation(
-        parent: controller,
-        curve: Curves.easeOutBack,
-      );
-
-      entry = OverlayEntry(
-        builder: (overlayContext) {
-          return AnimatedBuilder(
-            animation: animation,
-            builder: (context, child) {
-              final position = Offset.lerp(
-                startOffset,
-                endOffset,
-                animation.value,
-              )!;
-              return Positioned(
-                left: position.dx,
-                top: position.dy,
-                child: Transform.rotate(
-                  angle: animation.value * 0.2,
-                  child: child,
-                ),
-              );
-            },
-            child: PlayingCardWidget(card: PlayingCard.fromString(card)),
-          );
-        },
-      );
-
-      overlay.insert(entry);
-
-      controller.forward().whenComplete(() {
-        entry.remove();
-        _activeControllers.remove(controller);
-        controller.dispose();
-        _finalizeCardPlay(card);
-      });
-    } else {
-      _finalizeCardPlay(card);
-    }
+    // Play the card immediately so it shows on the table right away.
+    // The previous overlay fly animation delayed the state update and felt
+    // buggy, especially when cards did not land cleanly with the others.
+    _finalizeCardPlay(card);
   }
 
   void _finalizeCardPlay(String card) {
@@ -425,16 +356,8 @@ class _GamePlayPageState extends State<GamePlayPage>
                     listener: (context, state) {
                       // Auto-hide controls after state change
                       state.maybeWhen(
-                        playing:
-                            (
-                              game,
-                              controlsVisible,
-                              selectedCardIndex,
-                              chatOpen,
-                              chatMessages,
-                              actionInProgress,
-                              lastActionError,
-                            ) {
+                        playing: (game, controlsVisible, selectedCardIndex,
+                            actionInProgress, lastActionError) {
                               _hideControlsTimer?.cancel();
                               _hideControlsTimer = Timer(
                                 const Duration(seconds: 3),
@@ -459,16 +382,12 @@ class _GamePlayPageState extends State<GamePlayPage>
                           s.controlsVisible,
                           s.selectedCardIndex,
                           isDealing: true,
-                          chatOpen: s.chatOpen,
-                          chatMessages: s.chatMessages,
                         ),
                         bidding: (s) => widget.isSpectator || !s.game.isMyTurn
                             ? _buildGameLayout(
                                 s.game,
                                 s.controlsVisible,
                                 s.selectedCardIndex,
-                                chatOpen: s.chatOpen,
-                                chatMessages: s.chatMessages,
                               )
                             : Stack(
                                 children: [
@@ -476,8 +395,6 @@ class _GamePlayPageState extends State<GamePlayPage>
                                     s.game,
                                     s.controlsVisible,
                                     s.selectedCardIndex,
-                                    chatOpen: s.chatOpen,
-                                    chatMessages: s.chatMessages,
                                   ),
                                   BiddingOverlay(
                                     currentBidder:
@@ -499,8 +416,6 @@ class _GamePlayPageState extends State<GamePlayPage>
                                 s.game,
                                 s.controlsVisible,
                                 s.selectedCardIndex,
-                                chatOpen: s.chatOpen,
-                                chatMessages: s.chatMessages,
                               )
                             : Stack(
                                 children: [
@@ -508,8 +423,6 @@ class _GamePlayPageState extends State<GamePlayPage>
                                     s.game,
                                     s.controlsVisible,
                                     s.selectedCardIndex,
-                                    chatOpen: s.chatOpen,
-                                    chatMessages: s.chatMessages,
                                   ),
                                   BonusClaimOverlay(
                                     hand: s.game.myHand,
@@ -526,16 +439,12 @@ class _GamePlayPageState extends State<GamePlayPage>
                           s.game,
                           s.controlsVisible,
                           s.selectedCardIndex,
-                          chatOpen: s.chatOpen,
-                          chatMessages: s.chatMessages,
                         ),
                         trickEnd: (s) => _buildGameLayout(
                           s.game,
                           s.controlsVisible,
                           s.selectedCardIndex,
                           winnerSeat: s.winnerSeat,
-                          chatOpen: s.chatOpen,
-                          chatMessages: s.chatMessages,
                         ),
                         roundEnd: (s) => Stack(
                           children: [
@@ -543,8 +452,6 @@ class _GamePlayPageState extends State<GamePlayPage>
                               s.game,
                               s.controlsVisible,
                               s.selectedCardIndex,
-                              chatOpen: s.chatOpen,
-                              chatMessages: s.chatMessages,
                             ),
                             RoundScoreOverlay(
                               teamAScore: s.teamAPoints,
@@ -570,8 +477,6 @@ class _GamePlayPageState extends State<GamePlayPage>
                               s.game,
                               s.controlsVisible,
                               s.selectedCardIndex,
-                              chatOpen: s.chatOpen,
-                              chatMessages: s.chatMessages,
                             ),
                             FinalScoreOverlay(
                               teamAScore: s.game.scoreUs,
@@ -582,6 +487,10 @@ class _GamePlayPageState extends State<GamePlayPage>
                                 final router = GoRouter.of(context);
                                 cubit.rematch().then((_) {
                                   if (!mounted) return;
+                                  if (_isLocalGame) {
+                                    // Local simulator restarts in-place.
+                                    return;
+                                  }
                                   final roomId = s.game.roomId;
                                   if (roomId != null && roomId.isNotEmpty) {
                                     router.goNamed(
@@ -634,8 +543,6 @@ class _GamePlayPageState extends State<GamePlayPage>
     int? selectedCardIndex, {
     bool isDealing = false,
     int? winnerSeat,
-    bool chatOpen = false,
-    List<RoomChatMessage> chatMessages = const [],
   }) {
     // Map players to seats relative to the local player:
     // bottom = local (you), top = partner, left/right = opponents.
@@ -683,6 +590,8 @@ class _GamePlayPageState extends State<GamePlayPage>
             padding: const EdgeInsetsDirectional.fromSTEB(8, 8, 8, 76),
             child: LayoutBuilder(
               builder: (context, constraints) {
+                // Scale the board down on very short landscape screens so the
+                // hand + seats fit without vertical overflow.
                 final layoutScale = constraints.maxHeight < 420
                     ? (constraints.maxHeight / 420).clamp(0.72, 1.0)
                     : 1.0;
@@ -754,63 +663,65 @@ class _GamePlayPageState extends State<GamePlayPage>
                                                           10,
                                                         ),
                                                   ),
-                                                  child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Text(
-                                                        'us'.tr(),
-                                                        style: const TextStyle(
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                          color: ColorManager
-                                                              .darkTextSecondary,
+                                                  child: FittedBox(
+                                                    child: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        Text(
+                                                          'us'.tr(),
+                                                          style: const TextStyle(
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: ColorManager
+                                                                .darkTextSecondary,
+                                                          ),
                                                         ),
-                                                      ),
-                                                      const SizedBox(width: 4),
-                                                      Text(
-                                                        '${game.scoreUs}',
-                                                        style: const TextStyle(
-                                                          fontSize: 18,
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          color: ColorManager
-                                                              .darkTextPrimary,
+                                                        const SizedBox(width: 4),
+                                                        Text(
+                                                          '${game.scoreUs}',
+                                                          style: const TextStyle(
+                                                            fontSize: 18,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                            color: ColorManager
+                                                                .darkTextPrimary,
+                                                          ),
                                                         ),
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      const Text(
-                                                        '—',
-                                                        style: TextStyle(
-                                                          fontSize: 16,
-                                                          color: ColorManager
-                                                              .darkTextMuted,
+                                                        const SizedBox(width: 8),
+                                                        const Text(
+                                                          '—',
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            color: ColorManager
+                                                                .darkTextMuted,
+                                                          ),
                                                         ),
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      Text(
-                                                        '${game.scoreThem}',
-                                                        style: const TextStyle(
-                                                          fontSize: 18,
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          color: ColorManager
-                                                              .secondary,
+                                                        const SizedBox(width: 8),
+                                                        Text(
+                                                          '${game.scoreThem}',
+                                                          style: const TextStyle(
+                                                            fontSize: 18,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                            color: ColorManager
+                                                                .secondary,
+                                                          ),
                                                         ),
-                                                      ),
-                                                      const SizedBox(width: 4),
-                                                      Text(
-                                                        'them'.tr(),
-                                                        style: const TextStyle(
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                          color: ColorManager
-                                                              .secondary,
+                                                        const SizedBox(width: 4),
+                                                        Text(
+                                                          'them'.tr(),
+                                                          style: const TextStyle(
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: ColorManager
+                                                                .secondary,
+                                                          ),
                                                         ),
-                                                      ),
-                                                    ],
+                                                      ],
+                                                    ),
                                                   ),
                                                 ),
                                                 const SizedBox(height: 8),
@@ -867,11 +778,11 @@ class _GamePlayPageState extends State<GamePlayPage>
                                                 card: PlayingCard.fromString(
                                                   cardString,
                                                 ),
-                                                style: PlayingCardStyle.standard
+                                                style: PlayingCardStyle.gameTable
                                                     .copyWith(
-                                                      width: 40,
-                                                      height: 56,
-                                                      centerSuitSize: 20,
+                                                      width: 44,
+                                                      height: 62,
+                                                      centerSuitSize: 22,
                                                     ),
                                               ),
                                             );
@@ -906,10 +817,10 @@ class _GamePlayPageState extends State<GamePlayPage>
                           isActive: isMyTurn,
                           scale: layoutScale,
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4 * layoutScale),
                         // Cards
                         if (!isDealing && !widget.isSpectator)
-                          _buildHand(game, layoutScale: layoutScale),
+                          _buildHand(game, scale: layoutScale),
                       ],
                     ),
                   ],
@@ -994,16 +905,7 @@ class _GamePlayPageState extends State<GamePlayPage>
                       },
                     ),
                   ],
-                  _ControlIcon(
-                    Icons.chat_bubble_outline_rounded,
-                    ColorManager.darkTextPrimary.withValues(alpha: 0.7),
-                    onPressed: () => context.read<GameCubit>().toggleChat(),
-                  ),
-                  _ControlIcon(
-                    Icons.settings_rounded,
-                    ColorManager.darkTextPrimary.withValues(alpha: 0.7),
-                    onPressed: () => context.pushNamed(RouteNames.settings),
-                  ),
+
                 ],
               ),
             ),
@@ -1048,13 +950,6 @@ class _GamePlayPageState extends State<GamePlayPage>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _BottomControlButton(
-                          icon: Icons.chat_bubble_outline_rounded,
-                          color: ColorManager.darkTextPrimary.withValues(
-                            alpha: 0.7,
-                          ),
-                          onTap: () => context.read<GameCubit>().toggleChat(),
-                        ),
                         if (!widget.isSpectator && !_isLocalGame) ...[
                           const SizedBox(width: 16),
                           _BottomControlButton(
@@ -1102,24 +997,11 @@ class _GamePlayPageState extends State<GamePlayPage>
               ),
             ),
           ),
-        // Chat overlay
-        if (chatOpen)
-          PositionedDirectional(
-            end: 8,
-            top: 60,
-            bottom: 80,
-            width: 280,
-            child: _GameChatOverlay(
-              messages: chatMessages,
-              onSend: (msg) => context.read<GameCubit>().sendChatMessage(msg),
-              onClose: () => context.read<GameCubit>().toggleChat(),
-            ),
-          ),
       ],
     );
   }
 
-  Widget _buildHand(Game game, {double layoutScale = 1.0}) {
+  Widget _buildHand(Game game, {double scale = 1.0}) {
     final myHand = game.myHand;
     if (myHand.isEmpty) return const SizedBox.shrink();
 
@@ -1127,25 +1009,22 @@ class _GamePlayPageState extends State<GamePlayPage>
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        const cardWidth = 44.0;
-        const cardHeight = 60.0;
-        const overlap = 26.0;
-        final desiredWidth = cardWidth + (myHand.length - 1) * overlap;
-        final widthScale = desiredWidth > constraints.maxWidth
-            ? constraints.maxWidth / desiredWidth
-            : 1.0;
-        final scale = widthScale * layoutScale;
+        final cardWidth = 58.0 * scale;
+        final cardHeight = 82.0 * scale;
+        // Keep a fixed hand width so cards don't jump around as the hand
+        // shrinks. Cards distribute evenly within this width.
+        final handWidth = min(560.0 * scale, constraints.maxWidth);
+        final overlap = myHand.length > 1
+            ? (handWidth - cardWidth) / (myHand.length - 1)
+            : 0.0;
 
-        final effectiveCardWidth = cardWidth * scale;
-        final effectiveCardHeight = cardHeight * scale;
-        final effectiveOverlap = overlap * scale;
         // Extend the tappable area slightly below the visible card so taps
         // near the bottom edge still register.
-        final effectiveHitHeight = effectiveCardHeight + 12 * scale;
+        final hitExtension = 16.0 * scale;
 
         return SizedBox(
-          width: desiredWidth * scale,
-          height: effectiveHitHeight,
+          width: handWidth,
+          height: cardHeight + hitExtension,
           child: Stack(
             clipBehavior: Clip.none,
             children: myHand.asMap().entries.map((entry) {
@@ -1153,8 +1032,9 @@ class _GamePlayPageState extends State<GamePlayPage>
               final card = entry.value;
               final isPlayable = legalCards.contains(card);
               final key = _cardKeys.putIfAbsent(card, () => GlobalKey());
+              final left = index * overlap;
               return PositionedDirectional(
-                start: index * effectiveOverlap,
+                start: left,
                 top: 0,
                 child: GestureDetector(
                   key: key,
@@ -1170,39 +1050,47 @@ class _GamePlayPageState extends State<GamePlayPage>
                           ? (details) => _endCardDrag(card, game, details)
                           : null,
                   child: SizedBox(
-                    width: effectiveCardWidth,
-                    height: effectiveHitHeight,
+                    width: cardWidth + overlap,
+                    height: cardHeight + hitExtension,
                     child: Align(
-                      alignment: Alignment.topCenter,
+                      alignment: AlignmentDirectional.topStart,
                       child: SizedBox(
-                        width: effectiveCardWidth,
-                        height: effectiveCardHeight,
-                        child: Opacity(
-                          opacity: isPlayable ? 1.0 : 0.45,
-                          child: PlayingCardWidget(
-                            card: PlayingCard.fromString(card),
-                            style: PlayingCardStyle.standard.copyWith(
-                              width: effectiveCardWidth,
-                              height: effectiveCardHeight,
-                              centerSuitSize: 20 * scale,
-                              borderColor: isPlayable
-                                  ? ColorManager.primary
-                                  : const Color(0xFFE0E0E0),
-                              borderWidth: isPlayable ? 2.0 : 0.5,
-                              shadow: isPlayable
-                                  ? BoxShadow(
-                                      color: ColorManager.primary.withValues(
-                                        alpha: 0.6,
-                                      ),
-                                      blurRadius: 8,
-                                      spreadRadius: 1,
-                                    )
-                                  : const BoxShadow(
-                                      color: Color(0x40000000),
-                                      blurRadius: 4,
-                                      offset: Offset(0, 2),
-                                    ),
+                        width: cardWidth,
+                        height: cardHeight,
+                        child: PlayingCardWidget(
+                          card: PlayingCard.fromString(card),
+                          style: PlayingCardStyle.gameTable.copyWith(
+                            width: cardWidth,
+                            height: cardHeight,
+                            centerSuitSize: 26 * scale,
+                            rankTextStyle: TextStyle(
+                              fontSize: 13 * scale,
+                              fontWeight: FontWeight.w800,
+                              height: 1.0,
                             ),
+                            suitTextStyle: TextStyle(
+                              fontSize: 11 * scale,
+                              fontWeight: FontWeight.w700,
+                              height: 1.0,
+                            ),
+                            borderColor: isPlayable
+                                ? ColorManager.primary
+                                : const Color(0xFF9E9E9E),
+                            borderWidth: isPlayable ? 2.0 * scale : 0.5,
+                            shadow: isPlayable
+                                ? BoxShadow(
+                                    color: ColorManager.primary.withValues(
+                                      alpha: 0.45,
+                                    ),
+                                    blurRadius: 8,
+                                    spreadRadius: 1,
+                                    offset: const Offset(0, 3),
+                                  )
+                                : const BoxShadow(
+                                    color: Color(0x40000000),
+                                    blurRadius: 4,
+                                    offset: Offset(0, 2),
+                                  ),
                           ),
                         ),
                       ),
@@ -1268,192 +1156,6 @@ class _GamePlayPageState extends State<GamePlayPage>
             child: Text(
               'leave'.tr(),
               style: const TextStyle(color: ColorManager.error),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _GameChatOverlay extends StatefulWidget {
-  const _GameChatOverlay({
-    required this.messages,
-    required this.onSend,
-    required this.onClose,
-  });
-
-  final List<RoomChatMessage> messages;
-  final ValueChanged<String> onSend;
-  final VoidCallback onClose;
-
-  @override
-  State<_GameChatOverlay> createState() => _GameChatOverlayState();
-}
-
-class _GameChatOverlayState extends State<_GameChatOverlay> {
-  late final TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _send() {
-    final text = _controller.text.trim();
-    if (text.isNotEmpty) {
-      widget.onSend(text);
-      _controller.clear();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.appColors;
-    final controller = _controller;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.surface.withValues(alpha: 0.95),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: colors.border),
-      ),
-      child: Column(
-        children: [
-          // Header
-          Padding(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-            child: Row(
-              children: [
-                Text(
-                  'chat'.tr(),
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: colors.textPrimary,
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: Icon(
-                    Icons.close_rounded,
-                    color: colors.textMuted,
-                    size: 18,
-                  ),
-                  onPressed: widget.onClose,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-          ),
-          Divider(color: colors.border, height: 1),
-          // Messages
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-              reverse: true,
-              itemCount: widget.messages.length,
-              itemBuilder: (context, index) {
-                final msg = widget.messages[widget.messages.length - 1 - index];
-                return _ChatBubble(message: msg);
-              },
-            ),
-          ),
-          Divider(color: colors.border, height: 1),
-          // Input
-          Padding(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: controller,
-                    style: TextStyle(color: colors.textPrimary, fontSize: 13),
-                    decoration: InputDecoration(
-                      hintText: 'type_message'.tr(),
-                      hintStyle: TextStyle(
-                        color: colors.textMuted,
-                        fontSize: 13,
-                      ),
-                      filled: true,
-                      fillColor: colors.background,
-                      contentPadding: const EdgeInsetsDirectional.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.sm,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    onSubmitted: (_) => _send(),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                IconButton(
-                  icon: Icon(
-                    Icons.send_rounded,
-                    color: colors.primary,
-                    size: 20,
-                  ),
-                  onPressed: _send,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ChatBubble extends StatelessWidget {
-  const _ChatBubble({required this.message});
-
-  final RoomChatMessage message;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.appColors;
-    final isSystem = message.isSystem;
-
-    return Padding(
-      padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (!isSystem)
-            Text(
-              message.user,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: colors.primary,
-              ),
-            ),
-          const SizedBox(height: 2),
-          Container(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.sm),
-            decoration: BoxDecoration(
-              color: isSystem
-                  ? colors.secondary.withValues(alpha: 0.15)
-                  : colors.background,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            child: Text(
-              message.text,
-              style: TextStyle(
-                fontSize: 12,
-                color: isSystem ? colors.secondary : colors.textPrimary,
-              ),
             ),
           ),
         ],
@@ -1548,6 +1250,7 @@ class _GamePlayerSeatState extends State<_GamePlayerSeat> {
         : ColorManager.secondary;
     final isSpeaking = _isSpeaking;
 
+    final scale = widget.scale;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -1559,19 +1262,19 @@ class _GamePlayerSeatState extends State<_GamePlayerSeat> {
               return const SizedBox.shrink();
             }
             return Container(
-              margin: const EdgeInsets.only(bottom: 2),
-              padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: 6,
-                vertical: 2,
+              margin: EdgeInsets.only(bottom: 2 * scale),
+              padding: EdgeInsetsDirectional.symmetric(
+                horizontal: 6 * scale,
+                vertical: 2 * scale,
               ),
               decoration: BoxDecoration(
                 color: ColorManager.error.withValues(alpha: 0.85),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(10 * scale),
               ),
               child: Text(
                 '${seconds}s',
                 style: TextStyle(
-                  fontSize: 10 * widget.scale,
+                  fontSize: 10 * scale,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
                 ),
@@ -1580,8 +1283,8 @@ class _GamePlayerSeatState extends State<_GamePlayerSeat> {
           },
         ),
         Container(
-          width: (widget.isMe ? 48 : 40) * widget.scale,
-          height: (widget.isMe ? 48 : 40) * widget.scale,
+          width: (widget.isMe ? 48 : 40) * scale,
+          height: (widget.isMe ? 48 : 40) * scale,
           padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
@@ -1612,31 +1315,25 @@ class _GamePlayerSeatState extends State<_GamePlayerSeat> {
           clipBehavior: Clip.antiAlias,
           child: player.hasCamera
               ? _buildVideoView(player)
-              : CircleAvatar(
-                  radius: (widget.isMe ? 22 : 18) * widget.scale,
-                  backgroundColor: teamColor.withValues(alpha: 0.2),
-                  backgroundImage: player.avatarUrl.isNotEmpty
-                      ? NetworkImage(player.avatarUrl)
-                      : null,
-                  child: player.avatarUrl.isEmpty
-                      ? Text(
-                          player.initials,
-                          style: TextStyle(
-                            fontSize: (widget.isMe ? 16 : 12) * widget.scale,
-                            fontWeight: FontWeight.w700,
-                            color: teamColor,
-                          ),
-                        )
-                      : null,
+              : CachedAvatar(
+                  imageUrl: _playerAvatarUrl(player),
+                  size: (widget.isMe ? 44 : 36) * scale,
+                  borderRadius: (widget.isMe ? 22 : 18) * scale,
                 ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          player.name,
-          style: TextStyle(
-            fontSize: 10 * widget.scale,
-            fontWeight: FontWeight.w600,
-            color: widget.isActive ? teamColor : ColorManager.darkTextPrimary,
+        SizedBox(height: 4 * scale),
+        SizedBox(
+          width: (widget.isMe ? 56 : 48) * scale,
+          child: Text(
+            widget.isMe ? LocaleKeys.you.tr() : player.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 10 * scale,
+              fontWeight: FontWeight.w600,
+              color: widget.isActive ? teamColor : ColorManager.darkTextPrimary,
+            ),
           ),
         ),
         Row(
@@ -1644,17 +1341,17 @@ class _GamePlayerSeatState extends State<_GamePlayerSeat> {
           children: [
             Icon(
               player.isMuted ? Icons.mic_off_rounded : Icons.mic_rounded,
-              size: 12 * widget.scale,
+              size: 12 * scale,
               color: player.isMuted
                   ? ColorManager.error.withValues(alpha: 0.8)
                   : ColorManager.success.withValues(alpha: 0.8),
             ),
-            const SizedBox(width: 2),
+            SizedBox(width: 2 * scale),
             Icon(
               player.hasCamera
                   ? Icons.videocam_rounded
                   : Icons.videocam_off_rounded,
-              size: 12 * widget.scale,
+              size: 12 * scale,
               color: player.hasCamera
                   ? ColorManager.success.withValues(alpha: 0.8)
                   : ColorManager.darkTextMuted.withValues(alpha: 0.5),
@@ -1665,31 +1362,21 @@ class _GamePlayerSeatState extends State<_GamePlayerSeat> {
     );
   }
 
-  Widget _buildVideoView(GamePlayer player) {
-    final teamColor = player.team == 'A'
-        ? ColorManager.primary
-        : ColorManager.secondary;
+  String _playerAvatarUrl(GamePlayer player) {
+    if (player.avatarUrl.isNotEmpty) return player.avatarUrl;
+    return 'https://api.dicebear.com/7.x/avataaars/png?seed=${player.uid}';
+  }
 
+  Widget _buildVideoView(GamePlayer player) {
+    final scale = widget.scale;
     if (widget.isMe) {
       return _agoraService.getLocalVideoView();
     }
     if (player.agoraUid == null) {
-      return CircleAvatar(
-        radius: widget.isMe ? 26 : 22,
-        backgroundColor: teamColor.withValues(alpha: 0.2),
-        backgroundImage: player.avatarUrl.isNotEmpty
-            ? NetworkImage(player.avatarUrl)
-            : null,
-        child: player.avatarUrl.isEmpty
-            ? Text(
-                player.initials,
-                style: TextStyle(
-                  fontSize: widget.isMe ? 18 : 14,
-                  fontWeight: FontWeight.w700,
-                  color: teamColor,
-                ),
-              )
-            : null,
+      return CachedAvatar(
+        imageUrl: _playerAvatarUrl(player),
+        size: (widget.isMe ? 44 : 36) * scale,
+        borderRadius: (widget.isMe ? 22 : 18) * scale,
       );
     }
     return _agoraService.getRemoteVideoView(player.agoraUid!);

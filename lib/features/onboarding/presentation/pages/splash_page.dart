@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:bloot/app/app_initializer.dart';
 import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
@@ -48,6 +49,11 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
     _logoController.forward();
     _progressController.forward();
+
+    // Initialize Firebase App Distribution feedback for testers after first frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppInitializer.initAppDistribution();
+    });
 
     // Check auth status after animation completes
     Future.delayed(const Duration(milliseconds: 2500), () {

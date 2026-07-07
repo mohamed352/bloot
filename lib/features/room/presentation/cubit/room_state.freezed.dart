@@ -137,12 +137,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( Room room,  bool chatOpen)?  loaded,TResult Function( Room room)?  created,TResult Function( String gameId)?  gameStarted,TResult Function( List<Room> rooms)?  publicListLoaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( Room room)?  loaded,TResult Function( Room room)?  created,TResult Function( String gameId)?  gameStarted,TResult Function( List<Room> rooms)?  publicListLoaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case RoomInitial() when initial != null:
 return initial();case RoomLoading() when loading != null:
 return loading();case RoomLoaded() when loaded != null:
-return loaded(_that.room,_that.chatOpen);case RoomCreated() when created != null:
+return loaded(_that.room);case RoomCreated() when created != null:
 return created(_that.room);case RoomGameStarted() when gameStarted != null:
 return gameStarted(_that.gameId);case RoomPublicListLoaded() when publicListLoaded != null:
 return publicListLoaded(_that.rooms);case RoomError() when error != null:
@@ -164,12 +164,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( Room room,  bool chatOpen)  loaded,required TResult Function( Room room)  created,required TResult Function( String gameId)  gameStarted,required TResult Function( List<Room> rooms)  publicListLoaded,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( Room room)  loaded,required TResult Function( Room room)  created,required TResult Function( String gameId)  gameStarted,required TResult Function( List<Room> rooms)  publicListLoaded,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case RoomInitial():
 return initial();case RoomLoading():
 return loading();case RoomLoaded():
-return loaded(_that.room,_that.chatOpen);case RoomCreated():
+return loaded(_that.room);case RoomCreated():
 return created(_that.room);case RoomGameStarted():
 return gameStarted(_that.gameId);case RoomPublicListLoaded():
 return publicListLoaded(_that.rooms);case RoomError():
@@ -190,12 +190,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( Room room,  bool chatOpen)?  loaded,TResult? Function( Room room)?  created,TResult? Function( String gameId)?  gameStarted,TResult? Function( List<Room> rooms)?  publicListLoaded,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( Room room)?  loaded,TResult? Function( Room room)?  created,TResult? Function( String gameId)?  gameStarted,TResult? Function( List<Room> rooms)?  publicListLoaded,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case RoomInitial() when initial != null:
 return initial();case RoomLoading() when loading != null:
 return loading();case RoomLoaded() when loaded != null:
-return loaded(_that.room,_that.chatOpen);case RoomCreated() when created != null:
+return loaded(_that.room);case RoomCreated() when created != null:
 return created(_that.room);case RoomGameStarted() when gameStarted != null:
 return gameStarted(_that.gameId);case RoomPublicListLoaded() when publicListLoaded != null:
 return publicListLoaded(_that.rooms);case RoomError() when error != null:
@@ -275,11 +275,10 @@ String toString() {
 
 
 class RoomLoaded implements RoomState {
-  const RoomLoaded({required this.room, this.chatOpen = false});
+  const RoomLoaded({required this.room});
   
 
  final  Room room;
-@JsonKey() final  bool chatOpen;
 
 /// Create a copy of RoomState
 /// with the given fields replaced by the non-null parameter values.
@@ -291,16 +290,16 @@ $RoomLoadedCopyWith<RoomLoaded> get copyWith => _$RoomLoadedCopyWithImpl<RoomLoa
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RoomLoaded&&(identical(other.room, room) || other.room == room)&&(identical(other.chatOpen, chatOpen) || other.chatOpen == chatOpen));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RoomLoaded&&(identical(other.room, room) || other.room == room));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,room,chatOpen);
+int get hashCode => Object.hash(runtimeType,room);
 
 @override
 String toString() {
-  return 'RoomState.loaded(room: $room, chatOpen: $chatOpen)';
+  return 'RoomState.loaded(room: $room)';
 }
 
 
@@ -311,7 +310,7 @@ abstract mixin class $RoomLoadedCopyWith<$Res> implements $RoomStateCopyWith<$Re
   factory $RoomLoadedCopyWith(RoomLoaded value, $Res Function(RoomLoaded) _then) = _$RoomLoadedCopyWithImpl;
 @useResult
 $Res call({
- Room room, bool chatOpen
+ Room room
 });
 
 
@@ -328,11 +327,10 @@ class _$RoomLoadedCopyWithImpl<$Res>
 
 /// Create a copy of RoomState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? room = null,Object? chatOpen = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? room = null,}) {
   return _then(RoomLoaded(
 room: null == room ? _self.room : room // ignore: cast_nullable_to_non_nullable
-as Room,chatOpen: null == chatOpen ? _self.chatOpen : chatOpen // ignore: cast_nullable_to_non_nullable
-as bool,
+as Room,
   ));
 }
 

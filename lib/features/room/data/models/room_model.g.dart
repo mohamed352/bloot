@@ -23,11 +23,6 @@ _RoomModel _$RoomModelFromJson(Map<String, dynamic> json) => _RoomModel(
           ?.map((e) => RoomPlayerModel.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const <RoomPlayerModel>[],
-  chatMessages:
-      (json['chatMessages'] as List<dynamic>?)
-          ?.map((e) => RoomChatMessageModel.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      const <RoomChatMessageModel>[],
   status: json['status'] as String? ?? 'waiting',
   gameId: json['gameId'] as String?,
   isStreaming: json['isStreaming'] as bool? ?? false,
@@ -48,7 +43,6 @@ Map<String, dynamic> _$RoomModelToJson(_RoomModel instance) =>
       'inviteCode': instance.inviteCode,
       'agoraChannelName': instance.agoraChannelName,
       'players': instance.players,
-      'chatMessages': instance.chatMessages,
       'status': instance.status,
       'gameId': instance.gameId,
       'isStreaming': instance.isStreaming,
@@ -84,19 +78,3 @@ Map<String, dynamic> _$RoomPlayerModelToJson(_RoomPlayerModel instance) =>
       'agoraUid': instance.agoraUid,
       'isSpeaking': instance.isSpeaking,
     };
-
-_RoomChatMessageModel _$RoomChatMessageModelFromJson(
-  Map<String, dynamic> json,
-) => _RoomChatMessageModel(
-  user: json['user'] as String,
-  text: json['text'] as String,
-  isSystem: json['isSystem'] as bool? ?? false,
-);
-
-Map<String, dynamic> _$RoomChatMessageModelToJson(
-  _RoomChatMessageModel instance,
-) => <String, dynamic>{
-  'user': instance.user,
-  'text': instance.text,
-  'isSystem': instance.isSystem,
-};

@@ -121,6 +121,12 @@ class _TestAssetLoader extends AssetLoader {
       'tutorial_chat_desc': 'Send messages.',
       'tutorial_win': 'Win',
       'tutorial_win_desc': 'Win the game.',
+      'you': 'You',
+      'victory': 'Victory!',
+      'defeat': 'Defeat',
+      'congratulations_on_win': 'Congratulations on your win!',
+      'better_luck_next_time': 'Better luck next time!',
+      'rematch': 'Rematch',
     };
   }
 }
@@ -135,7 +141,6 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
     SharedPreferences.setMockInitialValues({'game_tutorial_seen': true});
     EasyLocalization.logger.enableBuildModes = [];
-    await EasyLocalization.ensureInitialized();
   });
 
   setUp(() {
@@ -159,21 +164,32 @@ void main() {
       supportedLocales: const [Locale('en'), Locale('ar')],
       path: 'assets/translations',
       fallbackLocale: const Locale('en'),
+      startLocale: const Locale('en'),
+      useOnlyLangCode: true,
       assetLoader: _TestAssetLoader(),
-      child: MaterialApp(
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider<GameCubit>.value(value: cubit),
-            BlocProvider<ConnectivityCubit>(create: (_) => ConnectivityCubit()),
-          ],
-          child: MultiRepositoryProvider(
+      child: Builder(
+        builder: (context) => MaterialApp(
+          localizationsDelegates: context.localizationDelegates,
+          supportedLocales: context.supportedLocales,
+          locale: context.locale,
+          home: MultiBlocProvider(
             providers: [
-              RepositoryProvider<AgoraService>(create: (_) => mockAgoraService),
-              RepositoryProvider<AudioService>(
-                create: (_) => MockAudioService(),
+              BlocProvider<GameCubit>.value(value: cubit),
+              BlocProvider<ConnectivityCubit>(
+                create: (_) => ConnectivityCubit(),
               ),
             ],
-            child: child,
+            child: MultiRepositoryProvider(
+              providers: [
+                RepositoryProvider<AgoraService>(
+                  create: (_) => mockAgoraService,
+                ),
+                RepositoryProvider<AudioService>(
+                  create: (_) => MockAudioService(),
+                ),
+              ],
+              child: child,
+            ),
           ),
         ),
       ),
@@ -364,10 +380,7 @@ void main() {
         expect(tableFinder, findsOneWidget);
         final tableCenter = tester.getCenter(tableFinder);
 
-        await tester.drag(
-          cardFinder.first,
-          tableCenter - cardCenter,
-        );
+        await tester.drag(cardFinder.first, tableCenter - cardCenter);
         await tester.pumpAndSettle();
 
         verify(() => mockRepository.playCard('g1', 'AH')).called(1);
@@ -395,23 +408,30 @@ void main() {
         supportedLocales: const [Locale('en'), Locale('ar')],
         path: 'assets/translations',
         fallbackLocale: const Locale('en'),
+        startLocale: const Locale('en'),
+        useOnlyLangCode: true,
         assetLoader: _TestAssetLoader(),
-        child: MaterialApp(
-          theme: ThemeData.dark().copyWith(
-            extensions: const <ThemeExtension<dynamic>>[AppColors.dark],
-          ),
-          home: MultiBlocProvider(
-            providers: [
-              BlocProvider<GameCubit>(
-                create: (_) => LocalGameSimulator()..watchGame('sim_1'),
+        child: Builder(
+          builder: (context) => MaterialApp(
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            locale: context.locale,
+            theme: ThemeData.dark().copyWith(
+              extensions: const <ThemeExtension<dynamic>>[AppColors.dark],
+            ),
+            home: MultiBlocProvider(
+              providers: [
+                BlocProvider<GameCubit>(
+                  create: (_) => LocalGameSimulator()..watchGame('sim_1'),
+                ),
+                BlocProvider<ConnectivityCubit>(
+                  create: (_) => ConnectivityCubit(),
+                ),
+              ],
+              child: RepositoryProvider<AgoraService>(
+                create: (_) => mockAgoraService,
+                child: const GamePlayPage(id: 'sim_1'),
               ),
-              BlocProvider<ConnectivityCubit>(
-                create: (_) => ConnectivityCubit(),
-              ),
-            ],
-            child: RepositoryProvider<AgoraService>(
-              create: (_) => mockAgoraService,
-              child: const GamePlayPage(id: 'sim_1'),
             ),
           ),
         ),
@@ -423,7 +443,7 @@ void main() {
     ) async {
       await runWithFakeHttp(() async {
         await tester.pumpWidget(buildSimWidget());
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         // Should be in loading/dealing state briefly.
         expect(find.byType(CircularProgressIndicator), findsNothing);

@@ -23,12 +23,9 @@ class RoomCubit extends Cubit<RoomState> {
   final AgoraService _agoraService;
   StreamSubscription<Room>? _roomSubscription;
   StreamSubscription<List<Room>>? _publicRoomsSubscription;
-  StreamSubscription<List<RoomChatMessage>>? _chatSubscription;
   StreamSubscription<AgoraAudioVolumeIndicationEvent>?
       _audioVolumeSubscription;
   Room? _currentRoom;
-  List<RoomChatMessage> _chatMessages = [];
-  bool _chatOpen = false;
   String? _joinedAgoraChannelName;
   Future<void>? _pendingAgoraJoin;
   bool _gameStartedEmitted = false;
@@ -36,12 +33,7 @@ class RoomCubit extends Cubit<RoomState> {
   void _emitMergedState() {
     final room = _currentRoom;
     if (room == null) return;
-    emit(
-      RoomState.loaded(
-        room: room.copyWith(chatMessages: _chatMessages),
-        chatOpen: _chatOpen,
-      ),
-    );
+    emit(RoomState.loaded(room: room));
   }
 
   void watchPublicRooms() {
@@ -124,10 +116,8 @@ class RoomCubit extends Cubit<RoomState> {
   void loadRoom(String roomId) {
     emit(const RoomState.loading());
     _roomSubscription?.cancel();
-    _chatSubscription?.cancel();
     _audioVolumeSubscription?.cancel();
     _currentRoom = null;
-    _chatMessages = [];
     _gameStartedEmitted = false;
 
     _roomSubscription = _roomRepository.watchRoom(roomId).listen(
@@ -177,16 +167,6 @@ class RoomCubit extends Cubit<RoomState> {
             ),
           );
         }
-      },
-    );
-
-    _chatSubscription = _roomRepository.watchChatMessages(roomId).listen(
-      (messages) {
-        _chatMessages = messages;
-        _emitMergedState();
-      },
-      onError: (Object error) {
-        AppLogger.error('Chat stream error', error: error);
       },
     );
   }
@@ -291,32 +271,6 @@ class RoomCubit extends Cubit<RoomState> {
     }
   }
 
-  void toggleChat() {
-    _chatOpen = !_chatOpen;
-    _emitMergedState();
-  }
-
-  Future<void> sendChatMessage(String roomId, String message) async {
-    final currentState = state;
-    if (currentState is! RoomLoaded) return;
-    if (message.trim().isEmpty) return;
-    try {
-      await _roomRepository.sendChatMessage(roomId, message.trim());
-      // Real-time listener will update chat messages automatically
-    } on RoomException catch (e) {
-      emit(RoomState.error(message: e.message));
-      emit(currentState);
-    } catch (e) {
-      AppLogger.error('Failed to send message', error: e);
-      emit(
-        const RoomState.error(
-          message: 'Failed to send message. Please try again.',
-        ),
-      );
-      emit(currentState);
-    }
-  }
-
   Future<void> toggleMic(String roomId) async {
     final currentState = state;
     if (currentState is! RoomLoaded) return;
@@ -372,8 +326,6 @@ class RoomCubit extends Cubit<RoomState> {
       // deleted/empty room does not surface a ROOM_NOT_FOUND error after exit.
       await _roomSubscription?.cancel();
       _roomSubscription = null;
-      await _chatSubscription?.cancel();
-      _chatSubscription = null;
       await _audioVolumeSubscription?.cancel();
       _audioVolumeSubscription = null;
       _joinedAgoraChannelName = null;
@@ -437,7 +389,6 @@ class RoomCubit extends Cubit<RoomState> {
   Future<void> close() async {
     await _roomSubscription?.cancel();
     await _publicRoomsSubscription?.cancel();
-    await _chatSubscription?.cancel();
     await _audioVolumeSubscription?.cancel();
     // Wait for an in-flight Agora join to finish before leaving so we don't
     // call leaveChannel while joinChannel is still running.

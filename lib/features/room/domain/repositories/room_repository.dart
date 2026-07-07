@@ -19,12 +19,6 @@ abstract class RoomRepository {
   /// Toggles the ready status for the current user in [roomId].
   Future<Room> toggleReady(String roomId);
 
-  /// Sends a chat [message] to [roomId].
-  Future<void> sendChatMessage(String roomId, String message);
-
-  /// Returns a real-time stream of chat messages for [roomId].
-  Stream<List<RoomChatMessage>> watchChatMessages(String roomId);
-
   /// Updates the current player's mic and camera state in [roomId].
   Future<void> updatePlayerMediaState(
     String roomId, {

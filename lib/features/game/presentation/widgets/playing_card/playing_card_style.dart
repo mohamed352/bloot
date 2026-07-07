@@ -66,6 +66,35 @@ class PlayingCardStyle {
     );
   }
 
+  /// Style tuned for the in-game board: crisp corners, readable suits,
+  /// and enough contrast against dark felt backgrounds.
+  static PlayingCardStyle get gameTable {
+    return standard.copyWith(
+      backgroundColor: const Color(0xFFF8F8F8),
+      borderColor: const Color(0xFFBDBDBD),
+      borderWidth: 0.5,
+      shadow: const BoxShadow(
+        color: Color(0x59000000),
+        blurRadius: 5,
+        offset: Offset(0, 3),
+      ),
+      rankTextStyle: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w800,
+        height: 1.0,
+      ),
+      suitTextStyle: const TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        height: 1.0,
+      ),
+      centerSuitSize: 30,
+      centerSuitOpacity: 0.22,
+      redColor: const Color(0xFFE53935),
+      blackColor: const Color(0xFF212121),
+    );
+  }
+
   final double width;
   final double height;
   final BorderRadius borderRadius;

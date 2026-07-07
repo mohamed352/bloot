@@ -1,0 +1,22 @@
+default_platform(:android)
+
+platform :android do
+  desc "Submit a new Beta Build to Firebase App Distribution"
+  lane :distribute do
+    release_notes_file = "release_notes.txt"
+    release_notes = File.exist?(release_notes_file) ? File.read(release_notes_file) : "New QA Build"
+
+    Dir.chdir("../..") do
+      sh("flutter clean")
+      sh("flutter build apk --release")
+    end
+
+    firebase_app_distribution(
+      app: "1:738592764893:android:e9cf7172926e3a227efc34",
+      testers: "mohamedmostafa5830@gmail.com",
+      release_notes: release_notes.strip,
+      apk_path: "../build/app/outputs/flutter-apk/app-release.apk",
+      service_credentials_file: "../../env/bloot-89b2b-firebase-adminsdk-fbsvc-b70047e82d.json"
+    )
+  end
+end

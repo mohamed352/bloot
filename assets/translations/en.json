@@ -375,5 +375,11 @@
   "simulator_camera_unavailable": "Camera is not available in the simulator.",
   "simulator_chat_unavailable": "Chat is not available in the simulator.",
   "simulator_mic_unavailable": "Microphone is not available in the simulator.",
-  "sun_after_sun": "Sun has already been bid."
+  "sun_after_sun": "Sun has already been bid.",
+  "victory": "Victory!",
+  "defeat": "Defeat",
+  "congratulations_on_win": "Congratulations on your win!",
+  "better_luck_next_time": "Better luck next time!",
+  "rematch": "Rematch",
+  "you": "You"
 }

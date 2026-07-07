@@ -31,13 +31,15 @@ class FinalScoreOverlay extends StatelessWidget {
 
     return Container(
       color: colors.background.withValues(alpha: 0.92),
-      child: Center(
+      alignment: Alignment.center,
+      child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsetsDirectional.symmetric(
             horizontal: AppSpacing.screenHorizontal,
+            vertical: AppSpacing.xxl,
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 isWinner
@@ -48,7 +50,9 @@ class FinalScoreOverlay extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xxl),
               Text(
-                isWinner ? 'Victory!' : 'Defeat',
+                isWinner
+                    ? LocaleKeys.victory.tr()
+                    : LocaleKeys.defeat.tr(),
                 style: context.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: isWinner ? colors.secondary : colors.textPrimary,
@@ -57,8 +61,8 @@ class FinalScoreOverlay extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               Text(
                 isWinner
-                    ? 'Congratulations on your win!'
-                    : 'Better luck next time!',
+                    ? LocaleKeys.congratulations_on_win.tr()
+                    : LocaleKeys.better_luck_next_time.tr(),
                 textAlign: TextAlign.center,
                 style: context.textTheme.bodyMedium?.copyWith(
                   color: colors.textSecondary,
@@ -90,7 +94,7 @@ class FinalScoreOverlay extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.xxxl),
-              AppButton(text: 'Rematch', onPressed: onRematch),
+              AppButton(text: LocaleKeys.rematch.tr(), onPressed: onRematch),
               const SizedBox(height: AppSpacing.lg),
               AppButton(
                 text: LocaleKeys.go_home.tr(),

@@ -20,7 +20,6 @@ abstract class RoomModel with _$RoomModel {
     String? inviteCode,
     String? agoraChannelName,
     @Default(<RoomPlayerModel>[]) List<RoomPlayerModel> players,
-    @Default(<RoomChatMessageModel>[]) List<RoomChatMessageModel> chatMessages,
     @Default('waiting') String status,
     String? gameId,
     @Default(false) bool isStreaming,
@@ -51,18 +50,6 @@ abstract class RoomPlayerModel with _$RoomPlayerModel {
       _$RoomPlayerModelFromJson(json);
 }
 
-@freezed
-abstract class RoomChatMessageModel with _$RoomChatMessageModel {
-  const factory RoomChatMessageModel({
-    required String user,
-    required String text,
-    @Default(false) bool isSystem,
-  }) = _RoomChatMessageModel;
-
-  factory RoomChatMessageModel.fromJson(Map<String, dynamic> json) =>
-      _$RoomChatMessageModelFromJson(json);
-}
-
 extension RoomModelX on RoomModel {
   Room toEntity({String? currentUserUid}) => Room(
     id: id,
@@ -85,7 +72,6 @@ extension RoomModelX on RoomModel {
     players: players
         .map((p) => p.toEntity(currentUserUid: currentUserUid))
         .toList(),
-    chatMessages: chatMessages.map((m) => m.toEntity()).toList(),
     status: RoomStatus.values.firstWhere(
       (e) => e.name == status,
       orElse: () => RoomStatus.waiting,
@@ -110,9 +96,4 @@ extension RoomPlayerModelX on RoomPlayerModel {
     agoraUid: agoraUid ?? uid.hashCode.abs(),
     isSpeaking: isSpeaking,
   );
-}
-
-extension RoomChatMessageModelX on RoomChatMessageModel {
-  RoomChatMessage toEntity() =>
-      RoomChatMessage(user: user, text: text, isSystem: isSystem);
 }

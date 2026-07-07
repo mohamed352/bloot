@@ -29,7 +29,6 @@ class RoomLobbyPage extends StatefulWidget {
 
 class _RoomLobbyPageState extends State<RoomLobbyPage>
     with WidgetsBindingObserver {
-  final _chatController = TextEditingController();
   AgoraService? _agoraService;
 
   @override
@@ -47,7 +46,6 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _chatController.dispose();
     super.dispose();
   }
 
@@ -92,9 +90,7 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
         },
         builder: (context, state) {
           final room = state is RoomLoaded ? state.room : null;
-          final chatOpen = state is RoomLoaded && state.chatOpen;
           final players = room?.players ?? [];
-          final chatMessages = room?.chatMessages ?? [];
           final readyCount = players.where((p) => p.isReady).length;
           final allReady = readyCount == 4 && players.length == 4;
           final isReady =
@@ -103,11 +99,6 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
               room?.creatorUid != null &&
               room?.players.any((p) => p.isMe && p.uid == room.creatorUid) ==
                   true;
-          final quickChatChips = [
-            'ready'.tr(),
-            'lets_go'.tr(),
-            'need_1_more'.tr(),
-          ];
 
           return Scaffold(
             backgroundColor: ColorManager.darkCanvas,
@@ -419,47 +410,6 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xxl),
-                        // Quick chat chips
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          alignment: WrapAlignment.center,
-                          children: quickChatChips.map((chip) {
-                            return GestureDetector(
-                              onTap: () {
-                                if (room != null) {
-                                  context.read<RoomCubit>().sendChatMessage(
-                                    room.id,
-                                    chip,
-                                  );
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsetsDirectional.symmetric(
-                                  horizontal: 14,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: ColorManager.darkSectionGray,
-                                  borderRadius: BorderRadius.circular(
-                                    AppRadius.full,
-                                  ),
-                                  border: Border.all(
-                                    color: ColorManager.darkBorderSoft,
-                                  ),
-                                ),
-                                child: Text(
-                                  chip,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: ColorManager.darkTextSecondary,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                        const SizedBox(height: AppSpacing.xxl),
                         // Ready indicator
                         Text(
                           '$readyCount/4 ${'ready'.tr()}',
@@ -606,181 +556,10 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                             isCreator &&
                             players.length < 4)
                           const SizedBox(height: AppSpacing.md),
-                        // Chat toggle
-                        TextButton.icon(
-                          onPressed: () =>
-                              context.read<RoomCubit>().toggleChat(),
-                          icon: const Icon(
-                            Icons.chat_bubble_outline_rounded,
-                            size: 18,
-                          ),
-                          label: Text(
-                            chatOpen ? 'hide_chat'.tr() : 'open_chat'.tr(),
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
                       ],
                     ),
                   ),
                 ),
-                // Chat drawer
-                if (chatOpen)
-                  PositionedDirectional(
-                    bottom: 0,
-                    start: 0,
-                    end: 0,
-                    child: SafeArea(
-                      top: false,
-                      child: Container(
-                        height: 280,
-                        decoration: BoxDecoration(
-                          color: ColorManager.darkSurface,
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(24),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: ColorManager.darkCanvas.withValues(
-                                alpha: 0.4,
-                              ),
-                              blurRadius: 20,
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Container(
-                              margin: const EdgeInsets.only(top: AppSpacing.sm),
-                              width: 40,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: ColorManager.darkBorderSoft,
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.dragHandle,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: ListView.builder(
-                                padding: const EdgeInsets.all(AppSpacing.md),
-                                itemCount: chatMessages.length,
-                                itemBuilder: (context, index) {
-                                  final msg = chatMessages[index];
-                                  return Padding(
-                                    padding: const EdgeInsets.only(
-                                      bottom: AppSpacing.smCompact,
-                                    ),
-                                    child: msg.isSystem
-                                        ? Center(
-                                            child: Text(
-                                              msg.text,
-                                              style: const TextStyle(
-                                                fontSize: 11,
-                                                color:
-                                                    ColorManager.darkTextMuted,
-                                              ),
-                                            ),
-                                          )
-                                        : Text.rich(
-                                            TextSpan(
-                                              text: '${msg.user}: ',
-                                              style: const TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w600,
-                                                color: ColorManager.primary,
-                                              ),
-                                              children: [
-                                                TextSpan(
-                                                  text: msg.text,
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.w400,
-                                                    color: ColorManager
-                                                        .darkTextPrimary,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                  );
-                                },
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(AppSpacing.md),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: ColorManager.darkSectionGray,
-                                        borderRadius: BorderRadius.circular(
-                                          AppRadius.full,
-                                        ),
-                                      ),
-                                      child: TextField(
-                                        controller: _chatController,
-                                        style: const TextStyle(
-                                          color: ColorManager.darkTextPrimary,
-                                          fontSize: 14,
-                                        ),
-                                        decoration: InputDecoration(
-                                          hintText: LocaleKeys.type_a_message
-                                              .tr(),
-                                          hintStyle: const TextStyle(
-                                            color: ColorManager.darkTextMuted,
-                                          ),
-                                          contentPadding:
-                                              const EdgeInsetsDirectional.symmetric(
-                                                horizontal: AppSpacing.lg,
-                                                vertical: 10,
-                                              ),
-                                          border: InputBorder.none,
-                                        ),
-                                        onSubmitted: (text) {
-                                          if (text.trim().isNotEmpty &&
-                                              room != null) {
-                                            context
-                                                .read<RoomCubit>()
-                                                .sendChatMessage(room.id, text);
-                                            _chatController.clear();
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: AppSpacing.sm),
-                                  GestureDetector(
-                                    onTap: () {
-                                      final text = _chatController.text.trim();
-                                      if (text.isNotEmpty && room != null) {
-                                        context
-                                            .read<RoomCubit>()
-                                            .sendChatMessage(room.id, text);
-                                        _chatController.clear();
-                                      }
-                                    },
-                                    child: Container(
-                                      width: 40,
-                                      height: 40,
-                                      decoration: const BoxDecoration(
-                                        color: ColorManager.primary,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.send_rounded,
-                                        color: ColorManager.darkTextPrimary,
-                                        size: 18,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
               ],
             ),
           );

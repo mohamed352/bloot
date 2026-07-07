@@ -37,6 +37,7 @@ abstract class AppRedirect {
       RoutePaths.forceUpdate,
       RoutePaths.maintenance,
       RoutePaths.offline,
+      RoutePaths.gameSim,
     ].contains(currentPath);
 
     // Pure authentication flow routes (welcome → login).

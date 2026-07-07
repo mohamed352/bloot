@@ -380,5 +380,10 @@ abstract class  LocaleKeys {
   static const simulator_chat_unavailable = 'simulator_chat_unavailable';
   static const simulator_mic_unavailable = 'simulator_mic_unavailable';
   static const sun_after_sun = 'sun_after_sun';
+  static const victory = 'victory';
+  static const defeat = 'defeat';
+  static const congratulations_on_win = 'congratulations_on_win';
+  static const better_luck_next_time = 'better_luck_next_time';
+  static const rematch = 'rematch';
 
 }

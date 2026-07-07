@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RoomModel {
 
- String get id; String get name; String get type; bool get voiceEnabled; bool get cameraEnabled; bool get allowSpectators; String get gameSpeed; String? get password; String? get creatorUid; String? get inviteCode; String? get agoraChannelName; List<RoomPlayerModel> get players; List<RoomChatMessageModel> get chatMessages; String get status; String? get gameId; bool get isStreaming; String? get streamId;
+ String get id; String get name; String get type; bool get voiceEnabled; bool get cameraEnabled; bool get allowSpectators; String get gameSpeed; String? get password; String? get creatorUid; String? get inviteCode; String? get agoraChannelName; List<RoomPlayerModel> get players; String get status; String? get gameId; bool get isStreaming; String? get streamId;
 /// Create a copy of RoomModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $RoomModelCopyWith<RoomModel> get copyWith => _$RoomModelCopyWithImpl<RoomModel>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RoomModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.type, type) || other.type == type)&&(identical(other.voiceEnabled, voiceEnabled) || other.voiceEnabled == voiceEnabled)&&(identical(other.cameraEnabled, cameraEnabled) || other.cameraEnabled == cameraEnabled)&&(identical(other.allowSpectators, allowSpectators) || other.allowSpectators == allowSpectators)&&(identical(other.gameSpeed, gameSpeed) || other.gameSpeed == gameSpeed)&&(identical(other.password, password) || other.password == password)&&(identical(other.creatorUid, creatorUid) || other.creatorUid == creatorUid)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode)&&(identical(other.agoraChannelName, agoraChannelName) || other.agoraChannelName == agoraChannelName)&&const DeepCollectionEquality().equals(other.players, players)&&const DeepCollectionEquality().equals(other.chatMessages, chatMessages)&&(identical(other.status, status) || other.status == status)&&(identical(other.gameId, gameId) || other.gameId == gameId)&&(identical(other.isStreaming, isStreaming) || other.isStreaming == isStreaming)&&(identical(other.streamId, streamId) || other.streamId == streamId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RoomModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.type, type) || other.type == type)&&(identical(other.voiceEnabled, voiceEnabled) || other.voiceEnabled == voiceEnabled)&&(identical(other.cameraEnabled, cameraEnabled) || other.cameraEnabled == cameraEnabled)&&(identical(other.allowSpectators, allowSpectators) || other.allowSpectators == allowSpectators)&&(identical(other.gameSpeed, gameSpeed) || other.gameSpeed == gameSpeed)&&(identical(other.password, password) || other.password == password)&&(identical(other.creatorUid, creatorUid) || other.creatorUid == creatorUid)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode)&&(identical(other.agoraChannelName, agoraChannelName) || other.agoraChannelName == agoraChannelName)&&const DeepCollectionEquality().equals(other.players, players)&&(identical(other.status, status) || other.status == status)&&(identical(other.gameId, gameId) || other.gameId == gameId)&&(identical(other.isStreaming, isStreaming) || other.isStreaming == isStreaming)&&(identical(other.streamId, streamId) || other.streamId == streamId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,type,voiceEnabled,cameraEnabled,allowSpectators,gameSpeed,password,creatorUid,inviteCode,agoraChannelName,const DeepCollectionEquality().hash(players),const DeepCollectionEquality().hash(chatMessages),status,gameId,isStreaming,streamId);
+int get hashCode => Object.hash(runtimeType,id,name,type,voiceEnabled,cameraEnabled,allowSpectators,gameSpeed,password,creatorUid,inviteCode,agoraChannelName,const DeepCollectionEquality().hash(players),status,gameId,isStreaming,streamId);
 
 @override
 String toString() {
-  return 'RoomModel(id: $id, name: $name, type: $type, voiceEnabled: $voiceEnabled, cameraEnabled: $cameraEnabled, allowSpectators: $allowSpectators, gameSpeed: $gameSpeed, password: $password, creatorUid: $creatorUid, inviteCode: $inviteCode, agoraChannelName: $agoraChannelName, players: $players, chatMessages: $chatMessages, status: $status, gameId: $gameId, isStreaming: $isStreaming, streamId: $streamId)';
+  return 'RoomModel(id: $id, name: $name, type: $type, voiceEnabled: $voiceEnabled, cameraEnabled: $cameraEnabled, allowSpectators: $allowSpectators, gameSpeed: $gameSpeed, password: $password, creatorUid: $creatorUid, inviteCode: $inviteCode, agoraChannelName: $agoraChannelName, players: $players, status: $status, gameId: $gameId, isStreaming: $isStreaming, streamId: $streamId)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $RoomModelCopyWith<$Res>  {
   factory $RoomModelCopyWith(RoomModel value, $Res Function(RoomModel) _then) = _$RoomModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String type, bool voiceEnabled, bool cameraEnabled, bool allowSpectators, String gameSpeed, String? password, String? creatorUid, String? inviteCode, String? agoraChannelName, List<RoomPlayerModel> players, List<RoomChatMessageModel> chatMessages, String status, String? gameId, bool isStreaming, String? streamId
+ String id, String name, String type, bool voiceEnabled, bool cameraEnabled, bool allowSpectators, String gameSpeed, String? password, String? creatorUid, String? inviteCode, String? agoraChannelName, List<RoomPlayerModel> players, String status, String? gameId, bool isStreaming, String? streamId
 });
 
 
@@ -65,7 +65,7 @@ class _$RoomModelCopyWithImpl<$Res>
 
 /// Create a copy of RoomModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? type = null,Object? voiceEnabled = null,Object? cameraEnabled = null,Object? allowSpectators = null,Object? gameSpeed = null,Object? password = freezed,Object? creatorUid = freezed,Object? inviteCode = freezed,Object? agoraChannelName = freezed,Object? players = null,Object? chatMessages = null,Object? status = null,Object? gameId = freezed,Object? isStreaming = null,Object? streamId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? type = null,Object? voiceEnabled = null,Object? cameraEnabled = null,Object? allowSpectators = null,Object? gameSpeed = null,Object? password = freezed,Object? creatorUid = freezed,Object? inviteCode = freezed,Object? agoraChannelName = freezed,Object? players = null,Object? status = null,Object? gameId = freezed,Object? isStreaming = null,Object? streamId = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -79,8 +79,7 @@ as String?,creatorUid: freezed == creatorUid ? _self.creatorUid : creatorUid // 
 as String?,inviteCode: freezed == inviteCode ? _self.inviteCode : inviteCode // ignore: cast_nullable_to_non_nullable
 as String?,agoraChannelName: freezed == agoraChannelName ? _self.agoraChannelName : agoraChannelName // ignore: cast_nullable_to_non_nullable
 as String?,players: null == players ? _self.players : players // ignore: cast_nullable_to_non_nullable
-as List<RoomPlayerModel>,chatMessages: null == chatMessages ? _self.chatMessages : chatMessages // ignore: cast_nullable_to_non_nullable
-as List<RoomChatMessageModel>,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as List<RoomPlayerModel>,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,gameId: freezed == gameId ? _self.gameId : gameId // ignore: cast_nullable_to_non_nullable
 as String?,isStreaming: null == isStreaming ? _self.isStreaming : isStreaming // ignore: cast_nullable_to_non_nullable
 as bool,streamId: freezed == streamId ? _self.streamId : streamId // ignore: cast_nullable_to_non_nullable
@@ -169,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String type,  bool voiceEnabled,  bool cameraEnabled,  bool allowSpectators,  String gameSpeed,  String? password,  String? creatorUid,  String? inviteCode,  String? agoraChannelName,  List<RoomPlayerModel> players,  List<RoomChatMessageModel> chatMessages,  String status,  String? gameId,  bool isStreaming,  String? streamId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String type,  bool voiceEnabled,  bool cameraEnabled,  bool allowSpectators,  String gameSpeed,  String? password,  String? creatorUid,  String? inviteCode,  String? agoraChannelName,  List<RoomPlayerModel> players,  String status,  String? gameId,  bool isStreaming,  String? streamId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RoomModel() when $default != null:
-return $default(_that.id,_that.name,_that.type,_that.voiceEnabled,_that.cameraEnabled,_that.allowSpectators,_that.gameSpeed,_that.password,_that.creatorUid,_that.inviteCode,_that.agoraChannelName,_that.players,_that.chatMessages,_that.status,_that.gameId,_that.isStreaming,_that.streamId);case _:
+return $default(_that.id,_that.name,_that.type,_that.voiceEnabled,_that.cameraEnabled,_that.allowSpectators,_that.gameSpeed,_that.password,_that.creatorUid,_that.inviteCode,_that.agoraChannelName,_that.players,_that.status,_that.gameId,_that.isStreaming,_that.streamId);case _:
   return orElse();
 
 }
@@ -190,10 +189,10 @@ return $default(_that.id,_that.name,_that.type,_that.voiceEnabled,_that.cameraEn
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String type,  bool voiceEnabled,  bool cameraEnabled,  bool allowSpectators,  String gameSpeed,  String? password,  String? creatorUid,  String? inviteCode,  String? agoraChannelName,  List<RoomPlayerModel> players,  List<RoomChatMessageModel> chatMessages,  String status,  String? gameId,  bool isStreaming,  String? streamId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String type,  bool voiceEnabled,  bool cameraEnabled,  bool allowSpectators,  String gameSpeed,  String? password,  String? creatorUid,  String? inviteCode,  String? agoraChannelName,  List<RoomPlayerModel> players,  String status,  String? gameId,  bool isStreaming,  String? streamId)  $default,) {final _that = this;
 switch (_that) {
 case _RoomModel():
-return $default(_that.id,_that.name,_that.type,_that.voiceEnabled,_that.cameraEnabled,_that.allowSpectators,_that.gameSpeed,_that.password,_that.creatorUid,_that.inviteCode,_that.agoraChannelName,_that.players,_that.chatMessages,_that.status,_that.gameId,_that.isStreaming,_that.streamId);case _:
+return $default(_that.id,_that.name,_that.type,_that.voiceEnabled,_that.cameraEnabled,_that.allowSpectators,_that.gameSpeed,_that.password,_that.creatorUid,_that.inviteCode,_that.agoraChannelName,_that.players,_that.status,_that.gameId,_that.isStreaming,_that.streamId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +209,10 @@ return $default(_that.id,_that.name,_that.type,_that.voiceEnabled,_that.cameraEn
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String type,  bool voiceEnabled,  bool cameraEnabled,  bool allowSpectators,  String gameSpeed,  String? password,  String? creatorUid,  String? inviteCode,  String? agoraChannelName,  List<RoomPlayerModel> players,  List<RoomChatMessageModel> chatMessages,  String status,  String? gameId,  bool isStreaming,  String? streamId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String type,  bool voiceEnabled,  bool cameraEnabled,  bool allowSpectators,  String gameSpeed,  String? password,  String? creatorUid,  String? inviteCode,  String? agoraChannelName,  List<RoomPlayerModel> players,  String status,  String? gameId,  bool isStreaming,  String? streamId)?  $default,) {final _that = this;
 switch (_that) {
 case _RoomModel() when $default != null:
-return $default(_that.id,_that.name,_that.type,_that.voiceEnabled,_that.cameraEnabled,_that.allowSpectators,_that.gameSpeed,_that.password,_that.creatorUid,_that.inviteCode,_that.agoraChannelName,_that.players,_that.chatMessages,_that.status,_that.gameId,_that.isStreaming,_that.streamId);case _:
+return $default(_that.id,_that.name,_that.type,_that.voiceEnabled,_that.cameraEnabled,_that.allowSpectators,_that.gameSpeed,_that.password,_that.creatorUid,_that.inviteCode,_that.agoraChannelName,_that.players,_that.status,_that.gameId,_that.isStreaming,_that.streamId);case _:
   return null;
 
 }
@@ -225,7 +224,7 @@ return $default(_that.id,_that.name,_that.type,_that.voiceEnabled,_that.cameraEn
 @JsonSerializable()
 
 class _RoomModel implements RoomModel {
-  const _RoomModel({required this.id, required this.name, required this.type, this.voiceEnabled = true, this.cameraEnabled = false, this.allowSpectators = true, this.gameSpeed = 'normal', this.password, this.creatorUid, this.inviteCode, this.agoraChannelName, final  List<RoomPlayerModel> players = const <RoomPlayerModel>[], final  List<RoomChatMessageModel> chatMessages = const <RoomChatMessageModel>[], this.status = 'waiting', this.gameId, this.isStreaming = false, this.streamId}): _players = players,_chatMessages = chatMessages;
+  const _RoomModel({required this.id, required this.name, required this.type, this.voiceEnabled = true, this.cameraEnabled = false, this.allowSpectators = true, this.gameSpeed = 'normal', this.password, this.creatorUid, this.inviteCode, this.agoraChannelName, final  List<RoomPlayerModel> players = const <RoomPlayerModel>[], this.status = 'waiting', this.gameId, this.isStreaming = false, this.streamId}): _players = players;
   factory _RoomModel.fromJson(Map<String, dynamic> json) => _$RoomModelFromJson(json);
 
 @override final  String id;
@@ -246,13 +245,6 @@ class _RoomModel implements RoomModel {
   return EqualUnmodifiableListView(_players);
 }
 
- final  List<RoomChatMessageModel> _chatMessages;
-@override@JsonKey() List<RoomChatMessageModel> get chatMessages {
-  if (_chatMessages is EqualUnmodifiableListView) return _chatMessages;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_chatMessages);
-}
-
 @override@JsonKey() final  String status;
 @override final  String? gameId;
 @override@JsonKey() final  bool isStreaming;
@@ -271,16 +263,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RoomModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.type, type) || other.type == type)&&(identical(other.voiceEnabled, voiceEnabled) || other.voiceEnabled == voiceEnabled)&&(identical(other.cameraEnabled, cameraEnabled) || other.cameraEnabled == cameraEnabled)&&(identical(other.allowSpectators, allowSpectators) || other.allowSpectators == allowSpectators)&&(identical(other.gameSpeed, gameSpeed) || other.gameSpeed == gameSpeed)&&(identical(other.password, password) || other.password == password)&&(identical(other.creatorUid, creatorUid) || other.creatorUid == creatorUid)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode)&&(identical(other.agoraChannelName, agoraChannelName) || other.agoraChannelName == agoraChannelName)&&const DeepCollectionEquality().equals(other._players, _players)&&const DeepCollectionEquality().equals(other._chatMessages, _chatMessages)&&(identical(other.status, status) || other.status == status)&&(identical(other.gameId, gameId) || other.gameId == gameId)&&(identical(other.isStreaming, isStreaming) || other.isStreaming == isStreaming)&&(identical(other.streamId, streamId) || other.streamId == streamId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RoomModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.type, type) || other.type == type)&&(identical(other.voiceEnabled, voiceEnabled) || other.voiceEnabled == voiceEnabled)&&(identical(other.cameraEnabled, cameraEnabled) || other.cameraEnabled == cameraEnabled)&&(identical(other.allowSpectators, allowSpectators) || other.allowSpectators == allowSpectators)&&(identical(other.gameSpeed, gameSpeed) || other.gameSpeed == gameSpeed)&&(identical(other.password, password) || other.password == password)&&(identical(other.creatorUid, creatorUid) || other.creatorUid == creatorUid)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode)&&(identical(other.agoraChannelName, agoraChannelName) || other.agoraChannelName == agoraChannelName)&&const DeepCollectionEquality().equals(other._players, _players)&&(identical(other.status, status) || other.status == status)&&(identical(other.gameId, gameId) || other.gameId == gameId)&&(identical(other.isStreaming, isStreaming) || other.isStreaming == isStreaming)&&(identical(other.streamId, streamId) || other.streamId == streamId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,type,voiceEnabled,cameraEnabled,allowSpectators,gameSpeed,password,creatorUid,inviteCode,agoraChannelName,const DeepCollectionEquality().hash(_players),const DeepCollectionEquality().hash(_chatMessages),status,gameId,isStreaming,streamId);
+int get hashCode => Object.hash(runtimeType,id,name,type,voiceEnabled,cameraEnabled,allowSpectators,gameSpeed,password,creatorUid,inviteCode,agoraChannelName,const DeepCollectionEquality().hash(_players),status,gameId,isStreaming,streamId);
 
 @override
 String toString() {
-  return 'RoomModel(id: $id, name: $name, type: $type, voiceEnabled: $voiceEnabled, cameraEnabled: $cameraEnabled, allowSpectators: $allowSpectators, gameSpeed: $gameSpeed, password: $password, creatorUid: $creatorUid, inviteCode: $inviteCode, agoraChannelName: $agoraChannelName, players: $players, chatMessages: $chatMessages, status: $status, gameId: $gameId, isStreaming: $isStreaming, streamId: $streamId)';
+  return 'RoomModel(id: $id, name: $name, type: $type, voiceEnabled: $voiceEnabled, cameraEnabled: $cameraEnabled, allowSpectators: $allowSpectators, gameSpeed: $gameSpeed, password: $password, creatorUid: $creatorUid, inviteCode: $inviteCode, agoraChannelName: $agoraChannelName, players: $players, status: $status, gameId: $gameId, isStreaming: $isStreaming, streamId: $streamId)';
 }
 
 
@@ -291,7 +283,7 @@ abstract mixin class _$RoomModelCopyWith<$Res> implements $RoomModelCopyWith<$Re
   factory _$RoomModelCopyWith(_RoomModel value, $Res Function(_RoomModel) _then) = __$RoomModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String type, bool voiceEnabled, bool cameraEnabled, bool allowSpectators, String gameSpeed, String? password, String? creatorUid, String? inviteCode, String? agoraChannelName, List<RoomPlayerModel> players, List<RoomChatMessageModel> chatMessages, String status, String? gameId, bool isStreaming, String? streamId
+ String id, String name, String type, bool voiceEnabled, bool cameraEnabled, bool allowSpectators, String gameSpeed, String? password, String? creatorUid, String? inviteCode, String? agoraChannelName, List<RoomPlayerModel> players, String status, String? gameId, bool isStreaming, String? streamId
 });
 
 
@@ -308,7 +300,7 @@ class __$RoomModelCopyWithImpl<$Res>
 
 /// Create a copy of RoomModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? type = null,Object? voiceEnabled = null,Object? cameraEnabled = null,Object? allowSpectators = null,Object? gameSpeed = null,Object? password = freezed,Object? creatorUid = freezed,Object? inviteCode = freezed,Object? agoraChannelName = freezed,Object? players = null,Object? chatMessages = null,Object? status = null,Object? gameId = freezed,Object? isStreaming = null,Object? streamId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? type = null,Object? voiceEnabled = null,Object? cameraEnabled = null,Object? allowSpectators = null,Object? gameSpeed = null,Object? password = freezed,Object? creatorUid = freezed,Object? inviteCode = freezed,Object? agoraChannelName = freezed,Object? players = null,Object? status = null,Object? gameId = freezed,Object? isStreaming = null,Object? streamId = freezed,}) {
   return _then(_RoomModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -322,8 +314,7 @@ as String?,creatorUid: freezed == creatorUid ? _self.creatorUid : creatorUid // 
 as String?,inviteCode: freezed == inviteCode ? _self.inviteCode : inviteCode // ignore: cast_nullable_to_non_nullable
 as String?,agoraChannelName: freezed == agoraChannelName ? _self.agoraChannelName : agoraChannelName // ignore: cast_nullable_to_non_nullable
 as String?,players: null == players ? _self._players : players // ignore: cast_nullable_to_non_nullable
-as List<RoomPlayerModel>,chatMessages: null == chatMessages ? _self._chatMessages : chatMessages // ignore: cast_nullable_to_non_nullable
-as List<RoomChatMessageModel>,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as List<RoomPlayerModel>,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,gameId: freezed == gameId ? _self.gameId : gameId // ignore: cast_nullable_to_non_nullable
 as String?,isStreaming: null == isStreaming ? _self.isStreaming : isStreaming // ignore: cast_nullable_to_non_nullable
 as bool,streamId: freezed == streamId ? _self.streamId : streamId // ignore: cast_nullable_to_non_nullable
@@ -620,275 +611,6 @@ as int?,isMicOn: null == isMicOn ? _self.isMicOn : isMicOn // ignore: cast_nulla
 as bool,isCameraOn: null == isCameraOn ? _self.isCameraOn : isCameraOn // ignore: cast_nullable_to_non_nullable
 as bool,agoraUid: freezed == agoraUid ? _self.agoraUid : agoraUid // ignore: cast_nullable_to_non_nullable
 as int?,isSpeaking: null == isSpeaking ? _self.isSpeaking : isSpeaking // ignore: cast_nullable_to_non_nullable
-as bool,
-  ));
-}
-
-
-}
-
-
-/// @nodoc
-mixin _$RoomChatMessageModel {
-
- String get user; String get text; bool get isSystem;
-/// Create a copy of RoomChatMessageModel
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$RoomChatMessageModelCopyWith<RoomChatMessageModel> get copyWith => _$RoomChatMessageModelCopyWithImpl<RoomChatMessageModel>(this as RoomChatMessageModel, _$identity);
-
-  /// Serializes this RoomChatMessageModel to a JSON map.
-  Map<String, dynamic> toJson();
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RoomChatMessageModel&&(identical(other.user, user) || other.user == user)&&(identical(other.text, text) || other.text == text)&&(identical(other.isSystem, isSystem) || other.isSystem == isSystem));
-}
-
-@JsonKey(includeFromJson: false, includeToJson: false)
-@override
-int get hashCode => Object.hash(runtimeType,user,text,isSystem);
-
-@override
-String toString() {
-  return 'RoomChatMessageModel(user: $user, text: $text, isSystem: $isSystem)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $RoomChatMessageModelCopyWith<$Res>  {
-  factory $RoomChatMessageModelCopyWith(RoomChatMessageModel value, $Res Function(RoomChatMessageModel) _then) = _$RoomChatMessageModelCopyWithImpl;
-@useResult
-$Res call({
- String user, String text, bool isSystem
-});
-
-
-
-
-}
-/// @nodoc
-class _$RoomChatMessageModelCopyWithImpl<$Res>
-    implements $RoomChatMessageModelCopyWith<$Res> {
-  _$RoomChatMessageModelCopyWithImpl(this._self, this._then);
-
-  final RoomChatMessageModel _self;
-  final $Res Function(RoomChatMessageModel) _then;
-
-/// Create a copy of RoomChatMessageModel
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? user = null,Object? text = null,Object? isSystem = null,}) {
-  return _then(_self.copyWith(
-user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as String,text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
-as String,isSystem: null == isSystem ? _self.isSystem : isSystem // ignore: cast_nullable_to_non_nullable
-as bool,
-  ));
-}
-
-}
-
-
-/// Adds pattern-matching-related methods to [RoomChatMessageModel].
-extension RoomChatMessageModelPatterns on RoomChatMessageModel {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RoomChatMessageModel value)?  $default,{required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _RoomChatMessageModel() when $default != null:
-return $default(_that);case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RoomChatMessageModel value)  $default,){
-final _that = this;
-switch (_that) {
-case _RoomChatMessageModel():
-return $default(_that);case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RoomChatMessageModel value)?  $default,){
-final _that = this;
-switch (_that) {
-case _RoomChatMessageModel() when $default != null:
-return $default(_that);case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String user,  String text,  bool isSystem)?  $default,{required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _RoomChatMessageModel() when $default != null:
-return $default(_that.user,_that.text,_that.isSystem);case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String user,  String text,  bool isSystem)  $default,) {final _that = this;
-switch (_that) {
-case _RoomChatMessageModel():
-return $default(_that.user,_that.text,_that.isSystem);case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String user,  String text,  bool isSystem)?  $default,) {final _that = this;
-switch (_that) {
-case _RoomChatMessageModel() when $default != null:
-return $default(_that.user,_that.text,_that.isSystem);case _:
-  return null;
-
-}
-}
-
-}
-
-/// @nodoc
-@JsonSerializable()
-
-class _RoomChatMessageModel implements RoomChatMessageModel {
-  const _RoomChatMessageModel({required this.user, required this.text, this.isSystem = false});
-  factory _RoomChatMessageModel.fromJson(Map<String, dynamic> json) => _$RoomChatMessageModelFromJson(json);
-
-@override final  String user;
-@override final  String text;
-@override@JsonKey() final  bool isSystem;
-
-/// Create a copy of RoomChatMessageModel
-/// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$RoomChatMessageModelCopyWith<_RoomChatMessageModel> get copyWith => __$RoomChatMessageModelCopyWithImpl<_RoomChatMessageModel>(this, _$identity);
-
-@override
-Map<String, dynamic> toJson() {
-  return _$RoomChatMessageModelToJson(this, );
-}
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RoomChatMessageModel&&(identical(other.user, user) || other.user == user)&&(identical(other.text, text) || other.text == text)&&(identical(other.isSystem, isSystem) || other.isSystem == isSystem));
-}
-
-@JsonKey(includeFromJson: false, includeToJson: false)
-@override
-int get hashCode => Object.hash(runtimeType,user,text,isSystem);
-
-@override
-String toString() {
-  return 'RoomChatMessageModel(user: $user, text: $text, isSystem: $isSystem)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class _$RoomChatMessageModelCopyWith<$Res> implements $RoomChatMessageModelCopyWith<$Res> {
-  factory _$RoomChatMessageModelCopyWith(_RoomChatMessageModel value, $Res Function(_RoomChatMessageModel) _then) = __$RoomChatMessageModelCopyWithImpl;
-@override @useResult
-$Res call({
- String user, String text, bool isSystem
-});
-
-
-
-
-}
-/// @nodoc
-class __$RoomChatMessageModelCopyWithImpl<$Res>
-    implements _$RoomChatMessageModelCopyWith<$Res> {
-  __$RoomChatMessageModelCopyWithImpl(this._self, this._then);
-
-  final _RoomChatMessageModel _self;
-  final $Res Function(_RoomChatMessageModel) _then;
-
-/// Create a copy of RoomChatMessageModel
-/// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? user = null,Object? text = null,Object? isSystem = null,}) {
-  return _then(_RoomChatMessageModel(
-user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as String,text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
-as String,isSystem: null == isSystem ? _self.isSystem : isSystem // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

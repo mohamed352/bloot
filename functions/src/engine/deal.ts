@@ -102,6 +102,7 @@ export function createGameDocument(
       cards: { '0': null, '1': null, '2': null, '3': null },
     },
     players: playersMap,
+    playerUids: players.map((p) => p.uid),
     gameLog: [],
     createdAt: now as any,
     updatedAt: now as any,
