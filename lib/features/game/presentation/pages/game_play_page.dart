@@ -55,6 +55,14 @@ class _GamePlayPageState extends State<GamePlayPage>
 
   bool get _isLocalGame => widget.id.startsWith('sim_');
 
+  String _gameTypeLabel(Game game) {
+    if (game.gameType == 'ashkal') return LocaleKeys.ashkal.tr();
+    if (game.gameType == 'hokm') {
+      return '${LocaleKeys.hokm.tr()} ${game.trump}';
+    }
+    return LocaleKeys.sun.tr();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -401,6 +409,10 @@ class _GamePlayPageState extends State<GamePlayPage>
                                         s.game.currentPlayer?.name ?? '',
                                     isEnabled: s.game.isMyTurn,
                                     faceUpCard: s.game.faceUpCard,
+                                    ashkalEnabled: s.game.mySeatIndex ==
+                                            s.game.dealerIndex ||
+                                        s.game.mySeatIndex ==
+                                            ((s.game.dealerIndex + 3) % 4),
                                     timeLeft: context
                                         .read<GameCubit>()
                                         .humanTurnTimeoutDuration
@@ -426,6 +438,8 @@ class _GamePlayPageState extends State<GamePlayPage>
                                   ),
                                   BonusClaimOverlay(
                                     hand: s.game.myHand,
+                                    projects: s.game.projects,
+                                    gameType: s.game.gameType,
                                     onClaim: (bonuses) => context
                                         .read<GameCubit>()
                                         .claimBonuses(bonuses),
@@ -460,10 +474,8 @@ class _GamePlayPageState extends State<GamePlayPage>
                                   ? {
                                       '${s.fellTeam == s.game.localTeam ? 'us'.tr() : 'them'.tr()} ${'fell'.tr()}':
                                           s.fellTeam == s.game.localTeam
-                                          ? 0
-                                          : (s.game.gameType == 'hokm'
-                                                ? 152
-                                                : 120),
+                                              ? 0
+                                              : s.game.targetScore,
                                     }
                                   : {},
                               onNextRound: () =>
@@ -744,9 +756,7 @@ class _GamePlayPageState extends State<GamePlayPage>
                                                           ),
                                                     ),
                                                     child: Text(
-                                                      game.gameType == 'hokm'
-                                                          ? '${LocaleKeys.hokm.tr()} ${game.trump}'
-                                                          : LocaleKeys.sun.tr(),
+                                                      _gameTypeLabel(game),
                                                       style: const TextStyle(
                                                         fontSize: 14,
                                                         fontWeight:

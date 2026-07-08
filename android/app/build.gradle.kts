@@ -48,11 +48,21 @@ android {
             if (keyPropsFile.exists()) {
                 keystoreProperties.load(FileInputStream(keyPropsFile))
             }
-            keyAlias = keystoreProperties.getProperty("keyAlias", "")
-            keyPassword = keystoreProperties.getProperty("keyPassword", "")
+
             val storeFilePath = keystoreProperties.getProperty("storeFile")
-            storeFile = if (storeFilePath != null) rootProject.file(storeFilePath) else null
-            storePassword = keystoreProperties.getProperty("storePassword", "")
+            storeFile = if (storeFilePath != null) {
+                rootProject.file(storeFilePath)
+            } else {
+                logger.warn(
+                    "No release keystore configured in key.properties; " +
+                        "falling back to the Android debug keystore for this build.",
+                )
+                file("${System.getProperty("user.home")}/.android/debug.keystore")
+            }
+
+            keyAlias = keystoreProperties.getProperty("keyAlias", "androiddebugkey")
+            keyPassword = keystoreProperties.getProperty("keyPassword", "android")
+            storePassword = keystoreProperties.getProperty("storePassword", "android")
         }
     }
 

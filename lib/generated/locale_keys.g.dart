@@ -65,6 +65,7 @@ abstract class  LocaleKeys {
   static const already_have_an_account = 'already_have_an_account';
   static const anyone_can_join = 'anyone_can_join';
   static const around_8_pm = 'around_8_pm';
+  static const ashkal = 'ashkal';
   static const auto_detect = 'auto_detect';
   static const auto_rotate_for_game = 'auto_rotate_for_game';
   static const background_music = 'background_music';
@@ -84,6 +85,7 @@ abstract class  LocaleKeys {
   static const chat_unavailable = 'chat_unavailable';
   static const claim = 'claim';
   static const claim_bonuses = 'claim_bonuses';
+  static const claim_projects = 'claim_projects';
   static const complete_profile = 'complete_profile';
   static const completed = 'completed';
   static const contact_support = 'contact_support';
@@ -126,6 +128,10 @@ abstract class  LocaleKeys {
   static const game_speed = 'game_speed';
   static const game_type = 'game_type';
   static const proposed_trump = 'proposed_trump';
+  static const project_sira = 'project_sira';
+  static const project_fifty = 'project_fifty';
+  static const project_hundred = 'project_hundred';
+  static const project_four_aces = 'project_four_aces';
   static const games = 'games';
   static const get_started = 'get_started';
   static const gg = 'gg';
@@ -186,6 +192,7 @@ abstract class  LocaleKeys {
   static const next_friday = 'next_friday';
   static const nice_move = 'nice_move';
   static const no_bonuses = 'no_bonuses';
+  static const no_projects = 'no_projects';
   static const no_games_yet = 'no_games_yet';
   static const no_internet_connection = 'no_internet_connection';
   static const none = 'none';
@@ -247,6 +254,7 @@ abstract class  LocaleKeys {
   static const save_changes = 'save_changes';
   static const say_something = 'say_something';
   static const select_bonus_cards = 'select_bonus_cards';
+  static const select_projects = 'select_projects';
   static const search_streams_players = 'search_streams_players';
   static const see_all = 'see_all';
   static const sent_a_room_invitation = 'sent_a_room_invitation';

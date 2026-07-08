@@ -1,15 +1,12 @@
 import 'dart:async';
 
-import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:bloot/core/services/agora_service.dart';
-import 'package:bloot/features/game/domain/entities/game.dart';
 import 'package:bloot/features/game/presentation/cubit/game_cubit.dart';
 import 'package:bloot/features/game/presentation/cubit/game_state.dart';
-import 'package:bloot/features/room/domain/entities/room.dart';
 import 'package:bloot/features/room/presentation/cubit/room_cubit.dart';
 import 'package:bloot/features/room/presentation/cubit/room_state.dart';
 
@@ -28,21 +25,15 @@ void main() {
       when(() => agoraService.toggleCamera()).thenAnswer((_) async => true);
     });
 
-    RoomCubit buildCubit() => RoomCubit(
-          roomRepository: roomRepository,
-          agoraService: agoraService,
-        );
+    RoomCubit buildCubit() =>
+        RoomCubit(roomRepository: roomRepository, agoraService: agoraService);
 
     blocTest<RoomCubit, RoomState>(
       'joins Agora voice channel when participant and voice enabled',
       build: () {
         when(() => roomRepository.watchRoom('r1')).thenAnswer(
           (_) => Stream.value(
-            testRoom(
-              voiceEnabled: true,
-              cameraEnabled: false,
-              players: [testPlayer(uid: 'u1', name: 'Me', isMe: true)],
-            ),
+            testRoom(players: [testPlayer(name: 'Me', isMe: true)]),
           ),
         );
         return buildCubit();
@@ -53,7 +44,9 @@ void main() {
         isA<RoomLoaded>().having((s) => s.room.id, 'room id', 'r1'),
       ],
       verify: (_) {
-        verify(() => agoraService.joinChannel(channelName: 'room_r1')).called(1);
+        verify(
+          () => agoraService.joinChannel(channelName: 'room_r1'),
+        ).called(1);
       },
     );
 
@@ -65,7 +58,7 @@ void main() {
             testRoom(
               voiceEnabled: false,
               cameraEnabled: true,
-              players: [testPlayer(uid: 'u1', name: 'Me', isMe: true)],
+              players: [testPlayer(name: 'Me', isMe: true)],
             ),
           ),
         );
@@ -77,30 +70,34 @@ void main() {
         isA<RoomLoaded>().having((s) => s.room.id, 'room id', 'r1'),
       ],
       verify: (_) {
-        verify(() => agoraService.joinChannel(channelName: 'room_r1')).called(1);
+        verify(
+          () => agoraService.joinChannel(channelName: 'room_r1'),
+        ).called(1);
       },
     );
 
     blocTest<RoomCubit, RoomState>(
       'does not join Agora when user is spectator only',
       build: () {
-        when(() => roomRepository.watchRoom('r1')).thenAnswer(
-          (_) => Stream.value(
-            testRoom(
-              voiceEnabled: true,
-              players: const [],
-            ),
-          ),
-        );
+        when(
+          () => roomRepository.watchRoom('r1'),
+        ).thenAnswer((_) => Stream.value(testRoom(players: const [])));
         return buildCubit();
       },
       act: (cubit) => cubit.loadRoom('r1'),
       expect: () => [
         const RoomState.loading(),
-        isA<RoomLoaded>().having((s) => s.room.players.isEmpty, 'no players', true),
+        isA<RoomLoaded>().having(
+          (s) => s.room.players.isEmpty,
+          'no players',
+          true,
+        ),
       ],
       verify: (_) {
-        verifyNever(() => agoraService.joinChannel(channelName: any(named: 'channelName')));
+        verifyNever(
+          () =>
+              agoraService.joinChannel(channelName: any(named: 'channelName')),
+        );
       },
     );
 
@@ -109,10 +106,7 @@ void main() {
       build: () {
         when(() => roomRepository.watchRoom('r1')).thenAnswer(
           (_) => Stream.value(
-            testRoom(
-              voiceEnabled: true,
-              players: [testPlayer(uid: 'u1', name: 'Me', isMe: true)],
-            ),
+            testRoom(players: [testPlayer(name: 'Me', isMe: true)]),
           ),
         );
         when(() => roomRepository.leaveRoom('r1')).thenAnswer((_) async {});
@@ -133,20 +127,14 @@ void main() {
       build: () {
         final volumeController =
             StreamController<AgoraAudioVolumeIndicationEvent>.broadcast();
-        when(() => agoraService.onAudioVolumeIndication)
-            .thenAnswer((_) => volumeController.stream);
+        addTearDown(() async => volumeController.close());
+        when(
+          () => agoraService.onAudioVolumeIndication,
+        ).thenAnswer((_) => volumeController.stream);
         when(() => roomRepository.watchRoom('r1')).thenAnswer(
           (_) => Stream.value(
             testRoom(
-              voiceEnabled: true,
-              players: [
-                testPlayer(
-                  uid: 'u1',
-                  name: 'Me',
-                  isMe: true,
-                  agoraUid: 123,
-                ),
-              ],
+              players: [testPlayer(name: 'Me', isMe: true, agoraUid: 123)],
             ),
           ),
         );
@@ -159,7 +147,11 @@ void main() {
       },
       expect: () => [
         const RoomState.loading(),
-        isA<RoomLoaded>().having((s) => s.room.players.first.isSpeaking, 'not speaking', false),
+        isA<RoomLoaded>().having(
+          (s) => s.room.players.first.isSpeaking,
+          'not speaking',
+          false,
+        ),
       ],
     );
 
@@ -168,10 +160,7 @@ void main() {
       build: () {
         when(() => roomRepository.watchRoom('r1')).thenAnswer(
           (_) => Stream.value(
-            testRoom(
-              voiceEnabled: true,
-              players: [testPlayer(uid: 'u1', name: 'Me', isMe: true)],
-            ),
+            testRoom(players: [testPlayer(name: 'Me', isMe: true)]),
           ),
         );
         when(
@@ -189,11 +178,13 @@ void main() {
         await cubit.toggleMic('r1');
       },
       verify: (_) {
-        verify(() => roomRepository.updatePlayerMediaState(
-              'r1',
-              isMicOn: true,
-              isCameraOn: false,
-            )).called(1);
+        verify(
+          () => roomRepository.updatePlayerMediaState(
+            'r1',
+            isMicOn: true,
+            isCameraOn: false,
+          ),
+        ).called(1);
       },
     );
   });
@@ -209,62 +200,62 @@ void main() {
       roomRepository = MockRoomRepository();
       agoraService = MockAgoraService();
       audioService = MockAudioService();
-      when(() => agoraService.joinChannel(channelName: any(named: 'channelName')))
-          .thenAnswer((_) async {});
+      when(
+        () => agoraService.joinChannel(channelName: any(named: 'channelName')),
+      ).thenAnswer((_) async {});
       when(() => agoraService.leaveChannel()).thenAnswer((_) async {});
       when(() => agoraService.toggleMic()).thenAnswer((_) async => true);
       when(() => agoraService.toggleCamera()).thenAnswer((_) async => true);
     });
 
     GameCubit buildCubit() => GameCubit(
-          gameRepository: gameRepository,
-          roomRepository: roomRepository,
-          agoraService: agoraService,
-          audioService: audioService,
-        );
+      gameRepository: gameRepository,
+      roomRepository: roomRepository,
+      agoraService: agoraService,
+      audioService: audioService,
+    );
 
     blocTest<GameCubit, GameState>(
       'joins Agora when game has agoraChannelName',
       build: () {
-        when(() => gameRepository.watchGame('g1')).thenAnswer(
-          (_) => Stream.value(testGame()),
-        );
+        when(
+          () => gameRepository.watchGame('g1'),
+        ).thenAnswer((_) => Stream.value(testGame()));
         return buildCubit();
       },
       act: (cubit) => cubit.watchGame('g1'),
-      expect: () => [
-        const GameState.loading(),
-        isA<GamePlaying>(),
-      ],
+      expect: () => [const GameState.loading(), isA<GamePlaying>()],
       verify: (_) {
-        verify(() => agoraService.joinChannel(channelName: 'room_r1')).called(1);
+        verify(
+          () => agoraService.joinChannel(channelName: 'room_r1'),
+        ).called(1);
       },
     );
 
     blocTest<GameCubit, GameState>(
       'does not join Agora when channel name is missing',
       build: () {
-        when(() => gameRepository.watchGame('g1')).thenAnswer(
-          (_) => Stream.value(testGame(agoraChannelName: null)),
-        );
+        when(
+          () => gameRepository.watchGame('g1'),
+        ).thenAnswer((_) => Stream.value(testGame(agoraChannelName: null)));
         return buildCubit();
       },
       act: (cubit) => cubit.watchGame('g1'),
-      expect: () => [
-        const GameState.loading(),
-        isA<GamePlaying>(),
-      ],
+      expect: () => [const GameState.loading(), isA<GamePlaying>()],
       verify: (_) {
-        verifyNever(() => agoraService.joinChannel(channelName: any(named: 'channelName')));
+        verifyNever(
+          () =>
+              agoraService.joinChannel(channelName: any(named: 'channelName')),
+        );
       },
     );
 
     blocTest<GameCubit, GameState>(
       'toggleMic updates player media state in room',
       build: () {
-        when(() => gameRepository.watchGame('g1')).thenAnswer(
-          (_) => Stream.value(testGame()),
-        );
+        when(
+          () => gameRepository.watchGame('g1'),
+        ).thenAnswer((_) => Stream.value(testGame()));
         when(
           () => roomRepository.updatePlayerMediaState(
             'r1',
@@ -280,20 +271,22 @@ void main() {
         await cubit.toggleMic();
       },
       verify: (_) {
-        verify(() => roomRepository.updatePlayerMediaState(
-              'r1',
-              isMicOn: true,
-              isCameraOn: false,
-            )).called(1);
+        verify(
+          () => roomRepository.updatePlayerMediaState(
+            'r1',
+            isMicOn: true,
+            isCameraOn: false,
+          ),
+        ).called(1);
       },
     );
 
     blocTest<GameCubit, GameState>(
       'leaves Agora channel when game cubit closes',
       build: () {
-        when(() => gameRepository.watchGame('g1')).thenAnswer(
-          (_) => Stream.value(testGame()),
-        );
+        when(
+          () => gameRepository.watchGame('g1'),
+        ).thenAnswer((_) => Stream.value(testGame()));
         return buildCubit();
       },
       act: (cubit) async {

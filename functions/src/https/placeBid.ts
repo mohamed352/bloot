@@ -1,8 +1,15 @@
 import * as functions from 'firebase-functions';
 import { db } from '../config/admin';
 import { requireAppCheck } from '../utils/appCheck';
-import { validateBid, resolveBidding, applyBiddingResult } from '../engine/bidding';
-import { dealRound } from '../engine/deal';
+import { BalootEngine } from '../engine';
+import {
+  autoResolveDoubling,
+  bidToString,
+  GameDocument,
+  loadMatch,
+  parseBidAction,
+  saveMatch,
+} from '../engine/gameAdapter';
 import { buildGameUpdate, deepCloneGame } from '../utils/gameUpdate';
 
 export const placeBid = functions.https.onCall(async (request) => {
@@ -13,7 +20,7 @@ export const placeBid = functions.https.onCall(async (request) => {
   requireAppCheck(request);
 
   const { gameId, bid } = request.data;
-  if (!gameId || !bid || !['pass', 'sun', 'hokm'].includes(bid)) {
+  if (!gameId || !bid || !['pass', 'sun', 'hokm', 'ashkal'].includes(bid)) {
     throw new functions.https.HttpsError('invalid-argument', 'Missing gameId or bid');
   }
 
@@ -25,60 +32,54 @@ export const placeBid = functions.https.onCall(async (request) => {
       throw new functions.https.HttpsError('not-found', 'Game not found');
     }
 
-    const game = gameDoc.data() as any;
+    const game = gameDoc.data() as GameDocument;
     const originalGame = deepCloneGame(game);
 
     if (game.status !== 'bidding') {
       throw new functions.https.HttpsError('failed-precondition', 'Not in bidding phase');
     }
 
-    // Find player seat
     const playerEntry = Object.entries(game.players).find(
-      ([, p]: [string, any]) => (p as any).uid === request.auth!.uid,
+      ([, p]) => (p as any).uid === request.auth!.uid,
     );
     if (!playerEntry) {
       throw new functions.https.HttpsError('permission-denied', 'Not a player in this game');
     }
 
     const seatIndex = parseInt(playerEntry[0], 10);
+    const engine = new BalootEngine();
+    const match = loadMatch(game);
+    const state = match.state!;
 
-    // Validate bid
-    const validation = validateBid(game, seatIndex, bid);
-    if (!validation.valid) {
-      throw new functions.https.HttpsError('failed-precondition', validation.reason || 'Invalid bid');
+    if (state.bidding.turn !== seatIndex) {
+      throw new functions.https.HttpsError('failed-precondition', 'Not your turn to bid');
     }
 
-    // Update player's bid
-    game.players[String(seatIndex)].bid = bid;
+    const action = parseBidAction(bid, state.topCard);
+    const events = engine.applyBid(match, seatIndex, {
+      type: action.type,
+      suit: action.suit ? (action.suit as any) : undefined,
+    });
 
-    // Check if bidding is complete
-    const allBids = Object.values(game.players).map((p: any) => p.bid);
-    const biddingComplete = allBids.every((b) => b !== null);
+    // Record the player's bid for the UI.
+    game.playerBids = game.playerBids ?? {};
+    game.playerBids[String(seatIndex)] = bidToString(action.type);
 
-    if (biddingComplete) {
-      const bidResult = resolveBidding(game);
-      if (bidResult.resolved) {
-        applyBiddingResult(game, bidResult as any);
-
-        // If redeal, deal again
-        if (bidResult.redeal) {
-          dealRound(game);
-        }
-
-        // Bidding result may have changed turnIndex and status; refresh timer
-        game.turnTimerStart = new Date();
-      }
-    } else {
-      // Advance turn to next player who hasn't bid
-      let nextTurn = (seatIndex + 1) % 4;
-      while (game.players[String(nextTurn)].bid !== null) {
-        nextTurn = (nextTurn + 1) % 4;
-      }
-      game.turnIndex = nextTurn;
-      game.turnTimerStart = new Date();
+    // Bidding may have ended and the engine may now be awaiting a double.
+    // Auto-resolve doubling so online play does not require a doubling UI.
+    if (match.state?.awaitingDouble) {
+      autoResolveDoubling(match, engine);
     }
 
-    const update = buildGameUpdate(originalGame, game);
+    saveMatch(game, match);
+    game.turnTimerStart = new Date();
+
+    // If the hand was re-dealt (everyone passed twice), reset the bid UI state.
+    if (events.some((e) => e.type === 'redeal')) {
+      game.playerBids = {};
+    }
+
+    const update = buildGameUpdate(originalGame, game );
     transaction.update(gameRef, update);
     return { success: true, status: game.status };
   });

@@ -11,8 +11,7 @@ import 'package:bloot/generated/locale_keys.g.dart';
 
 /// Bidding phase overlay shown during the Baloot game.
 ///
-/// Allows the current bidder to select Sun, Hokm, or Pass,
-/// and choose a trump suit for Hokm.
+/// Allows the current bidder to select Sun, Hokm, Ashkal, or Pass.
 class BiddingOverlay extends StatefulWidget {
   const BiddingOverlay({
     super.key,
@@ -21,6 +20,7 @@ class BiddingOverlay extends StatefulWidget {
     this.timeLeft = 30,
     this.isEnabled = true,
     this.faceUpCard,
+    this.ashkalEnabled = false,
   });
 
   final String currentBidder;
@@ -28,6 +28,9 @@ class BiddingOverlay extends StatefulWidget {
   final int timeLeft;
   final bool isEnabled;
   final String? faceUpCard;
+
+  /// Whether the Ashkal (أشكل) bid option is available to this player.
+  final bool ashkalEnabled;
 
   @override
   State<BiddingOverlay> createState() => _BiddingOverlayState();
@@ -121,9 +124,13 @@ class _BiddingOverlayState extends State<BiddingOverlay> {
                 ),
               ],
               const SizedBox(height: AppSpacing.xxxl),
-              Row(
+              Wrap(
+                spacing: AppSpacing.lg,
+                runSpacing: AppSpacing.lg,
+                alignment: WrapAlignment.center,
                 children: [
-                  Expanded(
+                  SizedBox(
+                    width: 100,
                     child: _BidButton(
                       label: LocaleKeys.sun.tr(),
                       icon: Icons.wb_sunny_rounded,
@@ -132,8 +139,8 @@ class _BiddingOverlayState extends State<BiddingOverlay> {
                       onTap: () => widget.onBid('sun'),
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.lg),
-                  Expanded(
+                  SizedBox(
+                    width: 100,
                     child: _BidButton(
                       label: LocaleKeys.hokm.tr(),
                       icon: Icons.shield_rounded,
@@ -142,8 +149,19 @@ class _BiddingOverlayState extends State<BiddingOverlay> {
                       onTap: () => widget.onBid('hokm'),
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.lg),
-                  Expanded(
+                  if (widget.ashkalEnabled)
+                    SizedBox(
+                      width: 100,
+                      child: _BidButton(
+                        label: LocaleKeys.ashkal.tr(),
+                        icon: Icons.auto_awesome_rounded,
+                        color: colors.success,
+                        isEnabled: widget.isEnabled,
+                        onTap: () => widget.onBid('ashkal'),
+                      ),
+                    ),
+                  SizedBox(
+                    width: 100,
                     child: _BidButton(
                       label: LocaleKeys.commonCancel.tr(),
                       icon: Icons.close_rounded,

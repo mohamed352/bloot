@@ -2,8 +2,7 @@ import * as functions from 'firebase-functions';
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { db, auth } from '../config/admin';
 import { requireAppCheck } from '../utils/appCheck';
-import { createGameDocument, dealRound } from '../engine/deal';
-import { PlayerState } from '../models/game';
+import { createGameDocument, RoomPlayer } from '../engine/gameAdapter';
 
 const BOT_NAMES = ['Faisal', 'Omar', 'Khalid'];
 const BOT_AVATAR_URL = 'https://cdn-icons-png.flaticon.com/512/4712/4712035.png';
@@ -368,28 +367,22 @@ function createAndDealGame(
   players: RoomPlayerData[],
   agoraChannelName: string | undefined,
 ): Record<string, any> {
-  const playerStates: PlayerState[] = players.map((p) => ({
+  const roomPlayers: RoomPlayer[] = players.map((p) => ({
     uid: p.uid,
     displayName: p.displayName,
-    avatarUrl: p.avatarUrl || '',
+    avatarUrl: p.avatarUrl,
     team: p.team,
-    hand: [],
-    takenCards: [],
-    tricksWon: 0,
-    bid: null,
-    isReady: false,
-    bonuses: null,
-    isConnected: true,
+    seatIndex: p.seatIndex,
+    isBot: p.isBot,
+    level: 'amateur',
     isMuted: true,
     hasCamera: false,
     agoraUid: p.agoraUid,
-    isBot: p.isBot,
+    isConnected: true,
   }));
 
-  let game = createGameDocument(gameId, roomId, playerStates, 152);
-  game = dealRound(game);
-  game.turnTimerStart = Timestamp.now();
-  game.agoraChannelName = agoraChannelName ?? `room_${roomId}`;
+  const game = createGameDocument(gameId, roomId, roomPlayers, 152, agoraChannelName ?? `room_${roomId}`);
+  game.turnTimerStart = Timestamp.now().toDate();
   return game as any;
 }
 

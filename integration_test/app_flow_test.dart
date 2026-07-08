@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,18 +12,13 @@ import 'package:bloot/core/network/connectivity_cubit.dart';
 import 'package:bloot/core/services/agora_service.dart';
 import 'package:bloot/core/services/audio_service.dart';
 import 'package:bloot/core/style/theme_manager.dart';
-import 'package:bloot/features/discover/domain/entities/discover_stream.dart';
 import 'package:bloot/features/discover/presentation/cubit/discover_cubit.dart';
 import 'package:bloot/features/discover/presentation/pages/watch_stream_page.dart';
-import 'package:bloot/features/game/domain/entities/game.dart';
-import 'package:bloot/features/game/domain/repositories/game_repository.dart';
 import 'package:bloot/features/game/presentation/cubit/game_cubit.dart';
 import 'package:bloot/features/game/presentation/pages/game_play_page.dart';
 import 'package:bloot/features/room/domain/entities/room.dart';
-import 'package:bloot/features/room/domain/repositories/room_repository.dart';
 import 'package:bloot/features/room/presentation/cubit/room_cubit.dart';
 import 'package:bloot/features/room/presentation/pages/create_room_page.dart';
-import 'package:bloot/features/room/presentation/pages/join_room_page.dart';
 import 'package:bloot/features/room/presentation/pages/public_rooms_page.dart';
 import 'package:bloot/features/room/presentation/pages/room_lobby_page.dart';
 import 'package:bloot/core/components/app_button.dart';
@@ -97,24 +91,30 @@ void main() {
   });
 
   setUp(() {
-    roomRepository = MockRoomRepository();
-    gameRepository = MockGameRepository();
-    discoverRepository = MockDiscoverRepository();
+    roomRepository = helpers.MockRoomRepository();
+    gameRepository = helpers.MockGameRepository();
+    discoverRepository = helpers.MockDiscoverRepository();
     agoraService = _MockAgoraService();
-    audioService = MockAudioService();
+    audioService = helpers.MockAudioService();
 
-    when(() => agoraService.joinChannel(channelName: any(named: 'channelName')))
-        .thenAnswer((_) async {});
-    when(() => agoraService.joinAsAudience(channelName: any(named: 'channelName')))
-        .thenAnswer((_) async {});
+    when(
+      () => agoraService.joinChannel(channelName: any(named: 'channelName')),
+    ).thenAnswer((_) async {});
+    when(
+      () => agoraService.joinAsAudience(channelName: any(named: 'channelName')),
+    ).thenAnswer((_) async {});
     when(() => agoraService.leaveChannel()).thenAnswer((_) async {});
     when(() => agoraService.toggleMic()).thenAnswer((_) async => true);
     when(() => agoraService.toggleCamera()).thenAnswer((_) async => true);
-    when(() => agoraService.onAudioVolumeIndication)
-        .thenAnswer((_) => const Stream.empty());
-    when(() => agoraService.onUserJoined).thenAnswer((_) => const Stream.empty());
-    when(() => agoraService.onUserOffline)
-        .thenAnswer((_) => const Stream.empty());
+    when(
+      () => agoraService.onAudioVolumeIndication,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => agoraService.onUserJoined,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => agoraService.onUserOffline,
+    ).thenAnswer((_) => const Stream.empty());
   });
 
   group('Bloot full feature flow', () {
@@ -125,14 +125,13 @@ void main() {
       final createdRoom = helpers.testRoom(
         id: 'room-flow',
         name: 'Flow Room',
-        type: RoomType.private,
         inviteCode: 'FLOW12',
-        voiceEnabled: true,
         cameraEnabled: true,
-        players: [helpers.testPlayer(uid: 'u1', name: 'Me', isMe: true)],
+        players: [helpers.testPlayer(name: 'Me', isMe: true)],
       );
-      when(() => roomRepository.createRoom(any()))
-          .thenAnswer((_) async => createdRoom);
+      when(
+        () => roomRepository.createRoom(any()),
+      ).thenAnswer((_) async => createdRoom);
 
       final createCubit = RoomCubit(
         roomRepository: roomRepository,
@@ -179,27 +178,28 @@ void main() {
       final lobbyRoom = helpers.testRoom(
         id: 'room-flow',
         name: 'Flow Room',
-        type: RoomType.private,
         inviteCode: 'FLOW12',
-        voiceEnabled: true,
         cameraEnabled: true,
         players: [
-          helpers.testPlayer(uid: 'u1', name: 'Me', isMe: true, isReady: true),
+          helpers.testPlayer(name: 'Me', isMe: true, isReady: true),
           helpers.testPlayer(uid: 'u2', name: 'Partner', isReady: true),
           helpers.testPlayer(uid: 'u3', name: 'Opp1', isReady: true),
           helpers.testPlayer(uid: 'u4', name: 'Opp2', isReady: true),
         ],
       );
-      when(() => roomRepository.watchRoom('room-flow')).thenAnswer(
-        (_) => Stream.value(lobbyRoom),
-      );
-      when(() => roomRepository.startGame('room-flow'))
-          .thenAnswer((_) async => 'game-flow');
-      when(() => roomRepository.updatePlayerMediaState(
-            'room-flow',
-            isMicOn: any(named: 'isMicOn'),
-            isCameraOn: any(named: 'isCameraOn'),
-          )).thenAnswer((_) async {});
+      when(
+        () => roomRepository.watchRoom('room-flow'),
+      ).thenAnswer((_) => Stream.value(lobbyRoom));
+      when(
+        () => roomRepository.startGame('room-flow'),
+      ).thenAnswer((_) async => 'game-flow');
+      when(
+        () => roomRepository.updatePlayerMediaState(
+          'room-flow',
+          isMicOn: any(named: 'isMicOn'),
+          isCameraOn: any(named: 'isCameraOn'),
+        ),
+      ).thenAnswer((_) async {});
 
       final lobbyCubit = RoomCubit(
         roomRepository: roomRepository,
@@ -242,16 +242,15 @@ void main() {
       // ------------------------------------------------------------------
       final game = helpers.testGame(
         id: 'game-flow',
-        status: 'playing',
-        turnIndex: 0,
-        mySeatIndex: 0,
         myHand: const ['AH', 'KH', 'QH'],
         agoraChannelName: 'room-flow',
       );
-      when(() => gameRepository.watchGame('game-flow'))
-          .thenAnswer((_) => Stream.value(game));
-      when(() => gameRepository.playCard('game-flow', 'AH'))
-          .thenAnswer((_) async {});
+      when(
+        () => gameRepository.watchGame('game-flow'),
+      ).thenAnswer((_) => Stream.value(game));
+      when(
+        () => gameRepository.playCard('game-flow', 'AH'),
+      ).thenAnswer((_) async {});
       when(
         () => roomRepository.updatePlayerMediaState(
           'r1',
@@ -305,14 +304,19 @@ void main() {
         viewers: 5,
         agoraChannelName: 'stream-flow',
       );
-      when(() => discoverRepository.getStreamById('stream-flow'))
-          .thenAnswer((_) async => stream);
-      when(() => discoverRepository.watchStreamChat('stream-flow'))
-          .thenAnswer((_) => const Stream.empty());
-      when(() => discoverRepository.sendChatMessage('stream-flow', 'GG'))
-          .thenAnswer((_) async {});
+      when(
+        () => discoverRepository.getStreamById('stream-flow'),
+      ).thenAnswer((_) async => stream);
+      when(
+        () => discoverRepository.watchStreamChat('stream-flow'),
+      ).thenAnswer((_) => const Stream.empty());
+      when(
+        () => discoverRepository.sendChatMessage('stream-flow', 'GG'),
+      ).thenAnswer((_) async {});
 
-      final discoverCubit = DiscoverCubit(discoverRepository: discoverRepository);
+      final discoverCubit = DiscoverCubit(
+        discoverRepository: discoverRepository,
+      );
       discoverCubit.loadStream('stream-flow');
 
       await tester.pumpWidget(
@@ -347,8 +351,9 @@ void main() {
       await tester.tap(find.byIcon(Icons.send_rounded));
       await tester.pumpAndSettle();
 
-      verify(() => discoverRepository.sendChatMessage('stream-flow', 'GG'))
-          .called(1);
+      verify(
+        () => discoverRepository.sendChatMessage('stream-flow', 'GG'),
+      ).called(1);
     });
 
     testWidgets('join public room flow', (tester) async {
@@ -359,14 +364,13 @@ void main() {
             name: 'Public Flow',
             type: RoomType.public,
             inviteCode: 'PUB123',
-            voiceEnabled: true,
-            cameraEnabled: false,
-            players: [helpers.testPlayer(uid: 'u1', name: 'Host')],
+            players: [helpers.testPlayer(name: 'Host')],
           ),
         ]),
       );
-      when(() => roomRepository.joinRoomByCode('PUB123'))
-          .thenAnswer((_) async => helpers.testRoom(id: 'pub1'));
+      when(
+        () => roomRepository.joinRoomByCode('PUB123'),
+      ).thenAnswer((_) async => helpers.testRoom(id: 'pub1'));
 
       final roomCubit = RoomCubit(
         roomRepository: roomRepository,

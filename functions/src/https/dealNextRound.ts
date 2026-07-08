@@ -1,7 +1,8 @@
 import * as functions from 'firebase-functions';
 import { db } from '../config/admin';
 import { requireAppCheck } from '../utils/appCheck';
-import { dealRound } from '../engine/deal';
+import { BalootEngine } from '../engine';
+import { GameDocument, loadMatch, saveMatch } from '../engine/gameAdapter';
 import { buildGameUpdate, deepCloneGame } from '../utils/gameUpdate';
 
 export const dealNextRound = functions.https.onCall(async (request) => {
@@ -24,19 +25,18 @@ export const dealNextRound = functions.https.onCall(async (request) => {
       throw new functions.https.HttpsError('not-found', 'Game not found');
     }
 
-    const game = gameDoc.data() as any;
+    const game = gameDoc.data() as GameDocument;
     const originalGame = deepCloneGame(game);
 
-    if (game.status !== 'roundEnd') {
+    if (game.status !== 'roundEnd' && game.status !== 'gameEnd') {
       throw new functions.https.HttpsError(
         'failed-precondition',
         'Game is not between rounds',
       );
     }
 
-    // Verify the caller is a player in the game
     const playerEntry = Object.entries(game.players).find(
-      ([, p]: [string, any]) => (p as any).uid === request.auth!.uid,
+      ([, p]) => (p as any).uid === request.auth!.uid,
     );
     if (!playerEntry) {
       throw new functions.https.HttpsError(
@@ -45,27 +45,35 @@ export const dealNextRound = functions.https.onCall(async (request) => {
       );
     }
 
-    // Deal a new round
-    dealRound(game);
+    const engine = new BalootEngine();
+    const match = loadMatch(game);
 
-    // Reset round-scoped fields
+    // If the match already ended, reset it for a rematch-style next round.
+    if (match.matchOver) {
+      match.matchOver = false;
+      match.winnerTeam = undefined;
+      match.totals[0] = 0;
+      match.totals[1] = 0;
+      match.handsPlayed = 0;
+      match.handResults = [];
+      match.dealer = 0;
+    } else {
+      match.dealer = (match.dealer + 1) % 4;
+    }
+
+    engine.startHand(match);
+
+    // Reset per-round UI state.
+    game.playerBids = {};
     game.fellTeam = null;
     game.resolvedBonuses = null;
     game.roundTricksA = 0;
     game.roundTricksB = 0;
 
-    // Reset per-player round state
-    for (const [, player] of Object.entries(game.players) as [string, any][]) {
-      player.takenCards = [];
-      player.tricksWon = 0;
-      player.bonuses = null;
-      player.isReady = false;
-      player.bid = null;
-    }
-
+    saveMatch(game, match);
     game.turnTimerStart = new Date();
 
-    const update = buildGameUpdate(originalGame, game);
+    const update = buildGameUpdate(originalGame, game );
     transaction.update(gameRef, update);
 
     return { success: true, status: game.status, currentRound: game.currentRound };

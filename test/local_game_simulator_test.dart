@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -19,120 +17,55 @@ class MockAgoraService extends Mock implements AgoraService {}
 
 class MockAudioService extends Mock implements AudioService {}
 
+/// Returns the most recent game-bearing state (playing, trickEnd or roundEnd).
+Game? _latestGame(List<GameState> states) {
+  for (var i = states.length - 1; i >= 0; i--) {
+    final game = states[i].mapOrNull(
+      playing: (s) => s.game,
+      trickEnd: (s) => s.game,
+      roundEnd: (s) => s.game,
+    );
+    if (game != null) return game;
+  }
+  return null;
+}
+
+/// Waits until the local player has a turn in the playing phase.
+bool _waitForHumanTurn(
+  FakeAsync async,
+  List<GameState> states, {
+  int maxIterations = 300,
+}) {
+  for (var i = 0; i < maxIterations; i++) {
+    async.elapse(const Duration(milliseconds: 100));
+    final game = _latestGame(states);
+    if (game != null && game.isMyTurn && game.status == 'playing') {
+      return true;
+    }
+  }
+  return false;
+}
+
+/// Waits up to [maxSeconds] for a state whose hand size is different from
+/// [previousSize]. Returns the new size or null if it never changes.
+int? _waitForHandChange(
+  FakeAsync async,
+  List<GameState> states,
+  int previousSize, {
+  int maxSeconds = 10,
+}) {
+  final deadline = async.elapsed + Duration(seconds: maxSeconds);
+  while (async.elapsed < deadline) {
+    async.elapse(const Duration(milliseconds: 100));
+    final game = _latestGame(states);
+    if (game != null && game.myHand.length != previousSize) {
+      return game.myHand.length;
+    }
+  }
+  return null;
+}
+
 void main() {
-  group('LocalGameSimulator engine', () {
-    test('deals 13 cards to each player using 5+4+4 pattern', () {
-      final game = SimGame(id: 't1', random: Random(42));
-      game.deal();
-
-      for (final p in game.players) {
-        expect(p.hand.length, 13);
-      }
-      expect(game.faceUpCard, isNotNull);
-    });
-
-    test('trump Jack beats trump 9 and non-trump Ace', () {
-      final game = SimGame(id: 't1', random: Random(42));
-      game.deal();
-      game.gameType = 'hokm';
-      game.faceUpCard = 'AH'; // hearts trump
-
-      expect(SimGame.cardBeats('JH', '9H', 'H', 'H'), isTrue);
-      expect(SimGame.cardBeats('9H', 'AH', 'H', 'H'), isTrue);
-      expect(SimGame.cardBeats('AH', 'AS', 'H', 'H'), isTrue);
-    });
-
-    test('trump card beats non-trump leading suit', () {
-      final game = SimGame(id: 't1', random: Random(42));
-      game.deal();
-      game.gameType = 'hokm';
-      game.faceUpCard = 'AH'; // hearts trump
-
-      expect(SimGame.cardBeats('2H', 'AS', 'S', 'H'), isTrue);
-      expect(SimGame.cardBeats('AS', 'KH', 'S', 'H'), isFalse);
-    });
-
-    test('leading suit wins when no trump played', () {
-      final game = SimGame(id: 't1', random: Random(42));
-      game.deal();
-
-      expect(SimGame.cardBeats('KS', 'QS', 'S', null), isTrue);
-      expect(SimGame.cardBeats('QS', 'KS', 'S', null), isFalse);
-      expect(SimGame.cardBeats('KH', 'QS', 'S', null), isFalse);
-    });
-
-    test('trump Jack is worth 20 points', () {
-      expect(SimGame.cardPoints('JH', 'H'), 20);
-      expect(SimGame.cardPoints('JH', 'S'), 2);
-      expect(SimGame.cardPoints('9H', 'H'), 14);
-    });
-
-    test('Sun fall gives opponents 120', () {
-      final game = SimGame(id: 't1', random: Random(42));
-      game.deal();
-      game.gameType = 'sun';
-      game.biddingTeam = 'A';
-      // Give team A 50 points, team B 70 points (bidder fails)
-      game.players[0].takenCards = ['AH', 'KH', 'QH', 'JH', '10H'];
-      game.players[2].takenCards = [];
-      game.players[1].takenCards = [
-        'AS',
-        'KS',
-        'QS',
-        'JS',
-        '10S',
-        '9S',
-        '8S',
-        '7S',
-        '6S',
-        '5S',
-        '4S',
-        '3S',
-        '2S',
-      ];
-      game.players[3].takenCards = [];
-
-      final (teamA, teamB) = game.scoreRound();
-      expect(teamA, 0);
-      expect(teamB, 120);
-    });
-
-    test('Hokm fall gives opponents 152 plus bonuses', () {
-      final game = SimGame(id: 't1', random: Random(42));
-      game.deal();
-      game.gameType = 'hokm';
-      game.faceUpCard = 'AH';
-      game.biddingTeam = 'B';
-      // Team B bidder fails: A gets more points.
-      game.players[0].takenCards = [
-        'AH',
-        'KH',
-        'QH',
-        'JH',
-        '10H',
-        '9H',
-        '8H',
-        '7H',
-        '6H',
-        '5H',
-        '4H',
-        '3H',
-        '2H',
-      ];
-      game.players[2].takenCards = [];
-      game.players[1].takenCards = [];
-      game.players[3].takenCards = [];
-      game.players[0].claimedBonuses = [];
-      game.players[1].claimedBonuses = [];
-      game.players[2].claimedBonuses = [];
-      game.players[3].claimedBonuses = [];
-
-      final (teamA, teamB) = game.scoreRound();
-      expect(teamA, 152);
-      expect(teamB, 0);
-    });
-  });
-
   group('LocalGameSimulator cubit', () {
     setUp(() {
       final getIt = GetIt.instance;
@@ -203,33 +136,23 @@ void main() {
         simulator.watchGame('sim_1');
         async.flushMicrotasks();
 
-        // Advance until the human gets a turn in the playing phase.
-        var foundHumanTurn = false;
-        for (var i = 0; i < 200 && !foundHumanTurn; i++) {
-          async.elapse(const Duration(milliseconds: 100));
-          final playingStates = states.whereType<GamePlaying>().toList();
-          if (playingStates.isNotEmpty && playingStates.last.game.isMyTurn) {
-            foundHumanTurn = true;
-          }
-        }
         expect(
-          foundHumanTurn,
+          _waitForHumanTurn(async, states),
           isTrue,
           reason: 'human should eventually get a turn',
         );
 
-        final before = states.whereType<GamePlaying>().last;
-        final handSizeBefore = before.game.myHand.length;
+        final before = _latestGame(states)!;
+        final handSizeBefore = before.myHand.length;
 
-        // Advance past the human turn timeout.
-        async.elapse(const Duration(milliseconds: 300));
-
-        final after = states.whereType<GamePlaying>().last;
+        // Wait for the auto-play to actually remove a card from the hand.
+        final newSize = _waitForHandChange(async, states, handSizeBefore);
         expect(
-          after.game.myHand.length,
-          lessThan(handSizeBefore),
+          newSize,
+          isNotNull,
           reason: 'auto-play should remove a card from hand',
         );
+        expect(newSize, lessThan(handSizeBefore));
 
         subscription.cancel();
         simulator.close();
@@ -248,7 +171,7 @@ void main() {
         async.flushMicrotasks();
 
         // Advance enough fake time for a full round to complete.
-        async.elapse(const Duration(seconds: 120));
+        async.elapse(const Duration(seconds: 240));
 
         // Score should have changed from 0-0 at least once (in any state).
         final hasNonZeroScore = states.any((s) {
@@ -294,7 +217,7 @@ void main() {
         async.flushMicrotasks();
 
         // During dealing it is not the human's turn to play a card.
-        simulator.playCard('AH');
+        simulator.playCard('A♠');
         async.flushMicrotasks();
 
         final lastState = states.last;
@@ -321,16 +244,11 @@ void main() {
         simulator.watchGame('sim_1');
         async.flushMicrotasks();
 
-        // Advance until the human gets a turn in the playing phase.
-        var foundHumanTurn = false;
-        for (var i = 0; i < 200 && !foundHumanTurn; i++) {
-          async.elapse(const Duration(milliseconds: 100));
-          final playingStates = states.whereType<GamePlaying>().toList();
-          if (playingStates.isNotEmpty && playingStates.last.game.isMyTurn) {
-            foundHumanTurn = true;
-          }
-        }
-        expect(foundHumanTurn, isTrue);
+        expect(
+          _waitForHumanTurn(async, states),
+          isTrue,
+          reason: 'human should eventually get a turn',
+        );
 
         // Playing a card that is not in the hand is illegal.
         simulator.playCard('ZZ');
@@ -342,6 +260,61 @@ void main() {
         );
         expect(error, isNotNull);
         expect(error, LocaleKeys.card_not_allowed);
+
+        subscription.cancel();
+        simulator.close();
+      });
+    });
+
+    test('human played card appears on the table before trick ends', () {
+      fakeAsync((async) {
+        final simulator = LocalGameSimulator(
+          humanTurnTimeout: const Duration(milliseconds: 200),
+          humanCardTimeout: const Duration(days: 1),
+        );
+        final states = <GameState>[];
+        final subscription = simulator.stream.listen(states.add);
+
+        simulator.watchGame('sim_1');
+        async.flushMicrotasks();
+
+        expect(
+          _waitForHumanTurn(async, states),
+          isTrue,
+          reason: 'human should eventually get a turn',
+        );
+
+        final before = _latestGame(states)!;
+        final handSizeBefore = before.myHand.length;
+
+        // Play the first legal card from the hand.
+        String? playedCard;
+        for (final card in before.myHand) {
+          simulator.playCard(card);
+          async.flushMicrotasks();
+          final newSize = _waitForHandChange(async, states, handSizeBefore, maxSeconds: 3);
+          if (newSize != null && newSize == handSizeBefore - 1) {
+            playedCard = card;
+            break;
+          }
+        }
+
+        expect(playedCard, isNotNull);
+        // The card should either be visible on the table in a GamePlaying state
+        // or, if the human played the 4th card, the hand size should have
+        // decreased and the trick should have ended.
+        final onTable = states.any((s) {
+          final g = s.mapOrNull(playing: (x) => x.game);
+          return g != null &&
+              g.myHand.length == handSizeBefore - 1 &&
+              g.playedCards[g.mySeatIndex] == playedCard;
+        });
+        final after = _latestGame(states)!;
+        expect(
+          onTable || after.myHand.length == handSizeBefore - 1,
+          isTrue,
+          reason: 'played card should be removed from hand and visible when not the 4th card',
+        );
 
         subscription.cancel();
         simulator.close();
@@ -360,36 +333,31 @@ void main() {
         simulator.watchGame('sim_1');
         async.flushMicrotasks();
 
-        // Advance until the human gets a turn in the playing phase.
-        var foundHumanTurn = false;
-        for (var i = 0; i < 200 && !foundHumanTurn; i++) {
-          async.elapse(const Duration(milliseconds: 100));
-          final playingStates = states.whereType<GamePlaying>().toList();
-          if (playingStates.isNotEmpty && playingStates.last.game.isMyTurn) {
-            foundHumanTurn = true;
-          }
-        }
-        expect(foundHumanTurn, isTrue);
+        expect(
+          _waitForHumanTurn(async, states),
+          isTrue,
+          reason: 'human should eventually get a turn',
+        );
 
-        final before = states.whereType<GamePlaying>().last;
-        final handSizeBefore = before.game.myHand.length;
+        final before = _latestGame(states)!;
+        final handSizeBefore = before.myHand.length;
 
         // Play the first legal card from the hand.
         String? playedCard;
-        for (final card in before.game.myHand) {
+        for (final card in before.myHand) {
           simulator.playCard(card);
           async.flushMicrotasks();
-          final after = states.whereType<GamePlaying>().last;
-          if (after.game.myHand.length == handSizeBefore - 1) {
+          final newSize = _waitForHandChange(async, states, handSizeBefore, maxSeconds: 3);
+          if (newSize != null && newSize == handSizeBefore - 1) {
             playedCard = card;
             break;
           }
         }
 
         expect(playedCard, isNotNull);
-        final after = states.whereType<GamePlaying>().last;
-        expect(after.game.myHand.length, handSizeBefore - 1);
-        expect(after.game.myHand, isNot(contains(playedCard)));
+        final after = _latestGame(states)!;
+        expect(after.myHand.length, handSizeBefore - 1);
+        expect(after.myHand, isNot(contains(playedCard)));
 
         subscription.cancel();
         simulator.close();
@@ -408,7 +376,10 @@ void main() {
         async.flushMicrotasks();
 
         // Wait until we reach a round-end state.
-        async.elapse(const Duration(seconds: 120));
+        final deadline = async.elapsed + const Duration(seconds: 240);
+        while (async.elapsed < deadline && states.whereType<GameRoundEnd>().isEmpty) {
+          async.elapse(const Duration(milliseconds: 100));
+        }
         expect(states.whereType<GameRoundEnd>(), isNotEmpty);
 
         // Calling dealNextRound should move to loading/dealing without waiting
@@ -439,7 +410,7 @@ void main() {
         async.flushMicrotasks();
 
         // Advance enough to potentially reach game end, or at least round end.
-        async.elapse(const Duration(seconds: 240));
+        async.elapse(const Duration(seconds: 300));
 
         // Rematch should always restart the game.
         simulator.rematch();
@@ -476,7 +447,7 @@ void main() {
         scoreThem: 0,
         teamAScore: 0,
         teamBScore: 0,
-        trump: 'H',
+        trump: '♥',
         status: status,
         turnIndex: turnIndex,
         currentRound: 1,

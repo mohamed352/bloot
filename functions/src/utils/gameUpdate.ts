@@ -4,7 +4,7 @@ import * as admin from 'firebase-admin';
  * Deep-clones a plain object while preserving Firestore Timestamp and Date
  * instances by reference (they are immutable).
  */
-export function deepCloneGame<T>(value: T): T {
+export function deepCloneGame(value: unknown): any {
   if (value == null || typeof value !== 'object') return value;
 
   // Preserve Timestamp / Date instances.
@@ -17,14 +17,14 @@ export function deepCloneGame<T>(value: T): T {
   }
 
   if (Array.isArray(value)) {
-    return value.map(deepCloneGame) as unknown as T;
+    return value.map(deepCloneGame);
   }
 
   const cloned: Record<string, unknown> = {};
   for (const [key, val] of Object.entries(value)) {
     cloned[key] = deepCloneGame(val);
   }
-  return cloned as T;
+  return cloned;
 }
 
 /**
@@ -35,23 +35,25 @@ export function deepCloneGame<T>(value: T): T {
  * concurrent updates to different players do not overwrite each other.
  */
 export function buildGameUpdate(
-  original: Record<string, unknown>,
-  mutated: Record<string, unknown>,
+  original: unknown,
+  mutated: unknown,
 ): Record<string, unknown> {
   const update: Record<string, unknown> = {};
+  const originalObj = original as Record<string, unknown>;
+  const mutatedObj = mutated as Record<string, unknown>;
 
   // Top-level scalar/object fields (except players/currentTrick, handled below).
   const nestedKeys = new Set(['players', 'currentTrick', 'resolvedBonuses']);
-  for (const key of Object.keys(mutated)) {
+  for (const key of Object.keys(mutatedObj)) {
     if (nestedKeys.has(key)) continue;
-    if (!isEqual(original[key], mutated[key])) {
-      update[key] = mutated[key];
+    if (!isEqual(originalObj[key], mutatedObj[key])) {
+      update[key] = mutatedObj[key];
     }
   }
 
   // players.{seat}.{field}
-  const originalPlayers = (original.players ?? {}) as Record<string, Record<string, unknown>>;
-  const mutatedPlayers = (mutated.players ?? {}) as Record<string, Record<string, unknown>>;
+  const originalPlayers = (originalObj.players ?? {}) as Record<string, Record<string, unknown>>;
+  const mutatedPlayers = (mutatedObj.players ?? {}) as Record<string, Record<string, unknown>>;
   for (const seat of Object.keys(mutatedPlayers)) {
     const originalPlayer = originalPlayers[seat] ?? {};
     const mutatedPlayer = mutatedPlayers[seat];
@@ -63,8 +65,8 @@ export function buildGameUpdate(
   }
 
   // currentTrick.{field}
-  const originalTrick = (original.currentTrick ?? {}) as Record<string, unknown>;
-  const mutatedTrick = (mutated.currentTrick ?? {}) as Record<string, unknown>;
+  const originalTrick = (originalObj.currentTrick ?? {}) as Record<string, unknown>;
+  const mutatedTrick = (mutatedObj.currentTrick ?? {}) as Record<string, unknown>;
   for (const field of Object.keys(mutatedTrick)) {
     if (!isEqual(originalTrick[field], mutatedTrick[field])) {
       update[`currentTrick.${field}`] = mutatedTrick[field];
@@ -72,8 +74,8 @@ export function buildGameUpdate(
   }
 
   // resolvedBonuses.{team}
-  const originalResolved = (original.resolvedBonuses ?? {}) as Record<string, unknown>;
-  const mutatedResolved = (mutated.resolvedBonuses ?? {}) as Record<string, unknown>;
+  const originalResolved = (originalObj.resolvedBonuses ?? {}) as Record<string, unknown>;
+  const mutatedResolved = (mutatedObj.resolvedBonuses ?? {}) as Record<string, unknown>;
   for (const field of Object.keys(mutatedResolved)) {
     if (!isEqual(originalResolved[field], mutatedResolved[field])) {
       update[`resolvedBonuses.${field}`] = mutatedResolved[field];

@@ -25,9 +25,8 @@ void main() {
         GoRoute(
           path: '/room/:id',
           name: 'roomLobby',
-          builder: (context, state) => RoomLobbyPage(
-            id: state.pathParameters['id']!,
-          ),
+          builder: (context, state) =>
+              RoomLobbyPage(id: state.pathParameters['id']!),
         ),
       ],
     );
@@ -78,8 +77,9 @@ void main() {
       addTearDown(tester.view.reset);
       router = buildRouter(const JoinRoomPage());
       await runWithFakeHttp(() async {
-        when(() => roomRepository.isPasswordRequired('ABC123'))
-            .thenAnswer((_) async => true);
+        when(
+          () => roomRepository.isPasswordRequired('ABC123'),
+        ).thenAnswer((_) async => true);
 
         await tester.pumpWidget(
           buildTestableWidgetWithRouter(
@@ -105,8 +105,9 @@ void main() {
       addTearDown(tester.view.reset);
       router = buildRouter(const JoinRoomPage());
       await runWithFakeHttp(() async {
-        when(() => roomRepository.isPasswordRequired('ABC123'))
-            .thenAnswer((_) async => true);
+        when(
+          () => roomRepository.isPasswordRequired('ABC123'),
+        ).thenAnswer((_) async => true);
         when(
           () => roomRepository.joinRoomByCode(
             'ABC123',
@@ -133,10 +134,7 @@ void main() {
         await tester.pump();
 
         verify(
-          () => roomRepository.joinRoomByCode(
-            'ABC123',
-            password: 'secret',
-          ),
+          () => roomRepository.joinRoomByCode('ABC123', password: 'secret'),
         ).called(1);
       });
     });
@@ -147,8 +145,9 @@ void main() {
       addTearDown(tester.view.reset);
       router = buildRouter(const JoinRoomPage());
       await runWithFakeHttp(() async {
-        when(() => roomRepository.isPasswordRequired('ABC123'))
-            .thenAnswer((_) async => false);
+        when(
+          () => roomRepository.isPasswordRequired('ABC123'),
+        ).thenAnswer((_) async => false);
         when(
           () => roomRepository.joinRoomByCode(
             'ABC123',
@@ -191,9 +190,7 @@ void main() {
               name: 'Public Room',
               type: RoomType.public,
               inviteCode: 'PUB001',
-              players: [
-                testPlayer(uid: 'u1', name: 'Host'),
-              ],
+              players: [testPlayer(name: 'Host')],
             ),
           ]),
         );
@@ -226,14 +223,13 @@ void main() {
               name: 'Public Room',
               type: RoomType.public,
               inviteCode: 'PUB001',
-              players: [
-                testPlayer(uid: 'u1', name: 'Host'),
-              ],
+              players: [testPlayer(name: 'Host')],
             ),
           ]),
         );
-        when(() => roomRepository.joinRoomByCode('PUB001'))
-            .thenAnswer((_) async => testRoom(id: 'r2'));
+        when(
+          () => roomRepository.joinRoomByCode('PUB001'),
+        ).thenAnswer((_) async => testRoom(id: 'r2'));
 
         await tester.pumpWidget(
           buildTestableWidgetWithRouter(
@@ -257,8 +253,9 @@ void main() {
       addTearDown(tester.view.reset);
       router = buildRouter(const PublicRoomsPage());
       await runWithFakeHttp(() async {
-        when(() => roomRepository.watchPublicRooms())
-            .thenAnswer((_) => Stream.value([]));
+        when(
+          () => roomRepository.watchPublicRooms(),
+        ).thenAnswer((_) => Stream.value([]));
 
         await tester.pumpWidget(
           buildTestableWidgetWithRouter(

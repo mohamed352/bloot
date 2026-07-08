@@ -86,6 +86,7 @@ class Game {
     this.biddingTeam,
     this.fellTeam,
     this.currentTrick,
+    this.projects = const [],
     this.roomId,
     this.agoraChannelName,
   });
@@ -116,6 +117,11 @@ class Game {
   final String? biddingTeam;
   final String? fellTeam;
   final Trick? currentTrick;
+
+  /// Detected Saudi Baloot projects (مشاريع) for the local player.
+  /// Each map contains 'type' (enum name) and 'cards' (list of card keys).
+  final List<Map<String, dynamic>> projects;
+
   final String? roomId;
   final String? agoraChannelName;
 
@@ -183,6 +189,7 @@ class Game {
     String? biddingTeam,
     String? fellTeam,
     Trick? currentTrick,
+    List<Map<String, dynamic>>? projects,
     String? roomId,
     String? agoraChannelName,
   }) {
@@ -207,6 +214,7 @@ class Game {
       biddingTeam: biddingTeam ?? this.biddingTeam,
       fellTeam: fellTeam ?? this.fellTeam,
       currentTrick: currentTrick ?? this.currentTrick,
+      projects: projects ?? this.projects,
       roomId: roomId ?? this.roomId,
       agoraChannelName: agoraChannelName ?? this.agoraChannelName,
     );

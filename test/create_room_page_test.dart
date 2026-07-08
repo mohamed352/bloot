@@ -1,14 +1,11 @@
 import 'dart:async';
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:bloot/core/components/app_button.dart';
-import 'package:bloot/features/room/domain/entities/room.dart';
 import 'package:bloot/features/room/presentation/cubit/room_cubit.dart';
 import 'package:bloot/features/room/presentation/pages/create_room_page.dart';
 import 'package:bloot/features/room/presentation/pages/room_lobby_page.dart';
@@ -32,9 +29,8 @@ void main() {
         GoRoute(
           path: '/room/:id',
           name: 'roomLobby',
-          builder: (context, state) => RoomLobbyPage(
-            id: state.pathParameters['id']!,
-          ),
+          builder: (context, state) =>
+              RoomLobbyPage(id: state.pathParameters['id']!),
         ),
       ],
     );
@@ -170,14 +166,16 @@ void main() {
       });
     });
 
-    testWidgets('calls createRoom with correct params on submit', (tester) async {
+    testWidgets('calls createRoom with correct params on submit', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
       await runWithFakeHttp(() async {
-        when(() => roomRepository.createRoom(any())).thenAnswer(
-          (_) async => testRoom(),
-        );
+        when(
+          () => roomRepository.createRoom(any()),
+        ).thenAnswer((_) async => testRoom());
 
         await tester.pumpWidget(
           buildTestableWidgetWithRouter(
@@ -211,12 +209,10 @@ void main() {
       addTearDown(tester.view.reset);
       await runWithFakeHttp(() async {
         final completer = Completer<void>();
-        when(() => roomRepository.createRoom(any())).thenAnswer(
-          (_) async {
-            await completer.future;
-            return testRoom();
-          },
-        );
+        when(() => roomRepository.createRoom(any())).thenAnswer((_) async {
+          await completer.future;
+          return testRoom();
+        });
 
         await tester.pumpWidget(
           buildTestableWidgetWithRouter(
@@ -251,9 +247,9 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
       await runWithFakeHttp(() async {
-        when(() => roomRepository.createRoom(any())).thenThrow(
-          Exception('network'),
-        );
+        when(
+          () => roomRepository.createRoom(any()),
+        ).thenThrow(Exception('network'));
 
         await tester.pumpWidget(
           buildTestableWidgetWithRouter(

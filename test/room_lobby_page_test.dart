@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:bloot/features/game/presentation/pages/game_play_page.dart';
 import 'package:bloot/features/room/domain/entities/room.dart';
 import 'package:bloot/features/room/presentation/cubit/room_cubit.dart';
 import 'package:bloot/features/room/presentation/pages/room_lobby_page.dart';
@@ -23,16 +22,14 @@ void main() {
         GoRoute(
           path: '/room/:id',
           name: 'roomLobby',
-          builder: (context, state) => RoomLobbyPage(
-            id: state.pathParameters['id']!,
-          ),
+          builder: (context, state) =>
+              RoomLobbyPage(id: state.pathParameters['id']!),
         ),
         GoRoute(
           path: '/game/:id',
           name: 'gamePlay',
-          builder: (context, state) => const Scaffold(
-            body: Center(child: Text('Game')),
-          ),
+          builder: (context, state) =>
+              const Scaffold(body: Center(child: Text('Game'))),
         ),
       ],
     );
@@ -66,7 +63,7 @@ void main() {
           (_) => Stream.value(
             testRoom(
               players: [
-                testPlayer(uid: 'u1', name: 'Me', isMe: true),
+                testPlayer(name: 'Me', isMe: true),
                 testPlayer(uid: 'u2', name: 'Partner'),
                 testPlayer(uid: 'u3', name: 'Opp1'),
                 testPlayer(uid: 'u4', name: 'Opp2'),
@@ -100,9 +97,7 @@ void main() {
       await runWithFakeHttp(() async {
         when(() => roomRepository.watchRoom('r1')).thenAnswer(
           (_) => Stream.value(
-            testRoom(
-              players: [testPlayer(uid: 'u1', name: 'Me', isMe: true)],
-            ),
+            testRoom(players: [testPlayer(name: 'Me', isMe: true)]),
           ),
         );
 
@@ -134,13 +129,12 @@ void main() {
       await runWithFakeHttp(() async {
         when(() => roomRepository.watchRoom('r1')).thenAnswer(
           (_) => Stream.value(
-            testRoom(
-              players: [testPlayer(uid: 'u1', name: 'Me', isMe: true)],
-            ),
+            testRoom(players: [testPlayer(name: 'Me', isMe: true)]),
           ),
         );
-        when(() => roomRepository.toggleReady('r1'))
-            .thenAnswer((_) async => testRoom());
+        when(
+          () => roomRepository.toggleReady('r1'),
+        ).thenAnswer((_) async => testRoom());
 
         cubit.loadRoom('r1');
         await tester.pumpWidget(
@@ -161,18 +155,16 @@ void main() {
       });
     });
 
-    testWidgets('start game button disabled when not all ready', (tester) async {
+    testWidgets('start game button disabled when not all ready', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
       await runWithFakeHttp(() async {
         when(() => roomRepository.watchRoom('r1')).thenAnswer(
           (_) => Stream.value(
-            testRoom(
-              players: [
-                testPlayer(uid: 'u1', name: 'Me', isMe: true),
-              ],
-            ),
+            testRoom(players: [testPlayer(name: 'Me', isMe: true)]),
           ),
         );
 
@@ -188,10 +180,7 @@ void main() {
 
         final startButton = find.widgetWithText(ElevatedButton, 'Start Game');
         expect(startButton, findsOneWidget);
-        expect(
-          tester.widget<ElevatedButton>(startButton).onPressed,
-          isNull,
-        );
+        expect(tester.widget<ElevatedButton>(startButton).onPressed, isNull);
       });
     });
 
@@ -206,7 +195,7 @@ void main() {
           (_) => Stream.value(
             testRoom(
               players: [
-                testPlayer(uid: 'u1', name: 'Me', isMe: true, isReady: true),
+                testPlayer(name: 'Me', isMe: true, isReady: true),
                 testPlayer(uid: 'u2', name: 'Partner', isReady: true),
                 testPlayer(uid: 'u3', name: 'Opp1', isReady: true),
                 testPlayer(uid: 'u4', name: 'Opp2', isReady: true),
@@ -214,8 +203,9 @@ void main() {
             ),
           ),
         );
-        when(() => roomRepository.startGame('r1'))
-            .thenAnswer((_) async => 'g1');
+        when(
+          () => roomRepository.startGame('r1'),
+        ).thenAnswer((_) async => 'g1');
 
         cubit.loadRoom('r1');
         await tester.pumpWidget(
@@ -229,10 +219,7 @@ void main() {
 
         final startButton = find.widgetWithText(ElevatedButton, 'Start Game');
         expect(startButton, findsOneWidget);
-        expect(
-          tester.widget<ElevatedButton>(startButton).onPressed,
-          isNotNull,
-        );
+        expect(tester.widget<ElevatedButton>(startButton).onPressed, isNotNull);
 
         await tester.tap(startButton);
         await tester.pump();
@@ -248,16 +235,16 @@ void main() {
       await runWithFakeHttp(() async {
         when(() => roomRepository.watchRoom('r1')).thenAnswer(
           (_) => Stream.value(
-            testRoom(
-              players: [testPlayer(uid: 'u1', name: 'Me', isMe: true)],
-            ),
+            testRoom(players: [testPlayer(name: 'Me', isMe: true)]),
           ),
         );
-        when(() => roomRepository.updatePlayerMediaState(
-              'r1',
-              isMicOn: any(named: 'isMicOn'),
-              isCameraOn: any(named: 'isCameraOn'),
-            )).thenAnswer((_) async {});
+        when(
+          () => roomRepository.updatePlayerMediaState(
+            'r1',
+            isMicOn: any(named: 'isMicOn'),
+            isCameraOn: any(named: 'isCameraOn'),
+          ),
+        ).thenAnswer((_) async {});
         when(() => agoraService.toggleMic()).thenAnswer((_) async => false);
 
         cubit.loadRoom('r1');
@@ -276,11 +263,13 @@ void main() {
         await tester.pump();
 
         verify(() => agoraService.toggleMic()).called(1);
-        verify(() => roomRepository.updatePlayerMediaState(
-              'r1',
-              isMicOn: false,
-              isCameraOn: false,
-            )).called(1);
+        verify(
+          () => roomRepository.updatePlayerMediaState(
+            'r1',
+            isMicOn: false,
+            isCameraOn: false,
+          ),
+        ).called(1);
       });
     });
 
@@ -295,7 +284,7 @@ void main() {
           (_) => Stream.value(
             testRoom(
               type: RoomType.liveStream,
-              players: [testPlayer(uid: 'u1', name: 'Me', isMe: true)],
+              players: [testPlayer(name: 'Me', isMe: true)],
             ),
           ),
         );

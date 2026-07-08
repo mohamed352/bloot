@@ -6,20 +6,25 @@ import 'package:bloot/core/constants/app_radius.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
 import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/features/game/presentation/widgets/playing_card/playing_card.dart';
+import 'package:bloot/generated/locale_keys.g.dart';
 
-/// Overlay shown during the Hokm bonus-claim phase.
+/// Overlay shown during the Saudi Baloot project-declaration phase.
 ///
-/// Allows the player to auto-detect bnaga/mosal bonuses from their hand,
-/// claim them, or pass with no bonuses.
+/// Allows the player to claim projects (مشاريع) detected by the engine,
+/// toggle individual claims, or pass with no projects.
 class BonusClaimOverlay extends StatefulWidget {
   const BonusClaimOverlay({
     super.key,
     required this.hand,
     required this.onClaim,
     required this.onPass,
+    this.projects = const [],
+    this.gameType,
   });
 
   final List<String> hand;
+  final List<Map<String, dynamic>> projects;
+  final String? gameType;
   final ValueChanged<List<Map<String, dynamic>>> onClaim;
   final VoidCallback onPass;
 
@@ -28,17 +33,27 @@ class BonusClaimOverlay extends StatefulWidget {
 }
 
 class _BonusClaimOverlayState extends State<BonusClaimOverlay> {
-  List<Map<String, dynamic>> _bonuses = [];
+  late List<Map<String, dynamic>> _selectedProjects;
 
   @override
   void initState() {
     super.initState();
-    // Run auto-detection so the player can confirm immediately if bonuses exist.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _detectBonuses());
+    // Pre-select all detected projects so the player can confirm immediately.
+    _selectedProjects = List<Map<String, dynamic>>.from(widget.projects);
+  }
+
+  @override
+  void didUpdateWidget(covariant BonusClaimOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.projects != widget.projects) {
+      _selectedProjects = List<Map<String, dynamic>>.from(widget.projects);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final hasProjects = widget.projects.isNotEmpty;
+
     return Container(
       color: ColorManager.darkCanvas.withValues(alpha: 0.85),
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -48,7 +63,7 @@ class _BonusClaimOverlayState extends State<BonusClaimOverlay> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'claim_bonuses'.tr(),
+                LocaleKeys.claim_projects.tr(),
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -57,7 +72,7 @@ class _BonusClaimOverlayState extends State<BonusClaimOverlay> {
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
-                'select_bonus_cards'.tr(),
+                LocaleKeys.select_projects.tr(),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 13,
@@ -77,56 +92,63 @@ class _BonusClaimOverlayState extends State<BonusClaimOverlay> {
                 }).toList(),
               ),
               const SizedBox(height: AppSpacing.xl),
-              if (_bonuses.isNotEmpty)
+              if (hasProjects)
                 Column(
                   children: [
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       alignment: WrapAlignment.center,
-                      children: _bonuses.map((bonus) {
-                        final type = bonus['type'] as String? ?? '';
-                        final points = bonus['points'] as int? ?? 0;
-                        final cards =
-                            (bonus['cards'] as List<dynamic>?)
+                      children: widget.projects.map((project) {
+                        final type = project['type'] as String? ?? '';
+                        final cards = (project['cards'] as List<dynamic>?)
                                 ?.cast<String>()
                                 .join(' ') ??
                             '';
-                        return Container(
-                          padding: const EdgeInsetsDirectional.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: ColorManager.secondary.withValues(
-                              alpha: 0.15,
-                            ),
-                            borderRadius: BorderRadius.circular(AppRadius.md),
-                            border: Border.all(
-                              color: ColorManager.secondary.withValues(
-                                alpha: 0.5,
+                        final isSelected = _selectedProjects.any(
+                          (p) => p['type'] == type,
+                        );
+                        return GestureDetector(
+                          onTap: () => _toggleProject(project),
+                          child: Opacity(
+                            opacity: isSelected ? 1.0 : 0.5,
+                            child: Container(
+                              padding: const EdgeInsetsDirectional.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
                               ),
-                            ),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '${type.toUpperCase()} • $points pts',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: ColorManager.secondary,
+                              decoration: BoxDecoration(
+                                color: ColorManager.secondary.withValues(
+                                  alpha: 0.15,
+                                ),
+                                borderRadius: BorderRadius.circular(AppRadius.md),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? ColorManager.secondary
+                                      : ColorManager.darkBorderSoft,
                                 ),
                               ),
-                              Text(
-                                cards,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: ColorManager.darkTextSecondary,
-                                ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    _projectName(type),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: ColorManager.secondary,
+                                    ),
+                                  ),
+                                  Text(
+                                    cards,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: ColorManager.darkTextSecondary,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         );
                       }).toList(),
@@ -137,27 +159,28 @@ class _BonusClaimOverlayState extends State<BonusClaimOverlay> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _detectBonuses,
-                      icon: const Icon(Icons.search_rounded, size: 18),
-                      label: Text('auto_detect'.tr()),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: ColorManager.primary,
-                        foregroundColor: ColorManager.darkTextPrimary,
-                        padding: const EdgeInsetsDirectional.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
+                  if (hasProjects)
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _claim,
+                        icon: const Icon(Icons.check_rounded, size: 18),
+                        label: Text(LocaleKeys.claim.tr()),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ColorManager.success,
+                          foregroundColor: ColorManager.darkTextPrimary,
+                          padding: const EdgeInsetsDirectional.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
+                  if (hasProjects) const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: widget.onPass,
                       icon: const Icon(Icons.block_rounded, size: 18),
-                      label: Text('no_bonuses'.tr()),
+                      label: Text(LocaleKeys.no_projects.tr()),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: ColorManager.darkTextSecondary,
                         side: const BorderSide(
@@ -173,22 +196,14 @@ class _BonusClaimOverlayState extends State<BonusClaimOverlay> {
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
-              SizedBox(
-                width: 200,
-                child: ElevatedButton(
-                  onPressed: _bonuses.isNotEmpty ? _claim : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorManager.success,
-                    foregroundColor: ColorManager.darkTextPrimary,
-                    disabledBackgroundColor: ColorManager.darkBorderSoft,
-                    padding: const EdgeInsetsDirectional.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
+              if (!hasProjects)
+                Text(
+                  LocaleKeys.no_projects.tr(),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: ColorManager.darkTextSecondary,
                   ),
-                  child: Text('claim'.tr()),
                 ),
-              ),
             ],
           ),
         ),
@@ -196,117 +211,29 @@ class _BonusClaimOverlayState extends State<BonusClaimOverlay> {
     );
   }
 
-  void _detectBonuses() {
-    final bonuses = <Map<String, dynamic>>[];
-
-    // Mosal: four of a kind (J=200, 9=150, A/10/K/Q=100)
-    final mosalPoints = <String, int>{
-      'J': 200,
-      '9': 150,
-      'A': 100,
-      '10': 100,
-      'K': 100,
-      'Q': 100,
-    };
-    final rankGroups = <String, List<String>>{};
-    for (final card in widget.hand) {
-      final rank = _rankOf(card);
-      rankGroups.putIfAbsent(rank, () => []).add(card);
-    }
-    String? bestMosalRank;
-    int bestMosalPoints = 0;
-    List<String>? bestMosalCards;
-    for (final entry in rankGroups.entries) {
-      if (entry.value.length == 4 &&
-          (mosalPoints[entry.key] ?? 0) > bestMosalPoints) {
-        bestMosalRank = entry.key;
-        bestMosalPoints = mosalPoints[entry.key]!;
-        bestMosalCards = entry.value;
-      }
-    }
-    if (bestMosalCards != null && bestMosalRank != null) {
-      bonuses.add({
-        'type': 'mosal',
-        'points': bestMosalPoints,
-        'cards': bestMosalCards,
-        'description': 'Mosal $bestMosalRank ($bestMosalPoints pts)',
-      });
-    }
-
-    // Bnaga: longest consecutive sequence in a suit (3=20, 4=50, 5+=100)
-    final suitGroups = <String, List<String>>{};
-    for (final card in widget.hand) {
-      final suit = _suitOf(card);
-      suitGroups.putIfAbsent(suit, () => []).add(card);
-    }
-    List<String>? bestSeq;
-    for (final entry in suitGroups.entries) {
-      if (entry.value.length < 3) continue;
-      final sorted = entry.value.toList()
-        ..sort((a, b) => _rankIndex(_rankOf(a)) - _rankIndex(_rankOf(b)));
-      List<String> current = [sorted.first];
-      for (int i = 1; i < sorted.length; i++) {
-        if (_rankIndex(_rankOf(sorted[i])) ==
-            _rankIndex(_rankOf(current.last)) + 1) {
-          current.add(sorted[i]);
-        } else {
-          if (current.length > (bestSeq?.length ?? 0)) {
-            bestSeq = current.toList();
-          }
-          current = [sorted[i]];
-        }
-      }
-      if (current.length > (bestSeq?.length ?? 0)) {
-        bestSeq = current.toList();
-      }
-    }
-    if (bestSeq != null && bestSeq.length >= 3) {
-      final points = bestSeq.length == 3
-          ? 20
-          : bestSeq.length == 4
-          ? 50
-          : 100;
-      bonuses.add({
-        'type': 'bnaga',
-        'points': points,
-        'cards': bestSeq,
-        'description': 'Bnaga ${bestSeq.length} ($points pts)',
-      });
-    }
-
+  void _toggleProject(Map<String, dynamic> project) {
+    final type = project['type'] as String? ?? '';
     setState(() {
-      _bonuses = bonuses;
+      final index = _selectedProjects.indexWhere((p) => p['type'] == type);
+      if (index >= 0) {
+        _selectedProjects.removeAt(index);
+      } else {
+        _selectedProjects.add(project);
+      }
     });
   }
 
   void _claim() {
-    widget.onClaim(_bonuses);
+    widget.onClaim(_selectedProjects);
   }
 
-  String _rankOf(String card) {
-    return card.substring(0, card.length - 1);
-  }
-
-  String _suitOf(String card) {
-    return card.substring(card.length - 1);
-  }
-
-  int _rankIndex(String rank) {
-    const order = [
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9',
-      '10',
-      'J',
-      'Q',
-      'K',
-      'A',
-    ];
-    return order.indexOf(rank);
+  String _projectName(String type) {
+    return switch (type) {
+      'sira' => LocaleKeys.project_sira.tr(),
+      'fifty' => LocaleKeys.project_fifty.tr(),
+      'hundred' => LocaleKeys.project_hundred.tr(),
+      'fourAces' => LocaleKeys.project_four_aces.tr(),
+      _ => type.toUpperCase(),
+    };
   }
 }

@@ -1,5 +1,4 @@
 import { Timestamp } from 'firebase-admin/firestore';
-import { CardString } from './card';
 
 export type GameStatus =
   | 'dealing'
@@ -10,18 +9,21 @@ export type GameStatus =
   | 'roundEnd'
   | 'gameEnd';
 
-export type GameType = 'sun' | 'hokm';
+export type GameType = 'sun' | 'hokm' | 'ashkal';
 
-export type Bid = 'pass' | 'sun' | 'hokm';
+export type Bid = 'pass' | 'sun' | 'hokm' | 'ashkal';
 
 export type Suit = 'hearts' | 'diamonds' | 'clubs' | 'spades';
 
+/** Legacy 52-card bonus claim; kept for type compatibility but unused by the 32-card engine. */
 export interface BonusClaim {
-  type: 'bnaga' | 'mosal';
+  type: 'bnaga' | 'mosal' | 'sira' | 'fifty' | 'hundred' | 'fourAces';
   points: number;
   cards: CardString[];
-  description: string;
+  description?: string;
 }
+
+export type CardString = string;
 
 export interface PlayerState {
   uid: string;
@@ -43,6 +45,8 @@ export interface PlayerState {
   agoraUid?: number;
   /** Whether this player is a bot (single-device testing). */
   isBot?: boolean;
+  /** Bot skill level. */
+  level?: string;
 }
 
 export interface CurrentTrick {
@@ -86,8 +90,12 @@ export interface GameDocument {
   players: Record<string, PlayerState>;
   /** UIDs of all participants; used by Firestore security rules for access control. */
   playerUids: string[];
-  /** Resolved bonus points after bonus claim phase (Hokm only). */
+  /** Per-seat bids stored for the UI (the engine only keeps the winning bid). */
+  playerBids?: Record<string, Bid>;
+  /** Resolved bonus points after bonus claim phase (legacy 52-card field; unused). */
   resolvedBonuses?: { teamA: number; teamB: number } | null;
+  /** Authoritative 32-card engine state serialized as JSON. */
+  engineState?: Record<string, unknown>;
   /** Team that fell in the last completed round, if any. */
   fellTeam?: 'A' | 'B' | null;
   gameLog: GameEvent[];

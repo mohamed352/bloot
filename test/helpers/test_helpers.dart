@@ -14,7 +14,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bloot/core/network/connectivity_cubit.dart';
 import 'package:bloot/core/services/agora_service.dart';
 import 'package:bloot/core/services/audio_service.dart';
-import 'package:bloot/core/style/app_colors.dart';
 import 'package:bloot/core/style/theme_manager.dart';
 import 'package:bloot/features/discover/domain/entities/discover_stream.dart';
 import 'package:bloot/features/discover/domain/repositories/discover_repository.dart';
@@ -22,7 +21,6 @@ import 'package:bloot/features/discover/presentation/cubit/discover_cubit.dart';
 import 'package:bloot/features/game/domain/entities/game.dart';
 import 'package:bloot/features/game/domain/repositories/game_repository.dart';
 import 'package:bloot/features/game/presentation/cubit/game_cubit.dart';
-import 'package:bloot/features/room/domain/entities/create_room_params.dart';
 import 'package:bloot/features/room/domain/entities/room.dart';
 import 'package:bloot/features/room/domain/repositories/room_repository.dart';
 import 'package:bloot/features/room/presentation/cubit/room_cubit.dart';
@@ -574,10 +572,10 @@ DiscoverStream testStream({
     players:
         players ??
         const [
-          StreamPlayer(uid: 'p1', name: 'Ali', agoraUid: 101, team: 'A'),
+          StreamPlayer(uid: 'p1', name: 'Ali', agoraUid: 101),
           StreamPlayer(uid: 'p2', name: 'Faisal', agoraUid: 102, team: 'B'),
           StreamPlayer(uid: 'p3', name: 'Omar', agoraUid: 103, team: 'B'),
-          StreamPlayer(uid: 'p4', name: 'Khalid', agoraUid: 104, team: 'A'),
+          StreamPlayer(uid: 'p4', name: 'Khalid', agoraUid: 104),
         ],
   );
 }
