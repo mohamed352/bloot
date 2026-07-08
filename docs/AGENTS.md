@@ -22,10 +22,11 @@
 
 ### What is Baloot?
 
-Baloot is a traditional Saudi/Khaleeji trick-taking card game played by 4 players in 2 teams. A standard 52-card deck is used; each player receives 13 cards. There are two game types:
+Baloot is a traditional Saudi/Khaleeji trick-taking card game played by 4 players in 2 teams. Bloot uses the **32-card Saudi Baloot** deck (ranks 7‑8‑9‑10‑J‑Q‑K‑A); each player receives 8 cards. There are three game types:
 
-- **Sun (صن)** — No trump suit, objective is 120 points per round. Must score >60 to win.
-- **Hokm (حكم)** — A trump suit is declared by the winning bid; objective varies by bid.
+- **Sun (صن)** — No trump suit; the buyer must score more than 60 card points.
+- **Hokm (حكم)** — The trump suit is the face-up card's suit; the buyer must outscore the opponents.
+- **Ashkal (أشكل)** — A special Sun bid where the face-up card is given to the bidder's partner.
 
 Bloot wraps this game in a **social streaming platform** — players sit in virtual rooms with live voice and video, while spectators watch, chat, and support streamers.
 

@@ -221,14 +221,14 @@ flowchart TD
     C --> D[Hide Status Bar]
 
     D --> E[Deal Animation]
-    E --> F[13 Cards Per Player]
+    E --> F[8 Cards Per Player]
     F --> G{Game Type?}
 
     G -->|Sun| H[Sun Mode: No Trump]
     G -->|Hokm| I[Hokm Mode: Declare Trump]
 
     I --> J[Bid Phase]
-    J --> K[Player with First Bid Selects Trump Suit]
+    J --> K[Trump Suit is the Face-Up Card's Suit]
     K --> L[Trump Suit Displayed]
 
     H --> M[Start Play Phase]

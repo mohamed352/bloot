@@ -919,7 +919,7 @@ For MVP, all `ThemeData` configuration must set `brightness: Brightness.dark`.
 
 ### 11.1 Card Design
 
-Baloot uses a standard 52-card deck. Card visuals must be:
+Baloot uses the 32-card Saudi Baloot deck (ranks 7, 8, 9, 10, J, Q, K, A). Card visuals must be:
 
 - **Card back:** Dark purple gradient (`#7C3AED` → `#8B5CF6`) with subtle gold diamond pattern overlay
 - **Card face:** Clean, high-contrast suit symbols on cream/white background
@@ -962,8 +962,8 @@ Team A (Us): 8 — Team B (Them): 12
 │              [Your Video]                     │
 │              [Name] [Mic] [Cam]               │
 │                                               │
-│     ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐           │
-│     └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘             │
+│     ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐       │
+│     └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘         │
 │     [Your Cards — Fan]                        │
 │                                               │
 │  [Chat] [Mic] [Cam] [Voice] [Settings] [Exit] │

@@ -98,7 +98,7 @@
 | `result` | string | "won" or "lost" |
 | `scoreTeamA` | int | Team A final score |
 | `scoreTeamB` | int | Team B final score |
-| `gameType` | string | "sun" or "hokm" |
+| `gameType` | string | "sun", "hokm", or "ashkal" |
 | `duration` | int | Game duration in seconds |
 | `playedAt` | timestamp | When the game occurred |
 
@@ -191,7 +191,7 @@
 |-------|------|----------|-------------|
 | `id` | string | yes | Document ID |
 | `roomId` | string | yes | Reference to rooms collection |
-| `gameType` | string | yes | "sun" or "hokm" |
+| `gameType` | string | yes | "sun", "hokm", or "ashkal" |
 | `status` | string | yes | "dealing", "bidding", "playing", "trickEnd", "roundEnd", "gameEnd" |
 | `players` | map | yes | Map of seatIndex (0-3) to player info |
 | `teamAScore` | int | yes | Team A total score |
@@ -200,13 +200,18 @@
 | `totalRounds` | int | yes | Total rounds in game |
 | `currentTrick` | map | yes | Current trick state (see below) |
 | `tricksPlayed` | int | yes | Number of tricks played in current round |
-| `trumpSuit` | string | no | Trump suit for Hokm ("hearts", "diamonds", "clubs", "spades") |
+| `trumpSuit` | string | no | Trump suit for Hokm as a symbol ("♠", "♥", "♦", "♣") |
 | `hokmBidder` | int | no | Seat index of Hokm bidder |
-| `targetScore` | int | yes | Score to win (120 for Sun, varies for Hokm) |
+| `sunBidder` | int | no | Seat index of Sun/Ashkal bidder |
+| `biddingTeam` | string | no | "A" or "B" — team that won the bid |
+| `faceUpCard` | string | no | Face-up card from the deal (e.g., "A♠") |
+| `targetScore` | int | yes | Score to win (152 for Saudi Baloot) |
 | `turnIndex` | int | yes | Current turn seat index (0-3) |
 | `turnTimerStart` | timestamp | no | When current turn started |
-| `turnTimeLimit` | int | yes | Seconds per turn (30, 15, or 60) |
-| `deck` | array | no | Remaining deck cards (server-side only, not synced to clients) |
+| `turnTimeLimit` | int | yes | Seconds per turn (default 90) |
+| `fellTeam` | string | no | "A" or "B" — team that fell in the last completed round |
+| `playerBids` | map | no | Per-seat bid strings for the UI (e.g., `{"0":"hokm"}`) |
+| `engineState` | map | no | Authoritative 32-card engine state (server-side source of truth) |
 | `gameLog` | array | no | Array of game events for replay |
 | `startedAt` | timestamp | yes | Game start timestamp |
 | `endedAt` | timestamp | no | Game end timestamp |
@@ -221,9 +226,14 @@
     displayName: string,
     avatarUrl: string,
     team: "A" | "B",
-    hand: array,      // Array of card strings (e.g., ["AH", "KH", "QH", ...])
+    hand: array,      // Array of 32-card keys (e.g., ["A♠", "10♦", "K♥", ...])
+    takenCards: array,
     tricksWon: int,
-    score: int
+    bid: string | null,
+    isConnected: bool,
+    isMuted: bool,
+    hasCamera: bool,
+    agoraUid: int
   },
   "1": { ... },
   "2": { ... },
@@ -231,7 +241,7 @@
 }
 ```
 
-**Card notation:** Suit + Rank (e.g., "AH" = Ace of Hearts, "10S" = 10 of Spades). Suits: "H" (Hearts), "D" (Diamonds), "C" (Clubs), "S" (Spades). Ranks: "A", "K", "Q", "J", "10", "9", "8", "7", "6", "5", "4", "3", "2".
+**Card notation:** Rank + suit symbol (e.g., "A♠" = Ace of Spades, "10♦" = 10 of Diamonds). 32-card deck: ranks 7-8-9-10-J-Q-K-A; 8 cards per player; 8 tricks per round.
 
 ### `currentTrick` Map Structure
 

@@ -1,7 +1,7 @@
 # Bloot — Definitive Baloot Game Rules
 
 > **Authority:** This document resolves all contradictions in `research/04_balout_game_mechanics.md` and external sources. It is the single source of truth for the Bloot game engine implementation.
-> **Deck:** Standard 52-card deck (not the 32-card variant). This matches the existing project specification, mock data, and Cloud Functions design.
+> **Variant:** 32-card Saudi Baloot (ranks 7‑8‑9‑10‑J‑Q‑K‑A).
 
 ---
 
@@ -13,11 +13,11 @@
 | Partners | Sit opposite each other |
 | Team A | Seats 0 and 2 |
 | Team B | Seats 1 and 3 |
-| Deck | 52 cards (A, K, Q, J, 10, 9, 8, 7, 6, 5, 4, 3, 2) × 4 suits |
-| Cards per player | 13 |
-| Tricks per round | 13 |
-| Modes | Sun (صن) and Hokm (حكم) |
-| Target score | 152 (configurable: 152, 250, 300) |
+| Deck | 32 cards (7, 8, 9, 10, J, Q, K, A) × 4 suits |
+| Cards per player | 8 |
+| Tricks per round | 8 |
+| Modes | Sun (صن), Hokm (حكم), Ashkal (أشكل) |
+| Target score | 152 qaid (configurable) |
 
 ---
 
@@ -25,15 +25,15 @@
 
 ### 2.1 Procedure
 
-1. Dealer shuffles the deck.
+1. Dealer shuffles the 32-card deck.
 2. Player to dealer's right cuts.
 3. Dealer distributes counter-clockwise:
-   - **First round:** 5 cards to each player
-   - **Second round:** 4 cards to each player
-   - **Third round:** 4 cards to each player
-   - **Total:** 13 cards per player
-4. The **last card dealt** (to the dealer) is placed **face-up** on the table.
-5. This face-up card determines the **proposed trump suit** for bidding.
+   - **First round:** 5 cards to each player.
+   - The **next card** is placed **face-up** on the table; this is the proposed trump suit.
+4. After bidding resolves, the remaining 11 cards are distributed:
+   - The bid winner (or the bid winner's partner in Ashkal) receives 2 cards plus the face-up card.
+   - Each other player receives 3 cards.
+   - **Total:** 8 cards per player.
 
 ### 2.2 Dealer Rotation
 
@@ -46,27 +46,25 @@
 
 ### 3.1 Bid Options
 
-| Bid | Arabic | Hierarchy | Requirement |
-|-----|--------|-----------|-------------|
+| Bid | Arabic | Hierarchy | Notes |
+|-----|--------|-----------|-------|
 | Pass | باص | Lowest | Always allowed |
-| Sun | صن | Middle | Allowed if no higher bid yet |
-| Hokm | حكم | Highest | Bidder must hold **≥1 card** of the face-up card's suit |
+| Sun | صن | Middle | Played with no trump; buyer must score > 60 card points |
+| Hokm | حكم | High | Trump suit is the face-up card's suit (round 1) or a chosen different suit (round 2) |
+| Ashkal | أشكل | Special Sun bid | Only the dealer or the player before the dealer may call Ashkal; the face-up card is given to the bidder's partner |
 
 ### 3.2 Bidding Rules
 
 - Bidding proceeds **clockwise** starting from the player to the dealer's right.
-- Each player bids once per round (Pass, Sun, or Hokm).
-- Once a player bids **Sun** or **Hokm**, subsequent players can only bid **higher**.
-- **Bid hierarchy:** Hokm > Sun > Pass.
-- The **first Hokm bidder** wins the bid if Hokm is the final game type.
-- The **last Sun bidder** wins the bid if Sun is the final game type.
-- **All four Pass → re-deal** by the same dealer.
+- **Sun**, **Ashkal**, or a first-round **Hokm** immediately ends the bidding.
+- In a second round (after all players passed in round 1), **Hokm** must be in a suit different from the face-up card; **Sun** may also be called.
+- **All four Pass in both rounds → re-deal** by the next dealer.
 
 ### 3.3 Bid Winner
 
 - Bid winner's team becomes the **bidding team** (الطالب).
 - The opposing team is **الخصم**.
-- In Hokm mode, the trump suit is the suit of the face-up card.
+- In Hokm mode, the trump suit is fixed as described above.
 
 ---
 
@@ -81,7 +79,7 @@
 | K | 4 |
 | Q | 3 |
 | J | 2 |
-| 9, 8, 7, 6, 5, 4, 3, 2 | 0 |
+| 9, 8, 7 | 0 |
 
 **Total per suit:** 30  
 **Total per round (4 suits):** 120
@@ -100,7 +98,6 @@ In Hokm mode, the trump suit has different point values and ranking:
 | 6th | Q | 3 |
 | 7th | 8 | 0 |
 | 8th | 7 | 0 |
-| ... | 6, 5, 4, 3, 2 | 0 |
 
 **Trump suit total:** 62  
 **Non-trump suit total:** 30  
@@ -109,10 +106,10 @@ In Hokm mode, the trump suit has different point values and ranking:
 ### 4.3 Card Rank Order
 
 **Non-trump / Sun:**  
-`A > 10 > K > Q > J > 9 > 8 > 7 > 6 > 5 > 4 > 3 > 2`
+`A > 10 > K > Q > J > 9 > 8 > 7`
 
 **Trump (Hokm):**  
-`J > 9 > A > 10 > K > Q > 8 > 7 > 6 > 5 > 4 > 3 > 2`
+`J > 9 > A > 10 > K > Q > 8 > 7`
 
 ---
 
@@ -122,10 +119,8 @@ In Hokm mode, the trump suit has different point values and ranking:
 
 1. **Bid winner leads the first trick.**
 2. Players **must follow suit** if they hold any card of the led suit.
-3. If a player is **void** in the led suit, they may:
-   - Play any **trump** card (to try to win the trick)
-   - **Discard** any non-trump card (concede the trick)
-4. All 13 tricks are played. There is **no early termination**.
+3. If a player is **void** in the led suit, they may play any card.
+4. All 8 tricks are played. There is **no early termination**.
 
 ### 5.2 Trick Winner Determination
 
@@ -133,101 +128,108 @@ In Hokm mode, the trump suit has different point values and ranking:
 2. If **no trump** played → highest card of the **led suit** wins.
 3. Winner of the trick **leads the next trick**.
 
+### 5.3 Baloot (Hokm Only)
+
+In Hokm, holding the **K and Q of the trump suit** is a **Baloot**. It scores an extra 2 qaid for the team that wins the trick containing the second Baloot card.
+
 ---
 
-## 6. Bonuses (Hokm Only)
+## 6. Projects (Sun / Ashkal Only)
 
-> **Bonuses do NOT apply in Sun mode.**
+> **Projects do NOT apply in Hokm mode.**
 
-### 6.1 Bnaga (Sequence)
+Before the first trick, players may reveal projects. The online engine uses **auto-declare** (all detected projects are revealed automatically).
+
+### 6.1 Sira (Sequence)
 
 A sequence of 3+ cards of the **same suit** in consecutive rank order.
 
-| Length | Name | Points |
-|--------|------|--------|
-| 3 | Bnaga Thalatha (بنقة ثلاثة) | 20 |
-| 4 | Bnaga Arba'a (بنقة أربعة) | 50 |
-| 5+ | Bnaga Khamsa (بنقة خمسة) | 100 |
+| Length | Arabic Name | Qaid |
+|--------|-------------|------|
+| 3 | سرا (Sira) | 4 |
+| 4 | خمسين (Khamsin) | 10 |
+| 5+ | مية (Meya) | 20 |
 
-**Ranking for sequences:** A > K > Q > J > 10 > 9 > 8 > 7 > 6 > 5 > 4 > 3 > 2
+**Ranking for sequences:** A > K > Q > J > 10 > 9 > 8 > 7
 
 **Rules:**
 - Only the **longest sequence per suit** counts.
-- If both teams have sequences of the same length, the team with the **higher-ranking sequence** wins.
-- Sequences are declared during the **bonus claim phase** (before the first trick).
+- If both teams have projects, the team with the **highest-ranking project** wins all project rights; the losing team's projects score 0.
 
-### 6.2 Mosal (Four of a Kind)
+### 6.2 Four of a Kind
 
 Four cards of the same rank.
 
-| Rank | Name | Points |
-|------|------|--------|
-| Four Jacks | Mosal Jawj (مصل جوج) | 200 |
-| Four Nines | Mosal Tisa (مصل تسعة) | 150 |
-| Four Aces | Mosal Ace | 100 |
-| Four Tens | Mosal 'Ashra | 100 |
-| Four Kings | Mosal Malik | 100 |
-| Four Queens | Mosal Malika | 100 |
+| Rank | Arabic Name | Qaid |
+|------|-------------|------|
+| Four Aces | أربعمئة (Arba'meya) | 40 |
+| Four 10s / Kings / Queens / Jacks | مية (Meya) | 20 |
 
-**Rules:**
-- Only the **highest-value mosal** per team counts.
-- Mosal is declared during the **bonus claim phase**.
+### 6.3 Project Resolution
 
-### 6.3 Bonus Resolution
+When both teams declare projects:
 
-When both teams declare bonuses:
-
-1. **Compare mosal first.** Higher mosal wins. The losing team loses **ALL** their bonuses (mosal + sequences).
-2. If no mosal or tied mosal, compare **longest sequence.** Longer wins.
-3. If sequences are equal length, compare **highest card in the sequence.**
-4. The **winning team's bonuses score.** The losing team's bonuses are **nullified** (0 points).
+1. Compare the **highest project** using qaid value, then highest card, then turn order.
+2. The **winning team's projects score.** The losing team's projects are **nullified** (0 qaid).
 
 ---
 
 ## 7. Scoring per Round
 
-### 7.1 Sun Mode
+Scores are tracked in **qaid**, not raw card points.
+
+### 7.1 Sun / Ashkal Mode
 
 | Condition | Result |
 |-----------|--------|
-| Bidding team scores > 60 | Both teams keep their earned points |
-| Bidding team scores ≤ 60 (Fall / سقوط) | Bidding team gets **0**. Opponents get **120**. |
+| Bidding team scores > 60 card points | Both teams keep their earned qaid |
+| Bidding team scores ≤ 60 card points (Fall / سقوط) | Bidding team gets **0**. Opponents get the full round qaid. |
 
 ### 7.2 Hokm Mode
 
 | Condition | Result |
 |-----------|--------|
-| Bidding team score > opponent score | Both teams keep earned points (including their valid bonuses) |
-| Bidding team score ≤ opponent score (Fall / سقوط) | Bidding team gets **0**. Opponents get **152 + all bonuses from BOTH teams**. |
+| Bidding team qaid > opponent qaid | Both teams keep earned qaid (including valid Baloot/projects) |
+| Bidding team qaid ≤ opponent qaid (Fall / سقوط) | Bidding team gets **0**. Opponents get the round qaid plus all project/Baloot bonuses. |
 
-### 7.3 Game End
+### 7.3 Capot (Sweep)
 
-- Teams accumulate points across multiple rounds.
+If a team wins all 8 tricks, it receives a large capot qaid bonus in addition to any projects/Baloot.
+
+### 7.4 Game End
+
+- Teams accumulate qaid across multiple rounds.
 - First team to reach or exceed the **target score** wins the game.
 - Default target: **152**.
 
 ---
 
-## 8. State Machine
+## 8. Doubling (Hokm Only)
+
+After projects are resolved, the opposing team may **double** the round's stakes. The bidding team may then **redouble**, and so on, up to a maximum level. Sun/Ashkal rounds may be doubled once before play begins.
+
+---
+
+## 9. State Machine
 
 ```
 WAITING (room lobby)
   └─ host starts ──▶ DEALING
                       └─ deal complete ──▶ BIDDING
-                                            └─ bid resolved ──▶ BONUS_CLAIM (Hokm only; skip for Sun)
-                                                                  └─ bonuses resolved ──▶ PLAYING
-                                                                                          └─ 13 tricks done ──▶ SCORING
+                                            └─ bid resolved ──▶ PROJECTS (Sun/Ashkal only; skip for Hokm)
+                                                                  └─ projects resolved ──▶ PLAYING
+                                                                                          └─ 8 tricks done ──▶ SCORING
                                                                                                                   └─ scores applied ──▶ CHECK_WIN
-                                                                                                                                         ├─ target reached ──▶ GAME_END
-                                                                                                                                         └─ no winner ──▶ NEW_DEAL ──▶ DEALING
+                                                                                                                                     ├─ target reached ──▶ GAME_END
+                                                                                                                                     └─ no winner ──▶ NEW_DEAL ──▶ DEALING
 ```
 
 | State | Player Actions | Duration |
 |-------|---------------|----------|
 | WAITING | Chat, ready toggle, leave | Variable |
 | DEALING | Watch animation | ~2 seconds |
-| BIDDING | Sun, Hokm, Pass | ~10-30s per player |
-| BONUS_CLAIM | Declare sequences/mosal | ~15-30s |
+| BIDDING | Pass, Sun, Hokm, Ashkal | ~10-30s per player |
+| PROJECTS | Declare sequences/four-of-a-kind (auto-declared online) | ~5s |
 | PLAYING | Play card | Variable (~5-15 min) |
 | TRICK_END | Watch winner highlight | ~1.5 seconds |
 | ROUND_END | View score breakdown | ~5 seconds |
@@ -235,13 +237,14 @@ WAITING (room lobby)
 
 ---
 
-## 9. Edge Cases & House Rules
+## 10. Edge Cases & House Rules
 
 | Scenario | Rule |
 |----------|------|
-| All-pass bidding | Re-deal by same dealer |
+| All-pass bidding | Re-deal by next dealer |
 | Disconnection | 60s reconnect window, then auto-play lowest legal card |
 | Turn timeout | Auto-play lowest legal card after `turnTimeLimit` seconds |
 | Spectators | See table but hands are hidden; read-only game doc view |
 | Cheating | All card plays validated server-side; client cannot write to `games/{id}` |
 | Misdeal | Handled by server-side card count validation |
+| Qaid / Sawa claims | Players may claim rule violations (e.g., not following suit). Resolved by the server based on the actual hand history. |

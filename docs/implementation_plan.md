@@ -158,7 +158,7 @@
 - [ ] Mic/camera toggles during game
 - [ ] Turn indicator (glowing border on active player)
 - [ ] Baloot rules engine (Cloud Functions):
-  - Card dealing (13 cards each)
+  - Card dealing (8 cards each)
   - Sun rules (120 target, must score >60, no trump, no bonuses)
   - Hokm rules (trump declaration, bid-based target)
   - Trick resolution (suit following, trump beats)
@@ -174,7 +174,7 @@
 | Join room via code | Manual | Player enters room, seat fills |
 | 4 players ready | Manual | "Start Game" enabled when all 4 ready |
 | Start game | Manual | Game screen opens in landscape |
-| Card dealing | Manual | 13 cards per player, cards visible |
+| Card dealing | Manual | 8 cards per player, cards visible |
 | Play a card | Manual | Card moves to center, turn passes |
 | Invalid card play | Manual | Dimmed, not playable |
 | Trick winner | Manual | Correct player wins trick, cards clear |

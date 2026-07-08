@@ -84,7 +84,7 @@ This is the MOST IMPORTANT screen in the app. It MUST be designed for landscape 
 - Score prominently displayed above table
 
 ### Player's Cards (bottom, fanned):
-- 13 cards (or fewer as game progresses)
+- 8 cards (or fewer as game progresses)
 - Cards fanned horizontally with overlap
 - Selected card rises up slightly
 - Tap to select/play a card
@@ -111,7 +111,7 @@ This is the MOST IMPORTANT screen in the app. It MUST be designed for landscape 
 - **Waiting for cards:** "Dealing..." animation
 - **Your turn:** Glowing border on your cards, "Your Turn" text
 - **Partner's turn:** Subtle highlight on partner's video
-- **Hokm declaration:** Modal showing trump suit selection
+- **Hokm declaration:** Trump suit indicator (trump is the face-up card's suit)
 - **Trick won:** Brief animation showing who won the trick
 - **Round end:** Score summary overlay
 - **Game end:** Winner announcement with celebration

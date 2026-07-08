@@ -1,7 +1,7 @@
 # Bloot — Implementation Tracker
 
 > **Purpose:** Living document tracking what is built, what is mocked, and what is next. Update after every implementation phase.
-> **Last updated:** 2026-06-05
+> **Last updated:** 2026-07-08
 
 ---
 
@@ -92,7 +92,7 @@
 | **Settings** | All toggles + 3 dropdowns persist via SharedPreferences | — | All settings wired |
 | **Chat** | List queries Firestore `conversations`, messages real-time stream, send writes to Firestore, new conversation creation, user search, UI built | Image sending mocked; voice/video call buttons mocked | Chat feature 100% wired to Firestore |
 | **Discover/Streams** | Firestore query for live streams | Stream viewer detail may have gaps | Home and Discover both query `streams` collection |
-| **Room/Game** | UI built, game engine in Cloud Functions | Needs verification of full loop | `game_cubit_test.dart` exists and passes |
+| **Room/Game** | UI built; 32-card Saudi Baloot engine in Cloud Functions; callers ported | Online loop needs end-to-end emulator testing | `game_cubit_test.dart` exists and passes; engine + adapter unit tests added |
 | **Notifications** | Firestore `users/{uid}/notifications` query, unread count on home bell | — | Notifications page loads real data; bell badge shows real unread count |
 | **Edge Cases** | Error, Offline, Loading, Success, Force Update, Maintenance | — | All 6 P0 edge-case pages exist |
 
@@ -309,6 +309,41 @@ When `AuthRemoteDataSource.completeProfile()` creates a user, it writes:
 - `cd functions && npm test` → 8 suites, 77 tests passed
 - `flutter analyze --no-pub` → No issues found
 - `flutter test --no-pub` → 11/11 passed
+
+---
+
+### Phase U: 32-Card Saudi Baloot Engine Port
+**Files modified/created:**
+- `functions/src/engine/balootCard.ts` (new) — 32-card value object + string parsing
+- `functions/src/engine/balootRules.ts` (new) — Saudi Baloot constants and point/strength helpers
+- `functions/src/engine/balootState.ts` (new) — match/hand state classes
+- `functions/src/engine/balootDeck.ts` (new) — 32-card deck and 2-phase Saudi deal
+- `functions/src/engine/balootEngine.ts` (new) — full engine: bidding, projects, doubling, play, scoring, qaid claims
+- `functions/src/engine/balootBot.ts` (new) — bot AI for bidding and play
+- `functions/src/engine/balootSerializer.ts` (new) — Firestore serialization for engine state
+- `functions/src/engine/gameAdapter.ts` (new) — maps engine state to/from the existing UI-facing game document
+- `functions/src/engine/index.ts` — exports the new 32-card modules
+- Deleted old 52-card engine files: `deck.ts`, `deal.ts`, `bidding.ts`, `trick.ts`, `scoring.ts`, `bonuses.ts`, `autoPlay.ts`, `botStrategy.ts`
+- `functions/src/https/placeBid.ts` — rewired to 32-card engine; supports `ashkal`
+- `functions/src/https/playCard.ts` — rewired to 32-card engine; handles `trickEnd` pause
+- `functions/src/https/claimBonuses.ts` — rewired for Saudi Baloot project declarations
+- `functions/src/https/dealNextRound.ts` — rewired to start the next hand from engine state
+- `functions/src/https/autoPlay.ts` — rewired timeout/bot play and trick-end advance
+- `functions/src/triggers/botAutoPlay.ts` — rewired bot auto-play for the new engine
+- `functions/src/https/startGame.ts` and `functions/src/https/botRoom.ts` — create games via the new adapter
+- `functions/src/models/game.ts` — added `ashkal` game type, `engineState`, `playerBids`, and player `level`
+- `functions/src/utils/gameUpdate.ts` — relaxed signatures to accept any game document shape
+- `functions/src/tests/balootEngine.test.ts` (new) and `functions/src/tests/gameAdapter.test.ts` (new)
+- `docs/firebase_schema.md` — updated `games` schema for 32-card Saudi Baloot
+- `functions/src/admin/gameAdmin.ts` — admin rematch now creates a fresh 32-card engine state
+- `docs/game_rules.md`, `docs/AGENTS.md`, `docs/DESIGN.md`, `docs/implementation_plan.md`, `docs/master_flow_map.md`, `docs/ui_implementation_plan.md`, `ai_prompts/07_game_play.md` — updated to 32-card Saudi Baloot rules
+
+**Status:** ✅ 32-card Saudi Baloot engine is now the authoritative online engine. Auto-declare and auto-pass doubling keep the UI flow unchanged. Illegal plays are rejected via `safeMode`. Old 52-card games cannot be resumed.
+
+**Verification:**
+- `cd functions && npm run build` → success
+- `cd functions && npm test` → 5 suites, 29 tests passed
+- `flutter test` → 141 tests passed
 
 ---
 

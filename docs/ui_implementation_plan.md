@@ -283,7 +283,7 @@ flowchart TD
   - Hide status bar, hide bottom nav
   - 4 video squares around table
   - Green felt game table in center
-  - 13-card hand fanned at bottom
+  - 8-card hand fanned at bottom
   - Card selection: tap to raise, valid cards bright, invalid dimmed
   - Trump suit display (Hokm mode)
   - Trick play animation (card flies to center)
