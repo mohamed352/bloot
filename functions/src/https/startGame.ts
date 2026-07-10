@@ -3,6 +3,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { db } from '../config/admin';
 import { requireAppCheck } from '../utils/appCheck';
 import { createGameDocument, RoomPlayer } from '../engine/gameAdapter';
+import { mirrorGameToRtdb } from '../utils/rtdbMirror';
 
 export const startGame = functions.https.onCall(async (request) => {
   console.log('[startGame] invoked', { uid: request.auth?.uid, roomId: request.data?.roomId });
@@ -30,7 +31,7 @@ export const startGame = functions.https.onCall(async (request) => {
   const gameRef = db.collection('games').doc();
 
   try {
-    return await db.runTransaction(async (transaction) => {
+    const txResult = await db.runTransaction(async (transaction) => {
       const roomDoc = await transaction.get(roomRef);
       if (!roomDoc.exists) {
         throw new functions.https.HttpsError('not-found', 'Room not found');
@@ -119,8 +120,16 @@ export const startGame = functions.https.onCall(async (request) => {
         updatedAt: new Date(),
       });
 
-      return { gameId: gameRef.id };
+      return { gameId: gameRef.id, game };
     });
+
+    // Mirror the initial state to RTDB so the WebView can read it with
+    // low latency as soon as the game starts.
+    if (txResult.game) {
+      await mirrorGameToRtdb(txResult.game as any);
+    }
+
+    return { gameId: txResult.gameId };
   } catch (e) {
     console.error('[startGame] transaction failed', e);
     throw e;

@@ -25,7 +25,9 @@ class GameRepositoryImpl implements GameRepository {
 
   @override
   Stream<Game> watchGameAsSpectator(String id) {
-    return _remoteDataSource.watchGameAsSpectator(id).map((model) => model.toEntity());
+    return _remoteDataSource
+        .watchGameAsSpectator(id)
+        .map((model) => model.toEntity());
   }
 
   @override
@@ -39,7 +41,10 @@ class GameRepositoryImpl implements GameRepository {
   }
 
   @override
-  Future<void> claimBonuses(String gameId, List<Map<String, dynamic>> bonuses) async {
+  Future<void> claimBonuses(
+    String gameId,
+    List<Map<String, dynamic>> bonuses,
+  ) async {
     return _remoteDataSource.claimBonuses(gameId, bonuses);
   }
 
@@ -71,5 +76,10 @@ class GameRepositoryImpl implements GameRepository {
   @override
   Future<void> claimSawa(String gameId) async {
     return _remoteDataSource.claimSawa(gameId);
+  }
+
+  @override
+  Future<String?> createRtdbToken() {
+    return _remoteDataSource.createRtdbToken();
   }
 }

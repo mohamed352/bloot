@@ -223,6 +223,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i855.RoomRepository>(
       () => _i166.RoomRepositoryImpl(
         remoteDataSource: gh<_i918.RoomRemoteDataSource>(),
+        firebaseAuth: gh<_i59.FirebaseAuth>(),
       ),
     );
     gh.factory<_i131.RoomCubit>(

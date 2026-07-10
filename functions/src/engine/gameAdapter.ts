@@ -140,7 +140,7 @@ export function createGameDocument(
     dealerIndex: match.dealer,
     turnIndex: match.state!.bidding.turn,
     turnTimerStart: null,
-    turnTimeLimit: 90,
+    turnTimeLimit: 45,
     trumpSuit: null,
     faceUpCard: match.state!.topCard.key,
     hokmBidder: null,

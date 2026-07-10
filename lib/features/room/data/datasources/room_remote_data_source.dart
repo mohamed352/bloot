@@ -281,72 +281,10 @@ class RoomRemoteDataSource {
     final currentUid = _currentUid;
     if (currentUid.isEmpty) throw const UnauthenticatedException();
 
-    final roomRef = _firestore.collection('rooms').doc(roomId);
-
-    await _firestore.runTransaction((transaction) async {
-      final doc = await transaction.get(roomRef);
-      if (!doc.exists) throw const RoomNotFoundException();
-
-      final data = doc.data()!;
-      final players = List<Map<String, dynamic>>.from(data['players'] as List);
-      final playerUids = List<String>.from(data['playerUids'] as List? ?? []);
-      final readyPlayers = List<String>.from(data['readyPlayers'] as List? ?? []);
-      final teamA = List<String>.from(data['teamA'] as List? ?? []);
-      final teamB = List<String>.from(data['teamB'] as List? ?? []);
-
-      final playerIndex = players.indexWhere((p) => p['uid'] == currentUid);
-      if (playerIndex == -1) throw const PlayerNotInRoomException();
-
-      players.removeAt(playerIndex);
-      playerUids.remove(currentUid);
-      readyPlayers.remove(currentUid);
-      teamA.remove(currentUid);
-      teamB.remove(currentUid);
-
-      String? newCreatorUid;
-      final oldCreatorUid = data['creatorUid'] as String?;
-      if (oldCreatorUid == currentUid && playerUids.isNotEmpty) {
-        newCreatorUid = playerUids.first;
-      }
-
-      // If game is active, mark player as disconnected in game doc
-      final gameId = data['gameId'] as String?;
-      if (gameId != null && data['status'] == 'playing') {
-        final gameRef = _firestore.collection('games').doc(gameId);
-        final gameDoc = await transaction.get(gameRef);
-        if (gameDoc.exists) {
-          final gameData = gameDoc.data()!;
-          final gamePlayers = gameData['players'] as Map<String, dynamic>? ?? <String, dynamic>{};
-          for (final entry in gamePlayers.entries) {
-            final p = entry.value as Map<String, dynamic>;
-            if (p['uid'] == currentUid) {
-              p['isConnected'] = false;
-              p['leftAt'] = FieldValue.serverTimestamp();
-              break;
-            }
-          }
-          transaction.update(gameRef, {'players': gamePlayers});
-        }
-      }
-
-      if (playerUids.isEmpty) {
-        transaction.delete(roomRef);
-      } else {
-        final updateData = <String, dynamic>{
-          'players': players,
-          'playerUids': playerUids,
-          'readyPlayers': readyPlayers,
-          'teamA': teamA,
-          'teamB': teamB,
-          'currentPlayerCount': players.length,
-          'updatedAt': FieldValue.serverTimestamp(),
-        };
-        if (newCreatorUid != null) {
-          updateData['creatorUid'] = newCreatorUid;
-        }
-        transaction.update(roomRef, updateData);
-      }
-    });
+    // Game documents are client-read-only, so use a callable function to update
+    // both the room and the active game document atomically.
+    final callable = _functions.httpsCallable('leaveGame');
+    await callable.call<void>({'roomId': roomId});
   }
 
   Future<RoomModel> startStream(String roomId) async {
@@ -451,90 +389,33 @@ class RoomRemoteDataSource {
     final currentUid = _currentUid;
     if (currentUid.isEmpty) throw const UnauthenticatedException();
 
-    final query = await _firestore
-        .collection('rooms')
-        .where('inviteCode', isEqualTo: inviteCode.toUpperCase())
-        .where('status', isEqualTo: 'waiting')
-        .limit(1)
-        .get();
-
-    if (query.docs.isEmpty) {
-      throw const RoomNotFoundException();
-    }
-
-    final roomDoc = query.docs.first;
-    final roomRef = roomDoc.reference;
-    final roomType = roomDoc.data()['type'] as String? ?? 'private';
-    final roomPassword = roomDoc.data()['password'] as String?;
-
-    if (roomType == 'private' &&
-        roomPassword != null &&
-        roomPassword.isNotEmpty &&
-        roomPassword != password) {
-      throw const WrongPasswordException();
-    }
-
-    // Get user profile
-    final userDoc = await _firestore.collection('users').doc(currentUid).get();
-    final userData = userDoc.data();
-    final displayName = userData?['displayName'] as String? ?? 'Player';
-    final avatarUrl = userData?['avatarUrl'] as String?;
-
-    await _firestore.runTransaction((transaction) async {
-      final doc = await transaction.get(roomRef);
-      if (!doc.exists) throw const RoomNotFoundException();
-
-      final docData = doc.data()!;
-      final players = List<Map<String, dynamic>>.from(
-        docData['players'] as List,
-      );
-      final playerUids = List<String>.from(
-        docData['playerUids'] as List? ?? [],
-      );
-
-      if (playerUids.contains(currentUid)) {
-        throw const AlreadyInRoomException();
-      }
-
-      if (players.length >= 4) {
-        throw const RoomFullException();
-      }
-
-      final teamA = List<String>.from(docData['teamA'] as List? ?? []);
-      final teamB = List<String>.from(docData['teamB'] as List? ?? []);
-      final team = teamA.length <= teamB.length ? 'A' : 'B';
-
-      if (team == 'A') {
-        teamA.add(currentUid);
-      } else {
-        teamB.add(currentUid);
-      }
-
-      players.add({
-        'uid': currentUid,
-        'displayName': displayName,
-        'avatarUrl': avatarUrl,
-        'team': team,
-        'seatIndex': players.length,
-        'isReady': false,
-        'isMicOn': docData['voiceEnabled'] == true,
-        'isCameraOn': docData['cameraEnabled'] == true,
-        'agoraUid': currentUid.hashCode.abs(),
-        'joinedAt': DateTime.now(),
+    try {
+      final callable = _functions.httpsCallable('joinRoom');
+      final result = await callable.call<Map<String, dynamic>>({
+        'inviteCode': inviteCode.toUpperCase(),
+        if (password != null && password.isNotEmpty) 'password': password,
       });
-      playerUids.add(currentUid);
-
-      transaction.update(roomRef, {
-        'players': players,
-        'playerUids': playerUids,
-        'teamA': teamA,
-        'teamB': teamB,
-        'currentPlayerCount': players.length,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    });
-
-    return getRoomById(roomDoc.id);
+      final roomId = result.data['roomId'] as String?;
+      if (roomId == null || roomId.isEmpty) {
+        throw const RoomException('Failed to join room.');
+      }
+      return getRoomById(roomId);
+    } on FirebaseFunctionsException catch (e) {
+      switch (e.code) {
+        case 'unauthenticated':
+          throw const UnauthenticatedException();
+        case 'not-found':
+          throw const RoomNotFoundException();
+        case 'permission-denied':
+          throw const WrongPasswordException();
+        case 'resource-exhausted':
+          throw const RoomFullException();
+        case 'already-exists':
+          throw const AlreadyInRoomException();
+        default:
+          throw RoomException(e.message ?? 'Failed to join room.');
+      }
+    }
   }
 
   RoomModel _mapDocToModel(

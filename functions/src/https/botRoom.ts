@@ -98,6 +98,8 @@ export const createRoomWithBots = functions.https.onCall(
       teamA,
       teamB,
       gameId: gameRef.id,
+      voiceEnabled: true,
+      cameraEnabled: true,
     });
 
     transaction.set(roomRef, roomData);
@@ -213,6 +215,9 @@ export const inviteBotsToRoom = functions.https.onCall(
       teamB,
       readyPlayers,
       currentPlayerCount: players.length,
+      // Keep voice/camera enabled so bot-filled rooms behave like real rooms.
+      voiceEnabled: freshData.voiceEnabled ?? true,
+      cameraEnabled: freshData.cameraEnabled ?? true,
       updatedAt: FieldValue.serverTimestamp(),
     };
 
@@ -296,6 +301,7 @@ function assignBotsToRoom(bots: BotProfile[], existingPlayers: RoomPlayerData[])
       team,
       nextSeat++,
       true,
+      { isMicOn: true, isCameraOn: true },
     );
   });
 }
@@ -316,7 +322,7 @@ function createRoomPlayer(
     team,
     seatIndex,
     isReady: options?.isReady ?? isBot,
-    isMicOn: options?.isMicOn ?? false,
+    isMicOn: options?.isMicOn ?? true,
     isCameraOn: options?.isCameraOn ?? false,
     agoraUid: uidToAgoraUid(uid),
     joinedAt: new Date(),
@@ -334,6 +340,8 @@ function buildRoomDoc(params: {
   teamA: string[];
   teamB: string[];
   gameId?: string;
+  voiceEnabled?: boolean;
+  cameraEnabled?: boolean;
 }): Record<string, any> {
   const now = FieldValue.serverTimestamp();
   return {
@@ -342,8 +350,8 @@ function buildRoomDoc(params: {
     type: 'private',
     creatorUid: params.creatorUid,
     status: params.gameId ? 'playing' : 'waiting',
-    voiceEnabled: false,
-    cameraEnabled: false,
+    voiceEnabled: params.voiceEnabled ?? true,
+    cameraEnabled: params.cameraEnabled ?? true,
     allowSpectators: false,
     gameSpeed: 'normal',
     inviteCode: params.inviteCode,
@@ -375,8 +383,8 @@ function createAndDealGame(
     seatIndex: p.seatIndex,
     isBot: p.isBot,
     level: 'amateur',
-    isMuted: true,
-    hasCamera: false,
+    isMuted: !p.isMicOn,
+    hasCamera: p.isCameraOn,
     agoraUid: p.agoraUid,
     isConnected: true,
   }));

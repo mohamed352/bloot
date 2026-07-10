@@ -9,11 +9,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
+import 'package:firebase_database/firebase_database.dart';
+
+import 'package:bloot/firebase_options.dart';
 
 import 'package:bloot/config/routes/routes.dart';
+import 'package:bloot/core/di/injection.dart';
 import 'package:bloot/core/services/agora_service.dart';
 import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/features/game/domain/entities/game.dart';
+import 'package:bloot/features/game/domain/repositories/game_repository.dart';
 import 'package:bloot/features/game/presentation/cubit/game_cubit.dart';
 import 'package:bloot/features/game/presentation/cubit/game_state.dart';
 
@@ -44,6 +50,8 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
   bool _startSent = false;
   Game? _lastPushedGame;
   String? _lastError;
+  String? _rtdbToken;
+  bool _rtdbAuthInProgress = false;
 
   @override
   void initState() {
@@ -55,28 +63,29 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
     ]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
-    _controller = WebViewController()
+    _controller = _createWebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(ColorManager.darkCanvas)
       ..setOnConsoleMessage(_onConsoleMessage)
-      ..addJavaScriptChannel(
-        'BlootNative',
-        onMessageReceived: _onBridgeMessage,
-      )
+      ..addJavaScriptChannel('BlootNative', onMessageReceived: _onBridgeMessage)
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (url) => debugPrint('WebView page started: $url'),
-          onProgress: (progress) => debugPrint('WebView load progress: $progress%'),
+          onProgress: (progress) =>
+              debugPrint('WebView load progress: $progress%'),
           onPageFinished: (_) => _onWebViewReady(),
           onWebResourceError: (error) {
-            debugPrint('WebView error: ${error.description} (errorCode=${error.errorCode}, type=${error.errorType})');
+            debugPrint(
+              'WebView error: ${error.description} (errorCode=${error.errorCode}, type=${error.errorType})',
+            );
             setState(() => _lastError = error.description);
           },
         ),
       )
-      ..loadFlutterAsset('assets/web_game/play.html');
+      ;
 
     _configureWebView();
+    _loadGamePage();
 
     final cubit = context.read<GameCubit>();
     if (cubit.state == const GameState.initial()) {
@@ -88,15 +97,37 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
     }
   }
 
-  Future<void> _configureWebView() async {
-    // Android-specific tweaks so the HTML game behaves like a native game
-    // surface: respect the viewport meta tag (so our responsive CSS works) and
-    // allow sound effects without requiring a user gesture every cold start.
-    if (_controller.platform is AndroidWebViewController) {
-      final android = _controller.platform as AndroidWebViewController;
-      await android.setUseWideViewPort(true);
-      await android.setMediaPlaybackRequiresUserGesture(false);
+  WebViewController _createWebViewController() {
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      return WebViewController.fromPlatformCreationParams(
+        WebKitWebViewControllerCreationParams(
+          allowsInlineMediaPlayback: true,
+          mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
+        ),
+      );
     }
+    return WebViewController();
+  }
+
+  Future<void> _configureWebView() async {
+    final platform = _controller.platform;
+    if (platform is AndroidWebViewController) {
+      // Android: respect the viewport meta tag and allow sound effects without
+      // requiring a user gesture every cold start.
+      await platform.setUseWideViewPort(true);
+      await platform.setMediaPlaybackRequiresUserGesture(false);
+    }
+  }
+
+  Future<void> _loadGamePage() async {
+    // Clear any stale WebView cache so a fresh install or rebuild always picks
+    // up the latest bundled JS/CSS (e.g. hamburger hiding / audio fixes).
+    try {
+      await _controller.clearCache();
+    } catch (e) {
+      debugPrint('[HtmlGame] clearCache error: $e');
+    }
+    await _controller.loadFlutterAsset('assets/web_game/play.html');
   }
 
   @override
@@ -119,22 +150,30 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
   }
 
   void _onConsoleMessage(JavaScriptConsoleMessage message) {
-    debugPrint(
-      '[Bloot WebView ${message.level.name}] ${message.message}',
-    );
+    debugPrint('[Bloot WebView ${message.level.name}] ${message.message}');
   }
 
   Future<void> _onWebViewReady() async {
     _webViewReady = true;
     await _runDiagnostics();
+    await _resumeWebAudio();
     if (!mounted) return;
     _pushStartIfNeeded();
   }
 
+  Future<void> _resumeWebAudio() async {
+    try {
+      await _controller.runJavaScript(
+        'if (window.BalootVoice && BalootVoice.resumeAudio) BalootVoice.resumeAudio();',
+      );
+    } catch (e) {
+      debugPrint('[HtmlGame] resumeAudio error: \$e');
+    }
+  }
+
   Future<void> _runDiagnostics() async {
     try {
-      final result = await _controller.runJavaScriptReturningResult(
-        """
+      final result = await _controller.runJavaScriptReturningResult("""
         JSON.stringify({
           readyState: document.readyState,
           hasBridge: typeof window.__bloot_bridge !== 'undefined',
@@ -152,8 +191,7 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
             ? document.getElementById('topbar').hidden
             : 'no-el'
         })
-        """,
-      );
+        """);
       debugPrint('WebView diagnostics: $result');
     } catch (e) {
       debugPrint('WebView diagnostics error: $e');
@@ -228,18 +266,54 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
     if (_startSent) {
       _pushState(game);
     } else {
-      _sendStart(game);
+      _ensureRtdbToken().then((_) => _sendStart(game));
     }
+  }
+
+  Future<void> _ensureRtdbToken() async {
+    if (_rtdbToken != null || _rtdbAuthInProgress) return;
+    _rtdbAuthInProgress = true;
+    try {
+      final repo = getIt<GameRepository>();
+      _rtdbToken = await repo.createRtdbToken();
+    } catch (e) {
+      debugPrint('[HtmlGame] failed to get RTDB token: $e');
+    } finally {
+      _rtdbAuthInProgress = false;
+    }
+  }
+
+  Map<String, dynamic> _buildRtdbConfig(String gameId) {
+    const web = DefaultFirebaseOptions.web;
+    return <String, dynamic>{
+      'firebaseConfig': <String, dynamic>{
+        'apiKey': web.apiKey,
+        'authDomain': web.authDomain,
+        'databaseURL':
+            FirebaseDatabase.instance.databaseURL ??
+            'https://bloot-89b2b-default-rtdb.firebaseio.com',
+        'projectId': web.projectId,
+        'storageBucket': web.storageBucket,
+        'messagingSenderId': web.messagingSenderId,
+        'appId': web.appId,
+        'measurementId': web.measurementId,
+      },
+      'gameId': gameId,
+      'token': _rtdbToken,
+    };
   }
 
   void _sendStart(Game game) {
     _startSent = true;
-    debugPrint('[HtmlGame] sending start for ${game.id}, seat ${game.mySeatIndex}');
+    debugPrint(
+      '[HtmlGame] sending start for ${game.id}, seat ${game.mySeatIndex}',
+    );
     _send('start', <String, dynamic>{
       'gameId': game.id,
       'seat': game.mySeatIndex,
       'safeMode': true,
       'players': game.players.map(_playerToJson).toList(),
+      'rtdbConfig': _buildRtdbConfig(game.id),
     });
     _pushState(game);
   }
@@ -301,10 +375,7 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
         backgroundColor: ColorManager.darkCanvas,
         body: BlocListener<GameCubit, GameState>(
           listenWhen: (previous, current) =>
-              current.maybeMap(
-                error: (_) => true,
-                orElse: () => false,
-              ) ||
+              current.maybeMap(error: (_) => true, orElse: () => false) ||
               _extractGame(current) != null,
           listener: (context, state) {
             debugPrint('[HtmlGame] cubit state: ${state.runtimeType}');

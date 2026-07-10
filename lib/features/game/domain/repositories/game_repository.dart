@@ -37,4 +37,7 @@ abstract class GameRepository {
 
   /// Claims "سوا" (the team will take all remaining tricks).
   Future<void> claimSawa(String gameId);
+
+  /// Creates a Firebase custom token for the WebView's RTDB authentication.
+  Future<String?> createRtdbToken();
 }

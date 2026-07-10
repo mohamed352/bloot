@@ -11,6 +11,9 @@
   let snapshotCb = null;
   let currentCode = null;
   let currentSeat = 0;
+  let rtdbUnsub = null;
+  let rtdbActive = false;
+  let lastBridgeState = null;
 
   function $(id) { return document.getElementById(id); }
 
@@ -153,6 +156,49 @@
     }
   }
 
+  // ── Realtime Database watcher ────────────────────────────────────────
+  async function initRtdb(config) {
+    if (!config || !config.gameId || !config.firebaseConfig) return false;
+    if (!window.firebase || !firebase.database || !firebase.auth) {
+      console.warn('[BlootBridge] Firebase SDK not loaded; using bridge fallback');
+      return false;
+    }
+    try {
+      currentCode = config.gameId;
+      if (!firebase.apps.length) {
+        firebase.initializeApp(config.firebaseConfig);
+      }
+      if (config.token) {
+        await firebase.auth().signInWithCustomToken(config.token);
+      }
+      const ref = firebase.database().ref('games/' + config.gameId);
+      rtdbUnsub = ref.on('value', function (snap) {
+        const data = snap.val() || {};
+        if (snapshotCb && data.engineState) {
+          rtdbActive = true;
+          snapshotCb(mapBlootState(data.engineState));
+        }
+      }, function (err) {
+        console.error('[BlootBridge] RTDB value error:', err);
+        rtdbActive = false;
+      });
+      console.log('[BlootBridge] RTDB watcher registered for game', config.gameId);
+      return true;
+    } catch (e) {
+      console.error('[BlootBridge] RTDB init failed:', e);
+      rtdbActive = false;
+      return false;
+    }
+  }
+
+  function stopRtdb() {
+    if (rtdbUnsub && currentCode) {
+      try { firebase.database().ref('games/' + currentCode).off('value', rtdbUnsub); } catch (e) {}
+      rtdbUnsub = null;
+    }
+    rtdbActive = false;
+  }
+
   // ── send to Flutter ──────────────────────────────────────────────────
   function sendToFlutter(msg) {
     const payload = JSON.stringify(msg);
@@ -225,7 +271,14 @@
       const ui = window.__bloot_ui;
 
       if (msg.type === "start") {
+        if (window.BalootVoice && BalootVoice.resumeAudio) BalootVoice.resumeAudio();
         currentSeat = msg.seat || 0;
+        // Start RTDB watcher if the Flutter host provided config. This runs
+        // in parallel with the bridge start so the UI renders quickly even if
+        // RTDB auth is slow.
+        initRtdb(msg.rtdbConfig).catch(function (e) {
+          console.warn('[BlootBridge] RTDB init rejected:', e);
+        });
         if (ui && ui.startBlootOnline) {
           ui.startBlootOnline({
             code: msg.gameId || "bloot",
@@ -243,9 +296,11 @@
       }
 
       if (msg.type === "state") {
-        if (snapshotCb) {
-          const snap = mapBlootState(msg.engineState || msg.state || {});
-          snapshotCb(snap);
+        lastBridgeState = msg.engineState || msg.state || {};
+        // When RTDB is active it is the fast path; only use the bridge state
+        // if RTDB has not delivered a snapshot yet.
+        if (snapshotCb && !rtdbActive) {
+          snapshotCb(mapBlootState(lastBridgeState));
         }
         return;
       }

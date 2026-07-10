@@ -3,6 +3,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
 
+import 'package:bloot/core/logger/app_logger.dart';
 import 'package:bloot/features/game/data/models/game_model.dart';
 
 @lazySingleton
@@ -109,6 +110,19 @@ class GameRemoteDataSource {
   Future<void> claimSawa(String gameId) async {
     final callable = _functions.httpsCallable('claimSawa');
     await callable.call<Map<String, dynamic>>({'gameId': gameId});
+  }
+
+  /// Creates a custom Firebase token so the WebView can authenticate its own
+  /// Firebase JS SDK and read the RTDB game mirror with the same UID.
+  Future<String?> createRtdbToken() async {
+    try {
+      final callable = _functions.httpsCallable('createRtdbToken');
+      final result = await callable.call<Map<String, dynamic>>();
+      return result.data['token'] as String?;
+    } catch (e) {
+      AppLogger.error('Failed to create RTDB token', error: e);
+      return null;
+    }
   }
 
   GameModel _mapDocToModel(DocumentSnapshot<Map<String, dynamic>> doc) {

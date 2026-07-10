@@ -73,7 +73,7 @@ export const autoPlay = onSchedule(
             (freshGame.turnTimerStart as any)?.toMillis?.() ||
             (freshGame.turnTimerStart as Date)?.getTime?.() ||
             0;
-          const timeLimit = (freshGame.turnTimeLimit || 90) * 1000;
+          const timeLimit = (freshGame.turnTimeLimit || 45) * 1000;
 
           const engine = new BalootEngine();
           const match = loadMatch(freshGame);

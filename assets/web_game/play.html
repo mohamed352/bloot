@@ -8,8 +8,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap">
-<link rel="stylesheet" href="tokens.css">
-<link rel="stylesheet" href="game.css">
+<link rel="stylesheet" href="tokens.css?v=2">
+<link rel="stylesheet" href="game.css?v=2">
+<style>
+  /* When hosted inside Bloot, the setup screen is driven by Flutter, so hide
+     it immediately to prevent the original-repo setup screen from flashing. */
+  #setup-screen { display: none !important; }
+  body.standalone #setup-screen { display: flex !important; }
+
+  /* In Bloot mode the menu is handled by the Flutter host; hide it here so it
+     never flashes or remains visible. */
+  .bt-hud__menu { display: none !important; }
+  body.standalone .bt-hud__menu { display: block !important; }
+</style>
 </head>
 <body class="bt-body">
 
@@ -268,8 +279,13 @@
     </div>
   </div>
 
-  <script src="js/voice.js" defer></script>
-  <script src="js/game_bundle.js" defer></script>
-  <script src="js/bloot_bridge.js" defer></script>
+  <!-- Firebase SDKs for low-latency Realtime Database game state sync. -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js" defer></script>
+
+  <script src="js/voice.js?v=2" defer></script>
+  <script src="js/game_bundle.js?v=2" defer></script>
+  <script src="js/bloot_bridge.js?v=2" defer></script>
 </body>
 </html>

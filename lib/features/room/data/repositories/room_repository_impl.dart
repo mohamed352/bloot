@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
 
 import 'package:bloot/features/room/data/datasources/room_remote_data_source.dart';
@@ -7,10 +8,16 @@ import 'package:bloot/features/room/domain/repositories/room_repository.dart';
 
 @LazySingleton(as: RoomRepository)
 class RoomRepositoryImpl implements RoomRepository {
-  RoomRepositoryImpl({required RoomRemoteDataSource remoteDataSource})
-    : _remoteDataSource = remoteDataSource;
+  RoomRepositoryImpl({
+    required RoomRemoteDataSource remoteDataSource,
+    required FirebaseAuth firebaseAuth,
+  }) : _remoteDataSource = remoteDataSource,
+       _firebaseAuth = firebaseAuth;
 
   final RoomRemoteDataSource _remoteDataSource;
+  final FirebaseAuth _firebaseAuth;
+
+  String? get _currentUid => _firebaseAuth.currentUser?.uid;
 
   @override
   Future<Room> createRoom(CreateRoomParams params) async {
@@ -23,31 +30,33 @@ class RoomRepositoryImpl implements RoomRepository {
       gameSpeed: 'normal',
       password: params.password,
     );
-    return model.toEntity();
+    return model.toEntity(currentUserUid: _currentUid);
   }
 
   @override
   Stream<Room> watchRoom(String id) {
-    return _remoteDataSource.watchRoom(id).map((model) => model.toEntity());
+    return _remoteDataSource.watchRoom(id).map(
+      (model) => model.toEntity(currentUserUid: _currentUid),
+    );
   }
 
   @override
   Stream<List<Room>> watchPublicRooms() {
     return _remoteDataSource.watchPublicRooms().map(
-          (models) => models.map((m) => m.toEntity()).toList(),
+          (models) => models.map((m) => m.toEntity(currentUserUid: _currentUid)).toList(),
         );
   }
 
   @override
   Future<Room> getRoomById(String id) async {
     final model = await _remoteDataSource.getRoomById(id);
-    return model.toEntity();
+    return model.toEntity(currentUserUid: _currentUid);
   }
 
   @override
   Future<Room> toggleReady(String roomId) async {
     final model = await _remoteDataSource.toggleReady(roomId);
-    return model.toEntity();
+    return model.toEntity(currentUserUid: _currentUid);
   }
 
   @override
@@ -76,7 +85,7 @@ class RoomRepositoryImpl implements RoomRepository {
       inviteCode,
       password: password,
     );
-    return model.toEntity();
+    return model.toEntity(currentUserUid: _currentUid);
   }
 
   @override
@@ -104,12 +113,12 @@ class RoomRepositoryImpl implements RoomRepository {
   @override
   Future<Room> startStream(String roomId) async {
     final model = await _remoteDataSource.startStream(roomId);
-    return model.toEntity();
+    return model.toEntity(currentUserUid: _currentUid);
   }
 
   @override
   Future<Room> endStream(String roomId) async {
     final model = await _remoteDataSource.endStream(roomId);
-    return model.toEntity();
+    return model.toEntity(currentUserUid: _currentUid);
   }
 }

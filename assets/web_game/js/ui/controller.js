@@ -15,6 +15,57 @@ import { S, botDelay } from "./state.js";
 import { pushAction } from "../online.js";
 
 const BOT_SAWA_CHANCE = { beginner: 0, amateur: 0.25, skilled: 0.6, pro: 0.9 };
+const HUMAN_AFK_MS = 25000;
+let humanTurnTimer = null;
+
+function clearHumanTurnTimer() {
+  if (humanTurnTimer) {
+    clearTimeout(humanTurnTimer);
+    humanTurnTimer = null;
+  }
+}
+
+function isStandalone() {
+  return !S.online;
+}
+
+function startHumanTurnTimer() {
+  clearHumanTurnTimer();
+  if (!isStandalone() || !S.match) return;
+  const st = S.match.state;
+  const phase = st.phase;
+  humanTurnTimer = setTimeout(() => {
+    if (!S.match || S.match.matchOver) return;
+    const st2 = S.match.state;
+    if (st2.phase !== phase) return;
+
+    if (st2.awaitingDeclare && (st2.declareSeats || []).includes(S.mySeat)) {
+      const types = st2.projects.filter((p) => p.seat === S.mySeat).map((p) => p.type);
+      finishDeclare(types);
+      return;
+    }
+    if (st2.awaitingDouble && st2.doubling && st2.doubling.turn === S.mySeat) {
+      humanDouble({ type: "pass" });
+      return;
+    }
+    if (st2.phase === "bidding" && st2.bidding.turn === S.mySeat) {
+      const action = decideBid(S.match, S.mySeat, S.players[S.mySeat].level);
+      humanBid(action);
+      return;
+    }
+    if (st2.phase === "playing" && st2.turn === S.mySeat) {
+      const hand = st2.hands[S.mySeat];
+      const strict = (st2.doubleLevel || 1) >= 2;
+      const legal = E.legalMoves(hand, st2.currentTrick, st2.mode, st2.trump, S.mySeat, strict);
+      if (legal.length) {
+        const card = legal[Math.floor(Math.random() * legal.length)];
+        onHumanPlay(card);
+      }
+      return;
+    }
+  }, HUMAN_AFK_MS);
+}
+
 function botQaidChance(level, tricksPlayed) {
   const base = { beginner: 0.25, amateur: 0.5, skilled: 0.75, pro: 0.95 }[level] || 0.5;
   const jitter = 0.85 + Math.random() * 0.3;
@@ -23,6 +74,7 @@ function botQaidChance(level, tricksPlayed) {
 
 // ===================== شاشة الإعداد =====================
 export function initSetup() {
+  document.body.classList.add("standalone");
   for (const sel of [$("level-1"), $("level-2"), $("level-3")]) {
     sel.innerHTML = "";
     for (const [level, label] of Object.entries(LEVELS)) {
@@ -119,12 +171,13 @@ async function safePump(run) {
 
 async function pump() {
   if (!S.match || S.match.matchOver) return;
+  clearHumanTurnTimer();
   const st = S.match.state;
   if (st.phase === "handEnd" || st.phase === "matchEnd") return;
 
   if (st.awaitingDeclare) {
     const seat = st.declareSeats[0];
-    if (seat === S.mySeat) { showDeclareDialog(); return; }
+    if (seat === S.mySeat) { showDeclareDialog(); startHumanTurnTimer(); return; }
     await sleep(botDelay());
     const types = st.projects.filter((p) => p.seat === seat).map((p) => p.type);
     return safePump(() => { E.declareProject(S.match, seat, types); return []; });
@@ -132,7 +185,7 @@ async function pump() {
 
   if (st.awaitingDouble) {
     const seat = st.doubling.turn;
-    if (seat === S.mySeat) { showDoubleDialog(); return; }
+    if (seat === S.mySeat) { showDoubleDialog(); startHumanTurnTimer(); return; }
     await sleep(botDelay());
     const wants = decideDouble(S.match, seat, S.players[seat].level);
     return safePump(() => E.applyDouble(S.match, seat, wants ? { type: "double" } : { type: "pass" }));
@@ -140,7 +193,7 @@ async function pump() {
 
   if (st.phase === "bidding") {
     const seat = st.bidding.turn;
-    if (seat === S.mySeat) { showBidDialog(); return; }
+    if (seat === S.mySeat) { showBidDialog(); startHumanTurnTimer(); return; }
     await sleep(botDelay());
     const action = decideBid(S.match, seat, S.players[seat].level);
     return safePump(() => E.applyBid(S.match, seat, action));
@@ -151,7 +204,7 @@ async function pump() {
     updateSawaButton(canClaimSawa());
     if (await maybeBotClaims()) return;
     const seat = st.turn;
-    if (seat === S.mySeat) { renderAll(S.match, S.mySeat, S.players, onHumanPlay); return; }
+    if (seat === S.mySeat) { renderAll(S.match, S.mySeat, S.players, onHumanPlay); startHumanTurnTimer(); return; }
     await sleep(botDelay());
     const card = decidePlay(S.match, seat, S.players[seat].level);
     await playCardFlow(seat, card);
@@ -221,6 +274,7 @@ async function playCardFlow(seat, card) {
 }
 
 export async function onHumanPlay(card) {
+  clearHumanTurnTimer();
   if (S.online && !S.online.isHost) {
     // عميل: يدفع الحركة للمضيف بدل ما يشغّل المحرك محلياً (العميل ما يشغّل المحرك أبداً)
     if (S.awaitingServerAck) return;
@@ -298,6 +352,7 @@ async function safeAct(run, remoteAction) {
 }
 
 function humanBid(action) {
+  clearHumanTurnTimer();
   closeSheet("bid-dialog");
   safeAct(() => E.applyBid(S.match, S.mySeat, action), { type: "bid", bid: action });
 }
@@ -377,6 +432,7 @@ export function wireDialogs() {
 }
 
 function humanDouble(action) {
+  clearHumanTurnTimer();
   closeSheet("double-dialog");
   safeAct(() => E.applyDouble(S.match, S.mySeat, action), { type: "double", double: action });
 }
@@ -403,6 +459,7 @@ export function showDeclareDialog() {
 }
 
 function finishDeclare(types) {
+  clearHumanTurnTimer();
   closeSheet("declare-dialog");
   if (S.online && !S.online.isHost) {
     if (S.awaitingServerAck) return;

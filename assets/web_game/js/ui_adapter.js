@@ -16,6 +16,48 @@ import {
   showDeclareDialog,
 } from "./ui/controller.js";
 
+let previousSnap = null;
+
+function playTransitionSounds(prev, next) {
+  const voice = window.BalootVoice;
+  if (!voice || !voice.sfx) return;
+  if (voice.resumeAudio) voice.resumeAudio();
+  const prevSt = prev && prev.state;
+  const nextSt = next && next.state;
+  if (!nextSt) return;
+
+  // Bid announced
+  if (prevSt && prevSt.bidding && nextSt.bidding) {
+    if (nextSt.bidding.spoken > prevSt.bidding.spoken) {
+      voice.sfx.turn();
+    }
+  }
+
+  // Card played (new card in currentTrick)
+  if (prevSt && nextSt.currentTrick && prevSt.currentTrick) {
+    if (nextSt.currentTrick.length > prevSt.currentTrick.length) {
+      voice.sfx.card();
+    }
+  }
+
+  // Trick completed (trickHistory grew)
+  if (prevSt && nextSt.trickHistory && prevSt.trickHistory) {
+    if (nextSt.trickHistory.length > prevSt.trickHistory.length) {
+      voice.sfx.trick();
+    }
+  }
+
+  // Round / match ended
+  if (prevSt && prevSt.phase !== "handEnd" && nextSt.phase === "handEnd") {
+    voice.sfx.deal();
+  }
+  if (prevSt && !prev.matchOver && next.matchOver) {
+    const myTeam = S.mySeat % 2;
+    const won = next.winnerTeam === myTeam;
+    won ? voice.sfx.win() : voice.sfx.lose();
+  }
+}
+
 function renderClient() {
   if (!S.match) return;
   renderAll(S.match, S.mySeat, S.players, onHumanPlay);
@@ -39,7 +81,11 @@ function renderClient() {
 function bootUI() {
   // Keep the setup screen wiring available for browser debugging, but in Bloot
   // the Flutter bridge calls startBlootOnline() directly.
-  if (!window.__BLOOT_BRIDGE_ENABLED) {
+  if (window.__BLOOT_BRIDGE_ENABLED) {
+    // Hide the standalone setup/lobby screens immediately so they never flash
+    // while the Flutter host prepares the game.
+    showScreen(null);
+  } else {
     wireDialogs();
     wireMenu();
     renderSetupStats();
@@ -65,12 +111,19 @@ function startBlootOnline(cfg) {
   $("table-area").hidden = false;
   $("buyer-badge").textContent = "🌐 أونلاين";
 
+  // In Bloot mode the menu is handled by the Flutter host (back gesture), so
+  // hide the standalone menu button to avoid duplicate/confusing UI.
+  const menuBtn = $("menu-btn");
+  if (menuBtn) menuBtn.parentElement.hidden = true;
+
   wireDialogs();
   wireMenu();
 
   S.online.unsubs.push(
     Net.watchSnapshot(cfg.code, (snap) => {
       if (!snap) return;
+      playTransitionSounds(previousSnap, snap);
+      previousSnap = JSON.parse(JSON.stringify(snap));
       S.match = E.deserializeMatch(snap);
       S.awaitingServerAck = false;
       renderClient();

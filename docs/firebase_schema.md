@@ -21,7 +21,31 @@
 
 ---
 
-## 2. `users` Collection
+## 2. Realtime Database (RTDB) Mirror
+
+Active game state is mirrored to Firebase Realtime Database for low-latency delivery to the WebView game renderer. Firestore remains the authoritative source of truth.
+
+### Path: `/games/{gameId}`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `engineState` | map | Serialized `BalootMatch` from `BalootSerializer.serializeMatch()` — same shape previously sent through the Flutter bridge. |
+| `playerUids` | map | `{ uid1: true, uid2: true, ... }` used by RTDB rules to restrict reads to game participants. |
+| `status` | string | Mirrors `games/{gameId}.status` (`bidding`, `playing`, `trickEnd`, `roundEnd`, `gameEnd`). |
+| `updatedAt` | number | Server-side millisecond timestamp of the last mirror write. |
+
+### Lifecycle
+- **Created** by `startGame` Cloud Function immediately after the Firestore game document is created.
+- **Updated** by the `mirrorGameToRtdbTrigger` Firestore trigger whenever the game document changes.
+- **Removed** by `rematch` (old game discarded) or when the game document is deleted.
+
+### Security Rules
+- `.read`: authenticated players only (`playerUids/{uid}` must exist).
+- `.write`: client writes are denied; Cloud Functions use the Admin SDK which bypasses rules.
+
+---
+
+## 3. `users` Collection
 
 **Document ID:** Firebase Auth UID (`uid`)
 

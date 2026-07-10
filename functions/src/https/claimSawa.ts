@@ -39,7 +39,14 @@ export const claimSawa = functions.https.onCall(async (request) => {
     const engine = new BalootEngine();
     const match = loadMatch(game);
 
-    engine.claimSawa(match, seatIndex);
+    try {
+      engine.claimSawa(match, seatIndex);
+    } catch (e) {
+      throw new functions.https.HttpsError(
+        'failed-precondition',
+        e instanceof Error ? e.message : 'Invalid sawa claim',
+      );
+    }
 
     saveMatch(game, match);
     game.turnTimerStart = new Date();

@@ -245,7 +245,7 @@ button { font-family: var(--font-sans); }
   padding: 4px 0 calc(env(safe-area-inset-bottom) + 64px);
   min-height: 78px;
 }
-.bt-hand .bt-card { margin-inline-start: -18px; transition: transform var(--anim-fast) var(--ease-out), box-shadow var(--anim-fast); }
+.bt-hand .bt-card { margin-inline-start: calc(var(--card-w) * -0.42); transition: transform var(--anim-fast) var(--ease-out), box-shadow var(--anim-fast); }
 .bt-hand .bt-card:first-child { margin-inline-start: 0; }
 .bt-hand .bt-card.is-legal { cursor: pointer; }
 .bt-hand .bt-card.is-legal:hover, .bt-hand .bt-card.is-legal:active { transform: translateY(-10px); }

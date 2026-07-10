@@ -19,6 +19,7 @@
 | D009 | Phone OTP auth only (MVP) | Initial | Primary market uses phone numbers; social auth deferred |
 | D010 | Single app, player + viewer modes | Initial | Reduces codebase complexity; modes are UI paths, not separate apps |
 | D011 | Firestore, not Realtime DB | Initial | Better querying, closer to document model, Cloud Functions support |
+| D011a | RTDB mirror for active game state | 2026-07 | Low-latency WebView state sync; Firestore stays authoritative source of truth |
 | D012 | No light theme in MVP | Initial | See D002; reduces design and implementation scope significantly |
 | D013 | Landscape-locked for game play | Initial | Baloot requires 4 players visible; landscape gives the best UX |
 | D014 | Cloud Functions for game logic | Initial | Game rules must be validated server-side to prevent cheating |

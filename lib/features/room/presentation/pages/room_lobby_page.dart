@@ -134,9 +134,13 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                             isScrollControlled: true,
                             builder: (context) => RoomSettingsBottomSheet(
                               room: room,
-                              onLeave: () {
-                                context.read<RoomCubit>().leaveRoom(room.id);
-                                context.goNamed(RouteNames.home);
+                              onLeave: () async {
+                                await context
+                                    .read<RoomCubit>()
+                                    .leaveRoom(room.id);
+                                if (context.mounted) {
+                                  context.goNamed(RouteNames.home);
+                                }
                               },
                             ),
                           );

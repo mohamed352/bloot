@@ -18,7 +18,7 @@ class RoomSettingsBottomSheet extends StatelessWidget {
   });
 
   final Room room;
-  final VoidCallback onLeave;
+  final Future<void> Function() onLeave;
 
   @override
   Widget build(BuildContext context) {
@@ -153,9 +153,9 @@ class RoomSettingsBottomSheet extends StatelessWidget {
             child: Text('cancel'.tr()),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               context.pop();
-              onLeave();
+              await onLeave();
             },
             child: Text(
               'leave'.tr(),
