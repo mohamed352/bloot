@@ -1137,6 +1137,88 @@
     setBuyerBadge(match);
   }
 
+  // js/ui/animations.js
+  var SEAT_ANCHOR = { 0: [50, 82], 1: [82, 50], 2: [50, 18], 3: [18, 50] };
+  function animateDeal(positions) {
+    const table = document.querySelector(".bt-table-area");
+    if (!table) return;
+    for (const pos of positions) {
+      const seatEl = $("seat-" + pos);
+      if (!seatEl) continue;
+      seatEl.animate(
+        [
+          { transform: "translateY(10px) scale(.9)", opacity: 0.4 },
+          { transform: "translateY(0) scale(1)", opacity: 1 }
+        ],
+        { duration: 260, easing: "cubic-bezier(.34,1.56,.64,1)", delay: pos * 70 }
+      );
+    }
+  }
+  function animatePlayedCard(cardEl2) {
+    cardEl2.animate(
+      [
+        { transform: "translate(-50%,-50%) scale(.55)", opacity: 0.2 },
+        { transform: "translate(-50%,-50%) scale(1.08)", opacity: 1, offset: 0.7 },
+        { transform: "translate(-50%,-50%) scale(1)", opacity: 1 }
+      ],
+      { duration: 260, easing: "cubic-bezier(0,0,.2,1)" }
+    );
+  }
+  function animateTrickCollect(winnerPos) {
+    return new Promise((resolve) => {
+      const zone = $("trick-zone");
+      const [wx, wy] = SEAT_ANCHOR[winnerPos] || [50, 50];
+      const cards = zone.querySelectorAll(".bt-played-card");
+      if (!cards.length) return resolve();
+      let done = 0;
+      cards.forEach((c, i) => {
+        const anim = c.animate(
+          [
+            { transform: c.style.transform, opacity: 1 },
+            { transform: `translate(${wx - 50}vw, ${wy - 50}vh) scale(.4)`, opacity: 0 }
+          ],
+          { duration: 340, easing: "cubic-bezier(.4,0,1,1)", delay: i * 30, fill: "forwards" }
+        );
+        anim.onfinish = () => {
+          done++;
+          if (done === cards.length) resolve();
+        };
+      });
+      const seatEl = $("seat-" + winnerPos);
+      if (seatEl) {
+        seatEl.animate(
+          [{ filter: "brightness(1)" }, { filter: "brightness(1.6)" }, { filter: "brightness(1)" }],
+          { duration: 420 }
+        );
+      }
+    });
+  }
+  function spawnConfetti(count = 60) {
+    const colors = ["#D9B25C", "#F3D98A", "#5FB6D9", "#E0A94F", "#F5EFE2"];
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement("div");
+      piece.className = "bt-confetti-piece";
+      piece.style.left = Math.random() * 100 + "vw";
+      piece.style.background = colors[i % colors.length];
+      piece.style.animationDuration = 1.6 + Math.random() * 1.4 + "s";
+      piece.style.animationDelay = Math.random() * 0.4 + "s";
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 3200);
+    }
+  }
+  function openSheet(id) {
+    $(id).classList.add("open");
+  }
+  function closeSheet(id) {
+    $(id).classList.remove("open");
+  }
+  function showOverlay(id) {
+    $(id).classList.add("show");
+  }
+  function hideOverlay(id) {
+    $(id).classList.remove("show");
+  }
+
   // js/bots.js
   function rand(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
@@ -1330,88 +1412,6 @@
     const strongThresh = isBuyTeam ? 6.4 : 5.4;
     const chance = score >= strongThresh ? base + 0.35 : base * 0.25;
     return Math.random() < chance;
-  }
-
-  // js/ui/animations.js
-  var SEAT_ANCHOR = { 0: [50, 82], 1: [82, 50], 2: [50, 18], 3: [18, 50] };
-  function animateDeal(positions) {
-    const table = document.querySelector(".bt-table-area");
-    if (!table) return;
-    for (const pos of positions) {
-      const seatEl = $("seat-" + pos);
-      if (!seatEl) continue;
-      seatEl.animate(
-        [
-          { transform: "translateY(10px) scale(.9)", opacity: 0.4 },
-          { transform: "translateY(0) scale(1)", opacity: 1 }
-        ],
-        { duration: 260, easing: "cubic-bezier(.34,1.56,.64,1)", delay: pos * 70 }
-      );
-    }
-  }
-  function animatePlayedCard(cardEl2) {
-    cardEl2.animate(
-      [
-        { transform: "translate(-50%,-50%) scale(.55)", opacity: 0.2 },
-        { transform: "translate(-50%,-50%) scale(1.08)", opacity: 1, offset: 0.7 },
-        { transform: "translate(-50%,-50%) scale(1)", opacity: 1 }
-      ],
-      { duration: 260, easing: "cubic-bezier(0,0,.2,1)" }
-    );
-  }
-  function animateTrickCollect(winnerPos) {
-    return new Promise((resolve) => {
-      const zone = $("trick-zone");
-      const [wx, wy] = SEAT_ANCHOR[winnerPos] || [50, 50];
-      const cards = zone.querySelectorAll(".bt-played-card");
-      if (!cards.length) return resolve();
-      let done = 0;
-      cards.forEach((c, i) => {
-        const anim = c.animate(
-          [
-            { transform: c.style.transform, opacity: 1 },
-            { transform: `translate(${wx - 50}vw, ${wy - 50}vh) scale(.4)`, opacity: 0 }
-          ],
-          { duration: 340, easing: "cubic-bezier(.4,0,1,1)", delay: i * 30, fill: "forwards" }
-        );
-        anim.onfinish = () => {
-          done++;
-          if (done === cards.length) resolve();
-        };
-      });
-      const seatEl = $("seat-" + winnerPos);
-      if (seatEl) {
-        seatEl.animate(
-          [{ filter: "brightness(1)" }, { filter: "brightness(1.6)" }, { filter: "brightness(1)" }],
-          { duration: 420 }
-        );
-      }
-    });
-  }
-  function spawnConfetti(count = 60) {
-    const colors = ["#D9B25C", "#F3D98A", "#5FB6D9", "#E0A94F", "#F5EFE2"];
-    for (let i = 0; i < count; i++) {
-      const piece = document.createElement("div");
-      piece.className = "bt-confetti-piece";
-      piece.style.left = Math.random() * 100 + "vw";
-      piece.style.background = colors[i % colors.length];
-      piece.style.animationDuration = 1.6 + Math.random() * 1.4 + "s";
-      piece.style.animationDelay = Math.random() * 0.4 + "s";
-      document.body.appendChild(piece);
-      setTimeout(() => piece.remove(), 3200);
-    }
-  }
-  function openSheet(id) {
-    $(id).classList.add("open");
-  }
-  function closeSheet(id) {
-    $(id).classList.remove("open");
-  }
-  function showOverlay(id) {
-    $(id).classList.add("show");
-  }
-  function hideOverlay(id) {
-    $(id).classList.remove("show");
   }
 
   // js/ui/grade.js
@@ -1944,6 +1944,8 @@
 
   // js/ui_adapter.js
   var previousSnap = null;
+  var previousMatch = null;
+  var bootstrapped = false;
   function playTransitionSounds(prev, next) {
     const voice = window.BalootVoice;
     if (!voice || !voice.sfx) return;
@@ -1973,6 +1975,45 @@
       const myTeam = S.mySeat % 2;
       const won = next.winnerTeam === myTeam;
       won ? voice.sfx.win() : voice.sfx.lose();
+    }
+  }
+  function playTransitionAnimations(prev, next) {
+    if (!next || !next.state) return;
+    const prevSt = prev && prev.state;
+    const nextSt = next.state;
+    if (!prevSt) return;
+    if (prevSt.phase === "handEnd" && nextSt.phase === "bidding") {
+      animateDeal([0, 1, 2, 3]);
+    }
+    if (prevSt.mode == null && nextSt.mode != null) {
+      const label = nextSt.ashkal ? "أشكل 🔄" : nextSt.mode === "sun" ? "صن ☀️" : `حكم ${nextSt.trump}`;
+      showBanner(label, 1400);
+    }
+    if ((nextSt.doubleLevel || 1) > (prevSt.doubleLevel || 1)) {
+      const label = { 2: "دبل ×2 🔺", 3: "تربل ×3 🔺", 4: "كوت ×4 🔺" }[nextSt.doubleLevel] || "";
+      if (label) showBanner(label);
+    }
+    const prevProj = (prevSt.announcedProjects || []).length;
+    const nextProj = (nextSt.announcedProjects || []).length;
+    if (nextProj > prevProj) {
+      const names = (nextSt.announcedProjects || []).map((p) => p.name);
+      if (names.length) showBanner(names.join(" + "), 1400);
+    }
+    if ((nextSt.currentTrick || []).length > (prevSt.currentTrick || []).length) {
+      const zone = $("trick-zone");
+      const played = zone && zone.querySelector(".bt-played-card:last-child");
+      if (played) animatePlayedCard(played);
+    }
+    if ((nextSt.trickHistory || []).length > (prevSt.trickHistory || []).length) {
+      const last = nextSt.trickHistory[nextSt.trickHistory.length - 1];
+      if (last && last.winner != null) {
+        renderTrickCards(last.plays, S.mySeat);
+        animateTrickCollect(vsFor(S.mySeat)(last.winner));
+      }
+    }
+    if (prev && !prev.matchOver && next.matchOver) {
+      const myTeam = S.mySeat % 2;
+      if (next.winnerTeam === myTeam) spawnConfetti();
     }
   }
   function renderClient() {
@@ -2026,9 +2067,16 @@
         if (!snap) return;
         playTransitionSounds(previousSnap, snap);
         previousSnap = JSON.parse(JSON.stringify(snap));
-        S.match = deserializeMatch(snap);
+        const nextMatch = deserializeMatch(snap);
+        S.match = nextMatch;
         S.awaitingServerAck = false;
         renderClient();
+        playTransitionAnimations(previousMatch, nextMatch);
+        previousMatch = nextMatch;
+        if (!bootstrapped) {
+          bootstrapped = true;
+          animateDeal([0, 1, 2, 3]);
+        }
       })
     );
   }

@@ -286,80 +286,7 @@ class HomePage extends StatelessWidget {
                           ),
                           const SizedBox(height: AppSpacing.md),
                           // Play with Bots — creates a real online room with 3 bots
-                          BlocProvider<RoomCubit>(
-                            create: (_) => getIt<RoomCubit>(),
-                            child: BlocConsumer<RoomCubit, RoomState>(
-                              listener: (context, state) {
-                                state.whenOrNull(
-                                  gameStarted: (gameId) {
-                                    context.pushNamed(
-                                      RouteNames.gamePlay,
-                                      pathParameters: {'id': gameId},
-                                    );
-                                  },
-                                  error: (message) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(message)),
-                                    );
-                                  },
-                                );
-                              },
-                              builder: (context, state) {
-                                final isLoading = state is RoomLoading;
-                                return SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton.icon(
-                                    onPressed: isLoading
-                                        ? null
-                                        : () => context
-                                            .read<RoomCubit>()
-                                            .createRoomWithBots(),
-                                    icon: isLoading
-                                        ? const SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: ColorManager.success,
-                                            ),
-                                          )
-                                        : const Icon(
-                                            Icons.smart_toy_rounded,
-                                            size: 20,
-                                          ),
-                                    label: Text('play_with_bots'.tr()),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          ColorManager.success.withValues(
-                                        alpha: 0.15,
-                                      ),
-                                      foregroundColor: ColorManager.success,
-                                      disabledForegroundColor:
-                                          ColorManager.success.withValues(
-                                        alpha: 0.5,
-                                      ),
-                                      elevation: 0,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 14,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        side: BorderSide(
-                                          color: ColorManager.success.withValues(
-                                            alpha: 0.3,
-                                          ),
-                                        ),
-                                      ),
-                                      textStyle: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
+                          const _PlayWithBotsButton(),
                         ],
                       ),
                     ),
@@ -806,3 +733,130 @@ class _StreamCard extends StatelessWidget {
 }
 
 
+
+/// "Play with Bots" button with a full-screen loading overlay that stays
+/// visible until the room is created and the game auto-joins.
+class _PlayWithBotsButton extends StatefulWidget {
+  const _PlayWithBotsButton();
+
+  @override
+  State<_PlayWithBotsButton> createState() => _PlayWithBotsButtonState();
+}
+
+class _PlayWithBotsButtonState extends State<_PlayWithBotsButton> {
+  bool _overlayOpen = false;
+
+  void _showOverlay() {
+    if (_overlayOpen || !mounted) return;
+    _overlayOpen = true;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: ColorManager.darkCanvas.withValues(alpha: 0.7),
+      builder: (_) => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(color: ColorManager.success),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'play_with_bots'.tr(),
+              style: const TextStyle(
+                color: ColorManager.darkTextPrimary,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                decoration: TextDecoration.none,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _hideOverlay() {
+    if (!_overlayOpen) return;
+    _overlayOpen = false;
+    if (mounted) Navigator.of(context, rootNavigator: true).pop();
+  }
+
+  @override
+  void dispose() {
+    if (_overlayOpen) {
+      _overlayOpen = false;
+      Navigator.of(context, rootNavigator: true).maybePop();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<RoomCubit>(
+      create: (_) => getIt<RoomCubit>(),
+      child: BlocConsumer<RoomCubit, RoomState>(
+        listener: (context, state) {
+          if (state is RoomLoading) {
+            _showOverlay();
+          } else {
+            _hideOverlay();
+          }
+          state.whenOrNull(
+            gameStarted: (gameId) {
+              if (!mounted) return;
+              context.pushNamed(
+                RouteNames.gamePlay,
+                pathParameters: {'id': gameId},
+              );
+            },
+            error: (message) {
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(message)),
+              );
+            },
+          );
+        },
+        builder: (context, state) {
+          final isLoading = state is RoomLoading;
+          return SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: isLoading
+                  ? null
+                  : () => context.read<RoomCubit>().createRoomWithBots(),
+              icon: isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: ColorManager.success,
+                      ),
+                    )
+                  : const Icon(Icons.smart_toy_rounded, size: 20),
+              label: Text('play_with_bots'.tr()),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorManager.success.withValues(alpha: 0.15),
+                foregroundColor: ColorManager.success,
+                disabledForegroundColor:
+                    ColorManager.success.withValues(alpha: 0.5),
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: ColorManager.success.withValues(alpha: 0.3),
+                  ),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

@@ -54,6 +54,11 @@ class _BlootAppState extends State<BlootApp> {
     super.initState();
     _initDeepLinks();
     _initFcmNavigation();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _notificationService?.syncLocale(context.locale.languageCode);
+      }
+    });
   }
 
   void _initDeepLinks() {

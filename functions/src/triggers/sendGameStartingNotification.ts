@@ -34,11 +34,22 @@ export const sendGameStartingNotification = functions.firestore
         continue;
       }
 
+      const locale = (userData.locale as string | undefined) ?? 'en';
+      const isArabic = locale.startsWith('ar');
+      const title = isArabic ? 'اللعبة تبدأ!' : 'Game Starting!';
+      const body = roomName
+        ? isArabic
+          ? `لعبتك في ${roomName} ستبدأ الآن.`
+          : `Your game in ${roomName} is starting now.`
+        : isArabic
+          ? 'لعبتك في البلوت ستبدأ الآن.'
+          : 'Your Baloot game is starting now.';
+
       const payload: admin.messaging.Message = {
         token: fcmToken,
         notification: {
-          title: 'Game Starting!',
-          body: roomName ? `Your game in ${roomName} is starting now.` : 'Your Baloot game is starting now.',
+          title,
+          body,
         },
         data: {
           type: 'gameStarting',
@@ -55,8 +66,8 @@ export const sendGameStartingNotification = functions.firestore
           payload: {
             aps: {
               alert: {
-                title: 'Game Starting!',
-                body: roomName ? `Your game in ${roomName} is starting now.` : 'Your Baloot game is starting now.',
+                title,
+                body,
               },
               badge: 1,
               sound: 'default',

@@ -93,6 +93,20 @@ class NotificationService {
     return _messaging.getToken();
   }
 
+  /// Persists the device's current language to the user document so that
+  /// server-side push notifications can be localized for the recipient.
+  Future<void> syncLocale(String languageCode) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    try {
+      await _firestore.collection('users').doc(user.uid).update({
+        'locale': languageCode,
+      });
+    } catch (e) {
+      AppLogger.error('Failed to sync locale', error: e, tag: 'FCM');
+    }
+  }
+
   Future<void> _saveToken(String token) async {
     final user = _auth.currentUser;
     if (user == null) return;

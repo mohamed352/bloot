@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:bloot/core/constants/app_spacing.dart';
+import 'package:bloot/core/di/injection.dart';
+import 'package:bloot/core/services/notification_service.dart';
 import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/core/localization/language_manager.dart';
 
@@ -45,6 +47,7 @@ class LanguageSettingsPage extends StatelessWidget {
                 : null,
             onTap: () {
               context.setLocale(locale);
+              getIt<NotificationService>().syncLocale(locale.languageCode);
               Navigator.pop(context);
             },
           );

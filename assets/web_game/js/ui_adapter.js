@@ -4,7 +4,13 @@ import * as E from "./engine/index.js";
 import * as Net from "./online.js";
 import { $ } from "./ui/dom.js";
 import { S } from "./ui/state.js";
-import { renderAll, updateQaidButton, updateSawaButton } from "./ui/render.js";
+import {
+  renderAll, renderTrickCards, updateQaidButton, updateSawaButton,
+  showBanner, vsFor,
+} from "./ui/render.js";
+import {
+  animateDeal, animatePlayedCard, animateTrickCollect, spawnConfetti,
+} from "./ui/animations.js";
 import {
   wireDialogs,
   wireMenu,
@@ -17,6 +23,8 @@ import {
 } from "./ui/controller.js";
 
 let previousSnap = null;
+let previousMatch = null;
+let bootstrapped = false;
 
 function playTransitionSounds(prev, next) {
   const voice = window.BalootVoice;
@@ -55,6 +63,71 @@ function playTransitionSounds(prev, next) {
     const myTeam = S.mySeat % 2;
     const won = next.winnerTeam === myTeam;
     won ? voice.sfx.win() : voice.sfx.lose();
+  }
+}
+
+/**
+ * Diffs consecutive server snapshots and fires the same visual animations the
+ * standalone engine triggers via handleEvents (center action banners, trick
+ * collection, confetti). The server only ships state — not an event log — so we
+ * infer what happened from state transitions.
+ */
+function playTransitionAnimations(prev, next) {
+  if (!next || !next.state) return;
+  const prevSt = prev && prev.state;
+  const nextSt = next.state;
+  if (!prevSt) return;
+
+  // New hand dealt: phase went handEnd -> bidding.
+  if (prevSt.phase === "handEnd" && nextSt.phase === "bidding") {
+    animateDeal([0, 1, 2, 3]);
+  }
+
+  // Bid won: mode just got set (sun / hokum / ashkal).
+  if (prevSt.mode == null && nextSt.mode != null) {
+    const label = nextSt.ashkal
+      ? "أشكل 🔄"
+      : nextSt.mode === "sun"
+        ? "صن ☀️"
+        : `حكم ${nextSt.trump}`;
+    showBanner(label, 1400);
+  }
+
+  // Double / triple / quadruple applied.
+  if ((nextSt.doubleLevel || 1) > (prevSt.doubleLevel || 1)) {
+    const label =
+      { 2: "دبل ×2 🔺", 3: "تربل ×3 🔺", 4: "كوت ×4 🔺" }[nextSt.doubleLevel] || "";
+    if (label) showBanner(label);
+  }
+
+  // Project(s) announced.
+  const prevProj = (prevSt.announcedProjects || []).length;
+  const nextProj = (nextSt.announcedProjects || []).length;
+  if (nextProj > prevProj) {
+    const names = (nextSt.announcedProjects || []).map((p) => p.name);
+    if (names.length) showBanner(names.join(" + "), 1400);
+  }
+
+  // A card was played: pop the newest card in the trick zone.
+  if ((nextSt.currentTrick || []).length > (prevSt.currentTrick || []).length) {
+    const zone = $("trick-zone");
+    const played = zone && zone.querySelector(".bt-played-card:last-child");
+    if (played) animatePlayedCard(played);
+  }
+
+  // A trick was won: re-render the completed trick then fly it to the winner.
+  if ((nextSt.trickHistory || []).length > (prevSt.trickHistory || []).length) {
+    const last = nextSt.trickHistory[nextSt.trickHistory.length - 1];
+    if (last && last.winner != null) {
+      renderTrickCards(last.plays, S.mySeat);
+      animateTrickCollect(vsFor(S.mySeat)(last.winner));
+    }
+  }
+
+  // Match ended: celebrate a win.
+  if (prev && !prev.matchOver && next.matchOver) {
+    const myTeam = S.mySeat % 2;
+    if (next.winnerTeam === myTeam) spawnConfetti();
   }
 }
 
@@ -124,9 +197,16 @@ function startBlootOnline(cfg) {
       if (!snap) return;
       playTransitionSounds(previousSnap, snap);
       previousSnap = JSON.parse(JSON.stringify(snap));
-      S.match = E.deserializeMatch(snap);
+      const nextMatch = E.deserializeMatch(snap);
+      S.match = nextMatch;
       S.awaitingServerAck = false;
       renderClient();
+      playTransitionAnimations(previousMatch, nextMatch);
+      previousMatch = nextMatch;
+      if (!bootstrapped) {
+        bootstrapped = true;
+        animateDeal([0, 1, 2, 3]);
+      }
     })
   );
 }
