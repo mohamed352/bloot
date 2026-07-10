@@ -51,6 +51,7 @@ dependencies:
   firebase_core: ^4.7.0
   firebase_auth: ^6.4.0
   cloud_firestore: ^6.3.0
+  firebase_database: ^11.3.4
   firebase_storage: ^13.3.0
   cloud_functions: ^6.2.0
   firebase_messaging: ^16.2.0
@@ -75,6 +76,10 @@ dependencies:
   # Audio
   audioplayers: ^6.4.0
 
+  # WebView for HTML game renderer
+  webview_flutter: ^4.11.0
+  webview_flutter_android: ^4.12.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -98,6 +103,12 @@ flutter:
     - assets/translations/
     - assets/images/
     - assets/icons/
+    - assets/web_game/
+    - assets/web_game/js/
+    - assets/web_game/js/engine/
+    - assets/web_game/js/ui/
+    - assets/web_game/icons/
+    - assets/web_game/assets/cards/
     - assets/sounds/
 
 flutter_native_splash:

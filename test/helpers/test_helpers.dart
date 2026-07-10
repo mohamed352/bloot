@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+
+import 'engine_state_fixture.dart';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -502,6 +505,7 @@ Game testGame({
   List<GamePlayer>? players,
   String? roomId = 'r1',
   String? agoraChannelName = 'room_r1',
+  Map<String, dynamic>? engineState,
 }) {
   return Game(
     id: id,
@@ -509,6 +513,7 @@ Game testGame({
     turnIndex: turnIndex,
     mySeatIndex: mySeatIndex,
     myHand: myHand,
+    engineState: engineState ?? (jsonDecode(kTestEngineStateJson) as Map<String, dynamic>),
     players:
         players ??
         const [

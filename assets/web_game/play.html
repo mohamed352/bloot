@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#062120">
+<title>Bloot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="game.css">
+</head>
+<body class="bt-body">
+
+  <!-- شاشة إعداد الصكة -->
+  <div id="setup-screen" class="bt-screen">
+    <div class="bt-panel bt-panel--form">
+      <h1 class="bt-title">🃏 صكة بلوت جديدة</h1>
+
+      <label class="bt-label" for="player-name">وش اسمك؟ (بدون حساب — بس اسمك)</label>
+      <input class="bt-input" type="text" id="player-name" maxlength="14" placeholder="اكتب اسمك يا بطل">
+
+      <button id="open-online" class="bt-btn bt-btn--cta">🌐 العب أونلاين مع أصحابك</button>
+      <div class="bt-sep"><span>أو العب ببوتات</span></div>
+
+      <span class="bt-label">نوع اللعبة</span>
+      <div class="bt-segmented" role="group" aria-label="نوع اللعبة">
+        <button id="mode-safe" class="bt-seg sel">🛡️ آمن</button>
+        <button id="mode-ranked" class="bt-seg">🔥 عادي</button>
+      </div>
+      <div class="bt-hint" id="mode-hint">🛡️ آمن: لو اشتريت وطحت ما ينقطع فريقك — مريح للتعلّم</div>
+
+      <span id="bot-levels-label" class="bt-label">مع مين تلعب؟ (قوة البوتات)</span>
+      <div class="bt-row"><label for="level-2">🤝 خويك</label><select id="level-2" class="bt-select" aria-labelledby="bot-levels-label"></select></div>
+      <div class="bt-row"><label for="level-1">◀️ اللي عن يمينك</label><select id="level-1" class="bt-select" aria-labelledby="bot-levels-label"></select></div>
+      <div class="bt-row"><label for="level-3">▶️ اللي عن يسارك</label><select id="level-3" class="bt-select" aria-labelledby="bot-levels-label"></select></div>
+
+      <button id="start-match" class="bt-btn bt-btn--primary">🚀 يلا نلعب</button>
+
+      <div class="bt-stats" id="setup-stats"></div>
+      <div class="bt-links">
+        <a href="index.html">الرئيسية</a> ·
+        <a href="rules.html">القوانين</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- لقارئ الشاشة فقط -->
+  <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- الشريط العلوي -->
+  <div id="topbar" class="bt-hud" hidden>
+    <div class="bt-hud__menu">
+      <button id="menu-btn" class="bt-icon-btn" aria-label="القائمة">☰</button>
+      <div id="menu-panel" class="bt-menu">
+        <button id="t-speed" class="bt-menu__item"></button>
+        <button id="exit-match" class="bt-menu__item bt-menu__item--danger">🚪 اطلع من الصكة</button>
+      </div>
+    </div>
+    <span id="buyer-badge" class="bt-badge"></span>
+    <span id="turn-timer" class="bt-timer" hidden></span>
+    <div class="bt-score">
+      <div class="bt-score__team bt-score__team--us">
+        <span class="bt-score__label">لنا</span>
+        <span class="bt-score__val" id="score-us">0</span>
+        <span class="bt-score__bar"><span id="bar-us" style="width:0%"></span></span>
+      </div>
+      <div class="bt-score__team bt-score__team--them">
+        <span class="bt-score__label">لهم</span>
+        <span class="bt-score__val" id="score-them">0</span>
+        <span class="bt-score__bar"><span id="bar-them" style="width:0%"></span></span>
+      </div>
+    </div>
+  </div>
+
+  <span id="hand-timer-self" class="bt-ring-timer" hidden></span>
+
+  <!-- الطاولة -->
+  <div id="table-area" class="bt-table-area" hidden>
+    <div class="bt-seat" id="seat-2" data-pos="top">
+      <div class="bt-avatar-wrap">
+        <div class="bt-dealer-chip">موزّع</div>
+        <div class="bt-avatar">🤝</div>
+        <span class="bt-hukum-badge" hidden></span>
+        <span class="bt-ring-timer bt-ring-timer--seat" data-seat="2" hidden></span>
+      </div>
+      <div class="bt-pname"></div>
+      <div class="bt-plevel"></div>
+      <div class="bt-backs"></div>
+      <div class="bt-projs"></div>
+    </div>
+
+    <div class="bt-mid-row">
+      <div class="bt-seat" id="seat-1" data-pos="right">
+        <div class="bt-avatar-wrap">
+          <div class="bt-dealer-chip">موزّع</div>
+          <div class="bt-avatar">🤖</div>
+          <span class="bt-hukum-badge" hidden></span>
+          <span class="bt-ring-timer bt-ring-timer--seat" data-seat="1" hidden></span>
+        </div>
+        <div class="bt-pname"></div>
+        <div class="bt-plevel"></div>
+        <div class="bt-backs"></div>
+        <div class="bt-projs"></div>
+      </div>
+
+      <div class="bt-center" id="center">
+        <div class="bt-mat"></div>
+        <div class="bt-trick-zone" id="trick-zone"></div>
+        <div class="bt-bid-center" id="bid-center" hidden>
+          <div id="top-card-slot" class="bt-top-card-slot"></div>
+          <div class="bt-hint" id="bid-hint"></div>
+        </div>
+        <div class="bt-center-banner" id="center-banner"></div>
+      </div>
+
+      <div class="bt-seat" id="seat-3" data-pos="left">
+        <div class="bt-avatar-wrap">
+          <div class="bt-dealer-chip">موزّع</div>
+          <div class="bt-avatar">🤖</div>
+          <span class="bt-hukum-badge" hidden></span>
+          <span class="bt-ring-timer bt-ring-timer--seat" data-seat="3" hidden></span>
+        </div>
+        <div class="bt-pname"></div>
+        <div class="bt-plevel"></div>
+        <div class="bt-backs"></div>
+        <div class="bt-projs"></div>
+      </div>
+    </div>
+
+    <div class="bt-hand-wrap" id="hand-wrap">
+      <div class="bt-seat bt-seat--me" id="seat-0" data-pos="bottom">
+        <div class="bt-human-row">
+          <div class="bt-avatar-wrap">
+            <div class="bt-dealer-chip">موزّع</div>
+            <div class="bt-avatar">😎</div>
+            <span class="bt-hukum-badge" hidden></span>
+          </div>
+          <div>
+            <div class="bt-pname"></div>
+            <div class="bt-projs"></div>
+          </div>
+        </div>
+      </div>
+      <div class="bt-hand" id="hand"></div>
+    </div>
+  </div>
+
+  <!-- شريط الفعل السفلي الثابت -->
+  <div id="footer-bar" class="bt-action-bar" hidden>
+    <div class="bt-action-bar__spacer"></div>
+    <div id="action-btns" class="bt-action-bar__btns">
+      <button id="qaid-btn" class="bt-btn bt-btn--danger" hidden aria-label="قيّده — طالب قطع">⚠️ قيّده</button>
+      <button id="sawa-btn" class="bt-btn bt-btn--gold" hidden aria-label="سوا — أعلن إنكم تاخذون كل الباقي">🃏 سوا</button>
+    </div>
+  </div>
+
+  <!-- منتقي نوع القيد -->
+  <div id="qaid-pick" class="bt-sheet">
+    <h3 class="bt-sheet__title">وش نوع القيد؟ <span class="bt-warn">⚠️ لو طلع خايب تخسرون الجولة</span></h3>
+    <div id="qaid-pick-list" class="bt-sheet__list"></div>
+    <button id="qaid-cancel" class="bt-btn">إلغاء</button>
+  </div>
+
+  <!-- حوار إعلان المشاريع -->
+  <div id="declare-dialog" class="bt-sheet">
+    <h3 class="bt-sheet__title">🎁 عندك مشاريع — اضغط عليها لإعلانها</h3>
+    <div id="declare-list" class="bt-sheet__list"></div>
+    <div class="bt-sheet__actions">
+      <button id="declare-none" class="bt-btn bt-btn--pass">لا تعلن شي</button>
+    </div>
+  </div>
+
+  <!-- حوار الدبل -->
+  <div id="double-dialog" class="bt-sheet">
+    <h3 class="bt-sheet__title" id="double-title">تبي تعلن دبل؟</h3>
+    <div class="bt-sheet__actions bt-sheet__actions--row">
+      <button class="bt-btn bt-btn--hokum" id="double-yes">دبل</button>
+      <button class="bt-btn bt-btn--pass" id="double-pass">لا</button>
+    </div>
+  </div>
+
+  <!-- حوار المزايدة -->
+  <div id="bid-dialog" class="bt-sheet">
+    <h3 class="bt-sheet__title" id="bid-title">دورك بالشراء</h3>
+    <div class="bt-sheet__actions bt-sheet__actions--row">
+      <button class="bt-btn bt-btn--pass" id="bid-pass">بس</button>
+      <button class="bt-btn bt-btn--ashkal" id="bid-ashkal">أشكل</button>
+      <button class="bt-btn bt-btn--hokum" id="bid-hokum">حكم</button>
+      <button class="bt-btn bt-btn--sun" id="bid-sun">صن</button>
+    </div>
+    <div id="suit-pick" class="bt-suit-pick"></div>
+  </div>
+
+  <!-- نهاية الصكة -->
+  <div class="bt-overlay" id="hand-overlay">
+    <div class="bt-overlay__panel">
+      <h2 id="hand-title">نتيجة الصكة</h2>
+      <div id="hand-detail"></div>
+      <button class="bt-btn bt-btn--primary bt-btn--wide" id="continue-btn">كمّل ➡️</button>
+    </div>
+  </div>
+
+  <!-- نهاية المباراة + التحليل -->
+  <div class="bt-overlay" id="match-overlay">
+    <div class="bt-overlay__panel">
+      <h2 id="match-title"></h2>
+      <div id="match-score"></div>
+      <div id="grade-circle" class="bt-grade-circle"></div>
+      <div id="grade-comment"></div>
+      <div class="bt-analysis" id="analysis"></div>
+      <div id="save-note" class="bt-save-note"></div>
+      <button class="bt-btn bt-btn--primary bt-btn--wide" id="again-btn">🔄 صكة جديدة</button>
+      <button class="bt-btn bt-btn--ghost bt-btn--wide" onclick="location.href='index.html'">🏠 الرئيسية</button>
+    </div>
+  </div>
+
+  <!-- شاشة اللعب أونلاين -->
+  <div id="online-screen" class="bt-screen" hidden>
+    <div class="bt-panel bt-panel--form">
+      <h1 class="bt-title">🌐 العب أونلاين</h1>
+      <div class="bt-segmented">
+        <button id="tab-create" class="bt-seg sel">أنشئ غرفة</button>
+        <button id="tab-join" class="bt-seg">ادخل غرفة</button>
+      </div>
+
+      <div id="pane-create">
+        <label class="bt-label" for="create-pass">باسورد الغرفة (اختياري)</label>
+        <input class="bt-input" type="text" id="create-pass" maxlength="12" placeholder="خله فاضي لو تبيها مفتوحة">
+        <span class="bt-label">نوع اللعبة (تختاره أنت بس، كقائد الغرفة)</span>
+        <div class="bt-segmented" role="group" aria-label="نوع اللعبة">
+          <button id="online-mode-safe" class="bt-seg sel">🛡️ آمن</button>
+          <button id="online-mode-ranked" class="bt-seg">🔥 عادي</button>
+        </div>
+        <div class="bt-hint" id="online-mode-hint"></div>
+        <button id="do-create" class="bt-btn bt-btn--cta">🎲 أنشئ الغرفة</button>
+        <p class="bt-hint">بينطلع لك كود، أرسله لربعك عشان يدخلون.</p>
+      </div>
+
+      <div id="pane-join" hidden>
+        <label class="bt-label" for="join-code">كود الغرفة</label>
+        <input class="bt-input bt-input--code" type="text" id="join-code" maxlength="4" placeholder="مثل: 6YMJ">
+        <label class="bt-label" for="join-pass">الباسورد (لو فيه)</label>
+        <input class="bt-input" type="text" id="join-pass" maxlength="12" placeholder="الباسورد">
+        <button id="do-join" class="bt-btn bt-btn--cta">🚪 ادخل الغرفة</button>
+      </div>
+
+      <div id="online-error" class="bt-error"></div>
+      <button id="online-back" class="bt-btn bt-btn--ghost bt-btn--wide">‹ رجوع</button>
+    </div>
+  </div>
+
+  <!-- لوبي الغرفة -->
+  <div id="lobby-screen" class="bt-screen" hidden>
+    <div class="bt-panel bt-panel--form">
+      <h1 class="bt-title">🪑 غرفة اللعب</h1>
+      <div class="bt-room-code">
+        الكود: <span id="lobby-code">----</span>
+        <button id="copy-code" class="bt-icon-btn" title="نسخ" aria-label="انسخ كود الغرفة">📋</button>
+      </div>
+      <p class="bt-hint" id="lobby-mode"></p>
+      <div id="lobby-seats" class="bt-lobby-seats"></div>
+      <p class="bt-hint" id="lobby-seats-hint">اضغط أي مقعد فاضي عشان تتحول له وتختار خويك</p>
+      <p class="bt-hint" id="lobby-hint">ننتظر الربع يدخلون...</p>
+      <button id="lobby-start" class="bt-btn bt-btn--cta" hidden>▶️ ابدأ الصكة (املأ الباقي بوتات)</button>
+      <button id="lobby-leave" class="bt-btn bt-btn--ghost bt-btn--wide">🚪 اطلع من الغرفة</button>
+    </div>
+  </div>
+
+  <script src="js/voice.js" defer></script>
+  <script src="js/game_bundle.js" defer></script>
+  <script src="js/bloot_bridge.js" defer></script>
+</body>
+</html>

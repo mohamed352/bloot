@@ -35,7 +35,7 @@ export class BalootSerializer {
       dealer: match.dealer,
       handsPlayed: match.handsPlayed,
       matchOver: match.matchOver,
-      winnerTeam: match.winnerTeam,
+      winnerTeam: match.winnerTeam ?? null,
       safeMode: match.safeMode,
       autoDeclare: match.autoDeclare,
       players: match.players.map((p) => ({
@@ -94,7 +94,7 @@ export class BalootSerializer {
   serializeHandState(state: BalootHandState): Record<string, unknown> {
     return {
       phase: state.phase,
-      hands: state.hands.map((h) => h.map((c) => c.key)),
+      hands: Object.fromEntries(state.hands.map((h, i) => [String(i), h.map((c) => c.key)])),
       topCard: state.topCard.key,
       rest: state.rest.map((c) => c.key),
       firstPlayer: state.firstPlayer,
@@ -167,7 +167,7 @@ export class BalootSerializer {
         escaped: v.escaped.map((c) => c.key),
         confirmed: v.confirmed,
       })),
-      voids: state.voids.map((s) => [...s].map((e) => SUIT_SYMBOLS[e])),
+      voids: Object.fromEntries(state.voids.map((s, i) => [String(i), [...s].map((e) => SUIT_SYMBOLS[e])])),
       playedCards: state.playedCards.map((c) => c.key),
       result: state.result == null ? null : this.serializeHandResult(state.result),
     };
@@ -176,8 +176,9 @@ export class BalootSerializer {
   deserializeHandState(json: Record<string, unknown>): BalootHandState {
     const state = new BalootHandState();
     state.phase = json.phase as BalootPhase;
-    state.hands = ((json.hands as unknown[]) ?? []).map((h) =>
-      (h as string[]).map((c) => BalootCard.fromString(c)),
+    const handsJson = (json.hands as Record<string, string[]> | undefined) ?? {};
+    state.hands = [0, 1, 2, 3].map((i) =>
+      (handsJson[String(i)] ?? []).map((c) => BalootCard.fromString(c)),
     );
     state.topCard = BalootCard.fromString(json.topCard as string);
     state.rest = ((json.rest as string[]) ?? []).map((c) => BalootCard.fromString(c));
@@ -238,8 +239,10 @@ export class BalootSerializer {
       ((json.pendingViolations as Array<Record<string, unknown>>) ?? []).map((v) => this.deserializeViolation(v))
     );
 
-    const voidsJson = (json.voids as Array<string[]>) ?? [];
-    state.voids = voidsJson.map((s) => new Set(s.map((e) => suitFromSymbol(e))));
+    const voidsJson = (json.voids as Record<string, string[]> | undefined) ?? {};
+    state.voids = [0, 1, 2, 3].map(
+      (i) => new Set((voidsJson[String(i)] ?? []).map((e) => suitFromSymbol(e))),
+    );
     state.playedCards.push(...((json.playedCards as string[]) ?? []).map((c) => BalootCard.fromString(c)));
 
     return state;
@@ -324,6 +327,13 @@ export class BalootSerializer {
             provedBy: r.qatClaim.provedBy?.key ?? null,
           }
         : null,
+      sawa: r.sawa
+        ? {
+            seat: r.sawa.seat,
+            valid: r.sawa.valid,
+            hands: r.sawa.hands?.map((h) => h.map((c) => c.key)) ?? null,
+          }
+        : null,
     };
   }
 
@@ -350,6 +360,15 @@ export class BalootSerializer {
             violCard: qc.violCard == null ? undefined : BalootCard.fromString(qc.violCard as string),
             trickIndex: qc.trickIndex == null ? undefined : (qc.trickIndex as number),
             provedBy: qc.provedBy == null ? undefined : BalootCard.fromString(qc.provedBy as string),
+          }
+        : undefined,
+      sawa: json.sawa
+        ? {
+            seat: (json.sawa as Record<string, unknown>).seat as number,
+            valid: (json.sawa as Record<string, unknown>).valid as boolean,
+            hands: ((json.sawa as Record<string, unknown>).hands as string[][] | undefined)?.map((h) =>
+              h.map((c) => BalootCard.fromString(c)),
+            ),
           }
         : undefined,
     };

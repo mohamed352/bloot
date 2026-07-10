@@ -52,4 +52,24 @@ class GameRepositoryImpl implements GameRepository {
   Future<void> rematch(String roomId) async {
     return _remoteDataSource.rematch(roomId);
   }
+
+  @override
+  Future<void> declareProject(String gameId, List<String> types) async {
+    return _remoteDataSource.declareProject(gameId, types);
+  }
+
+  @override
+  Future<void> applyDouble(String gameId, String action) async {
+    return _remoteDataSource.applyDouble(gameId, action);
+  }
+
+  @override
+  Future<void> claimQaid(String gameId, String? claimType) async {
+    return _remoteDataSource.claimQaid(gameId, claimType);
+  }
+
+  @override
+  Future<void> claimSawa(String gameId) async {
+    return _remoteDataSource.claimSawa(gameId);
+  }
 }

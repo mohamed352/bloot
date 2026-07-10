@@ -1,0 +1,122 @@
+/* ============================================================
+   tokens.css — نظام تصميم بلوت الموحّد
+   مصدر واحد للألوان والتباعد والزوايا والخط والظلال والحركة.
+   بدون أي أداة بناء — CSS خام يُحمَّل مباشرة بكل صفحة.
+
+   سياقان بصريان بنفس المتغيرات:
+   - واجهة الموقع (index/rules): تتبدّل بين فاتح/غامق عبر html[data-theme].
+   - طاولة اللعب (play.html): هوية ثابتة (لبدة/طاولة داكنة + ذهبي) بغض النظر
+     عن الوضع الليلي للموقع — هالمتغيرات بـ:root فقط ولا تتغيّر بالوضع الغامق.
+   ============================================================ */
+
+:root {
+  /* ---- واجهة الموقع — فاتح ---- */
+  --color-canvas:#F5F2EC;
+  --color-brand:#0E4F52;
+  --color-accent:#B8863B;
+  --color-destructive:#B23A2E;
+  --color-surface:#FFFFFF;
+  --color-ink:#161D1C;
+  --color-muted:#5C6664;
+  --color-border:#E2DDD2;
+  --color-on-brand:#FFFFFF;
+  --color-on-accent:#161D1C;
+  --color-success:#2E8F5B;
+
+  /* ---- طاولة اللعب (ثابتة، ما تتأثر بالوضع الليلي) ----
+     هوية جديدة كلياً: كحلي-زمردي غامق (طاولة كازينو فاخرة) بحواف ذهبية،
+     بدل الأخضر أو البني/البيج القديمين. */
+  --felt-outer-from:#0B3B37;
+  --felt-outer-to:#062120;
+  --felt-mat-from:#0F4A44;
+  --felt-mat-to:#082B28;
+  --felt-trim:#D9B25C;
+  --felt-trim-dim:#8C7238;
+  --felt-panel:#0A1F1D;
+  --felt-panel-glass:rgba(10,31,29,.72);
+  --felt-danger:#D6543F;
+  --felt-success:#D9B25C;
+  --felt-ink:#F5EFE2;
+  --felt-label:#F3D98A;
+  --felt-hint:#B9C9C4;
+  --felt-team-a:#5FB6D9;
+  --felt-team-b:#E0A94F;
+  --felt-chrome-from:rgba(4,18,17,.96);
+  --felt-chrome-to:rgba(4,14,13,.88);
+
+  /* ---- مدد الحركة — مصدر واحد لإيقاع كل الأنيميشن ---- */
+  --anim-instant:0.12s;
+  --anim-fast:0.22s;
+  --anim-med:0.38s;
+  --anim-slow:0.6s;
+  --anim-deal-step:0.09s;
+  --ease-standard:cubic-bezier(.4,0,.2,1);
+  --ease-out:cubic-bezier(0,0,.2,1);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+
+  /* ---- تباعد (مضاعفات 4) ---- */
+  --space-3xs:2px;
+  --space-2xs:4px;
+  --space-xs:8px;
+  --space-sm:12px;
+  --space-md:16px;
+  --space-lg:24px;
+  --space-xl:32px;
+  --space-2xl:48px;
+  --space-3xl:64px;
+
+  /* ---- زوايا ---- */
+  --radius-sm:6px;
+  --radius-md:10px;
+  --radius-lg:16px;
+  --radius-xl:22px;
+  --radius-pill:999px;
+
+  /* ---- خط: وزنان بس بكل الموقع — 400 للنص، 700 لكل عنوان/تسمية/زر ---- */
+  --font-sans:"Cairo","Segoe UI",Tahoma,sans-serif;
+  --type-label:clamp(.72rem, .65rem + .3vw, .85rem);
+  --type-body:clamp(.85rem, .8rem + .25vw, 1rem);
+  --type-heading:clamp(1.1rem, 1rem + .6vw, 1.4rem);
+  --type-display:clamp(1.5rem, 1.2rem + 1.4vw, 2.2rem);
+  --lh-body:1.6;
+  --lh-heading:1.25;
+
+  /* ---- ظلال وعمق ---- */
+  --elev-raised:0 2px 8px rgba(0,0,0,.12);
+  --elev-floating:0 12px 32px rgba(0,0,0,.45);
+  --elev-felt-inset:inset 0 0 40px rgba(0,0,0,.5);
+  --elev-glow-gold:0 0 0 rgba(217,178,92,0);
+  --elev-glow-gold-active:0 0 18px rgba(217,178,92,.55);
+
+  /* ---- حد اللمس الأدنى ---- */
+  --touch-min:44px;
+
+  /* ---- طبقات z-index موحّدة ---- */
+  --z-table:1;
+  --z-seat:5;
+  --z-trick:6;
+  --z-hand:8;
+  --z-hud:20;
+  --z-banner:30;
+  --z-sheet:40;
+  --z-modal:50;
+  --z-toast:60;
+
+  /* ---- نقاط الكسر (توثيقية — الاستعلامات الفعلية بملفات الصفحات):
+     جوال: افتراضي < 600px  |  تابلت: 600–1023px  |  سطح مكتب: ≥1024px ---- */
+}
+
+html[data-theme="dark"] {
+  /* ---- واجهة الموقع — غامق ---- */
+  --color-canvas:#0D1413;
+  --color-brand:#134B47;
+  --color-accent:#D9B25C;
+  --color-destructive:#E06B57;
+  --color-surface:#16201D;
+  --color-ink:#EDE7DA;
+  --color-muted:#93A19C;
+  --color-border:#293530;
+  --color-on-brand:#EDE7DA;
+  --color-on-accent:#161B14;
+  --elev-raised:0 2px 8px rgba(0,0,0,.35);
+}

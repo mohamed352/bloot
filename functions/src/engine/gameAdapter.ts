@@ -107,8 +107,9 @@ function playerConfigFromRoomPlayer(p: RoomPlayer): BalootPlayerConfig {
     isBot: p.isBot ?? false,
     level: p.level ?? 'amateur',
     agoraUid: p.agoraUid,
-    isMuted: p.isMuted,
-    hasCamera: p.hasCamera,
+    isMuted: p.isMuted ?? false,
+    hasCamera: p.hasCamera ?? true,
+    isConnected: p.isConnected ?? true,
   };
 }
 
@@ -356,9 +357,9 @@ export function parseBidAction(bid: string, topCard: BalootCard): { type: BidAct
   if (bid === 'pass') return { type: 'pass' };
   if (bid === 'sun') return { type: 'sun' };
   if (bid === 'ashkal') return { type: 'ashkal' };
-  if (bid === 'hokum') return { type: 'hokum', suit: topCard.suit };
+  if (bid === 'hokum' || bid === 'hokm') return { type: 'hokum', suit: topCard.suit };
   // Some callers may send "hokm-hearts" etc. in the future.
-  if (bid.startsWith('hokum-')) {
+  if (bid.startsWith('hokum-') || bid.startsWith('hokm-')) {
     const suit = bid.split('-')[1];
     return { type: 'hokum', suit };
   }

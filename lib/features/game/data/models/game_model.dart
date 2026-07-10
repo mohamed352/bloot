@@ -30,6 +30,7 @@ abstract class GameModel with _$GameModel {
     TrickModel? currentTrick,
     String? roomId,
     String? agoraChannelName,
+    Map<String, dynamic>? engineState,
   }) = _GameModel;
 
   factory GameModel.fromJson(Map<String, dynamic> json) =>
@@ -147,6 +148,7 @@ extension GameModelX on GameModel {
       currentTrick: currentTrick?.toEntity(),
       roomId: roomId,
       agoraChannelName: agoraChannelName,
+      engineState: engineState,
     );
   }
 }

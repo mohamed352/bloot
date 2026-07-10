@@ -30,8 +30,7 @@ import 'package:bloot/features/edge_cases/presentation/pages/maintenance_page.da
 import 'package:bloot/features/edge_cases/presentation/pages/offline_page.dart';
 import 'package:bloot/features/edge_cases/presentation/pages/success_page.dart';
 import 'package:bloot/features/game/presentation/cubit/game_cubit.dart';
-import 'package:bloot/features/game/presentation/cubit/local_game_simulator.dart';
-import 'package:bloot/features/game/presentation/pages/game_play_page.dart';
+import 'package:bloot/features/game/presentation/pages/html_game_play_page.dart';
 import 'package:bloot/features/home/presentation/cubit/home_cubit.dart';
 import 'package:bloot/features/home/presentation/pages/home_page.dart';
 import 'package:bloot/features/onboarding/presentation/pages/splash_page.dart';
@@ -177,12 +176,9 @@ final GoRouter appRouter = GoRouter(
       name: RouteNames.gamePlay,
       builder: (context, state) {
         final id = state.pathParameters['id']!;
-        final isSim = id.startsWith('sim_');
         return BlocProvider(
-          create: (_) => isSim
-              ? (getIt<LocalGameSimulator>()..watchGame(id))
-              : (getIt<GameCubit>()..loadGame(id)),
-          child: GamePlayPage(id: id),
+          create: (_) => getIt<GameCubit>()..loadGame(id),
+          child: HtmlGamePlayPage(id: id),
         );
       },
     ),
@@ -190,9 +186,9 @@ final GoRouter appRouter = GoRouter(
       path: RoutePaths.gameSim,
       name: RouteNames.gameSim,
       builder: (context, state) {
-        return BlocProvider<GameCubit>(
-          create: (_) => getIt<LocalGameSimulator>()..watchGame('sim_1'),
-          child: const GamePlayPage(id: 'sim_1'),
+        return BlocProvider(
+          create: (_) => getIt<GameCubit>()..loadGame('sim_1'),
+          child: const HtmlGamePlayPage(id: 'sim_1'),
         );
       },
     ),
@@ -327,7 +323,7 @@ final GoRouter appRouter = GoRouter(
         final id = state.pathParameters['id']!;
         return BlocProvider(
           create: (_) => getIt<GameCubit>()..watchGameAsSpectator(id),
-          child: GamePlayPage(id: id, isSpectator: true),
+          child: HtmlGamePlayPage(id: id, isSpectator: true),
         );
       },
     ),

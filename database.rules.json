@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "games": {
+      "$gameId": {
+        ".read": "auth != null && (root.child('games/' + $gameId + '/playerUids/' + auth.uid).exists() || root.child('admins/' + auth.uid).exists())",
+        ".write": "false"
+      }
+    }
+  }
+}

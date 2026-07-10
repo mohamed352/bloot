@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$GameModel {
 
- String get id; List<GamePlayerModel> get players; List<String> get myHand; int get mySeatIndex; List<String?> get playedCards; int get scoreUs; int get scoreThem; int get teamAScore; int get teamBScore; String get trump; String get status; int get turnIndex; int get currentRound; int get targetScore; String? get gameType; int get dealerIndex; String? get faceUpCard; String? get biddingTeam; String? get fellTeam; TrickModel? get currentTrick; String? get roomId; String? get agoraChannelName;
+ String get id; List<GamePlayerModel> get players; List<String> get myHand; int get mySeatIndex; List<String?> get playedCards; int get scoreUs; int get scoreThem; int get teamAScore; int get teamBScore; String get trump; String get status; int get turnIndex; int get currentRound; int get targetScore; String? get gameType; int get dealerIndex; String? get faceUpCard; String? get biddingTeam; String? get fellTeam; TrickModel? get currentTrick; String? get roomId; String? get agoraChannelName; Map<String, dynamic>? get engineState;
 /// Create a copy of GameModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $GameModelCopyWith<GameModel> get copyWith => _$GameModelCopyWithImpl<GameModel>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GameModel&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.players, players)&&const DeepCollectionEquality().equals(other.myHand, myHand)&&(identical(other.mySeatIndex, mySeatIndex) || other.mySeatIndex == mySeatIndex)&&const DeepCollectionEquality().equals(other.playedCards, playedCards)&&(identical(other.scoreUs, scoreUs) || other.scoreUs == scoreUs)&&(identical(other.scoreThem, scoreThem) || other.scoreThem == scoreThem)&&(identical(other.teamAScore, teamAScore) || other.teamAScore == teamAScore)&&(identical(other.teamBScore, teamBScore) || other.teamBScore == teamBScore)&&(identical(other.trump, trump) || other.trump == trump)&&(identical(other.status, status) || other.status == status)&&(identical(other.turnIndex, turnIndex) || other.turnIndex == turnIndex)&&(identical(other.currentRound, currentRound) || other.currentRound == currentRound)&&(identical(other.targetScore, targetScore) || other.targetScore == targetScore)&&(identical(other.gameType, gameType) || other.gameType == gameType)&&(identical(other.dealerIndex, dealerIndex) || other.dealerIndex == dealerIndex)&&(identical(other.faceUpCard, faceUpCard) || other.faceUpCard == faceUpCard)&&(identical(other.biddingTeam, biddingTeam) || other.biddingTeam == biddingTeam)&&(identical(other.fellTeam, fellTeam) || other.fellTeam == fellTeam)&&(identical(other.currentTrick, currentTrick) || other.currentTrick == currentTrick)&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.agoraChannelName, agoraChannelName) || other.agoraChannelName == agoraChannelName));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GameModel&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.players, players)&&const DeepCollectionEquality().equals(other.myHand, myHand)&&(identical(other.mySeatIndex, mySeatIndex) || other.mySeatIndex == mySeatIndex)&&const DeepCollectionEquality().equals(other.playedCards, playedCards)&&(identical(other.scoreUs, scoreUs) || other.scoreUs == scoreUs)&&(identical(other.scoreThem, scoreThem) || other.scoreThem == scoreThem)&&(identical(other.teamAScore, teamAScore) || other.teamAScore == teamAScore)&&(identical(other.teamBScore, teamBScore) || other.teamBScore == teamBScore)&&(identical(other.trump, trump) || other.trump == trump)&&(identical(other.status, status) || other.status == status)&&(identical(other.turnIndex, turnIndex) || other.turnIndex == turnIndex)&&(identical(other.currentRound, currentRound) || other.currentRound == currentRound)&&(identical(other.targetScore, targetScore) || other.targetScore == targetScore)&&(identical(other.gameType, gameType) || other.gameType == gameType)&&(identical(other.dealerIndex, dealerIndex) || other.dealerIndex == dealerIndex)&&(identical(other.faceUpCard, faceUpCard) || other.faceUpCard == faceUpCard)&&(identical(other.biddingTeam, biddingTeam) || other.biddingTeam == biddingTeam)&&(identical(other.fellTeam, fellTeam) || other.fellTeam == fellTeam)&&(identical(other.currentTrick, currentTrick) || other.currentTrick == currentTrick)&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.agoraChannelName, agoraChannelName) || other.agoraChannelName == agoraChannelName)&&const DeepCollectionEquality().equals(other.engineState, engineState));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,const DeepCollectionEquality().hash(players),const DeepCollectionEquality().hash(myHand),mySeatIndex,const DeepCollectionEquality().hash(playedCards),scoreUs,scoreThem,teamAScore,teamBScore,trump,status,turnIndex,currentRound,targetScore,gameType,dealerIndex,faceUpCard,biddingTeam,fellTeam,currentTrick,roomId,agoraChannelName]);
+int get hashCode => Object.hashAll([runtimeType,id,const DeepCollectionEquality().hash(players),const DeepCollectionEquality().hash(myHand),mySeatIndex,const DeepCollectionEquality().hash(playedCards),scoreUs,scoreThem,teamAScore,teamBScore,trump,status,turnIndex,currentRound,targetScore,gameType,dealerIndex,faceUpCard,biddingTeam,fellTeam,currentTrick,roomId,agoraChannelName,const DeepCollectionEquality().hash(engineState)]);
 
 @override
 String toString() {
-  return 'GameModel(id: $id, players: $players, myHand: $myHand, mySeatIndex: $mySeatIndex, playedCards: $playedCards, scoreUs: $scoreUs, scoreThem: $scoreThem, teamAScore: $teamAScore, teamBScore: $teamBScore, trump: $trump, status: $status, turnIndex: $turnIndex, currentRound: $currentRound, targetScore: $targetScore, gameType: $gameType, dealerIndex: $dealerIndex, faceUpCard: $faceUpCard, biddingTeam: $biddingTeam, fellTeam: $fellTeam, currentTrick: $currentTrick, roomId: $roomId, agoraChannelName: $agoraChannelName)';
+  return 'GameModel(id: $id, players: $players, myHand: $myHand, mySeatIndex: $mySeatIndex, playedCards: $playedCards, scoreUs: $scoreUs, scoreThem: $scoreThem, teamAScore: $teamAScore, teamBScore: $teamBScore, trump: $trump, status: $status, turnIndex: $turnIndex, currentRound: $currentRound, targetScore: $targetScore, gameType: $gameType, dealerIndex: $dealerIndex, faceUpCard: $faceUpCard, biddingTeam: $biddingTeam, fellTeam: $fellTeam, currentTrick: $currentTrick, roomId: $roomId, agoraChannelName: $agoraChannelName, engineState: $engineState)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $GameModelCopyWith<$Res>  {
   factory $GameModelCopyWith(GameModel value, $Res Function(GameModel) _then) = _$GameModelCopyWithImpl;
 @useResult
 $Res call({
- String id, List<GamePlayerModel> players, List<String> myHand, int mySeatIndex, List<String?> playedCards, int scoreUs, int scoreThem, int teamAScore, int teamBScore, String trump, String status, int turnIndex, int currentRound, int targetScore, String? gameType, int dealerIndex, String? faceUpCard, String? biddingTeam, String? fellTeam, TrickModel? currentTrick, String? roomId, String? agoraChannelName
+ String id, List<GamePlayerModel> players, List<String> myHand, int mySeatIndex, List<String?> playedCards, int scoreUs, int scoreThem, int teamAScore, int teamBScore, String trump, String status, int turnIndex, int currentRound, int targetScore, String? gameType, int dealerIndex, String? faceUpCard, String? biddingTeam, String? fellTeam, TrickModel? currentTrick, String? roomId, String? agoraChannelName, Map<String, dynamic>? engineState
 });
 
 
@@ -65,7 +65,7 @@ class _$GameModelCopyWithImpl<$Res>
 
 /// Create a copy of GameModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? players = null,Object? myHand = null,Object? mySeatIndex = null,Object? playedCards = null,Object? scoreUs = null,Object? scoreThem = null,Object? teamAScore = null,Object? teamBScore = null,Object? trump = null,Object? status = null,Object? turnIndex = null,Object? currentRound = null,Object? targetScore = null,Object? gameType = freezed,Object? dealerIndex = null,Object? faceUpCard = freezed,Object? biddingTeam = freezed,Object? fellTeam = freezed,Object? currentTrick = freezed,Object? roomId = freezed,Object? agoraChannelName = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? players = null,Object? myHand = null,Object? mySeatIndex = null,Object? playedCards = null,Object? scoreUs = null,Object? scoreThem = null,Object? teamAScore = null,Object? teamBScore = null,Object? trump = null,Object? status = null,Object? turnIndex = null,Object? currentRound = null,Object? targetScore = null,Object? gameType = freezed,Object? dealerIndex = null,Object? faceUpCard = freezed,Object? biddingTeam = freezed,Object? fellTeam = freezed,Object? currentTrick = freezed,Object? roomId = freezed,Object? agoraChannelName = freezed,Object? engineState = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,players: null == players ? _self.players : players // ignore: cast_nullable_to_non_nullable
@@ -89,7 +89,8 @@ as String?,fellTeam: freezed == fellTeam ? _self.fellTeam : fellTeam // ignore: 
 as String?,currentTrick: freezed == currentTrick ? _self.currentTrick : currentTrick // ignore: cast_nullable_to_non_nullable
 as TrickModel?,roomId: freezed == roomId ? _self.roomId : roomId // ignore: cast_nullable_to_non_nullable
 as String?,agoraChannelName: freezed == agoraChannelName ? _self.agoraChannelName : agoraChannelName // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,engineState: freezed == engineState ? _self.engineState : engineState // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 /// Create a copy of GameModel
@@ -186,10 +187,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  List<GamePlayerModel> players,  List<String> myHand,  int mySeatIndex,  List<String?> playedCards,  int scoreUs,  int scoreThem,  int teamAScore,  int teamBScore,  String trump,  String status,  int turnIndex,  int currentRound,  int targetScore,  String? gameType,  int dealerIndex,  String? faceUpCard,  String? biddingTeam,  String? fellTeam,  TrickModel? currentTrick,  String? roomId,  String? agoraChannelName)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  List<GamePlayerModel> players,  List<String> myHand,  int mySeatIndex,  List<String?> playedCards,  int scoreUs,  int scoreThem,  int teamAScore,  int teamBScore,  String trump,  String status,  int turnIndex,  int currentRound,  int targetScore,  String? gameType,  int dealerIndex,  String? faceUpCard,  String? biddingTeam,  String? fellTeam,  TrickModel? currentTrick,  String? roomId,  String? agoraChannelName,  Map<String, dynamic>? engineState)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GameModel() when $default != null:
-return $default(_that.id,_that.players,_that.myHand,_that.mySeatIndex,_that.playedCards,_that.scoreUs,_that.scoreThem,_that.teamAScore,_that.teamBScore,_that.trump,_that.status,_that.turnIndex,_that.currentRound,_that.targetScore,_that.gameType,_that.dealerIndex,_that.faceUpCard,_that.biddingTeam,_that.fellTeam,_that.currentTrick,_that.roomId,_that.agoraChannelName);case _:
+return $default(_that.id,_that.players,_that.myHand,_that.mySeatIndex,_that.playedCards,_that.scoreUs,_that.scoreThem,_that.teamAScore,_that.teamBScore,_that.trump,_that.status,_that.turnIndex,_that.currentRound,_that.targetScore,_that.gameType,_that.dealerIndex,_that.faceUpCard,_that.biddingTeam,_that.fellTeam,_that.currentTrick,_that.roomId,_that.agoraChannelName,_that.engineState);case _:
   return orElse();
 
 }
@@ -207,10 +208,10 @@ return $default(_that.id,_that.players,_that.myHand,_that.mySeatIndex,_that.play
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  List<GamePlayerModel> players,  List<String> myHand,  int mySeatIndex,  List<String?> playedCards,  int scoreUs,  int scoreThem,  int teamAScore,  int teamBScore,  String trump,  String status,  int turnIndex,  int currentRound,  int targetScore,  String? gameType,  int dealerIndex,  String? faceUpCard,  String? biddingTeam,  String? fellTeam,  TrickModel? currentTrick,  String? roomId,  String? agoraChannelName)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  List<GamePlayerModel> players,  List<String> myHand,  int mySeatIndex,  List<String?> playedCards,  int scoreUs,  int scoreThem,  int teamAScore,  int teamBScore,  String trump,  String status,  int turnIndex,  int currentRound,  int targetScore,  String? gameType,  int dealerIndex,  String? faceUpCard,  String? biddingTeam,  String? fellTeam,  TrickModel? currentTrick,  String? roomId,  String? agoraChannelName,  Map<String, dynamic>? engineState)  $default,) {final _that = this;
 switch (_that) {
 case _GameModel():
-return $default(_that.id,_that.players,_that.myHand,_that.mySeatIndex,_that.playedCards,_that.scoreUs,_that.scoreThem,_that.teamAScore,_that.teamBScore,_that.trump,_that.status,_that.turnIndex,_that.currentRound,_that.targetScore,_that.gameType,_that.dealerIndex,_that.faceUpCard,_that.biddingTeam,_that.fellTeam,_that.currentTrick,_that.roomId,_that.agoraChannelName);case _:
+return $default(_that.id,_that.players,_that.myHand,_that.mySeatIndex,_that.playedCards,_that.scoreUs,_that.scoreThem,_that.teamAScore,_that.teamBScore,_that.trump,_that.status,_that.turnIndex,_that.currentRound,_that.targetScore,_that.gameType,_that.dealerIndex,_that.faceUpCard,_that.biddingTeam,_that.fellTeam,_that.currentTrick,_that.roomId,_that.agoraChannelName,_that.engineState);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -227,10 +228,10 @@ return $default(_that.id,_that.players,_that.myHand,_that.mySeatIndex,_that.play
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  List<GamePlayerModel> players,  List<String> myHand,  int mySeatIndex,  List<String?> playedCards,  int scoreUs,  int scoreThem,  int teamAScore,  int teamBScore,  String trump,  String status,  int turnIndex,  int currentRound,  int targetScore,  String? gameType,  int dealerIndex,  String? faceUpCard,  String? biddingTeam,  String? fellTeam,  TrickModel? currentTrick,  String? roomId,  String? agoraChannelName)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  List<GamePlayerModel> players,  List<String> myHand,  int mySeatIndex,  List<String?> playedCards,  int scoreUs,  int scoreThem,  int teamAScore,  int teamBScore,  String trump,  String status,  int turnIndex,  int currentRound,  int targetScore,  String? gameType,  int dealerIndex,  String? faceUpCard,  String? biddingTeam,  String? fellTeam,  TrickModel? currentTrick,  String? roomId,  String? agoraChannelName,  Map<String, dynamic>? engineState)?  $default,) {final _that = this;
 switch (_that) {
 case _GameModel() when $default != null:
-return $default(_that.id,_that.players,_that.myHand,_that.mySeatIndex,_that.playedCards,_that.scoreUs,_that.scoreThem,_that.teamAScore,_that.teamBScore,_that.trump,_that.status,_that.turnIndex,_that.currentRound,_that.targetScore,_that.gameType,_that.dealerIndex,_that.faceUpCard,_that.biddingTeam,_that.fellTeam,_that.currentTrick,_that.roomId,_that.agoraChannelName);case _:
+return $default(_that.id,_that.players,_that.myHand,_that.mySeatIndex,_that.playedCards,_that.scoreUs,_that.scoreThem,_that.teamAScore,_that.teamBScore,_that.trump,_that.status,_that.turnIndex,_that.currentRound,_that.targetScore,_that.gameType,_that.dealerIndex,_that.faceUpCard,_that.biddingTeam,_that.fellTeam,_that.currentTrick,_that.roomId,_that.agoraChannelName,_that.engineState);case _:
   return null;
 
 }
@@ -242,7 +243,7 @@ return $default(_that.id,_that.players,_that.myHand,_that.mySeatIndex,_that.play
 @JsonSerializable()
 
 class _GameModel implements GameModel {
-  const _GameModel({required this.id, required final  List<GamePlayerModel> players, required final  List<String> myHand, this.mySeatIndex = 0, required final  List<String?> playedCards, required this.scoreUs, required this.scoreThem, this.teamAScore = 0, this.teamBScore = 0, required this.trump, required this.status, required this.turnIndex, required this.currentRound, required this.targetScore, this.gameType, this.dealerIndex = 0, this.faceUpCard, this.biddingTeam, this.fellTeam, this.currentTrick, this.roomId, this.agoraChannelName}): _players = players,_myHand = myHand,_playedCards = playedCards;
+  const _GameModel({required this.id, required final  List<GamePlayerModel> players, required final  List<String> myHand, this.mySeatIndex = 0, required final  List<String?> playedCards, required this.scoreUs, required this.scoreThem, this.teamAScore = 0, this.teamBScore = 0, required this.trump, required this.status, required this.turnIndex, required this.currentRound, required this.targetScore, this.gameType, this.dealerIndex = 0, this.faceUpCard, this.biddingTeam, this.fellTeam, this.currentTrick, this.roomId, this.agoraChannelName, final  Map<String, dynamic>? engineState}): _players = players,_myHand = myHand,_playedCards = playedCards,_engineState = engineState;
   factory _GameModel.fromJson(Map<String, dynamic> json) => _$GameModelFromJson(json);
 
 @override final  String id;
@@ -285,6 +286,15 @@ class _GameModel implements GameModel {
 @override final  TrickModel? currentTrick;
 @override final  String? roomId;
 @override final  String? agoraChannelName;
+ final  Map<String, dynamic>? _engineState;
+@override Map<String, dynamic>? get engineState {
+  final value = _engineState;
+  if (value == null) return null;
+  if (_engineState is EqualUnmodifiableMapView) return _engineState;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
 
 /// Create a copy of GameModel
 /// with the given fields replaced by the non-null parameter values.
@@ -299,16 +309,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GameModel&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other._players, _players)&&const DeepCollectionEquality().equals(other._myHand, _myHand)&&(identical(other.mySeatIndex, mySeatIndex) || other.mySeatIndex == mySeatIndex)&&const DeepCollectionEquality().equals(other._playedCards, _playedCards)&&(identical(other.scoreUs, scoreUs) || other.scoreUs == scoreUs)&&(identical(other.scoreThem, scoreThem) || other.scoreThem == scoreThem)&&(identical(other.teamAScore, teamAScore) || other.teamAScore == teamAScore)&&(identical(other.teamBScore, teamBScore) || other.teamBScore == teamBScore)&&(identical(other.trump, trump) || other.trump == trump)&&(identical(other.status, status) || other.status == status)&&(identical(other.turnIndex, turnIndex) || other.turnIndex == turnIndex)&&(identical(other.currentRound, currentRound) || other.currentRound == currentRound)&&(identical(other.targetScore, targetScore) || other.targetScore == targetScore)&&(identical(other.gameType, gameType) || other.gameType == gameType)&&(identical(other.dealerIndex, dealerIndex) || other.dealerIndex == dealerIndex)&&(identical(other.faceUpCard, faceUpCard) || other.faceUpCard == faceUpCard)&&(identical(other.biddingTeam, biddingTeam) || other.biddingTeam == biddingTeam)&&(identical(other.fellTeam, fellTeam) || other.fellTeam == fellTeam)&&(identical(other.currentTrick, currentTrick) || other.currentTrick == currentTrick)&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.agoraChannelName, agoraChannelName) || other.agoraChannelName == agoraChannelName));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GameModel&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other._players, _players)&&const DeepCollectionEquality().equals(other._myHand, _myHand)&&(identical(other.mySeatIndex, mySeatIndex) || other.mySeatIndex == mySeatIndex)&&const DeepCollectionEquality().equals(other._playedCards, _playedCards)&&(identical(other.scoreUs, scoreUs) || other.scoreUs == scoreUs)&&(identical(other.scoreThem, scoreThem) || other.scoreThem == scoreThem)&&(identical(other.teamAScore, teamAScore) || other.teamAScore == teamAScore)&&(identical(other.teamBScore, teamBScore) || other.teamBScore == teamBScore)&&(identical(other.trump, trump) || other.trump == trump)&&(identical(other.status, status) || other.status == status)&&(identical(other.turnIndex, turnIndex) || other.turnIndex == turnIndex)&&(identical(other.currentRound, currentRound) || other.currentRound == currentRound)&&(identical(other.targetScore, targetScore) || other.targetScore == targetScore)&&(identical(other.gameType, gameType) || other.gameType == gameType)&&(identical(other.dealerIndex, dealerIndex) || other.dealerIndex == dealerIndex)&&(identical(other.faceUpCard, faceUpCard) || other.faceUpCard == faceUpCard)&&(identical(other.biddingTeam, biddingTeam) || other.biddingTeam == biddingTeam)&&(identical(other.fellTeam, fellTeam) || other.fellTeam == fellTeam)&&(identical(other.currentTrick, currentTrick) || other.currentTrick == currentTrick)&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.agoraChannelName, agoraChannelName) || other.agoraChannelName == agoraChannelName)&&const DeepCollectionEquality().equals(other._engineState, _engineState));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,const DeepCollectionEquality().hash(_players),const DeepCollectionEquality().hash(_myHand),mySeatIndex,const DeepCollectionEquality().hash(_playedCards),scoreUs,scoreThem,teamAScore,teamBScore,trump,status,turnIndex,currentRound,targetScore,gameType,dealerIndex,faceUpCard,biddingTeam,fellTeam,currentTrick,roomId,agoraChannelName]);
+int get hashCode => Object.hashAll([runtimeType,id,const DeepCollectionEquality().hash(_players),const DeepCollectionEquality().hash(_myHand),mySeatIndex,const DeepCollectionEquality().hash(_playedCards),scoreUs,scoreThem,teamAScore,teamBScore,trump,status,turnIndex,currentRound,targetScore,gameType,dealerIndex,faceUpCard,biddingTeam,fellTeam,currentTrick,roomId,agoraChannelName,const DeepCollectionEquality().hash(_engineState)]);
 
 @override
 String toString() {
-  return 'GameModel(id: $id, players: $players, myHand: $myHand, mySeatIndex: $mySeatIndex, playedCards: $playedCards, scoreUs: $scoreUs, scoreThem: $scoreThem, teamAScore: $teamAScore, teamBScore: $teamBScore, trump: $trump, status: $status, turnIndex: $turnIndex, currentRound: $currentRound, targetScore: $targetScore, gameType: $gameType, dealerIndex: $dealerIndex, faceUpCard: $faceUpCard, biddingTeam: $biddingTeam, fellTeam: $fellTeam, currentTrick: $currentTrick, roomId: $roomId, agoraChannelName: $agoraChannelName)';
+  return 'GameModel(id: $id, players: $players, myHand: $myHand, mySeatIndex: $mySeatIndex, playedCards: $playedCards, scoreUs: $scoreUs, scoreThem: $scoreThem, teamAScore: $teamAScore, teamBScore: $teamBScore, trump: $trump, status: $status, turnIndex: $turnIndex, currentRound: $currentRound, targetScore: $targetScore, gameType: $gameType, dealerIndex: $dealerIndex, faceUpCard: $faceUpCard, biddingTeam: $biddingTeam, fellTeam: $fellTeam, currentTrick: $currentTrick, roomId: $roomId, agoraChannelName: $agoraChannelName, engineState: $engineState)';
 }
 
 
@@ -319,7 +329,7 @@ abstract mixin class _$GameModelCopyWith<$Res> implements $GameModelCopyWith<$Re
   factory _$GameModelCopyWith(_GameModel value, $Res Function(_GameModel) _then) = __$GameModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, List<GamePlayerModel> players, List<String> myHand, int mySeatIndex, List<String?> playedCards, int scoreUs, int scoreThem, int teamAScore, int teamBScore, String trump, String status, int turnIndex, int currentRound, int targetScore, String? gameType, int dealerIndex, String? faceUpCard, String? biddingTeam, String? fellTeam, TrickModel? currentTrick, String? roomId, String? agoraChannelName
+ String id, List<GamePlayerModel> players, List<String> myHand, int mySeatIndex, List<String?> playedCards, int scoreUs, int scoreThem, int teamAScore, int teamBScore, String trump, String status, int turnIndex, int currentRound, int targetScore, String? gameType, int dealerIndex, String? faceUpCard, String? biddingTeam, String? fellTeam, TrickModel? currentTrick, String? roomId, String? agoraChannelName, Map<String, dynamic>? engineState
 });
 
 
@@ -336,7 +346,7 @@ class __$GameModelCopyWithImpl<$Res>
 
 /// Create a copy of GameModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? players = null,Object? myHand = null,Object? mySeatIndex = null,Object? playedCards = null,Object? scoreUs = null,Object? scoreThem = null,Object? teamAScore = null,Object? teamBScore = null,Object? trump = null,Object? status = null,Object? turnIndex = null,Object? currentRound = null,Object? targetScore = null,Object? gameType = freezed,Object? dealerIndex = null,Object? faceUpCard = freezed,Object? biddingTeam = freezed,Object? fellTeam = freezed,Object? currentTrick = freezed,Object? roomId = freezed,Object? agoraChannelName = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? players = null,Object? myHand = null,Object? mySeatIndex = null,Object? playedCards = null,Object? scoreUs = null,Object? scoreThem = null,Object? teamAScore = null,Object? teamBScore = null,Object? trump = null,Object? status = null,Object? turnIndex = null,Object? currentRound = null,Object? targetScore = null,Object? gameType = freezed,Object? dealerIndex = null,Object? faceUpCard = freezed,Object? biddingTeam = freezed,Object? fellTeam = freezed,Object? currentTrick = freezed,Object? roomId = freezed,Object? agoraChannelName = freezed,Object? engineState = freezed,}) {
   return _then(_GameModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,players: null == players ? _self._players : players // ignore: cast_nullable_to_non_nullable
@@ -360,7 +370,8 @@ as String?,fellTeam: freezed == fellTeam ? _self.fellTeam : fellTeam // ignore: 
 as String?,currentTrick: freezed == currentTrick ? _self.currentTrick : currentTrick // ignore: cast_nullable_to_non_nullable
 as TrickModel?,roomId: freezed == roomId ? _self.roomId : roomId // ignore: cast_nullable_to_non_nullable
 as String?,agoraChannelName: freezed == agoraChannelName ? _self.agoraChannelName : agoraChannelName // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,engineState: freezed == engineState ? _self._engineState : engineState // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 

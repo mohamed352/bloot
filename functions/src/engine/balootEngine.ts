@@ -767,6 +767,188 @@ export class BalootEngine {
     return events;
   }
 
+  claimSawa(match: BalootMatch, claimingSeat: number): Record<string, unknown>[] {
+    const state = match.state!;
+    if (state.phase !== 'playing') throw new Error('Not time to claim sawa');
+    if (state.turn !== claimingSeat || state.currentTrick.length !== 0) {
+      throw new Error('Sawa can only be claimed when leading a trick');
+    }
+    const remainingTricks = 8 - state.trickHistory.length;
+    if (remainingTricks > 4) throw new Error('Sawa is only allowed in the last 4 tricks');
+
+    const claimTeam = teamOf(claimingSeat);
+    const guaranteed = this.sawaGuaranteed(state, claimingSeat);
+    const events: Record<string, unknown>[] = [];
+
+    if (!guaranteed) {
+      this.finishClaimedHand(match, events, {
+        winTeam: 1 - claimTeam,
+        loseTeam: claimTeam,
+        qatClaim: {
+          type: 'sawa',
+          typeName: violationName('sawa'),
+          failed: true,
+          claimSeat: claimingSeat,
+          violSeat: claimingSeat,
+          winTeam: 1 - claimTeam,
+        },
+      });
+      events.unshift({ type: 'sawaClaimed', seat: claimingSeat, valid: false });
+      this.checkMatchEnd(match, events);
+      return events;
+    }
+
+    // Valid sawa: reveal all remaining hands, then play out the remaining tricks
+    // with the claiming team winning each one.
+    const revealHands = state.hands.map((h) => [...h]);
+    this.playOutSawaTricks(state, claimingSeat);
+
+    const result = this.scoreHand(state);
+    result.sawa = { seat: claimingSeat, valid: true, hands: revealHands };
+
+    match.totals[0] += result.qaid[0];
+    match.totals[1] += result.qaid[1];
+    match.handResults.push({
+      mode: state.mode,
+      trump: state.trump,
+      buyer: state.buyer,
+      qaid: result.qaid,
+      buyerLost: result.buyerLost,
+      capotTeam: result.capotTeam,
+      sawa: true,
+    });
+    match.handsPlayed++;
+    state.phase = 'handEnd';
+    state.result = result;
+    state.violation = undefined;
+
+    events.push({ type: 'sawaClaimed', seat: claimingSeat, valid: true, remainingTricks });
+    events.push({ type: 'handEnd', result: this.resultToJson(result) });
+    this.checkMatchEnd(match, events);
+    return events;
+  }
+
+  private sawaGuaranteed(state: BalootHandState, claimSeat: number): boolean {
+    const team = teamOf(claimSeat);
+    const hands = state.hands.map((h) => [...h]);
+    return this.sawaTeamWinsAll(hands, claimSeat, state, team);
+  }
+
+  private sawaTeamWinsAll(hands: BalootCard[][], leader: number, state: BalootHandState, team: number): boolean {
+    if (hands.every((h) => h.length === 0)) return true;
+    return this.sawaTrickOutcome(hands, leader, [], state, team);
+  }
+
+  private sawaTrickOutcome(
+    hands: BalootCard[][],
+    leader: number,
+    trick: TrickPlay[],
+    state: BalootHandState,
+    team: number,
+  ): boolean {
+    if (trick.length === 4) {
+      const tempState = { ...state, currentTrick: trick };
+      const winner = this.trickWinnerIndex(trick, tempState as BalootHandState);
+      if (teamOf(winner) !== team) return false;
+      const nextHands = hands.map((h) => [...h]);
+      return this.sawaTeamWinsAll(nextHands, winner, state, team);
+    }
+
+    let seat: number;
+    if (trick.length === 0) {
+      seat = leader;
+    } else {
+      seat = (trick[trick.length - 1].seat + 1) % 4;
+    }
+
+    // Skip seats that have no cards left in this branch.
+    while (hands[seat].length === 0) {
+      seat = (seat + 1) % 4;
+      if (seat === leader && hands[seat].length === 0) {
+        // All remaining hands empty; this should have been caught above.
+        return true;
+      }
+    }
+
+    const tempState = { ...state, hands, currentTrick: trick };
+    const legal = this.legalMoves(tempState as BalootHandState, seat, true);
+    const mine = teamOf(seat) === team;
+
+    for (const card of legal) {
+      const nextHands = hands.map((h, i) =>
+        i === seat ? h.filter((c) => c.key !== card.key) : [...h],
+      );
+      const ok = this.sawaTrickOutcome(nextHands, leader, [...trick, { seat, card }], state, team);
+      if (mine && ok) return true;
+      if (!mine && !ok) return false;
+    }
+
+    return !mine;
+  }
+
+  private playOutSawaTricks(state: BalootHandState, claimSeat: number): void {
+    const team = teamOf(claimSeat);
+    let leader = claimSeat;
+
+    while (state.hands.some((h) => h.length > 0)) {
+      const trick: TrickPlay[] = [];
+      let seat = leader;
+
+      for (let i = 0; i < 4; i++) {
+        while (state.hands[seat].length === 0) {
+          seat = (seat + 1) % 4;
+        }
+
+        const tempState = { ...state, currentTrick: trick };
+        const legal = this.legalMoves(tempState as BalootHandState, seat, true);
+        const card = this.pickSawaCard(state.hands, seat, legal, trick, state, team);
+
+        state.hands[seat] = state.hands[seat].filter((c) => c.key !== card.key);
+        state.playedCards.push(card);
+        trick.push({ seat, card });
+        seat = (seat + 1) % 4;
+      }
+
+      const winner = this.trickWinnerIndex(trick, state);
+      const trickPts = trick.reduce(
+        (sum, p) => sum + cardPoints(p.card, state.mode!, state.trump ?? null),
+        0,
+      );
+      state.trickHistory.push({ plays: trick, winner, points: trickPts });
+      state.currentTrick.length = 0;
+      state.leader = winner;
+      leader = winner;
+    }
+
+    state.violation = undefined;
+  }
+
+  private pickSawaCard(
+    hands: BalootCard[][],
+    seat: number,
+    legal: BalootCard[],
+    trick: TrickPlay[],
+    state: BalootHandState,
+    team: number,
+  ): BalootCard {
+    if (teamOf(seat) !== team) {
+      return legal[0];
+    }
+
+    // For the claiming team, pick the first move that keeps the sawa guaranteed.
+    for (const card of legal) {
+      const nextHands = hands.map((h, i) =>
+        i === seat ? h.filter((c) => c.key !== card.key) : [...h],
+      );
+      if (this.sawaTrickOutcome(nextHands, state.leader, [...trick, { seat, card }], state, team)) {
+        return card;
+      }
+    }
+
+    // Fallback (should not happen if sawa was guaranteed).
+    return legal[0];
+  }
+
   private finishClaimedHand(
     match: BalootMatch,
     events: Record<string, unknown>[],
@@ -843,6 +1025,12 @@ export class BalootEngine {
             typeName: r.qatClaim.typeName,
             failed: r.qatClaim.failed,
             claimSeat: r.qatClaim.claimSeat,
+          }
+        : null,
+      sawa: r.sawa
+        ? {
+            seat: r.sawa.seat,
+            valid: r.sawa.valid,
           }
         : null,
     };

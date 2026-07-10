@@ -1,4 +1,4 @@
-import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
+import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { Timestamp } from 'firebase-admin/firestore';
 import { db } from '../config/admin';
 import { BalootBot, BalootEngine } from '../engine';
@@ -10,7 +10,7 @@ import { buildGameUpdate, deepCloneGame } from '../utils/gameUpdate';
  * turn. This makes the "Play with Bots" single-device test flow work against
  * the real database.
  */
-export const botAutoPlay = onDocumentUpdated(
+export const botAutoPlay = onDocumentWritten(
   {
     document: 'games/{gameId}',
     maxInstances: 10,
@@ -61,6 +61,15 @@ export const botAutoPlay = onDocumentUpdated(
           if (events.some((e) => e.type === 'redeal')) {
             freshGame.playerBids = {};
           }
+        } else if (state.awaitingDeclare && state.declareSeats.includes(seatIndex)) {
+          const botProjects = state.projects.filter((p) => p.seat === seatIndex);
+          const types = botProjects.map((p) => p.type);
+          engine.declareProject(match, seatIndex, types);
+          saveMatch(freshGame, match);
+        } else if (state.awaitingDouble && state.doubling?.turn === seatIndex) {
+          const wantsDouble = bot.decideDouble(match, seatIndex, level);
+          engine.applyDouble(match, seatIndex, wantsDouble ? 'double' : 'pass');
+          saveMatch(freshGame, match);
         } else if (state.phase === 'playing') {
           const card = bot.decidePlay(match, seatIndex, level);
           const events = engine.playCard(match, seatIndex, card);

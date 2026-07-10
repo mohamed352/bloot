@@ -3,7 +3,7 @@ import { BalootDeck } from '../engine/balootDeck';
 import { BalootEngine } from '../engine/balootEngine';
 import { BalootSerializer } from '../engine/balootSerializer';
 import { BalootMatch } from '../engine/balootState';
-import { TARGET_QAID } from '../engine/balootRules';
+import { TARGET_QAID, cardStrength } from '../engine/balootRules';
 
 function seededRng(seed: number): () => number {
   let s = seed;
@@ -226,6 +226,83 @@ describe('BalootEngine', () => {
     expect(match.winnerTeam).toBe(0);
   });
 });
+
+  describe('sawa claims', () => {
+    it('rejects sawa outside the last 4 tricks', () => {
+      const engine = new BalootEngine(seededRng(12345));
+      const match = createTestMatch();
+      finishBidding(match, engine, 'sun', 0);
+
+      expect(() => engine.claimSawa(match, 0)).toThrow();
+    });
+
+    it('accepts a guaranteed sawa and ends the hand', () => {
+      const engine = new BalootEngine();
+      const match = createTestMatch();
+      const state = match.state!;
+      finishBidding(match, engine, 'sun', 0);
+
+      // Play 7 tricks so only 1 trick remains.
+      let plays = 0;
+      while (state.trickHistory.length < 7 && plays < 100) {
+        const legal = engine.legalMoves(state, state.turn);
+        engine.playCard(match, state.turn, legal[0]);
+        plays++;
+      }
+
+      expect(state.trickHistory.length).toBe(7);
+      expect(state.currentTrick).toHaveLength(0);
+
+      // Force a guaranteed sawa by giving seat 0 the highest remaining card in a Sun hand.
+      const allRemaining = state.hands.flatMap((h, seat) => h.map((c) => ({ seat, card: c })));
+      const highest = allRemaining.reduce((best, item) =>
+        cardStrength(item.card, item.card.suit, 'sun', null) >
+        cardStrength(best.card, best.card.suit, 'sun', null)
+          ? item
+          : best,
+      );
+      // Swap the highest card into seat 0's hand so every seat still has exactly one card.
+      const seat0Card = state.hands[0][0];
+      state.hands[highest.seat] = [seat0Card];
+      state.hands[0] = [highest.card];
+      state.turn = 0;
+      state.leader = 0;
+
+      const events = engine.claimSawa(match, 0);
+      expect(events.some((e) => e.type === 'sawaClaimed' && (e as any).valid)).toBe(true);
+      expect(state.phase).toBe('handEnd');
+      expect(state.result).toBeDefined();
+      expect(state.result!.sawa?.valid).toBe(true);
+    });
+
+    it('penalizes a failed sawa claim', () => {
+      const engine = new BalootEngine();
+      const match = createTestMatch();
+      const state = match.state!;
+      finishBidding(match, engine, 'sun', 0);
+
+      let plays = 0;
+      while (state.trickHistory.length < 7 && plays < 100) {
+        const legal = engine.legalMoves(state, state.turn);
+        engine.playCard(match, state.turn, legal[0]);
+        plays++;
+      }
+
+      // Force a failing sawa: seat 0 leads with the 7 of spades but seat 1 has the ace.
+      state.hands[0] = [BalootCard.fromString('7♠')];
+      state.hands[1] = [BalootCard.fromString('A♠')];
+      state.hands[2] = [BalootCard.fromString('7♥')];
+      state.hands[3] = [BalootCard.fromString('7♦')];
+      state.turn = 0;
+      state.leader = 0;
+
+      const before = match.totals[1];
+      const events = engine.claimSawa(match, 0);
+      expect(events.some((e) => e.type === 'sawaClaimed' && !(e as any).valid)).toBe(true);
+      expect(state.phase).toBe('handEnd');
+      expect(match.totals[1]).toBeGreaterThan(before);
+    });
+  });
 
 describe('BalootDeck', () => {
   it('shuffles a full 32-card deck', () => {

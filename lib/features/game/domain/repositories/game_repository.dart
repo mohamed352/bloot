@@ -25,4 +25,16 @@ abstract class GameRepository {
 
   /// Resets a finished room to waiting state for a rematch.
   Future<void> rematch(String roomId);
+
+  /// Declares Saudi Baloot projects (مشاريع).
+  Future<void> declareProject(String gameId, List<String> types);
+
+  /// Accepts or passes a double/redouble/recoat offer.
+  Future<void> applyDouble(String gameId, String action);
+
+  /// Claims a qaid (قطع) violation.
+  Future<void> claimQaid(String gameId, String? claimType);
+
+  /// Claims "سوا" (the team will take all remaining tricks).
+  Future<void> claimSawa(String gameId);
 }

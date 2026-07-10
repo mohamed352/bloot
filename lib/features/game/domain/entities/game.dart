@@ -89,6 +89,7 @@ class Game {
     this.projects = const [],
     this.roomId,
     this.agoraChannelName,
+    this.engineState,
   });
 
   final String id;
@@ -124,6 +125,7 @@ class Game {
 
   final String? roomId;
   final String? agoraChannelName;
+  final Map<String, dynamic>? engineState;
 
   /// Returns true if it's the local player's turn.
   bool get isMyTurn => turnIndex == mySeatIndex;
@@ -217,6 +219,8 @@ class Game {
       projects: projects ?? this.projects,
       roomId: roomId ?? this.roomId,
       agoraChannelName: agoraChannelName ?? this.agoraChannelName,
+      // ignore: unnecessary_this
+      engineState: engineState ?? this.engineState,
     );
   }
 }

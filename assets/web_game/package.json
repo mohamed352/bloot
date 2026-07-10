@@ -1,0 +1,11 @@
+{
+  "name": "bloot-web-game",
+  "private": true,
+  "description": "Bloot WebView game assets — bundled from the original Baloot web UI",
+  "scripts": {
+    "build": "esbuild js/bundle_entry.js --bundle --format=iife --outfile=js/game_bundle.js --charset=utf8"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
+  }
+}

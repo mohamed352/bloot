@@ -73,6 +73,11 @@ export interface HandResult {
   balootQaid: [number, number];
   doubleLevel: number;
   qatClaim?: QatClaimResult;
+  sawa?: {
+    seat: number;
+    valid: boolean;
+    hands?: BalootCard[][];
+  };
 }
 
 export interface BalootPlayerConfig {

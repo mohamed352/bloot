@@ -98,7 +98,7 @@ function isEqual(a: unknown, b: unknown): boolean {
   if (typeof a === 'object') {
     // Treat Firestore Timestamps/Dates loosely by value if possible.
     if (isTimestampLike(a) && isTimestampLike(b)) {
-      return (a as any).toMillis() === (b as any).toMillis();
+      return getMillis(a) === getMillis(b);
     }
 
     const aKeys = Object.keys(a as object);
@@ -114,6 +114,11 @@ function isEqual(a: unknown, b: unknown): boolean {
   }
 
   return false;
+}
+
+function getMillis(value: unknown): number {
+  if (value instanceof Date) return value.getTime();
+  return (value as any).toMillis();
 }
 
 function isTimestampLike(value: unknown): boolean {

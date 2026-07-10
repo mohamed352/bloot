@@ -352,6 +352,70 @@ class GameCubit extends Cubit<GameState> {
     }
   }
 
+  Future<void> declareProject(List<String> types) async {
+    final current = state;
+    final game = _currentGame(current);
+    if (game == null) return;
+    _emitActionInProgress();
+    try {
+      await _gameRepository.declareProject(game.id, types);
+    } catch (e) {
+      AppLogger.error('Failed to declare project', error: e);
+      _emitActionError('Failed to declare project. Please try again.');
+    }
+  }
+
+  Future<void> applyDouble(String action) async {
+    final current = state;
+    final game = _currentGame(current);
+    if (game == null) return;
+    _emitActionInProgress();
+    try {
+      await _gameRepository.applyDouble(game.id, action);
+    } catch (e) {
+      AppLogger.error('Failed to apply double', error: e);
+      _emitActionError('Failed to apply double. Please try again.');
+    }
+  }
+
+  Future<void> claimQaid(String? claimType) async {
+    final current = state;
+    final game = _currentGame(current);
+    if (game == null) return;
+    _emitActionInProgress();
+    try {
+      await _gameRepository.claimQaid(game.id, claimType);
+    } catch (e) {
+      AppLogger.error('Failed to claim qaid', error: e);
+      _emitActionError('Failed to claim qaid. Please try again.');
+    }
+  }
+
+  Future<void> claimSawa() async {
+    final current = state;
+    final game = _currentGame(current);
+    if (game == null) return;
+    _emitActionInProgress();
+    try {
+      await _gameRepository.claimSawa(game.id);
+    } catch (e) {
+      AppLogger.error('Failed to claim sawa', error: e);
+      _emitActionError('Failed to claim sawa. Please try again.');
+    }
+  }
+
+  Game? _currentGame(GameState current) {
+    return current.mapOrNull(
+      dealing: (s) => s.game,
+      bidding: (s) => s.game,
+      bonusClaim: (s) => s.game,
+      playing: (s) => s.game,
+      trickEnd: (s) => s.game,
+      roundEnd: (s) => s.game,
+      gameEnd: (s) => s.game,
+    );
+  }
+
   Future<void> leaveGame() async {
     final roomId = _getCurrentRoomId();
     if (roomId == null || roomId.isEmpty) return;

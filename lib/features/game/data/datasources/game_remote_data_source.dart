@@ -82,6 +82,35 @@ class GameRemoteDataSource {
     await callable.call<Map<String, dynamic>>({'roomId': roomId});
   }
 
+  Future<void> declareProject(String gameId, List<String> types) async {
+    final callable = _functions.httpsCallable('declareProject');
+    await callable.call<Map<String, dynamic>>({
+      'gameId': gameId,
+      'types': types,
+    });
+  }
+
+  Future<void> applyDouble(String gameId, String action) async {
+    final callable = _functions.httpsCallable('applyDouble');
+    await callable.call<Map<String, dynamic>>({
+      'gameId': gameId,
+      'action': action,
+    });
+  }
+
+  Future<void> claimQaid(String gameId, String? claimType) async {
+    final callable = _functions.httpsCallable('claimQaid');
+    await callable.call<Map<String, dynamic>>({
+      'gameId': gameId,
+      'claimType': claimType,
+    });
+  }
+
+  Future<void> claimSawa(String gameId) async {
+    final callable = _functions.httpsCallable('claimSawa');
+    await callable.call<Map<String, dynamic>>({'gameId': gameId});
+  }
+
   GameModel _mapDocToModel(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data();
     if (data == null) throw Exception('Game data is null');
@@ -175,6 +204,7 @@ class GameRemoteDataSource {
       currentTrick: trick,
       roomId: data['roomId'] as String?,
       agoraChannelName: data['agoraChannelName'] as String?,
+      engineState: data['engineState'] as Map<String, dynamic>?,
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:bloot/app/app_initializer.dart';
 import 'package:bloot/core/logger/app_logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -42,6 +43,9 @@ abstract class ThirdPartyModule {
 
   @lazySingleton
   FirebaseFirestore get firestore => FirebaseFirestore.instance;
+
+  @lazySingleton
+  FirebaseDatabase get database => FirebaseDatabase.instance;
 
   @lazySingleton
   FirebaseStorage get storage => FirebaseStorage.instance;
