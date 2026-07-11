@@ -291,6 +291,13 @@ async function playCardFlow(seat, card) {
 
 export async function onHumanPlay(card) {
   clearHumanTurnTimer();
+  // Ignore taps during UI-only statuses like trickEnd/roundEnd where the
+  // engine phase is still "playing" but the player should not act yet.
+  if (!canShowActionButtons()) {
+    console.warn("[baloot] ignoring card tap while UI status is", S.uiStatus);
+    renderAll(S.match, S.mySeat, S.players, onHumanPlay);
+    return;
+  }
   if (S.online && !S.online.isHost) {
     // عميل: يدفع الحركة للمضيف بدل ما يشغّل المحرك محلياً (العميل ما يشغّل المحرك أبداً)
     if (S.awaitingServerAck) return;

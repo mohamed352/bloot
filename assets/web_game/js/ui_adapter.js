@@ -10,6 +10,7 @@ import {
 } from "./ui/render.js";
 import {
   animateDeal, animatePlayedCard, animateTrickCollect, spawnConfetti,
+  hideOverlay,
 } from "./ui/animations.js";
 import {
   wireDialogs,
@@ -215,9 +216,10 @@ function startBlootOnline(cfg) {
       S.match = nextMatch;
       clearAwaitingAck();
       renderClient();
-      if (st.phase === "handEnd" && st.result && !nextMatch.matchOver && S.uiStatus !== "gameEnd") {
-        if (!$("hand-overlay").classList.contains("show")) showHandOverlay(st.result);
-      } else if (st.phase !== "handEnd") {
+      const nextState = nextMatch.state;
+      if (nextState.phase === "handEnd" && nextState.result && !nextMatch.matchOver && S.uiStatus !== "gameEnd") {
+        if (!$("hand-overlay").classList.contains("show")) showHandOverlay(nextState.result);
+      } else if (nextState.phase !== "handEnd") {
         hideOverlay("hand-overlay");
       }
       playTransitionAnimations(previousMatch, nextMatch);
