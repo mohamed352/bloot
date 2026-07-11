@@ -7,6 +7,8 @@ export const S = {
   speed: "normal",
   online: null, // null = لعب محلي؛ غير null = {code, seat, isHost, actionBuffer, unsubs, started, hostPump, syncSnapshot}
   awaitingServerAck: false, // عميل أونلاين: يمنع سبام/دبل-تاب يدفع نفس الحركة مرتين قبل ما توصل لقطة جديدة
+  _ackTimeout: null, // مهلة إعادة ضبط awaitingServerAck إذا ما وصلت لقطة
+  uiStatus: null, // حالة الواجهة المرسلة من Flutter (playing/trickEnd/roundEnd/...)
 };
 
 export const botDelay = () => (S.speed === "fast" ? 150 : 350) + Math.random() * (S.speed === "fast" ? 100 : 200);

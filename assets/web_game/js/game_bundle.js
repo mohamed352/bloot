@@ -387,10 +387,10 @@
     return match.state;
   }
   function finalizeProjects(match, declarations) {
-    const st = match.state;
+    const st2 = match.state;
     const kept = [];
     for (let p = 0; p < 4; p++) {
-      const seatProjs = st.projects.filter((pr) => pr.seat === p);
+      const seatProjs = st2.projects.filter((pr) => pr.seat === p);
       if (match.players[p].isBot || !(p in declarations)) {
         kept.push(...seatProjs);
       } else {
@@ -398,27 +398,27 @@
         kept.push(...seatProjs.filter((pr) => claimed.includes(pr.type)));
       }
     }
-    const res = resolveProjects(kept, st.mode, st.firstPlayer);
-    st.countedProjects = res.counted;
-    st.droppedProjects = res.dropped;
-    st.awaitingDeclare = false;
-    st.declareSeats = [];
-    st.announcedProjects = [];
-    st.revealedProjects = [];
-    st.pendingAnnounce = kept.map((p) => ({ seat: p.seat, name: PROJECT_NAMES[p.type], type: p.type }));
-    st.pendingReveal = st.countedProjects.map((p) => ({
+    const res = resolveProjects(kept, st2.mode, st2.firstPlayer);
+    st2.countedProjects = res.counted;
+    st2.droppedProjects = res.dropped;
+    st2.awaitingDeclare = false;
+    st2.declareSeats = [];
+    st2.announcedProjects = [];
+    st2.revealedProjects = [];
+    st2.pendingAnnounce = kept.map((p) => ({ seat: p.seat, name: PROJECT_NAMES[p.type], type: p.type }));
+    st2.pendingReveal = st2.countedProjects.map((p) => ({
       seat: p.seat,
       name: PROJECT_NAMES[p.type],
-      qaid: projectQaid(p, st.mode),
+      qaid: projectQaid(p, st2.mode),
       cards: p.cards
     }));
   }
   function declareProject(match, seat, claimedTypes) {
-    const st = match.state;
-    if (!st.awaitingDeclare || !(st.declareSeats || []).includes(seat)) throw new Error("مو وقت الإعلان");
-    st.declarations[seat] = claimedTypes || [];
-    st.declareSeats = st.declareSeats.filter((s) => s !== seat);
-    if (st.declareSeats.length === 0) finalizeProjects(match, st.declarations);
+    const st2 = match.state;
+    if (!st2.awaitingDeclare || !(st2.declareSeats || []).includes(seat)) throw new Error("مو وقت الإعلان");
+    st2.declarations[seat] = claimedTypes || [];
+    st2.declareSeats = st2.declareSeats.filter((s) => s !== seat);
+    if (st2.declareSeats.length === 0) finalizeProjects(match, st2.declarations);
     return [];
   }
   function sawaGuaranteed(state, claimSeat) {
@@ -449,36 +449,36 @@
     return teamWinsAll(hands, claimSeat);
   }
   function claimSawa(match, seat) {
-    const st = match.state;
-    if (st.phase !== "playing") throw new Error("مو وقت السوا");
-    if (st.turn !== seat || st.currentTrick.length) throw new Error("السوا بس لما تكون قائد الأكلة");
-    const remaining = 8 - st.trickHistory.length;
+    const st2 = match.state;
+    if (st2.phase !== "playing") throw new Error("مو وقت السوا");
+    if (st2.turn !== seat || st2.currentTrick.length) throw new Error("السوا بس لما تكون قائد الأكلة");
+    const remaining = 8 - st2.trickHistory.length;
     if (remaining > 4) throw new Error("السوا بس بآخر 4 أكلات");
-    const valid = sawaGuaranteed(st, seat);
-    const revealHands = valid ? st.hands.map((h) => h.slice()) : null;
+    const valid = sawaGuaranteed(st2, seat);
+    const revealHands = valid ? st2.hands.map((h) => h.slice()) : null;
     const events = [{ type: "sawaClaimed", seat, valid, remaining, hands: revealHands }];
     if (valid) {
-      while (st.hands.some((h) => h.length)) {
+      while (st2.hands.some((h) => h.length)) {
         const plays = [];
         for (let p = 0; p < 4; p++) {
           const s = (seat + p) % 4;
-          if (st.hands[s].length) {
-            const c = st.hands[s].shift();
+          if (st2.hands[s].length) {
+            const c = st2.hands[s].shift();
             plays.push({ seat: s, card: c });
-            st.playedCards.push(c);
+            st2.playedCards.push(c);
           }
         }
-        st.trickHistory.push({ plays, winner: seat, pts: plays.reduce((t, x) => t + cardPoints(x.card, st.mode, st.trump), 0) });
+        st2.trickHistory.push({ plays, winner: seat, pts: plays.reduce((t, x) => t + cardPoints(x.card, st2.mode, st2.trump), 0) });
       }
-      st.currentTrick = [];
-      const result = scoreHand(st);
+      st2.currentTrick = [];
+      const result = scoreHand(st2);
       result.sawa = { seat, valid: true, hands: revealHands };
       match.totals[0] += result.qaid[0];
       match.totals[1] += result.qaid[1];
-      match.handResults.push({ mode: st.mode, trump: st.trump, buyer: st.buyer, qaid: result.qaid, buyerLost: result.buyerLost, capotTeam: result.capotTeam, sawa: true });
+      match.handResults.push({ mode: st2.mode, trump: st2.trump, buyer: st2.buyer, qaid: result.qaid, buyerLost: result.buyerLost, capotTeam: result.capotTeam, sawa: true });
       match.handsPlayed++;
-      st.phase = "handEnd";
-      st.result = result;
+      st2.phase = "handEnd";
+      st2.result = result;
       events.push({ type: "handEnd", result });
     } else {
       finishClaimedHand(match, events, {
@@ -491,16 +491,16 @@
     return events;
   }
   function finishClaimedHand(match, events, info) {
-    const st = match.state;
+    const st2 = match.state;
     const balootQaid = [0, 0];
-    if (st.balootTeam != null) balootQaid[st.balootTeam] = BALOOT_QAID;
-    const mult = st.doubleLevel || 1;
+    if (st2.balootTeam != null) balootQaid[st2.balootTeam] = BALOOT_QAID;
+    const mult = st2.doubleLevel || 1;
     const qaid = [0, 0];
-    qaid[info.winTeam] = (st.mode === "hokum" ? 25 : 44) * mult + balootQaid[info.winTeam];
+    qaid[info.winTeam] = (st2.mode === "hokum" ? 25 : 44) * mult + balootQaid[info.winTeam];
     qaid[info.loseTeam] = balootQaid[info.loseTeam];
     match.totals[0] += qaid[0];
     match.totals[1] += qaid[1];
-    match.handResults.push({ mode: st.mode, trump: st.trump, buyer: st.buyer, qaid, buyerLost: true, capotTeam: null, qatClaim: true });
+    match.handResults.push({ mode: st2.mode, trump: st2.trump, buyer: st2.buyer, qaid, buyerLost: true, capotTeam: null, qatClaim: true });
     match.handsPlayed++;
     const result = {
       qaid,
@@ -514,9 +514,9 @@
       qatClaim: info.qatClaim,
       doubleLevel: mult
     };
-    st.phase = "handEnd";
-    st.result = result;
-    st.violation = null;
+    st2.phase = "handEnd";
+    st2.result = result;
+    st2.violation = null;
     events.push({ type: "handEnd", result });
   }
   function checkMatchEnd(match, events) {
@@ -530,112 +530,112 @@
     }
   }
   function playCard(match, seat, card) {
-    const st = match.state;
-    if (st.phase !== "playing" || st.turn !== seat) throw new Error("مو دورك");
-    const hand = st.hands[seat];
+    const st2 = match.state;
+    if (st2.phase !== "playing" || st2.turn !== seat) throw new Error("مو دورك");
+    const hand = st2.hands[seat];
     const idx = hand.findIndex((c) => sameCard(c, card));
     if (idx === -1) throw new Error("الورقة مو عندك");
-    const strict = (st.doubleLevel || 1) >= 2;
-    const legal = legalMoves(hand, st.currentTrick, st.mode, st.trump, seat, strict);
+    const strict = (st2.doubleLevel || 1) >= 2;
+    const legal = legalMoves(hand, st2.currentTrick, st2.mode, st2.trump, seat, strict);
     const isLegal = legal.some((c) => sameCard(c, card));
     if (!isLegal) {
       if (match.safeMode) throw new Error("حركة غير قانونية");
-      st.pendingViolations.push({
+      st2.pendingViolations.push({
         seat,
         card: { suit: card.suit, rank: card.rank },
-        trickIndex: st.trickHistory.length,
-        vtype: classifyViolation(hand, st.currentTrick, st.mode, st.trump, card, seat, st.doubleLevel),
+        trickIndex: st2.trickHistory.length,
+        vtype: classifyViolation(hand, st2.currentTrick, st2.mode, st2.trump, card, seat, st2.doubleLevel),
         escaped: legal.map((c) => ({ suit: c.suit, rank: c.rank }))
       });
     }
-    if (st.currentTrick.length) {
-      const led = st.currentTrick[0].card.suit;
-      if (card.suit !== led) st.voids[seat].add(led);
+    if (st2.currentTrick.length) {
+      const led = st2.currentTrick[0].card.suit;
+      if (card.suit !== led) st2.voids[seat].add(led);
     }
     hand.splice(idx, 1);
-    st.currentTrick.push({ seat, card });
-    st.playedCards.push(card);
-    const events = [{ type: "played", seat, card, lead: st.currentTrick.length === 1 }];
-    if (st.mode === "hokum" && card.suit === st.trump && (card.rank === "K" || card.rank === "Q")) {
-      const bs = st.balootState;
-      const curTrick = st.trickHistory.length;
-      if (bs && bs.seat === seat && bs.rank !== card.rank && curTrick === bs.trickIndex + 1 && st.balootTeam == null) {
-        st.balootTeam = teamOf(seat);
-        st.balootSeat = seat;
-        st.balootState = null;
+    st2.currentTrick.push({ seat, card });
+    st2.playedCards.push(card);
+    const events = [{ type: "played", seat, card, lead: st2.currentTrick.length === 1 }];
+    if (st2.mode === "hokum" && card.suit === st2.trump && (card.rank === "K" || card.rank === "Q")) {
+      const bs = st2.balootState;
+      const curTrick = st2.trickHistory.length;
+      if (bs && bs.seat === seat && bs.rank !== card.rank && curTrick === bs.trickIndex + 1 && st2.balootTeam == null) {
+        st2.balootTeam = teamOf(seat);
+        st2.balootSeat = seat;
+        st2.balootState = null;
         events.push({ type: "baloot", seat });
       } else {
-        st.balootState = { seat, rank: card.rank, trickIndex: curTrick };
+        st2.balootState = { seat, rank: card.rank, trickIndex: curTrick };
       }
     }
-    for (const pv of st.pendingViolations) {
+    for (const pv of st2.pendingViolations) {
       if (pv.confirmed || pv.seat !== seat) continue;
       if (pv.escaped.some((e) => sameCard(e, card))) {
         pv.confirmed = true;
-        st.violation = { seat: pv.seat, card: pv.card, trickIndex: pv.trickIndex, vtype: pv.vtype || "qatee", provedBy: { suit: card.suit, rank: card.rank } };
+        st2.violation = { seat: pv.seat, card: pv.card, trickIndex: pv.trickIndex, vtype: pv.vtype || "qatee", provedBy: { suit: card.suit, rank: card.rank } };
         events.push({ type: "violationRevealed", seat: pv.seat, card: pv.card, trickIndex: pv.trickIndex, provedBy: card });
       }
     }
-    if (st.trickHistory.length === 0 && st.pendingAnnounce.length) {
-      const mine = st.pendingAnnounce.filter((p) => p.seat === seat);
+    if (st2.trickHistory.length === 0 && st2.pendingAnnounce.length) {
+      const mine = st2.pendingAnnounce.filter((p) => p.seat === seat);
       if (mine.length) {
-        st.pendingAnnounce = st.pendingAnnounce.filter((p) => p.seat !== seat);
+        st2.pendingAnnounce = st2.pendingAnnounce.filter((p) => p.seat !== seat);
         const stamped = mine.map((m) => ({ seat: m.seat, name: m.name, type: m.type, at: Date.now() }));
-        st.announcedProjects.push(...stamped);
+        st2.announcedProjects.push(...stamped);
         events.push({ type: "projectAnnounce", seat, names: mine.map((m) => m.name) });
       }
     }
-    if (st.trickHistory.length === 1 && st.pendingReveal.length) {
-      const mine = st.pendingReveal.filter((p) => p.seat === seat);
+    if (st2.trickHistory.length === 1 && st2.pendingReveal.length) {
+      const mine = st2.pendingReveal.filter((p) => p.seat === seat);
       if (mine.length) {
-        st.pendingReveal = st.pendingReveal.filter((p) => p.seat !== seat);
+        st2.pendingReveal = st2.pendingReveal.filter((p) => p.seat !== seat);
         const stamped = mine.map((m) => Object.assign({ at: Date.now() }, m));
-        st.revealedProjects.push(...stamped);
+        st2.revealedProjects.push(...stamped);
         for (const p of mine) {
           const restCards = p.cards.filter((c) => !sameCard(c, card));
           events.push({ type: "projectReveal", seat: p.seat, name: p.name, qaid: p.qaid, cards: p.cards, restCards });
         }
       }
     }
-    if (st.currentTrick.length === 4) {
-      const wIdx = trickWinnerIdx(st.currentTrick, st.mode, st.trump);
-      const winner = st.currentTrick[wIdx].seat;
-      const trickPts = st.currentTrick.reduce((s, t) => s + cardPoints(t.card, st.mode, st.trump), 0);
-      st.trickHistory.push({ plays: st.currentTrick.slice(), winner, pts: trickPts });
-      const finishedPlays = st.trickHistory[st.trickHistory.length - 1].plays;
-      st.currentTrick = [];
-      st.leader = winner;
-      st.turn = winner;
-      st.violation = null;
+    if (st2.currentTrick.length === 4) {
+      const wIdx = trickWinnerIdx(st2.currentTrick, st2.mode, st2.trump);
+      const winner = st2.currentTrick[wIdx].seat;
+      const trickPts = st2.currentTrick.reduce((s, t) => s + cardPoints(t.card, st2.mode, st2.trump), 0);
+      st2.trickHistory.push({ plays: st2.currentTrick.slice(), winner, pts: trickPts });
+      const finishedPlays = st2.trickHistory[st2.trickHistory.length - 1].plays;
+      st2.currentTrick = [];
+      st2.leader = winner;
+      st2.turn = winner;
+      st2.violation = null;
       events.push({ type: "trickEnd", winner, pts: trickPts, plays: finishedPlays });
-      if (st.trickHistory.length === 8) {
+      if (st2.trickHistory.length === 8) {
         const result = scoreHand(match.state);
         match.totals[0] += result.qaid[0];
         match.totals[1] += result.qaid[1];
         match.handResults.push({
-          mode: st.mode,
-          trump: st.trump,
-          buyer: st.buyer,
+          mode: st2.mode,
+          trump: st2.trump,
+          buyer: st2.buyer,
           qaid: result.qaid,
           buyerLost: result.buyerLost,
           capotTeam: result.capotTeam
         });
         match.handsPlayed++;
-        st.phase = "handEnd";
-        st.result = result;
+        st2.phase = "handEnd";
+        st2.result = result;
         events.push({ type: "handEnd", result });
         checkMatchEnd(match, events);
       }
     } else {
-      st.turn = (st.turn + 1) % 4;
+      st2.turn = (st2.turn + 1) % 4;
     }
     return events;
   }
   function claimQaid(match, claimingSeat, claimType) {
-    const st = match.state;
-    if (st.phase !== "playing") throw new Error("مو وقت القيد");
+    const st2 = match.state;
+    if (st2.phase !== "playing") throw new Error("مو وقت القيد");
     const claimTeam = teamOf(claimingSeat);
-    const v = st.violation;
+    const v = st2.violation;
     const correct = !!v && teamOf(v.seat) !== claimTeam && (!claimType || claimType === v.vtype);
     const events = [];
     if (correct) {
@@ -668,7 +668,7 @@
         }
       });
     }
-    const qc = st.result.qatClaim;
+    const qc = st2.result.qatClaim;
     events.unshift({ type: "qatClaimed", seat: claimingSeat, violSeat: qc.violSeat, failed: qc.failed, typeName: qc.typeName });
     checkMatchEnd(match, events);
     return events;
@@ -680,8 +680,8 @@
 
   // js/engine/bidding.js
   function applyBid(match, seat, action, rng) {
-    const st = match.state;
-    const b = st.bidding;
+    const st2 = match.state;
+    const b = st2.bidding;
     if (seat !== b.turn) throw new Error("مو دورك بعد");
     const events = [];
     if (action.type === "sun") {
@@ -700,8 +700,8 @@
       return events;
     }
     if (action.type === "hokum") {
-      const suit = b.round === 1 ? st.topCard.suit : action.suit;
-      if (b.round === 2 && suit === st.topCard.suit) throw new Error("حكم ثاني لازم لون غير المكشوف");
+      const suit = b.round === 1 ? st2.topCard.suit : action.suit;
+      if (b.round === 2 && suit === st2.topCard.suit) throw new Error("حكم ثاني لازم لون غير المكشوف");
       if (!b.best) b.best = { type: "hokum", seat, suit };
       events.push({ type: "bid", seat, say: b.round === 1 ? "حكم" : "حكم ثاني" });
     } else {
@@ -714,7 +714,7 @@
       } else if (b.round === 1) {
         b.round = 2;
         b.spoken = 0;
-        b.turn = st.firstPlayer;
+        b.turn = st2.firstPlayer;
         b.best = null;
         events.push({ type: "round2" });
       } else {
@@ -728,83 +728,83 @@
     return events;
   }
   function finalizeBid(match, events) {
-    const st = match.state;
-    const best = st.bidding.best;
-    st.buyer = best.seat;
-    st.ashkal = best.type === "ashkal";
-    st.mode = st.ashkal ? "sun" : best.type;
-    st.trump = best.type === "hokum" ? best.suit : null;
-    const topRecipient = st.ashkal ? (st.buyer + 2) % 4 : st.buyer;
+    const st2 = match.state;
+    const best = st2.bidding.best;
+    st2.buyer = best.seat;
+    st2.ashkal = best.type === "ashkal";
+    st2.mode = st2.ashkal ? "sun" : best.type;
+    st2.trump = best.type === "hokum" ? best.suit : null;
+    const topRecipient = st2.ashkal ? (st2.buyer + 2) % 4 : st2.buyer;
     let ri = 0;
-    st.hands[topRecipient].push(st.rest[ri++], st.rest[ri++]);
+    st2.hands[topRecipient].push(st2.rest[ri++], st2.rest[ri++]);
     for (let p = 0; p < 4; p++) {
       if (p === topRecipient) continue;
-      st.hands[p].push(st.rest[ri++], st.rest[ri++], st.rest[ri++]);
+      st2.hands[p].push(st2.rest[ri++], st2.rest[ri++], st2.rest[ri++]);
     }
-    st.hands[topRecipient].push(st.topCard);
-    st.projects = [];
+    st2.hands[topRecipient].push(st2.topCard);
+    st2.projects = [];
     for (let p = 0; p < 4; p++) {
-      for (const pr of findProjects(st.hands[p], st.mode, st.trump)) {
-        st.projects.push(Object.assign({ seat: p }, pr));
+      for (const pr of findProjects(st2.hands[p], st2.mode, st2.trump)) {
+        st2.projects.push(Object.assign({ seat: p }, pr));
       }
     }
-    st.phase = "playing";
-    st.leader = st.firstPlayer;
-    st.turn = st.firstPlayer;
-    events.push({ type: "bidWon", seat: st.buyer, mode: st.mode, trump: st.trump, ashkal: st.ashkal });
-    st.doubleLevel = 1;
-    st.doubleTeam = null;
-    const buyerTeam = teamOf(st.buyer);
+    st2.phase = "playing";
+    st2.leader = st2.firstPlayer;
+    st2.turn = st2.firstPlayer;
+    events.push({ type: "bidWon", seat: st2.buyer, mode: st2.mode, trump: st2.trump, ashkal: st2.ashkal });
+    st2.doubleLevel = 1;
+    st2.doubleTeam = null;
+    const buyerTeam = teamOf(st2.buyer);
     const oppTeam = 1 - buyerTeam;
-    const sunDoubleAllowed = st.mode === "hokum" || match.totals[buyerTeam] > 100 && match.totals[oppTeam] <= 100;
+    const sunDoubleAllowed = st2.mode === "hokum" || match.totals[buyerTeam] > 100 && match.totals[oppTeam] <= 100;
     if (sunDoubleAllowed) {
-      st.awaitingDouble = true;
-      st.doubling = { turn: (st.buyer + 1) % 4, stage: "offer", nextLevel: 2 };
-      events.push({ type: "doubleOpen", turn: st.doubling.turn, stage: "offer" });
+      st2.awaitingDouble = true;
+      st2.doubling = { turn: (st2.buyer + 1) % 4, stage: "offer", nextLevel: 2 };
+      events.push({ type: "doubleOpen", turn: st2.doubling.turn, stage: "offer" });
     } else {
-      st.awaitingDouble = false;
-      st.doubling = null;
+      st2.awaitingDouble = false;
+      st2.doubling = null;
     }
-    st.countedProjects = [];
-    st.droppedProjects = [];
+    st2.countedProjects = [];
+    st2.droppedProjects = [];
     const humanSeats = [];
     for (let p = 0; p < 4; p++) {
-      if (!match.players[p].isBot && st.projects.some((pr) => pr.seat === p)) humanSeats.push(p);
+      if (!match.players[p].isBot && st2.projects.some((pr) => pr.seat === p)) humanSeats.push(p);
     }
     if (!match.autoDeclare && humanSeats.length) {
-      st.awaitingDeclare = true;
-      st.declareSeats = humanSeats.slice();
-      st.declarations = {};
+      st2.awaitingDeclare = true;
+      st2.declareSeats = humanSeats.slice();
+      st2.declarations = {};
       events.push({ type: "declareProjects", seats: humanSeats.slice() });
     } else {
       finalizeProjects(match, {});
     }
   }
   function applyDouble(match, seat, action) {
-    const st = match.state;
-    if (!st.awaitingDouble || !st.doubling) throw new Error("مو وقت الدبل");
-    const d = st.doubling;
+    const st2 = match.state;
+    if (!st2.awaitingDouble || !st2.doubling) throw new Error("مو وقت الدبل");
+    const d = st2.doubling;
     if (seat !== d.turn) throw new Error("مو دورك بالدبل");
     const events = [];
     if (action && action.type === "double") {
       const level = d.nextLevel;
-      st.doubleLevel = level;
-      st.doubleTeam = teamOf(seat);
+      st2.doubleLevel = level;
+      st2.doubleTeam = teamOf(seat);
       events.push({ type: "doubled", seat, level });
-      if (level >= 4 || st.mode === "sun") {
-        st.awaitingDouble = false;
-        st.doubling = null;
+      if (level >= 4 || st2.mode === "sun") {
+        st2.awaitingDouble = false;
+        st2.doubling = null;
         events.push({ type: "doublingClosed", level });
       } else {
-        d.turn = teamOf(seat) === teamOf(st.buyer) ? (st.buyer + 1) % 4 : st.buyer;
+        d.turn = teamOf(seat) === teamOf(st2.buyer) ? (st2.buyer + 1) % 4 : st2.buyer;
         d.stage = level === 2 ? "redouble" : "recoat";
         d.nextLevel = level + 1;
         events.push({ type: "doubleOpen", turn: d.turn, stage: d.stage });
       }
     } else {
-      st.awaitingDouble = false;
-      st.doubling = null;
-      events.push({ type: "doublingClosed", level: st.doubleLevel });
+      st2.awaitingDouble = false;
+      st2.doubling = null;
+      events.push({ type: "doublingClosed", level: st2.doubleLevel });
     }
     return events;
   }
@@ -943,8 +943,12 @@
     speed: "normal",
     online: null,
     // null = لعب محلي؛ غير null = {code, seat, isHost, actionBuffer, unsubs, started, hostPump, syncSnapshot}
-    awaitingServerAck: false
+    awaitingServerAck: false,
     // عميل أونلاين: يمنع سبام/دبل-تاب يدفع نفس الحركة مرتين قبل ما توصل لقطة جديدة
+    _ackTimeout: null,
+    // مهلة إعادة ضبط awaitingServerAck إذا ما وصلت لقطة
+    uiStatus: null
+    // حالة الواجهة المرسلة من Flutter (playing/trickEnd/roundEnd/...)
   };
   var botDelay = () => (S.speed === "fast" ? 150 : 350) + Math.random() * (S.speed === "fast" ? 100 : 200);
 
@@ -1001,18 +1005,35 @@
   function levelBadge(level) {
     return { beginner: "مبتدئ 🐣", amateur: "نص نص", skilled: "شاطر", pro: "وحش 🔥" }[level] || "";
   }
-  function activeSeat(st) {
-    if (!st) return null;
-    if (st.awaitingDeclare) return (st.declareSeats || [])[0];
-    if (st.awaitingDouble) return st.doubling.turn;
-    if (st.phase === "bidding") return st.bidding.turn;
-    if (st.phase === "playing") return st.turn;
+  var AVATAR_FALLBACKS = { 0: "😎", 1: "🤖", 2: "🤝", 3: "🤖" };
+  function renderAvatar(avatarEl, player, pos) {
+    if (!avatarEl) return;
+    if (player && player.avatarUrl) {
+      const img = document.createElement("img");
+      img.src = player.avatarUrl;
+      img.alt = player.name || "";
+      img.onerror = () => {
+        avatarEl.textContent = (player.name ? player.name.charAt(0) : "") || AVATAR_FALLBACKS[pos] || "🃏";
+      };
+      avatarEl.innerHTML = "";
+      avatarEl.appendChild(img);
+    } else {
+      const initial = player && player.name ? player.name.charAt(0) : "";
+      avatarEl.textContent = initial || AVATAR_FALLBACKS[pos] || "🃏";
+    }
+  }
+  function activeSeat(st2) {
+    if (!st2) return null;
+    if (st2.awaitingDeclare) return (st2.declareSeats || [])[0];
+    if (st2.awaitingDouble) return st2.doubling.turn;
+    if (st2.phase === "bidding") return st2.bidding.turn;
+    if (st2.phase === "playing") return st2.turn;
     return null;
   }
   function renderSeats(match, mySeat, players) {
-    const st = match.state;
+    const st2 = match.state;
     const vs = vsFor(mySeat);
-    const active = activeSeat(st);
+    const active = activeSeat(st2);
     for (let seat = 0; seat < 4; seat++) {
       const pos = vs(seat);
       const seatEl = $("seat-" + pos);
@@ -1021,48 +1042,70 @@
       seatEl.classList.toggle("is-dealer", match.dealer === seat);
       const nameEl = seatEl.querySelector(".bt-pname");
       const levelEl = seatEl.querySelector(".bt-plevel");
+      const avatarEl = seatEl.querySelector(".bt-avatar");
       if (nameEl) nameEl.textContent = players[seat] ? players[seat].name : "";
       if (levelEl) levelEl.textContent = players[seat] && players[seat].isBot ? levelBadge(players[seat].level) : "";
+      renderAvatar(avatarEl, players[seat], pos);
       const hukumBadge = seatEl.querySelector(".bt-hukum-badge");
       if (hukumBadge) {
-        const showTrump = st && st.mode === "hokum" && st.buyer === seat;
+        const showTrump = st2 && st2.mode === "hokum" && st2.buyer === seat;
         hukumBadge.hidden = !showTrump;
-        if (showTrump) hukumBadge.textContent = st.trump;
+        if (showTrump) hukumBadge.textContent = st2.trump;
       }
       if (pos !== 0) {
         const backs = seatEl.querySelector(".bt-backs");
         if (backs) {
-          const count = st ? st.hands[seat] ? st.hands[seat].length : 0 : 0;
-          backs.innerHTML = "";
-          for (let i = 0; i < Math.min(count, 8); i++) backs.appendChild(cardBackEl());
+          const count = st2 ? st2.hands[seat] ? st2.hands[seat].length : 0 : 0;
+          const lastCount = backs._lastCount ?? -1;
+          if (count !== lastCount) {
+            backs._lastCount = count;
+            const current = backs.children.length;
+            if (current < count) {
+              for (let i = current; i < Math.min(count, 8); i++) backs.appendChild(cardBackEl());
+            } else if (current > count) {
+              for (let i = current - 1; i >= count; i--) backs.removeChild(backs.children[i]);
+            }
+          }
         }
       }
       const projs = seatEl.querySelector(".bt-projs");
       if (projs) {
-        projs.innerHTML = "";
-        const mine = (st.announcedProjects || []).filter((p) => p.seat === seat);
-        for (const p of mine) {
-          const chip = document.createElement("span");
-          chip.className = "bt-proj-chip";
-          chip.textContent = p.name;
-          projs.appendChild(chip);
+        const mine = (st2.announcedProjects || []).filter((p) => p.seat === seat);
+        const projsKey = mine.map((p) => p.name).join(",");
+        if (projs._lastKey !== projsKey) {
+          projs._lastKey = projsKey;
+          projs.innerHTML = "";
+          for (const p of mine) {
+            const chip = document.createElement("span");
+            chip.className = "bt-proj-chip";
+            chip.textContent = p.name;
+            projs.appendChild(chip);
+          }
         }
       }
     }
   }
   function renderHand(match, mySeat, onPlay) {
-    const st = match.state;
+    const st2 = match.state;
     const handEl = $("hand");
+    if (!st2 || st2.phase !== "playing") {
+      handEl.innerHTML = "";
+      handEl._lastKey = null;
+      return;
+    }
+    const hand = sortHand(st2.hands[mySeat], st2.trump);
+    const handKey = hand.map((c) => c.key).join(",");
+    const stateKey = `${handKey}|${st2.turn}|${st2.currentTrick.length}|${st2.doubleLevel || 1}`;
+    if (handEl._lastKey === stateKey) return;
+    handEl._lastKey = stateKey;
     handEl.innerHTML = "";
-    if (!st || st.phase !== "playing") return;
-    const hand = sortHand(st.hands[mySeat], st.trump);
-    const strict = (st.doubleLevel || 1) >= 2;
+    const strict = (st2.doubleLevel || 1) >= 2;
     let legal = [];
-    if (st.turn === mySeat) {
-      legal = legalMoves(hand, st.currentTrick, st.mode, st.trump, mySeat, strict);
+    if (st2.turn === mySeat) {
+      legal = legalMoves(hand, st2.currentTrick, st2.mode, st2.trump, mySeat, strict);
     }
     for (const c of hand) {
-      const isLegal = st.turn === mySeat && legal.some((l) => l.suit === c.suit && l.rank === c.rank);
+      const isLegal = st2.turn === mySeat && legal.some((l) => l.suit === c.suit && l.rank === c.rank);
       const card = cardEl(c, isLegal ? "is-legal" : "");
       if (isLegal) card.addEventListener("click", () => onPlay(c));
       handEl.appendChild(card);
@@ -1076,6 +1119,9 @@
   };
   function renderTrickCards(plays, mySeat) {
     const zone = $("trick-zone");
+    const trickKey = plays.map((p) => `${p.seat}:${p.card.key}`).join(",");
+    if (zone._lastKey === trickKey) return;
+    zone._lastKey = trickKey;
     zone.innerHTML = "";
     const vs = vsFor(mySeat);
     for (const play of plays) {
@@ -1093,26 +1139,30 @@
     renderTrickCards(match.state.currentTrick, mySeat);
   }
   function renderBidCenter(match) {
-    const st = match.state;
+    const st2 = match.state;
     const center = $("bid-center");
-    if (!st || st.phase !== "bidding") {
+    if (!st2 || st2.phase !== "bidding") {
       center.hidden = true;
+      center._lastKey = null;
       return;
     }
     center.hidden = false;
+    const bidKey = `${st2.topCard.key}|${st2.bidding.round}`;
+    if (center._lastKey === bidKey) return;
+    center._lastKey = bidKey;
     const slot = $("top-card-slot");
     slot.innerHTML = "";
-    slot.appendChild(cardEl(st.topCard));
-    $("bid-hint").textContent = st.bidding.round === 1 ? "الجولة الأولى" : "الجولة الثانية";
+    slot.appendChild(cardEl(st2.topCard));
+    $("bid-hint").textContent = st2.bidding.round === 1 ? "الجولة الأولى" : "الجولة الثانية";
   }
   function setBuyerBadge(match) {
-    const st = match.state;
+    const st2 = match.state;
     const badge = $("buyer-badge");
-    if (!st || st.buyer == null || st.phase === "bidding") {
+    if (!st2 || st2.buyer == null || st2.phase === "bidding") {
       badge.textContent = "";
       return;
     }
-    const modeTxt = st.mode === "hokum" ? `حكم ${st.trump}` : "صن";
+    const modeTxt = st2.mode === "hokum" ? `حكم ${st2.trump}` : "صن";
     badge.textContent = modeTxt;
   }
   function showBanner(text, ms = 1600) {
@@ -1123,10 +1173,14 @@
     b._t = setTimeout(() => b.classList.remove("show"), ms);
   }
   function updateQaidButton(show) {
-    $("qaid-btn").hidden = !show;
+    const el2 = $("qaid-btn");
+    el2.hidden = !show;
+    el2.disabled = !show;
   }
   function updateSawaButton(show) {
-    $("sawa-btn").hidden = !show;
+    const el2 = $("sawa-btn");
+    el2.hidden = !show;
+    el2.disabled = !show;
   }
   function renderAll(match, mySeat, players, onPlay) {
     renderScores(match, mySeat);
@@ -1215,7 +1269,7 @@
   function showOverlay(id) {
     $(id).classList.add("show");
   }
-  function hideOverlay(id) {
+  function hideOverlay2(id) {
     $(id).classList.remove("show");
   }
 
@@ -1258,11 +1312,11 @@
     return score;
   }
   function decideBid(match, seat, level) {
-    const st = match.state;
-    const hand = st.hands[seat];
-    const top = st.topCard;
-    const round = st.bidding.round;
-    const best = st.bidding.best;
+    const st2 = match.state;
+    const hand = st2.hands[seat];
+    const top = st2.topCard;
+    const round = st2.bidding.round;
+    const best = st2.bidding.best;
     const th = {
       beginner: { hokum: 6.6, sun: 7.7, noise: 2 },
       amateur: { hokum: 6.1, sun: 7.3, noise: 1 },
@@ -1272,7 +1326,7 @@
     let adj = 0;
     if (round === 2) {
       adj -= 0.4;
-      if (st.bidding.spoken === 3 && !best) adj -= 0.8;
+      if (st2.bidding.spoken === 3 && !best) adj -= 0.8;
     }
     th.hokum += adj;
     th.sun += adj;
@@ -1309,101 +1363,101 @@
     if (canSun && sunScore >= th.sun) return { type: "sun" };
     return { type: "pass" };
   }
-  function isMaster(card, st) {
-    const order = st.mode === "hokum" && card.suit === st.trump ? HOKUM_TRUMP_ORDER : SUN_ORDER;
+  function isMaster(card, st2) {
+    const order = st2.mode === "hokum" && card.suit === st2.trump ? HOKUM_TRUMP_ORDER : SUN_ORDER;
     const myPow = order.indexOf(card.rank);
     for (const r of RANKS) {
       if (order.indexOf(r) <= myPow) continue;
-      const played = st.playedCards.some((c) => c.suit === card.suit && c.rank === r);
+      const played = st2.playedCards.some((c) => c.suit === card.suit && c.rank === r);
       if (!played) return false;
     }
     return true;
   }
-  function trickPoints(trick, st) {
-    return trick.reduce((s, t) => s + cardPoints(t.card, st.mode, st.trump), 0);
+  function trickPoints(trick, st2) {
+    return trick.reduce((s, t) => s + cardPoints(t.card, st2.mode, st2.trump), 0);
   }
-  function currentWinner(trick, st) {
+  function currentWinner(trick, st2) {
     if (!trick.length) return null;
-    return trick[trickWinnerIdx(trick, st.mode, st.trump)].seat;
+    return trick[trickWinnerIdx(trick, st2.mode, st2.trump)].seat;
   }
-  function strength(card, led, st) {
-    return cardStrength(card, led, st.mode, st.trump);
+  function strength(card, led, st2) {
+    return cardStrength(card, led, st2.mode, st2.trump);
   }
-  function lowestBy(cards, st) {
+  function lowestBy(cards, st2) {
     return cards.slice().sort((a, b) => {
-      const pa = cardPoints(a, st.mode, st.trump), pb = cardPoints(b, st.mode, st.trump);
+      const pa = cardPoints(a, st2.mode, st2.trump), pb = cardPoints(b, st2.mode, st2.trump);
       if (pa !== pb) return pa - pb;
-      return strength(a, a.suit, st) - strength(b, b.suit, st);
+      return strength(a, a.suit, st2) - strength(b, b.suit, st2);
     })[0];
   }
   function decidePlay(match, seat, level) {
-    const st = match.state;
-    const hand = st.hands[seat];
-    const strict = (st.doubleLevel || 1) >= 2;
-    const legal = legalMoves(hand, st.currentTrick, st.mode, st.trump, seat, strict);
+    const st2 = match.state;
+    const hand = st2.hands[seat];
+    const strict = (st2.doubleLevel || 1) >= 2;
+    const legal = legalMoves(hand, st2.currentTrick, st2.mode, st2.trump, seat, strict);
     if (legal.length === 1) return legal[0];
     if (level === "beginner") return rand(legal);
-    const trick = st.currentTrick;
+    const trick = st2.currentTrick;
     const partner = (seat + 2) % 4;
     const isLast = trick.length === 3;
     if (!trick.length) {
       if (level !== "amateur") {
-        const masters = legal.filter((c) => isMaster(c, st));
+        const masters = legal.filter((c) => isMaster(c, st2));
         if (masters.length) {
-          return masters.sort((a, b) => cardPoints(b, st.mode, st.trump) - cardPoints(a, st.mode, st.trump))[0];
+          return masters.sort((a, b) => cardPoints(b, st2.mode, st2.trump) - cardPoints(a, st2.mode, st2.trump))[0];
         }
       }
-      if (level === "pro" && st.mode === "hokum") {
-        const trumpsOut = st.playedCards.filter((c) => c.suit === st.trump).length;
+      if (level === "pro" && st2.mode === "hokum") {
+        const trumpsOut = st2.playedCards.filter((c) => c.suit === st2.trump).length;
         for (const c of legal) {
-          if (c.suit !== st.trump && st.voids[partner].has(c.suit) && trumpsOut < 8) {
+          if (c.suit !== st2.trump && st2.voids[partner].has(c.suit) && trumpsOut < 8) {
             const opp1 = (seat + 1) % 4, opp2 = (seat + 3) % 4;
-            if (!st.voids[opp1].has(c.suit) || !st.voids[opp2].has(c.suit)) return c;
+            if (!st2.voids[opp1].has(c.suit) || !st2.voids[opp2].has(c.suit)) return c;
           }
         }
       }
-      if (st.mode === "hokum" && level !== "amateur") {
+      if (st2.mode === "hokum" && level !== "amateur") {
         const opp1 = (seat + 1) % 4, opp2 = (seat + 3) % 4;
-        const safe = legal.filter((c) => c.suit === st.trump || !st.voids[opp1].has(c.suit) && !st.voids[opp2].has(c.suit));
-        if (safe.length) return lowestBy(safe, st);
+        const safe = legal.filter((c) => c.suit === st2.trump || !st2.voids[opp1].has(c.suit) && !st2.voids[opp2].has(c.suit));
+        if (safe.length) return lowestBy(safe, st2);
       }
-      return lowestBy(legal, st);
+      return lowestBy(legal, st2);
     }
     const led = trick[0].card.suit;
-    const winSeat = currentWinner(trick, st);
+    const winSeat = currentWinner(trick, st2);
     const partnerWinning = teamOf(winSeat) === teamOf(seat);
-    const curBest = Math.max(...trick.map((t) => strength(t.card, led, st)));
-    const winners = legal.filter((c) => strength(c, led, st) > curBest);
-    const pts = trickPoints(trick, st);
+    const curBest = Math.max(...trick.map((t) => strength(t.card, led, st2)));
+    const winners = legal.filter((c) => strength(c, led, st2) > curBest);
+    const pts = trickPoints(trick, st2);
     if (partnerWinning) {
       if (level !== "amateur") {
         const partnerCard = trick.find((t) => t.seat === partner);
-        const partnerSolid = partnerCard && (isLast || isMaster(partnerCard.card, st));
+        const partnerSolid = partnerCard && (isLast || isMaster(partnerCard.card, st2));
         if (partnerSolid) {
-          const feed = legal.filter((c) => strength(c, led, st) <= curBest || c.suit !== led);
+          const feed = legal.filter((c) => strength(c, led, st2) <= curBest || c.suit !== led);
           if (feed.length) {
-            const fat = feed.sort((a, b) => cardPoints(b, st.mode, st.trump) - cardPoints(a, st.mode, st.trump))[0];
-            if (cardPoints(fat, st.mode, st.trump) >= 4) return fat;
-            return lowestBy(feed, st);
+            const fat = feed.sort((a, b) => cardPoints(b, st2.mode, st2.trump) - cardPoints(a, st2.mode, st2.trump))[0];
+            if (cardPoints(fat, st2.mode, st2.trump) >= 4) return fat;
+            return lowestBy(feed, st2);
           }
         }
       }
-      return lowestBy(legal, st);
+      return lowestBy(legal, st2);
     }
     if (winners.length) {
-      const cheapWin = winners.sort((a, b) => strength(a, led, st) - strength(b, led, st))[0];
+      const cheapWin = winners.sort((a, b) => strength(a, led, st2) - strength(b, led, st2))[0];
       if (level === "amateur") return cheapWin;
       if (isLast) return cheapWin;
-      if (pts >= 10 || cardPoints(cheapWin, st.mode, st.trump) <= 4) return cheapWin;
+      if (pts >= 10 || cardPoints(cheapWin, st2.mode, st2.trump) <= 4) return cheapWin;
       const cheap = legal.filter((c) => !winners.includes(c));
-      if (cheap.length && Math.random() < 0.6) return lowestBy(cheap, st);
+      if (cheap.length && Math.random() < 0.6) return lowestBy(cheap, st2);
       return cheapWin;
     }
-    return lowestBy(legal, st);
+    return lowestBy(legal, st2);
   }
   function handStrength(match, seat) {
-    const st = match.state;
-    return st.mode === "hokum" ? evalHokum(st.hands[seat], st.trump, st.topCard, false) : evalSun(st.hands[seat], st.topCard, false);
+    const st2 = match.state;
+    return st2.mode === "hokum" ? evalHokum(st2.hands[seat], st2.trump, st2.topCard, false) : evalSun(st2.hands[seat], st2.topCard, false);
   }
   function decideDouble(match, seat, level) {
     const isBuyTeam = teamOf(seat) === teamOf(match.state.buyer);
@@ -1416,23 +1470,23 @@
 
   // js/ui/grade.js
   function trackHumanCard(match, card, mySeat) {
-    const st = match.state;
-    const trick = st.currentTrick;
+    const st2 = match.state;
+    const trick = st2.currentTrick;
     if (!trick.length) return;
     const m = match.metrics;
     const led = trick[0].card.suit;
-    const legal = legalMoves(st.hands[mySeat], trick, st.mode, st.trump, mySeat);
-    const curBest = Math.max(...trick.map((t) => cardStrength(t.card, led, st.mode, st.trump)));
-    const winSeat = trick[trickWinnerIdx(trick, st.mode, st.trump)].seat;
+    const legal = legalMoves(st2.hands[mySeat], trick, st2.mode, st2.trump, mySeat);
+    const curBest = Math.max(...trick.map((t) => cardStrength(t.card, led, st2.mode, st2.trump)));
+    const winSeat = trick[trickWinnerIdx(trick, st2.mode, st2.trump)].seat;
     if (teamOf(winSeat) === teamOf(mySeat)) return;
-    const myStr = cardStrength(card, led, st.mode, st.trump);
+    const myStr = cardStrength(card, led, st2.mode, st2.trump);
     if (myStr > curBest) return;
-    const myPts = cardPoints(card, st.mode, st.trump);
-    const hasCheap = legal.some((c) => cardPoints(c, st.mode, st.trump) <= 4 && cardStrength(c, led, st.mode, st.trump) <= curBest);
+    const myPts = cardPoints(card, st2.mode, st2.trump);
+    const hasCheap = legal.some((c) => cardPoints(c, st2.mode, st2.trump) <= 4 && cardStrength(c, led, st2.mode, st2.trump) <= curBest);
     if (myPts >= 10 && hasCheap) m.pointMistakes++;
     if (trick.length === 3) {
-      const trickPts = trick.reduce((s, t) => s + cardPoints(t.card, st.mode, st.trump), 0);
-      const couldWin = legal.some((c) => cardStrength(c, led, st.mode, st.trump) > curBest);
+      const trickPts = trick.reduce((s, t) => s + cardPoints(t.card, st2.mode, st2.trump), 0);
+      const couldWin = legal.some((c) => cardStrength(c, led, st2.mode, st2.trump) > curBest);
       if (couldWin && trickPts >= 10) m.missedWins++;
     }
   }
@@ -1510,30 +1564,30 @@
   function startHumanTurnTimer() {
     clearHumanTurnTimer();
     if (!isStandalone() || !S.match) return;
-    const st = S.match.state;
-    const phase = st.phase;
+    const st2 = S.match.state;
+    const phase = st2.phase;
     humanTurnTimer = setTimeout(() => {
       if (!S.match || S.match.matchOver) return;
-      const st2 = S.match.state;
-      if (st2.phase !== phase) return;
-      if (st2.awaitingDeclare && (st2.declareSeats || []).includes(S.mySeat)) {
-        const types = st2.projects.filter((p) => p.seat === S.mySeat).map((p) => p.type);
+      const st22 = S.match.state;
+      if (st22.phase !== phase) return;
+      if (st22.awaitingDeclare && (st22.declareSeats || []).includes(S.mySeat)) {
+        const types = st22.projects.filter((p) => p.seat === S.mySeat).map((p) => p.type);
         finishDeclare(types);
         return;
       }
-      if (st2.awaitingDouble && st2.doubling && st2.doubling.turn === S.mySeat) {
+      if (st22.awaitingDouble && st22.doubling && st22.doubling.turn === S.mySeat) {
         humanDouble({ type: "pass" });
         return;
       }
-      if (st2.phase === "bidding" && st2.bidding.turn === S.mySeat) {
+      if (st22.phase === "bidding" && st22.bidding.turn === S.mySeat) {
         const action = decideBid(S.match, S.mySeat, S.players[S.mySeat].level);
         humanBid(action);
         return;
       }
-      if (st2.phase === "playing" && st2.turn === S.mySeat) {
-        const hand = st2.hands[S.mySeat];
-        const strict = (st2.doubleLevel || 1) >= 2;
-        const legal = legalMoves(hand, st2.currentTrick, st2.mode, st2.trump, S.mySeat, strict);
+      if (st22.phase === "playing" && st22.turn === S.mySeat) {
+        const hand = st22.hands[S.mySeat];
+        const strict = (st22.doubleLevel || 1) >= 2;
+        const legal = legalMoves(hand, st22.currentTrick, st22.mode, st22.trump, S.mySeat, strict);
         if (legal.length) {
           const card = legal[Math.floor(Math.random() * legal.length)];
           onHumanPlay(card);
@@ -1587,24 +1641,32 @@
   async function pump() {
     if (!S.match || S.match.matchOver) return;
     clearHumanTurnTimer();
-    const st = S.match.state;
-    if (st.phase === "handEnd" || st.phase === "matchEnd") return;
-    if (st.awaitingDeclare) {
-      const seat = st.declareSeats[0];
+    const st2 = S.match.state;
+    if (st2.phase === "handEnd" || st2.phase === "matchEnd") {
+      updateQaidButton(false);
+      updateSawaButton(false);
+      return;
+    }
+    if (st2.phase !== "playing" || st2.awaitingDeclare || st2.awaitingDouble) {
+      updateQaidButton(false);
+      updateSawaButton(false);
+    }
+    if (st2.awaitingDeclare) {
+      const seat = st2.declareSeats[0];
       if (seat === S.mySeat) {
         showDeclareDialog();
         startHumanTurnTimer();
         return;
       }
       await sleep(botDelay());
-      const types = st.projects.filter((p) => p.seat === seat).map((p) => p.type);
+      const types = st2.projects.filter((p) => p.seat === seat).map((p) => p.type);
       return safePump(() => {
         declareProject(S.match, seat, types);
         return [];
       });
     }
-    if (st.awaitingDouble) {
-      const seat = st.doubling.turn;
+    if (st2.awaitingDouble) {
+      const seat = st2.doubling.turn;
       if (seat === S.mySeat) {
         showDoubleDialog();
         startHumanTurnTimer();
@@ -1614,8 +1676,8 @@
       const wants = decideDouble(S.match, seat, S.players[seat].level);
       return safePump(() => applyDouble(S.match, seat, wants ? { type: "double" } : { type: "pass" }));
     }
-    if (st.phase === "bidding") {
-      const seat = st.bidding.turn;
+    if (st2.phase === "bidding") {
+      const seat = st2.bidding.turn;
       if (seat === S.mySeat) {
         showBidDialog();
         startHumanTurnTimer();
@@ -1625,11 +1687,12 @@
       const action = decideBid(S.match, seat, S.players[seat].level);
       return safePump(() => applyBid(S.match, seat, action));
     }
-    if (st.phase === "playing") {
-      updateQaidButton(canClaimQaid());
-      updateSawaButton(canClaimSawa());
+    if (st2.phase === "playing") {
+      const actionsAllowed = canShowActionButtons();
+      updateQaidButton(actionsAllowed && canClaimQaid());
+      updateSawaButton(actionsAllowed && canClaimSawa());
       if (await maybeBotClaims()) return;
-      const seat = st.turn;
+      const seat = st2.turn;
       if (seat === S.mySeat) {
         renderAll(S.match, S.mySeat, S.players, onHumanPlay);
         startHumanTurnTimer();
@@ -1643,22 +1706,25 @@
     }
   }
   function canClaimQaid() {
-    const st = S.match.state;
-    return !!st.violation && teamOf(st.violation.seat) !== teamOf(S.mySeat);
+    const st2 = S.match.state;
+    return !!st2.violation && teamOf(st2.violation.seat) !== teamOf(S.mySeat);
   }
   function canClaimSawa() {
-    const st = S.match.state;
-    return st.turn === S.mySeat && st.currentTrick.length === 0 && 8 - st.trickHistory.length <= 4;
+    const st2 = S.match.state;
+    return st2.turn === S.mySeat && st2.currentTrick.length === 0 && 8 - st2.trickHistory.length <= 4;
+  }
+  function canShowActionButtons() {
+    return S.uiStatus === "playing" || S.uiStatus == null;
   }
   async function maybeBotClaims() {
-    const st = S.match.state;
-    if (st.violation) {
+    const st2 = S.match.state;
+    if (st2.violation) {
       for (let s = 0; s < 4; s++) {
-        if (s === S.mySeat || teamOf(s) === teamOf(st.violation.seat)) continue;
-        if (Math.random() < botQaidChance(S.players[s].level, st.trickHistory.length)) {
+        if (s === S.mySeat || teamOf(s) === teamOf(st2.violation.seat)) continue;
+        if (Math.random() < botQaidChance(S.players[s].level, st2.trickHistory.length)) {
           await sleep(botDelay());
           try {
-            await handleEvents(claimQaid(S.match, s, st.violation.vtype));
+            await handleEvents(claimQaid(S.match, s, st2.violation.vtype));
           } catch (err) {
             console.warn("[baloot] قيد بوت أصبح غير صالح (سباق) — تُجوهل:", err && err.message);
           }
@@ -1667,9 +1733,9 @@
         }
       }
     }
-    if (st.currentTrick.length === 0 && 8 - st.trickHistory.length <= 4) {
-      const seat = st.turn;
-      if (seat !== S.mySeat && Math.random() < (BOT_SAWA_CHANCE[S.players[seat].level] || 0) && sawaGuaranteed(st, seat)) {
+    if (st2.currentTrick.length === 0 && 8 - st2.trickHistory.length <= 4) {
+      const seat = st2.turn;
+      if (seat !== S.mySeat && Math.random() < (BOT_SAWA_CHANCE[S.players[seat].level] || 0) && sawaGuaranteed(st2, seat)) {
         await sleep(botDelay());
         try {
           await handleEvents(claimSawa(S.match, seat));
@@ -1706,7 +1772,7 @@
     clearHumanTurnTimer();
     if (S.online && !S.online.isHost) {
       if (S.awaitingServerAck) return;
-      S.awaitingServerAck = true;
+      setAwaitingAck();
       pushAction(S.online.code, { type: "play", seat: S.mySeat, card });
       return;
     }
@@ -1745,19 +1811,37 @@
     return ev.say;
   }
   function showBidDialog() {
-    const st = S.match.state;
+    const st2 = S.match.state;
     const dealer = S.match.dealer;
     const ashkalEligible = S.mySeat === dealer || S.mySeat === (dealer + 3) % 4;
-    $("bid-ashkal").hidden = !(st.bidding.round === 1 && ashkalEligible);
-    $("bid-title").textContent = st.bidding.round === 1 ? "دورك بالشراء" : "الجولة الثانية";
+    $("bid-ashkal").hidden = !(st2.bidding.round === 1 && ashkalEligible);
+    $("bid-title").textContent = st2.bidding.round === 1 ? "دورك بالشراء" : "الجولة الثانية";
     $("suit-pick").innerHTML = "";
     $("suit-pick").hidden = true;
     openSheet("bid-dialog");
   }
+  function setAwaitingAck() {
+    S.awaitingServerAck = true;
+    if (S._ackTimeout) clearTimeout(S._ackTimeout);
+    S._ackTimeout = setTimeout(() => {
+      S.awaitingServerAck = false;
+      console.warn("[baloot] server ack timeout — allowing retry");
+    }, 3e3);
+  }
+  function clearAwaitingAck() {
+    S.awaitingServerAck = false;
+    if (S._ackTimeout) {
+      clearTimeout(S._ackTimeout);
+      S._ackTimeout = null;
+    }
+  }
+  function resetAck() {
+    clearAwaitingAck();
+  }
   async function safeAct(run, remoteAction) {
     if (S.online && !S.online.isHost) {
       if (S.awaitingServerAck) return;
-      S.awaitingServerAck = true;
+      setAwaitingAck();
       pushAction(S.online.code, { seat: S.mySeat, ...remoteAction });
       return;
     }
@@ -1784,12 +1868,12 @@
     $("bid-sun").onclick = () => humanBid({ type: "sun" });
     $("bid-ashkal").onclick = () => humanBid({ type: "ashkal" });
     $("bid-hokum").onclick = () => {
-      const st = S.match.state;
-      if (st.bidding.round === 1) {
+      const st2 = S.match.state;
+      if (st2.bidding.round === 1) {
         humanBid({ type: "hokum" });
         return;
       }
-      const suits = ["♠", "♥", "♦", "♣"].filter((s) => s !== st.topCard.suit);
+      const suits = ["♠", "♥", "♦", "♣"].filter((s) => s !== st2.topCard.suit);
       const pick = $("suit-pick");
       pick.innerHTML = "";
       pick.hidden = false;
@@ -1804,11 +1888,27 @@
     $("double-yes").onclick = () => humanDouble({ type: "double" });
     $("double-pass").onclick = () => humanDouble({ type: "pass" });
     $("declare-none").onclick = () => finishDeclare([]);
-    $("qaid-btn").onclick = () => openSheet("qaid-pick");
+    $("qaid-btn").onclick = () => {
+      if (!canShowActionButtons() || !canClaimQaid()) {
+        updateQaidButton(false);
+        return;
+      }
+      openSheet("qaid-pick");
+    };
     $("qaid-cancel").onclick = () => closeSheet("qaid-pick");
-    $("sawa-btn").onclick = () => safeAct(() => claimSawa(S.match, S.mySeat), { type: "sawa" });
+    $("sawa-btn").onclick = () => {
+      if (!canShowActionButtons() || !canClaimSawa()) {
+        updateSawaButton(false);
+        return;
+      }
+      safeAct(() => claimSawa(S.match, S.mySeat), { type: "sawa" });
+    };
     $("continue-btn").onclick = () => {
-      hideOverlay("hand-overlay");
+      hideOverlay2("hand-overlay");
+      if (window.__BLOOT_BRIDGE_ENABLED && window.BlootBridge) {
+        window.BlootBridge.send({ type: "action", action: "nextRound", seat: S.mySeat });
+        return;
+      }
       if (S.online) {
         if (!S.online.isHost) return;
         if (S.match.matchOver) return;
@@ -1826,7 +1926,7 @@
       pump();
     };
     $("again-btn").onclick = () => {
-      hideOverlay("match-overlay");
+      hideOverlay2("match-overlay");
       if (S.online) {
         S.online.leaveOnline();
         return;
@@ -1881,7 +1981,7 @@
     closeSheet("declare-dialog");
     if (S.online && !S.online.isHost) {
       if (S.awaitingServerAck) return;
-      S.awaitingServerAck = true;
+      setAwaitingAck();
       pushAction(S.online.code, { type: "declare", seat: S.mySeat, claimedTypes: types });
       return;
     }
@@ -1899,9 +1999,9 @@
     pump();
   }
   function showHandOverlay(result) {
-    const st = S.match.state;
-    const label = st.ashkal ? "أشكل 🔄" : st.mode === "sun" ? "صن ☀️" : `حكم ${st.trump}`;
-    const dblLabel = { 2: " · دبل ×2", 3: " · تربل ×3", 4: " · كوت ×4" }[st.doubleLevel] || "";
+    const st2 = S.match.state;
+    const label = st2.ashkal ? "أشكل 🔄" : st2.mode === "sun" ? "صن ☀️" : `حكم ${st2.trump}`;
+    const dblLabel = { 2: " · دبل ×2", 3: " · تربل ×3", 4: " · كوت ×4" }[st2.doubleLevel] || "";
     $("hand-title").textContent = `نتيجة الصكة — ${label}${dblLabel}`;
     const rows = [];
     if (result.qatClaim) {
@@ -2019,16 +2119,17 @@
   function renderClient() {
     if (!S.match) return;
     renderAll(S.match, S.mySeat, S.players, onHumanPlay);
-    const st = S.match.state;
-    updateQaidButton(!!st.violation && teamOf(st.violation.seat) !== teamOf(S.mySeat));
+    const st2 = S.match.state;
+    const canShowActions = canShowActionButtons() && st2.phase === "playing" && !st2.awaitingDeclare && !st2.awaitingDouble;
+    updateQaidButton(canShowActions && !!st2.violation && teamOf(st2.violation.seat) !== teamOf(S.mySeat));
     updateSawaButton(
-      st.turn === S.mySeat && st.currentTrick.length === 0 && 8 - st.trickHistory.length <= 4
+      canShowActions && st2.turn === S.mySeat && st2.currentTrick.length === 0 && 8 - st2.trickHistory.length <= 4
     );
-    if (st.awaitingDeclare && (st.declareSeats || []).includes(S.mySeat)) {
+    if (st2.awaitingDeclare && (st2.declareSeats || []).includes(S.mySeat)) {
       showDeclareDialog();
-    } else if (st.awaitingDouble && st.doubling.turn === S.mySeat) {
+    } else if (st2.awaitingDouble && st2.doubling.turn === S.mySeat) {
       showDoubleDialog();
-    } else if (st.phase === "bidding" && st.bidding.turn === S.mySeat) {
+    } else if (st2.phase === "bidding" && st2.bidding.turn === S.mySeat) {
       showBidDialog();
     }
   }
@@ -2053,6 +2154,7 @@
     S.mySeat = cfg.seat;
     S.players = cfg.players || [];
     S.safeMode = !!cfg.safeMode;
+    S.uiStatus = null;
     showScreen(null);
     $("topbar").hidden = false;
     $("footer-bar").hidden = false;
@@ -2067,10 +2169,16 @@
         if (!snap) return;
         playTransitionSounds(previousSnap, snap);
         previousSnap = JSON.parse(JSON.stringify(snap));
+        S.uiStatus = snap.status || S.uiStatus;
         const nextMatch = deserializeMatch(snap);
         S.match = nextMatch;
-        S.awaitingServerAck = false;
+        clearAwaitingAck();
         renderClient();
+        if (st.phase === "handEnd" && st.result && !nextMatch.matchOver && S.uiStatus !== "gameEnd") {
+          if (!$("hand-overlay").classList.contains("show")) showHandOverlay(st.result);
+        } else if (st.phase !== "handEnd") {
+          hideOverlay("hand-overlay");
+        }
         playTransitionAnimations(previousMatch, nextMatch);
         previousMatch = nextMatch;
         if (!bootstrapped) {
@@ -2083,9 +2191,17 @@
   function setPlayers(p) {
     S.players = p || [];
   }
+  function setStatus(status) {
+    S.uiStatus = status;
+    clearAwaitingAck();
+    if (S.match) renderClient();
+    if (window.BalootVoice && BalootVoice.resumeAudio) BalootVoice.resumeAudio();
+  }
   window.__bloot_ui = {
     startBlootOnline,
-    setPlayers
+    setPlayers,
+    resetAck,
+    setStatus
   };
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", bootUI);

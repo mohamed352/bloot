@@ -173,7 +173,17 @@ async function pump() {
   if (!S.match || S.match.matchOver) return;
   clearHumanTurnTimer();
   const st = S.match.state;
-  if (st.phase === "handEnd" || st.phase === "matchEnd") return;
+  if (st.phase === "handEnd" || st.phase === "matchEnd") {
+    updateQaidButton(false);
+    updateSawaButton(false);
+    return;
+  }
+
+  // Hide action buttons outside the playing phase; they are re-shown below when valid.
+  if (st.phase !== "playing" || st.awaitingDeclare || st.awaitingDouble) {
+    updateQaidButton(false);
+    updateSawaButton(false);
+  }
 
   if (st.awaitingDeclare) {
     const seat = st.declareSeats[0];
@@ -200,8 +210,9 @@ async function pump() {
   }
 
   if (st.phase === "playing") {
-    updateQaidButton(canClaimQaid());
-    updateSawaButton(canClaimSawa());
+    const actionsAllowed = canShowActionButtons();
+    updateQaidButton(actionsAllowed && canClaimQaid());
+    updateSawaButton(actionsAllowed && canClaimSawa());
     if (await maybeBotClaims()) return;
     const seat = st.turn;
     if (seat === S.mySeat) { renderAll(S.match, S.mySeat, S.players, onHumanPlay); startHumanTurnTimer(); return; }
@@ -220,6 +231,11 @@ function canClaimQaid() {
 function canClaimSawa() {
   const st = S.match.state;
   return st.turn === S.mySeat && st.currentTrick.length === 0 && (8 - st.trickHistory.length) <= 4;
+}
+export function canShowActionButtons() {
+  // In Bloot mode Flutter sends UI-only statuses such as trickEnd/roundEnd.
+  // The engine phase may stay "playing" during those, so we gate actions by it.
+  return S.uiStatus === "playing" || S.uiStatus == null;
 }
 
 async function maybeBotClaims() {
@@ -278,7 +294,7 @@ export async function onHumanPlay(card) {
   if (S.online && !S.online.isHost) {
     // عميل: يدفع الحركة للمضيف بدل ما يشغّل المحرك محلياً (العميل ما يشغّل المحرك أبداً)
     if (S.awaitingServerAck) return;
-    S.awaitingServerAck = true;
+    setAwaitingAck();
     pushAction(S.online.code, { type: "play", seat: S.mySeat, card });
     return;
   }
@@ -332,12 +348,34 @@ export function showBidDialog() {
 // حركة بشرية قد تتصادم مع دورة بوت شغّالة أصلاً (سباق) أو تُضغط مرتين بسرعة (تكرار) —
 // المحرك يرفضها بخطأ (مو دورك/مو وقت...) وهذا صحيح ومتوقع؛ نتجاهلها بأمان بدل ما نكسر
 // الواجهة، ونعيد رسم الحالة الحقيقية دايماً حتى لو الحركة انرفضت.
+export function setAwaitingAck() {
+  S.awaitingServerAck = true;
+  if (S._ackTimeout) clearTimeout(S._ackTimeout);
+  S._ackTimeout = setTimeout(() => {
+    S.awaitingServerAck = false;
+    console.warn("[baloot] server ack timeout — allowing retry");
+  }, 3000);
+}
+
+export function clearAwaitingAck() {
+  S.awaitingServerAck = false;
+  if (S._ackTimeout) {
+    clearTimeout(S._ackTimeout);
+    S._ackTimeout = null;
+  }
+}
+
+export function resetAck() {
+  clearAwaitingAck();
+}
+
 async function safeAct(run, remoteAction) {
   if (S.online && !S.online.isHost) {
     // عميل: يدفع الحركة للمضيف — العميل ما يشغّل المحرك أبداً، وما يعيد الدفع لو رد المضيف
     // (لقطة جديدة) لسا ما وصل، يمنع سبام/دبل-تاب يرسل نفس القرار مرتين.
+    // لكن لو المضيف رفض الحركة بدون لقطة جديدة، مهلة 5 ثواني تسمح بإعادة المحاولة.
     if (S.awaitingServerAck) return;
-    S.awaitingServerAck = true;
+    setAwaitingAck();
     pushAction(S.online.code, { seat: S.mySeat, ...remoteAction });
     return;
   }
@@ -382,12 +420,29 @@ export function wireDialogs() {
 
   $("declare-none").onclick = () => finishDeclare([]);
 
-  $("qaid-btn").onclick = () => openSheet("qaid-pick");
+  $("qaid-btn").onclick = () => {
+    if (!canShowActionButtons() || !canClaimQaid()) {
+      updateQaidButton(false);
+      return;
+    }
+    openSheet("qaid-pick");
+  };
   $("qaid-cancel").onclick = () => closeSheet("qaid-pick");
-  $("sawa-btn").onclick = () => safeAct(() => E.claimSawa(S.match, S.mySeat), { type: "sawa" });
+  $("sawa-btn").onclick = () => {
+    if (!canShowActionButtons() || !canClaimSawa()) {
+      updateSawaButton(false);
+      return;
+    }
+    safeAct(() => E.claimSawa(S.match, S.mySeat), { type: "sawa" });
+  };
 
   $("continue-btn").onclick = () => {
     hideOverlay("hand-overlay");
+    // In Bloot mode the Flutter host owns advancing rounds.
+    if (window.__BLOOT_BRIDGE_ENABLED && window.BlootBridge) {
+      window.BlootBridge.send({ type: "action", action: "nextRound", seat: S.mySeat });
+      return;
+    }
     if (S.online) {
       if (!S.online.isHost) return; // العميل بس يسكّر نافذته — المضيف هو اللي يتقدّم فعلياً للجميع
       if (S.match.matchOver) return;
@@ -463,7 +518,7 @@ function finishDeclare(types) {
   closeSheet("declare-dialog");
   if (S.online && !S.online.isHost) {
     if (S.awaitingServerAck) return;
-    S.awaitingServerAck = true;
+    setAwaitingAck();
     pushAction(S.online.code, { type: "declare", seat: S.mySeat, claimedTypes: types });
     return;
   }
@@ -475,7 +530,7 @@ function finishDeclare(types) {
 }
 
 // ===================== نهاية الصكة / المباراة =====================
-function showHandOverlay(result) {
+export function showHandOverlay(result) {
   const st = S.match.state;
   const label = st.ashkal ? "أشكل 🔄" : st.mode === "sun" ? "صن ☀️" : `حكم ${st.trump}`;
   const dblLabel = { 2: " · دبل ×2", 3: " · تربل ×3", 4: " · كوت ×4" }[st.doubleLevel] || "";

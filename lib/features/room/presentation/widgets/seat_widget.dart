@@ -84,7 +84,7 @@ class _SeatWidgetState extends State<SeatWidget> {
   void _unsubscribeFromVideo() {
     if (widget.player == null) return;
     if (!widget.player!.isMe) {
-      _agoraService.unsubscribeFromRemoteVideo();
+      _agoraService.unsubscribeFromRemoteVideo().ignore();
     }
   }
 

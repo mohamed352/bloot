@@ -206,6 +206,52 @@ describe('BalootEngine', () => {
     expect(restored.state!.topCard.key).toBe(match.state!.topCard.key);
   });
 
+  it('serializes sawa hands as a Firestore-safe map and restores them', () => {
+    const match = createTestMatch();
+    const engine = new BalootEngine(seededRng(12345));
+    finishBidding(match, engine, 'sun', 0);
+
+    const sampleHands = [
+      [BalootCard.fromString('A♠'), BalootCard.fromString('10♥')],
+      [BalootCard.fromString('7♦')],
+      [BalootCard.fromString('K♣')],
+      [BalootCard.fromString('Q♠')],
+    ];
+    match.state!.result = {
+      qaid: [0, 0],
+      pts: [0, 0],
+      trickWins: [0, 0],
+      buyerLost: false,
+      safeSaved: false,
+      projQaid: [0, 0],
+      balootQaid: [0, 0],
+      doubleLevel: 1,
+      sawa: { seat: 0, valid: true, hands: sampleHands },
+    };
+
+    const serializer = new BalootSerializer();
+    const json = serializer.serializeMatch(match);
+
+    // Firestore cannot store arrays of arrays, so sawa hands must be a map keyed by seat.
+    const sawaHands = (json.state as Record<string, unknown>).result &&
+      ((json.state as Record<string, unknown>).result as Record<string, unknown>).sawa &&
+      (((json.state as Record<string, unknown>).result as Record<string, unknown>).sawa as Record<string, unknown>).hands;
+    expect(sawaHands).toBeDefined();
+    expect(Array.isArray(sawaHands)).toBe(false);
+    expect((sawaHands as Record<string, string[]>)[0]).toEqual(['A♠', '10♥']);
+    expect((sawaHands as Record<string, string[]>)[1]).toEqual(['7♦']);
+    expect((sawaHands as Record<string, string[]>)[2]).toEqual(['K♣']);
+    expect((sawaHands as Record<string, string[]>)[3]).toEqual(['Q♠']);
+
+    const restored = serializer.deserializeMatch(json);
+    const restoredHands = restored.state!.result!.sawa!.hands!;
+    expect(restoredHands).toHaveLength(4);
+    expect(restoredHands[0].map((c) => c.key)).toEqual(['A♠', '10♥']);
+    expect(restoredHands[1].map((c) => c.key)).toEqual(['7♦']);
+    expect(restoredHands[2].map((c) => c.key)).toEqual(['K♣']);
+    expect(restoredHands[3].map((c) => c.key)).toEqual(['Q♠']);
+  });
+
   it('ends the match when a team reaches the target qaid', () => {
     const engine = new BalootEngine();
     const match = createTestMatch();

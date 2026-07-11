@@ -75,6 +75,7 @@ class AgoraService {
   bool _isMicOn = true;
   bool _isCameraOn = false;
   int _remoteVideoSubscriberCount = 0;
+  bool _leaveRequested = false;
 
   // Event controllers
   final _userJoinedController = StreamController<AgoraUserJoinedEvent>.broadcast();
@@ -132,7 +133,9 @@ class AgoraService {
     await _engine!.enableAudio();
     await _engine!.setAudioProfile(
       profile: AudioProfileType.audioProfileMusicStandard,
-      scenario: AudioScenarioType.audioScenarioChatroom,
+      // Game-streaming scenario mixes with other app audio instead of taking
+      // exclusive focus, so WebView sound effects keep playing.
+      scenario: AudioScenarioType.audioScenarioGameStreaming,
     );
     await _engine!.enableAudioVolumeIndication(
       interval: 200,
@@ -280,6 +283,8 @@ class AgoraService {
       await leaveChannel();
     }
 
+    _leaveRequested = false;
+
     final firebaseUid = _firebaseAuth.currentUser?.uid;
     if (firebaseUid == null) {
       throw Exception('Cannot join Agora channel: user not authenticated');
@@ -315,6 +320,13 @@ class AgoraService {
               : ClientRoleType.clientRoleBroadcaster,
         ),
       );
+
+      // If the user requested leave while we were joining, leave immediately.
+      if (_leaveRequested) {
+        await leaveChannel();
+        return;
+      }
+
       _currentChannelId = channelName;
       _currentUid = agoraUid;
 
@@ -333,7 +345,9 @@ class AgoraService {
 
   /// Leave the current Agora channel.
   Future<void> leaveChannel() async {
-    if (_engine == null || _currentChannelId == null) return;
+    if (_engine == null) return;
+    _leaveRequested = true;
+    if (_currentChannelId == null) return;
 
     try {
       await _engine!.leaveChannel();
@@ -460,30 +474,39 @@ class AgoraService {
 
   /// Increment the remote video subscriber count and enable video if needed.
   Future<void> subscribeToRemoteVideo() async {
-    if (_engine == null) return;
+    if (_engine == null || _currentChannelId == null) return;
     _remoteVideoSubscriberCount++;
     if (_remoteVideoSubscriberCount == 1) {
-      await _engine!.enableVideo();
-      // video enabled
-      await _engine!.updateChannelMediaOptions(
-        const ChannelMediaOptions(autoSubscribeVideo: true),
-      );
-      AppLogger.debug('Remote video subscribed', tag: 'Agora');
+      try {
+        await _engine!.enableVideo();
+        // video enabled
+        await _engine!.updateChannelMediaOptions(
+          const ChannelMediaOptions(autoSubscribeVideo: true),
+        );
+        AppLogger.debug('Remote video subscribed', tag: 'Agora');
+      } catch (e) {
+        AppLogger.error('Failed to subscribe to remote video', error: e, tag: 'Agora');
+      }
     }
   }
 
   /// Decrement the remote video subscriber count and disable video if no
   /// subscribers remain.
   Future<void> unsubscribeFromRemoteVideo() async {
-    if (_engine == null) return;
+    if (_engine == null || _currentChannelId == null) return;
     _remoteVideoSubscriberCount--;
     if (_remoteVideoSubscriberCount <= 0) {
       _remoteVideoSubscriberCount = 0;
-      await _engine!.updateChannelMediaOptions(
-        const ChannelMediaOptions(autoSubscribeVideo: false),
-      );
-      AppLogger.debug('Remote video unsubscribed', tag: 'Agora');
+      try {
+        await _engine!.updateChannelMediaOptions(
+          const ChannelMediaOptions(autoSubscribeVideo: false),
+        );
+        AppLogger.debug('Remote video unsubscribed', tag: 'Agora');
+      } catch (e) {
+        AppLogger.error('Failed to unsubscribe from remote video', error: e, tag: 'Agora');
+      }
     }
+    if (_remoteVideoSubscriberCount < 0) _remoteVideoSubscriberCount = 0;
   }
 
   // ---------------------------------------------------------------------------

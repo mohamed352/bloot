@@ -163,8 +163,8 @@ button { font-family: var(--font-sans); }
   position: fixed; inset: 0;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  padding-top: calc(env(safe-area-inset-top) + 52px);
-  padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
+  padding-top: calc(env(safe-area-inset-top) + 48px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 6px);
   padding-inline: var(--space-xs);
   z-index: var(--z-table);
 }
@@ -178,17 +178,21 @@ button { font-family: var(--font-sans); }
   gap: var(--space-2xs);
   min-height: 0;
 }
-.bt-mid-row .bt-seat { flex: 0 0 auto; width: 84px; }
+.bt-mid-row .bt-seat { flex: 0 0 auto; width: 104px; }
 .bt-mid-row .bt-center { flex: 1; min-width: 0; }
 
 .bt-seat { display: flex; flex-direction: column; align-items: center; gap: 2px; z-index: var(--z-seat); }
 #seat-2 { justify-self: center; }
 .bt-avatar-wrap { position: relative; }
 .bt-avatar {
-  width: 46px; height: 46px; border-radius: 50%;
+  width: 56px; height: 56px; border-radius: 50%;
   background: rgba(0,0,0,.3); border: 2px solid rgba(217,178,92,.3);
-  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+  display: flex; align-items: center; justify-content: center; font-size: 1.65rem;
+  overflow: hidden;
   transition: box-shadow var(--anim-fast), border-color var(--anim-fast);
+}
+.bt-avatar img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
 }
 .bt-seat.is-turn .bt-avatar { border-color: var(--felt-trim); box-shadow: var(--elev-glow-gold-active); animation: bt-pulse 1.1s ease-in-out infinite; }
 .bt-seat.is-dealer .bt-dealer-chip { display: block; }
@@ -253,7 +257,7 @@ button { font-family: var(--font-sans); }
 
 /* ===================== بطاقات ===================== */
 .bt-card {
-  --card-w: clamp(38px, 11vw, 58px);
+  --card-w: clamp(46px, 13vw, 68px);
   --card-h: calc(var(--card-w) * 1.42);
   width: var(--card-w); height: var(--card-h);
   border-radius: calc(var(--card-w) * .12);
@@ -383,14 +387,14 @@ button { font-family: var(--font-sans); }
 
 /* ===================== استجابة الشاشة ===================== */
 @media (min-width: 700px) {
-  .bt-table-area { max-width: 620px; margin: 0 auto; }
-  .bt-avatar { width: 56px; height: 56px; font-size: 1.7rem; }
+  .bt-table-area { max-width: 720px; margin: 0 auto; }
+  .bt-avatar { width: 68px; height: 68px; font-size: 1.9rem; }
 }
 
 @media (orientation: landscape) and (max-height: 500px) {
   .bt-table-area { padding-top: calc(env(safe-area-inset-top) + 40px); }
   .bt-hud { padding-block: 2px; }
-  .bt-avatar { width: 38px; height: 38px; font-size: 1.1rem; }
+  .bt-avatar { width: 46px; height: 46px; font-size: 1.3rem; }
   .bt-hand { min-height: 58px; }
-  .bt-card { --card-w: clamp(32px, 8vh, 46px); }
+  .bt-card { --card-w: clamp(40px, 10vh, 56px); }
 }

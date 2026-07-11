@@ -331,7 +331,9 @@ export class BalootSerializer {
         ? {
             seat: r.sawa.seat,
             valid: r.sawa.valid,
-            hands: r.sawa.hands?.map((h) => h.map((c) => c.key)) ?? null,
+            hands: r.sawa.hands
+              ? Object.fromEntries(r.sawa.hands.map((h, i) => [i.toString(), h.map((c) => c.key)]))
+              : null,
           }
         : null,
     };
@@ -366,9 +368,16 @@ export class BalootSerializer {
         ? {
             seat: (json.sawa as Record<string, unknown>).seat as number,
             valid: (json.sawa as Record<string, unknown>).valid as boolean,
-            hands: ((json.sawa as Record<string, unknown>).hands as string[][] | undefined)?.map((h) =>
-              h.map((c) => BalootCard.fromString(c)),
-            ),
+            hands: (() => {
+              const handsMap = (json.sawa as Record<string, unknown>).hands as
+                | Record<string, string[]>
+                | undefined
+                | null;
+              if (!handsMap) return undefined;
+              return Array.from({ length: 4 }, (_, i) =>
+                (handsMap[i.toString()] ?? []).map((c) => BalootCard.fromString(c)),
+              );
+            })(),
           }
         : undefined,
     };

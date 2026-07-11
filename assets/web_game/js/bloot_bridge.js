@@ -297,6 +297,7 @@
 
       if (msg.type === "state") {
         lastBridgeState = msg.engineState || msg.state || {};
+        if (ui && ui.setStatus) ui.setStatus(msg.status || lastBridgeState.status);
         // When RTDB is active it is the fast path; only use the bridge state
         // if RTDB has not delivered a snapshot yet.
         if (snapshotCb && !rtdbActive) {

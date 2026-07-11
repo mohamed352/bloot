@@ -2,10 +2,16 @@
 (function () {
   "use strict";
 
-  const settings = {
-    voice: localStorage.getItem("baloot-voice") !== "off",
-    sfx: localStorage.getItem("baloot-sfx") !== "off",
-  };
+  const settings = (() => {
+    try {
+      return {
+        voice: localStorage.getItem("baloot-voice") !== "off",
+        sfx: localStorage.getItem("baloot-sfx") !== "off",
+      };
+    } catch (e) {
+      return { voice: true, sfx: true };
+    }
+  })();
 
   let arVoice = null;
   function pickVoice() {
@@ -131,8 +137,15 @@
     eeka() { tone(1046, 0.11, "triangle", 0.2); tone(1568, 0.16, "triangle", 0.2, 0.07); },
   };
 
-  function setVoice(on) { settings.voice = on; localStorage.setItem("baloot-voice", on ? "on" : "off"); if (!on && "speechSynthesis" in window) speechSynthesis.cancel(); }
-  function setSfx(on) { settings.sfx = on; localStorage.setItem("baloot-sfx", on ? "on" : "off"); }
+  function setVoice(on) {
+    settings.voice = on;
+    try { localStorage.setItem("baloot-voice", on ? "on" : "off"); } catch (e) {}
+    if (!on && "speechSynthesis" in window) speechSynthesis.cancel();
+  }
+  function setSfx(on) {
+    settings.sfx = on;
+    try { localStorage.setItem("baloot-sfx", on ? "on" : "off"); } catch (e) {}
+  }
 
   window.BalootVoice = { speak, sfx, settings, setVoice, setSfx, resumeAudio: forceResume };
 })();

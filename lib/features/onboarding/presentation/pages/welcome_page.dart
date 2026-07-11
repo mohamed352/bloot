@@ -141,46 +141,10 @@ class WelcomePage extends StatelessWidget {
                   subtitle: 'build_your_audience'.tr(),
                   color: ColorManager.secondary,
                 ),
-                const SizedBox(height: AppSpacing.xxl),
-                // Pagination dots
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _Dot(isActive: true),
-                    SizedBox(width: 8),
-                    _Dot(isActive: false),
-                    SizedBox(width: 8),
-                    _Dot(isActive: false),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xxl),
+                const SizedBox(height: AppSpacing.xxxl),
                 AppButton(
                   text: 'get_started'.tr(),
                   onPressed: () => context.pushNamed(RouteNames.login),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'already_have_an_account'.tr(),
-                      style: const TextStyle(
-                        color: ColorManager.darkTextMuted,
-                        fontSize: 14,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => context.pushNamed(RouteNames.login),
-                      child: Text(
-                        'sign_in'.tr(),
-                        style: const TextStyle(
-                          color: ColorManager.primary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
                 const SizedBox(height: AppSpacing.xxl),
               ],
@@ -255,22 +219,3 @@ class _FeatureCard extends StatelessWidget {
   }
 }
 
-class _Dot extends StatelessWidget {
-  const _Dot({required this.isActive});
-
-  final bool isActive;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: isActive ? 24 : 8,
-      height: 8,
-      decoration: BoxDecoration(
-        color: isActive
-            ? ColorManager.primary
-            : ColorManager.darkTextMuted.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(4),
-      ),
-    );
-  }
-}

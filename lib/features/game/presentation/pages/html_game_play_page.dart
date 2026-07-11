@@ -52,6 +52,7 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
   String? _lastError;
   String? _rtdbToken;
   bool _rtdbAuthInProgress = false;
+  DateTime _lastAudioResume = DateTime.fromMillisecondsSinceEpoch(0);
 
   @override
   void initState() {
@@ -162,12 +163,25 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
   }
 
   Future<void> _resumeWebAudio() async {
+    final now = DateTime.now();
+    if (now.difference(_lastAudioResume) < const Duration(seconds: 1)) return;
+    _lastAudioResume = now;
     try {
       await _controller.runJavaScript(
         'if (window.BalootVoice && BalootVoice.resumeAudio) BalootVoice.resumeAudio();',
       );
     } catch (e) {
-      debugPrint('[HtmlGame] resumeAudio error: \$e');
+      debugPrint('[HtmlGame] resumeAudio error: $e');
+    }
+  }
+
+  Future<void> _resetWebViewAck() async {
+    try {
+      await _controller.runJavaScript(
+        'if (window.__bloot_ui && __bloot_ui.resetAck) __bloot_ui.resetAck();',
+      );
+    } catch (e) {
+      debugPrint('[HtmlGame] resetAck error: $e');
     }
   }
 
@@ -239,21 +253,30 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
       case 'bid':
         final bid = payload['bid'] as String?;
         if (bid != null) cubit.placeBid(bid);
+        break;
       case 'play':
         final card = payload['card'] as String?;
         if (card != null) cubit.playCard(card);
+        break;
       case 'declare':
         final types = (payload['claimedTypes'] as List<dynamic>?)
             ?.cast<String>();
         cubit.declareProject(types ?? []);
+        break;
       case 'double':
         final double = payload['double'] as String?;
         cubit.applyDouble(double ?? 'pass');
+        break;
       case 'qaid':
         final claimType = payload['claimType'] as String?;
         cubit.claimQaid(claimType);
+        break;
       case 'sawa':
         cubit.claimSawa();
+        break;
+      case 'nextRound':
+        cubit.dealNextRound();
+        break;
     }
   }
 
@@ -324,8 +347,10 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
     debugPrint('[HtmlGame] pushing state status=${game.status}');
     _send('state', <String, dynamic>{
       'engineState': game.engineState,
+      'status': game.status,
       'players': game.players.map(_playerToJson).toList(),
     });
+    _resumeWebAudio();
     if (mounted) setState(() => _lastError = null);
   }
 
@@ -385,6 +410,8 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
                 setState(() => _lastError = s.message);
               },
             );
+            final lastError = _extractLastActionError(state);
+            if (lastError != null) _resetWebViewAck();
             final game = _extractGame(state);
             if (game != null) _pushStartIfNeeded();
           },
@@ -447,6 +474,18 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
       trickEnd: (s) => s.game,
       roundEnd: (s) => s.game,
       gameEnd: (s) => s.game,
+    );
+  }
+
+  String? _extractLastActionError(GameState state) {
+    return state.mapOrNull(
+      dealing: (s) => s.lastActionError,
+      bidding: (s) => s.lastActionError,
+      bonusClaim: (s) => s.lastActionError,
+      playing: (s) => s.lastActionError,
+      trickEnd: (s) => s.lastActionError,
+      roundEnd: (s) => s.lastActionError,
+      gameEnd: (s) => s.lastActionError,
     );
   }
 }

@@ -218,14 +218,29 @@ abstract class AppInitializer {
               'Skipping signInTester: recent attempt detected',
               tag: LogTags.init,
             );
-          } else {
-            await prefs.setInt(_kAppDistSignInAttemptKey, now);
-            AppLogger.info('Calling signInTester...', tag: LogTags.init);
-            await firebase_app_distribution.signInTester();
-            // Clear attempt timestamp on success.
-            await prefs.remove(_kAppDistSignInAttemptKey);
-            AppLogger.info('Tester signed in', tag: LogTags.init);
+            // We are not signed in and we must not prompt again so soon.
+            return;
           }
+
+          await prefs.setInt(_kAppDistSignInAttemptKey, now);
+          AppLogger.info('Calling signInTester...', tag: LogTags.init);
+          await firebase_app_distribution.signInTester();
+          // Do NOT clear the timestamp here. If the OS kills this process
+          // while the browser is in the foreground, a fresh process handling
+          // the redirect would otherwise see no recent attempt and call
+          // signInTester again, creating the browser<->app loop.
+          AppLogger.info('Tester signed in', tag: LogTags.init);
+        }
+
+        // Re-check sign-in state before enabling features that can themselves
+        // prompt for sign-in (e.g., updateIfNewReleaseAvailable).
+        final bool signedInNow = await firebase_app_distribution.isTesterSignedIn();
+        if (!signedInNow) {
+          AppLogger.warning(
+            'Tester sign-in not confirmed; skipping feedback/updates',
+            tag: LogTags.init,
+          );
+          return;
         }
 
         // Show the persistent feedback notification now that the tester

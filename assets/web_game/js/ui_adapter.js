@@ -20,6 +20,10 @@ import {
   showBidDialog,
   showDoubleDialog,
   showDeclareDialog,
+  clearAwaitingAck,
+  resetAck,
+  canShowActionButtons,
+  showHandOverlay,
 } from "./ui/controller.js";
 
 let previousSnap = null;
@@ -135,9 +139,17 @@ function renderClient() {
   if (!S.match) return;
   renderAll(S.match, S.mySeat, S.players, onHumanPlay);
   const st = S.match.state;
-  updateQaidButton(!!st.violation && E.teamOf(st.violation.seat) !== E.teamOf(S.mySeat));
+  // The engine phase may stay "playing" during UI-only statuses like trickEnd/roundEnd,
+  // so we also guard by the UI status sent from Flutter/RTDB.
+  const canShowActions =
+    canShowActionButtons() &&
+    st.phase === "playing" &&
+    !st.awaitingDeclare &&
+    !st.awaitingDouble;
+  updateQaidButton(canShowActions && !!st.violation && E.teamOf(st.violation.seat) !== E.teamOf(S.mySeat));
   updateSawaButton(
-    st.turn === S.mySeat &&
+    canShowActions &&
+      st.turn === S.mySeat &&
       st.currentTrick.length === 0 &&
       8 - st.trickHistory.length <= 4
   );
@@ -177,6 +189,7 @@ function startBlootOnline(cfg) {
   S.mySeat = cfg.seat;
   S.players = cfg.players || [];
   S.safeMode = !!cfg.safeMode;
+  S.uiStatus = null;
 
   showScreen(null);
   $("topbar").hidden = false;
@@ -197,10 +210,16 @@ function startBlootOnline(cfg) {
       if (!snap) return;
       playTransitionSounds(previousSnap, snap);
       previousSnap = JSON.parse(JSON.stringify(snap));
+      S.uiStatus = snap.status || S.uiStatus;
       const nextMatch = E.deserializeMatch(snap);
       S.match = nextMatch;
-      S.awaitingServerAck = false;
+      clearAwaitingAck();
       renderClient();
+      if (st.phase === "handEnd" && st.result && !nextMatch.matchOver && S.uiStatus !== "gameEnd") {
+        if (!$("hand-overlay").classList.contains("show")) showHandOverlay(st.result);
+      } else if (st.phase !== "handEnd") {
+        hideOverlay("hand-overlay");
+      }
       playTransitionAnimations(previousMatch, nextMatch);
       previousMatch = nextMatch;
       if (!bootstrapped) {
@@ -215,9 +234,20 @@ function setPlayers(p) {
   S.players = p || [];
 }
 
+function setStatus(status) {
+  S.uiStatus = status;
+  // A status push from Flutter is a new server state, so release the UI lock
+  // and re-render button visibility immediately (e.g. hide سوا during trickEnd).
+  clearAwaitingAck();
+  if (S.match) renderClient();
+  if (window.BalootVoice && BalootVoice.resumeAudio) BalootVoice.resumeAudio();
+}
+
 window.__bloot_ui = {
   startBlootOnline,
   setPlayers,
+  resetAck,
+  setStatus,
 };
 
 if (document.readyState === "loading") {

@@ -320,14 +320,24 @@ class RoomCubit extends Cubit<RoomState> {
     if (currentState is! RoomLoaded) return;
 
     try {
-      await _roomRepository.leaveRoom(roomId);
-      await _agoraService.leaveChannel();
-      // Stop listening to the room before emitting the initial state so a
-      // deleted/empty room does not surface a ROOM_NOT_FOUND error after exit.
+      // Stop listening first so a late room update does not re-trigger Agora join.
       await _roomSubscription?.cancel();
       _roomSubscription = null;
       await _audioVolumeSubscription?.cancel();
       _audioVolumeSubscription = null;
+
+      // Wait for an in-flight Agora join to finish before leaving.
+      if (_pendingAgoraJoin != null) {
+        try {
+          await _pendingAgoraJoin!.timeout(const Duration(seconds: 3));
+        } catch (_) {
+          // Ignore join errors/timeouts during leave.
+        }
+        _pendingAgoraJoin = null;
+      }
+
+      await _roomRepository.leaveRoom(roomId);
+      await _agoraService.leaveChannel();
       _joinedAgoraChannelName = null;
       emit(const RoomState.initial());
     } on RoomException catch (e) {

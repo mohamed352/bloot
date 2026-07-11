@@ -31,6 +31,7 @@ class GameCubit extends Cubit<GameState> {
   final AudioService _audioService;
   StreamSubscription<Game>? _gameSubscription;
   String? _joinedAgoraChannelName;
+  Future<void>? _pendingAgoraJoin;
   bool _isClosed = false;
 
   /// Countdown seconds left for the current turn. Null when no timer is active
@@ -393,6 +394,8 @@ class GameCubit extends Cubit<GameState> {
 
   Future<void> claimSawa() async {
     final current = state;
+    // Sawa is only meaningful while the hand is in progress.
+    if (current is! GamePlaying) return;
     final game = _currentGame(current);
     if (game == null) return;
     _emitActionInProgress();
@@ -421,7 +424,17 @@ class GameCubit extends Cubit<GameState> {
     if (roomId == null || roomId.isEmpty) return;
     _emitActionInProgress();
     try {
+      await _gameSubscription?.cancel();
+      _gameSubscription = null;
       await _roomRepository.leaveRoom(roomId);
+      if (_pendingAgoraJoin != null) {
+        try {
+          await _pendingAgoraJoin!.timeout(const Duration(seconds: 3));
+        } catch (_) {
+          // Ignore join errors/timeouts during leave.
+        }
+        _pendingAgoraJoin = null;
+      }
       await _agoraService.leaveChannel();
       _joinedAgoraChannelName = null;
       emit(const GameState.initial());
@@ -508,11 +521,17 @@ class GameCubit extends Cubit<GameState> {
     final channelName = game.agoraChannelName;
     if (channelName == null || channelName.isEmpty) return;
     if (_joinedAgoraChannelName == channelName) return;
+    if (_pendingAgoraJoin != null) return;
 
-    _joinedAgoraChannelName = channelName;
-    _agoraService.joinChannel(channelName: channelName).catchError((Object e) {
+    final pendingJoin = _agoraService.joinChannel(channelName: channelName);
+    _pendingAgoraJoin = pendingJoin;
+    pendingJoin.then((_) {
+      if (_isClosed) return;
+      _joinedAgoraChannelName = channelName;
+    }).catchError((Object e) {
       AppLogger.error('Failed to join Agora from game', error: e);
-      _joinedAgoraChannelName = null;
+    }).whenComplete(() {
+      _pendingAgoraJoin = null;
     });
   }
 
@@ -523,6 +542,16 @@ class GameCubit extends Cubit<GameState> {
 
     await _gameSubscription?.cancel();
     humanTurnSecondsLeft.dispose();
+
+    // Wait for an in-flight Agora join to finish before leaving.
+    if (_pendingAgoraJoin != null) {
+      try {
+        await _pendingAgoraJoin!.timeout(const Duration(seconds: 3));
+      } catch (_) {
+        // Ignore join errors/timeouts during close.
+      }
+      _pendingAgoraJoin = null;
+    }
 
     // Leave the Agora channel if this cubit joined it.
     if (_joinedAgoraChannelName != null) {

@@ -18,6 +18,25 @@ function levelBadge(level) {
   return { beginner: "مبتدئ 🐣", amateur: "نص نص", skilled: "شاطر", pro: "وحش 🔥" }[level] || "";
 }
 
+const AVATAR_FALLBACKS = { 0: "😎", 1: "🤖", 2: "🤝", 3: "🤖" };
+
+function renderAvatar(avatarEl, player, pos) {
+  if (!avatarEl) return;
+  if (player && player.avatarUrl) {
+    const img = document.createElement("img");
+    img.src = player.avatarUrl;
+    img.alt = player.name || "";
+    img.onerror = () => {
+      avatarEl.textContent = (player.name ? player.name.charAt(0) : "") || AVATAR_FALLBACKS[pos] || "🃏";
+    };
+    avatarEl.innerHTML = "";
+    avatarEl.appendChild(img);
+  } else {
+    const initial = player && player.name ? player.name.charAt(0) : "";
+    avatarEl.textContent = initial || AVATAR_FALLBACKS[pos] || "🃏";
+  }
+}
+
 function activeSeat(st) {
   if (!st) return null;
   if (st.awaitingDeclare) return (st.declareSeats || [])[0];
@@ -40,8 +59,10 @@ export function renderSeats(match, mySeat, players) {
 
     const nameEl = seatEl.querySelector(".bt-pname");
     const levelEl = seatEl.querySelector(".bt-plevel");
+    const avatarEl = seatEl.querySelector(".bt-avatar");
     if (nameEl) nameEl.textContent = players[seat] ? players[seat].name : "";
     if (levelEl) levelEl.textContent = players[seat] && players[seat].isBot ? levelBadge(players[seat].level) : "";
+    renderAvatar(avatarEl, players[seat], pos);
 
     const hukumBadge = seatEl.querySelector(".bt-hukum-badge");
     if (hukumBadge) {
@@ -54,20 +75,32 @@ export function renderSeats(match, mySeat, players) {
       const backs = seatEl.querySelector(".bt-backs");
       if (backs) {
         const count = st ? (st.hands[seat] ? st.hands[seat].length : 0) : 0;
-        backs.innerHTML = "";
-        for (let i = 0; i < Math.min(count, 8); i++) backs.appendChild(cardBackEl());
+        const lastCount = backs._lastCount ?? -1;
+        if (count !== lastCount) {
+          backs._lastCount = count;
+          const current = backs.children.length;
+          if (current < count) {
+            for (let i = current; i < Math.min(count, 8); i++) backs.appendChild(cardBackEl());
+          } else if (current > count) {
+            for (let i = current - 1; i >= count; i--) backs.removeChild(backs.children[i]);
+          }
+        }
       }
     }
 
     const projs = seatEl.querySelector(".bt-projs");
     if (projs) {
-      projs.innerHTML = "";
       const mine = (st.announcedProjects || []).filter((p) => p.seat === seat);
-      for (const p of mine) {
-        const chip = document.createElement("span");
-        chip.className = "bt-proj-chip";
-        chip.textContent = p.name;
-        projs.appendChild(chip);
+      const projsKey = mine.map((p) => p.name).join(",");
+      if (projs._lastKey !== projsKey) {
+        projs._lastKey = projsKey;
+        projs.innerHTML = "";
+        for (const p of mine) {
+          const chip = document.createElement("span");
+          chip.className = "bt-proj-chip";
+          chip.textContent = p.name;
+          projs.appendChild(chip);
+        }
       }
     }
   }
@@ -76,9 +109,18 @@ export function renderSeats(match, mySeat, players) {
 export function renderHand(match, mySeat, onPlay) {
   const st = match.state;
   const handEl = $("hand");
-  handEl.innerHTML = "";
-  if (!st || st.phase !== "playing") return;
+  if (!st || st.phase !== "playing") {
+    handEl.innerHTML = "";
+    handEl._lastKey = null;
+    return;
+  }
   const hand = sortHand(st.hands[mySeat], st.trump);
+  const handKey = hand.map((c) => c.key).join(",");
+  const stateKey = `${handKey}|${st.turn}|${st.currentTrick.length}|${st.doubleLevel || 1}`;
+  if (handEl._lastKey === stateKey) return;
+  handEl._lastKey = stateKey;
+
+  handEl.innerHTML = "";
   const strict = (st.doubleLevel || 1) >= 2;
   let legal = [];
   if (st.turn === mySeat) {
@@ -104,6 +146,9 @@ const TRICK_ANCHORS = {
     اكتملت لتوّها (trickEnd) بعد ما المحرك يكون فرّغ currentTrick أصلاً */
 export function renderTrickCards(plays, mySeat) {
   const zone = $("trick-zone");
+  const trickKey = plays.map((p) => `${p.seat}:${p.card.key}`).join(",");
+  if (zone._lastKey === trickKey) return;
+  zone._lastKey = trickKey;
   zone.innerHTML = "";
   const vs = vsFor(mySeat);
   for (const play of plays) {
@@ -125,8 +170,15 @@ export function renderTrick(match, mySeat) {
 export function renderBidCenter(match) {
   const st = match.state;
   const center = $("bid-center");
-  if (!st || st.phase !== "bidding") { center.hidden = true; return; }
+  if (!st || st.phase !== "bidding") {
+    center.hidden = true;
+    center._lastKey = null;
+    return;
+  }
   center.hidden = false;
+  const bidKey = `${st.topCard.key}|${st.bidding.round}`;
+  if (center._lastKey === bidKey) return;
+  center._lastKey = bidKey;
   const slot = $("top-card-slot");
   slot.innerHTML = "";
   slot.appendChild(cardEl(st.topCard));
@@ -149,8 +201,16 @@ export function showBanner(text, ms = 1600) {
   b._t = setTimeout(() => b.classList.remove("show"), ms);
 }
 
-export function updateQaidButton(show) { $("qaid-btn").hidden = !show; }
-export function updateSawaButton(show) { $("sawa-btn").hidden = !show; }
+export function updateQaidButton(show) {
+  const el = $("qaid-btn");
+  el.hidden = !show;
+  el.disabled = !show;
+}
+export function updateSawaButton(show) {
+  const el = $("sawa-btn");
+  el.hidden = !show;
+  el.disabled = !show;
+}
 
 export function renderAll(match, mySeat, players, onPlay) {
   renderScores(match, mySeat);
