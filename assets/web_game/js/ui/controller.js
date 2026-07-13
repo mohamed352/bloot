@@ -235,6 +235,8 @@ function canClaimSawa() {
 export function canShowActionButtons() {
   // In Bloot mode Flutter sends UI-only statuses such as trickEnd/roundEnd.
   // The engine phase may stay "playing" during those, so we gate actions by it.
+  // Also lock actions while a server request is in flight to prevent duplicates.
+  if (S.online && S.awaitingServerAck) return false;
   return S.uiStatus === "playing" || S.uiStatus == null;
 }
 
@@ -557,7 +559,7 @@ export function showHandOverlay(result) {
   showOverlay("hand-overlay");
 }
 
-function showMatchOverlay() {
+export function showMatchOverlay() {
   const myTeam = E.teamOf(S.mySeat);
   const won = S.match.winnerTeam === myTeam;
   const g = computeGrade(S.match, S.mySeat);
@@ -566,7 +568,11 @@ function showMatchOverlay() {
   $("grade-circle").textContent = g.grade;
   $("grade-comment").textContent = g.comment;
 
-  const m = S.match.metrics;
+  const m = S.match.metrics || {
+    humanBids: 0, humanBidWins: 0,
+    teamTricks: 0, totalTricks: 0,
+    pointMistakes: 0, missedWins: 0,
+  };
   const rows = [
     ["قيدكم من الكل", Math.round(g.qaidShare * 100) + "%"],
     ["الأكلات اللي أخذتوها", Math.round(g.trickShare * 100) + "%"],

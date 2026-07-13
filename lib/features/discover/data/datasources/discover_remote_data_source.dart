@@ -26,7 +26,8 @@ class DiscoverRemoteDataSource {
           .orderBy('viewerCount', descending: true)
           .get();
 
-      return snapshot.docs.map((doc) => _mapStreamDoc(doc)).toList();
+      final streams = snapshot.docs.map((doc) => _mapStreamDoc(doc)).toList();
+      return _filterActiveStreams(streams);
     } catch (e) {
       AppLogger.error('Failed to get discover streams', error: e);
       return [];
@@ -39,7 +40,12 @@ class DiscoverRemoteDataSource {
     try {
       final doc = await _firestore.collection('streams').doc(id).get();
       if (doc.exists) {
-        return _mapStreamDoc(doc);
+        final stream = _mapStreamDoc(doc);
+        final activeStreams = await _filterActiveStreams([stream]);
+        if (activeStreams.isEmpty) {
+          throw Exception('Stream is no longer active: $id');
+        }
+        return stream;
       }
     } catch (e) {
       AppLogger.error('Failed to get stream by id: $id', error: e);
@@ -90,7 +96,45 @@ class DiscoverRemoteDataSource {
         });
   }
 
-  DiscoverStreamModel _mapStreamDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
+  /// Finds a live stream by its room invite [code].
+  ///
+  /// Codes live on `rooms.inviteCode`; stream docs reference their room via
+  /// `roomId`, so we resolve the room first, then look up its live stream.
+  /// Returns the stream document id, or `null` when nothing matches.
+  Future<String?> findStreamIdByCode(String code) async {
+    try {
+      final normalized = code.trim().toUpperCase();
+      if (normalized.isEmpty) return null;
+
+      final roomSnapshot = await _firestore
+          .collection('rooms')
+          .where('inviteCode', isEqualTo: normalized)
+          .limit(1)
+          .get();
+      if (roomSnapshot.docs.isEmpty) return null;
+
+      final roomDoc = roomSnapshot.docs.first;
+      final roomData = roomDoc.data();
+      if (roomData['status'] == 'finished') return null;
+
+      final streamSnapshot = await _firestore
+          .collection('streams')
+          .where('roomId', isEqualTo: roomDoc.id)
+          .where('status', isEqualTo: 'live')
+          .limit(1)
+          .get();
+      if (streamSnapshot.docs.isEmpty) return null;
+
+      return streamSnapshot.docs.first.id;
+    } catch (e) {
+      AppLogger.error('Failed to find stream by code', error: e);
+      return null;
+    }
+  }
+
+  DiscoverStreamModel _mapStreamDoc(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
     final data = doc.data()!;
     return DiscoverStreamModel(
       id: doc.id,
@@ -142,4 +186,40 @@ class DiscoverRemoteDataSource {
     );
   }
 
+  /// Filters out streams whose parent room is missing, finished, or has no
+  /// players so closed/empty rooms never appear as live.
+  Future<List<DiscoverStreamModel>> _filterActiveStreams(
+    List<DiscoverStreamModel> streams,
+  ) async {
+    if (streams.isEmpty) return streams;
+
+    final roomIds = streams
+        .map((s) => s.roomId)
+        .where((id) => id != null && id.isNotEmpty)
+        .cast<String>()
+        .toSet();
+
+    if (roomIds.isEmpty) return streams;
+
+    final roomDocs = await Future.wait(
+      roomIds.map((id) => _firestore.collection('rooms').doc(id).get()),
+    );
+
+    final validRoomIds = <String>{};
+    for (final doc in roomDocs) {
+      if (!doc.exists) continue;
+      final data = doc.data()!;
+      final playerUids = data['playerUids'];
+      final status = data['status'] as String?;
+      final hasPlayers = playerUids is List && playerUids.isNotEmpty;
+      if (hasPlayers && status != 'finished') {
+        validRoomIds.add(doc.id);
+      }
+    }
+
+    return streams.where((s) {
+      final roomId = s.roomId;
+      return roomId == null || roomId.isEmpty || validRoomIds.contains(roomId);
+    }).toList();
+  }
 }

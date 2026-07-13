@@ -12,8 +12,9 @@ abstract class DiscoverRepository {
   Stream<List<StreamChatMessage>> watchStreamChat(String streamId);
 
   /// Sends a chat [message] to [streamId].
-  Future<void> sendChatMessage(
-    String streamId,
-    String message,
-  );
+  Future<void> sendChatMessage(String streamId, String message);
+
+  /// Finds a live stream by its room invite [code].
+  /// Returns the stream document id, or `null` when no live stream matches.
+  Future<String?> findStreamIdByCode(String code);
 }

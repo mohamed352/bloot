@@ -12,10 +12,7 @@ import 'package:bloot/features/discover/domain/entities/discover_stream.dart';
 /// Renders a remote Agora video feed for a stream player, with their
 /// avatar as fallback when camera is off.
 class StreamVideoSquare extends StatefulWidget {
-  const StreamVideoSquare({
-    super.key,
-    required this.player,
-  });
+  const StreamVideoSquare({super.key, required this.player});
 
   final StreamPlayer player;
 
@@ -43,10 +40,7 @@ class _StreamVideoSquareState extends State<StreamVideoSquare> {
       decoration: BoxDecoration(
         color: ColorManager.darkCanvas,
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
-          color: teamColor.withValues(alpha: 0.5),
-          width: 2,
-        ),
+        border: Border.all(color: teamColor.withValues(alpha: 0.5), width: 2),
       ),
       child: Stack(
         fit: StackFit.expand,

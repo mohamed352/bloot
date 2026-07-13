@@ -4,13 +4,16 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/components/cached_avatar.dart';
+import 'package:bloot/core/di/injection.dart';
 import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
 import 'package:bloot/core/constants/app_radius.dart';
-import 'package:bloot/features/profile/domain/entities/achievement.dart';
+import 'package:bloot/features/moderation/presentation/widgets/block_user_dialog.dart';
+import 'package:bloot/features/moderation/presentation/widgets/report_user_sheet.dart';
 import 'package:bloot/features/profile/domain/entities/game_history.dart';
 import 'package:bloot/features/profile/domain/entities/user_profile.dart';
 import 'package:bloot/features/profile/presentation/cubit/profile_cubit.dart';
@@ -25,24 +28,14 @@ class UserProfilePage extends StatefulWidget {
   State<UserProfilePage> createState() => _UserProfilePageState();
 }
 
-class _UserProfilePageState extends State<UserProfilePage>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
+class _UserProfilePageState extends State<UserProfilePage> {
+  bool _isOtherUser = false;
 
   @override
   Widget build(BuildContext context) {
+    final currentUid = getIt<firebase_auth.FirebaseAuth>().currentUser?.uid;
+    _isOtherUser = widget.userId != 'me' && widget.userId != currentUid;
+
     return Scaffold(
       backgroundColor: ColorManager.darkCanvas,
       body: SafeArea(
@@ -52,7 +45,11 @@ class _UserProfilePageState extends State<UserProfilePage>
               initial: () => const Center(child: CircularProgressIndicator()),
               loading: () => const Center(child: CircularProgressIndicator()),
               loaded: (profile, gameHistory, achievements) =>
-                  _buildProfileContent(context, profile, gameHistory, achievements),
+                  _buildProfileContent(
+                    context,
+                    profile,
+                    gameHistory,
+                  ),
               error: (message) => Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -72,9 +69,9 @@ class _UserProfilePageState extends State<UserProfilePage>
                     ),
                     const SizedBox(height: AppSpacing.md),
                     TextButton(
-                      onPressed: () => context
-                          .read<ProfileCubit>()
-                          .loadProfile(widget.userId),
+                      onPressed: () => context.read<ProfileCubit>().loadProfile(
+                        widget.userId,
+                      ),
                       child: Text('commonRetry'.tr()),
                     ),
                   ],
@@ -91,12 +88,7 @@ class _UserProfilePageState extends State<UserProfilePage>
     BuildContext context,
     UserProfile profile,
     List<GameHistory> gameHistory,
-    List<Achievement> achievements,
   ) {
-    final xpProgress = profile.xpToNextLevel > 0
-        ? profile.xp / profile.xpToNextLevel
-        : 0.0;
-
     return NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) {
         return [
@@ -105,6 +97,28 @@ class _UserProfilePageState extends State<UserProfilePage>
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(
                 children: [
+                  if (_isOtherUser)
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: PopupMenuButton<String>(
+                        icon: const Icon(
+                          Icons.more_vert_rounded,
+                          color: ColorManager.darkTextSecondary,
+                        ),
+                        color: ColorManager.darkSurface,
+                        onSelected: (value) => _onMenuSelected(context, value),
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'report',
+                            child: Text('report_user'.tr()),
+                          ),
+                          PopupMenuItem(
+                            value: 'block',
+                            child: Text('block_user'.tr()),
+                          ),
+                        ],
+                      ),
+                    ),
                   // Avatar + name with gold ring and level badge
                   Stack(
                     alignment: AlignmentDirectional.bottomEnd,
@@ -135,9 +149,7 @@ class _UserProfilePageState extends State<UserProfilePage>
                         ),
                         decoration: BoxDecoration(
                           color: ColorManager.secondary,
-                          borderRadius: BorderRadius.circular(
-                            AppRadius.full,
-                          ),
+                          borderRadius: BorderRadius.circular(AppRadius.full),
                           border: Border.all(
                             color: ColorManager.darkCanvas,
                             width: 2,
@@ -173,40 +185,6 @@ class _UserProfilePageState extends State<UserProfilePage>
                       ),
                     ),
                   const SizedBox(height: AppSpacing.lg),
-                  // XP bar
-                  Container(
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: ColorManager.darkSectionGray,
-                      borderRadius: BorderRadius.circular(AppRadius.full),
-                    ),
-                    child: FractionallySizedBox(
-                      alignment: AlignmentDirectional.centerStart,
-                      widthFactor: xpProgress.clamp(0.0, 1.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [
-                              ColorManager.primary,
-                              ColorManager.primaryLight,
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(
-                            AppRadius.full,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${profile.xp} / ${profile.xpToNextLevel} XP',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: ColorManager.darkTextMuted,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
                   // Stats row with cards and icons
                   Row(
                     children: [
@@ -270,27 +248,9 @@ class _UserProfilePageState extends State<UserProfilePage>
                         child: _ActionButton(
                           icon: Icons.settings_rounded,
                           label: 'settings'.tr(),
-                          onTap: () =>
-                              context.pushNamed(RouteNames.settings),
+                          onTap: () => context.pushNamed(RouteNames.settings),
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  // Tab bar
-                  TabBar(
-                    controller: _tabController,
-                    indicatorColor: ColorManager.primary,
-                    labelColor: ColorManager.primary,
-                    unselectedLabelColor: ColorManager.darkTextMuted,
-                    labelStyle: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    tabs: [
-                      Tab(text: 'stats'.tr()),
-                      Tab(text: 'history'.tr()),
-                      Tab(text: 'about'.tr()),
                     ],
                   ),
                 ],
@@ -299,15 +259,32 @@ class _UserProfilePageState extends State<UserProfilePage>
           ),
         ];
       },
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _StatsTab(profile: profile, achievements: achievements),
-          _HistoryTab(games: gameHistory),
-          _AboutTab(profile: profile),
-        ],
-      ),
+      body: _HistoryTab(games: gameHistory.take(6).toList()),
     );
+  }
+
+  Future<void> _onMenuSelected(BuildContext context, String value) async {
+    if (value == 'report') {
+      await showReportUserSheet(
+        context,
+        targetUid: widget.userId,
+        targetType: 'user',
+      );
+    } else if (value == 'block') {
+      final state = context.read<ProfileCubit>().state;
+      final displayName = state is ProfileLoaded
+          ? (state.profile.displayName ?? 'User')
+          : 'User';
+      if (!context.mounted) return;
+      final blocked = await showBlockUserDialog(
+        context,
+        targetUid: widget.userId,
+        displayName: displayName,
+      );
+      if (blocked && context.mounted) {
+        context.pop();
+      }
+    }
   }
 }
 
@@ -399,207 +376,6 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
-class _StatsTab extends StatelessWidget {
-  const _StatsTab({
-    required this.profile,
-    required this.achievements,
-  });
-
-  final UserProfile profile;
-  final List<Achievement> achievements;
-
-  @override
-  Widget build(BuildContext context) {
-    final winRate = profile.gamesPlayed > 0
-        ? profile.gamesWon / profile.gamesPlayed
-        : 0.0;
-    final winRatePercent = (winRate * 100).toInt();
-    final sunWinRate = profile.sunGamesPlayed > 0
-        ? profile.sunGamesWon / profile.sunGamesPlayed
-        : 0.0;
-    final hokmWinRate = profile.hokmGamesPlayed > 0
-        ? profile.hokmGamesWon / profile.hokmGamesPlayed
-        : 0.0;
-
-    return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      children: [
-        // Win rate with subtitle
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: ColorManager.darkSurface,
-            borderRadius: BorderRadius.circular(AppRadius.xl),
-            border: Border.all(color: ColorManager.darkBorderSoft),
-          ),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 80,
-                height: 80,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    CircularProgressIndicator(
-                      value: winRate.clamp(0.0, 1.0),
-                      strokeWidth: 8,
-                      backgroundColor: ColorManager.darkSectionGray,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        ColorManager.primary,
-                      ),
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '$winRatePercent%',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: ColorManager.darkTextPrimary,
-                          ),
-                        ),
-                        Text(
-                          'win_rate'.tr(),
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: ColorManager.darkTextMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'overall_win_rate'.tr(),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: ColorManager.darkTextPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'last_30_days'.tr(),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: ColorManager.darkTextMuted,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    // Horizontal bar charts
-                    _BarChartRow(
-                      label: 'sun_games'.tr(),
-                      value: sunWinRate,
-                      color: ColorManager.primary,
-                    ),
-                    const SizedBox(height: 10),
-                    _BarChartRow(
-                      label: 'hokm_games'.tr(),
-                      value: hokmWinRate,
-                      color: ColorManager.secondary,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        // Achievements with unlock dates
-        Text(
-          'achievements'.tr(),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: ColorManager.darkTextPrimary,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        SizedBox(
-          height: 100,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: achievements.length,
-            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
-            itemBuilder: (context, index) {
-              final achievement = achievements[index];
-              return _AchievementCard(achievement: achievement);
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _BarChartRow extends StatelessWidget {
-  const _BarChartRow({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  final String label;
-  final double value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: ColorManager.darkTextSecondary,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Stack(
-          children: [
-            Container(
-              height: 8,
-              decoration: BoxDecoration(
-                color: ColorManager.darkSectionGray,
-                borderRadius: BorderRadius.circular(AppRadius.full),
-              ),
-            ),
-            FractionallySizedBox(
-              widthFactor: value,
-              child: Container(
-                height: 8,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [color, color.withValues(alpha: 0.7)],
-                  ),
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 2),
-        Text(
-          '${(value * 100).toInt()}%',
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: color,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _HistoryTab extends StatelessWidget {
   const _HistoryTab({required this.games});
 
@@ -627,9 +403,7 @@ class _HistoryTab extends StatelessWidget {
         final duration = game.durationMinutes != null
             ? '${game.durationMinutes}m'
             : '';
-        final date = game.playedAt != null
-            ? _formatDate(game.playedAt!)
-            : '';
+        final date = game.playedAt != null ? _formatDate(game.playedAt!) : '';
 
         return Container(
           margin: const EdgeInsets.only(bottom: 10),
@@ -713,178 +487,4 @@ class _HistoryTab extends StatelessWidget {
   }
 }
 
-class _AboutTab extends StatelessWidget {
-  const _AboutTab({required this.profile});
 
-  final UserProfile profile;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        children: [
-          if (profile.bio != null && profile.bio!.isNotEmpty)
-            _AboutCard(
-              icon: Icons.info_outline_rounded,
-              label: 'bio'.tr(),
-              value: profile.bio!,
-            ),
-          if (profile.bio != null && profile.bio!.isNotEmpty)
-            const SizedBox(height: AppSpacing.md),
-          _AboutCard(
-            icon: Icons.calendar_today_rounded,
-            label: 'member_since'.tr(),
-            value: 'march_2024'.tr(),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          if (profile.favoriteMode != null && profile.favoriteMode!.isNotEmpty)
-            _AboutCard(
-              icon: Icons.favorite_rounded,
-              label: 'favorite_mode'.tr(),
-              value: profile.favoriteMode!.tr(),
-            ),
-          if (profile.favoriteMode != null && profile.favoriteMode!.isNotEmpty)
-            const SizedBox(height: AppSpacing.md),
-          if (profile.region != null && profile.region!.isNotEmpty)
-            _AboutCard(
-              icon: Icons.location_on_rounded,
-              label: 'region'.tr(),
-              value: profile.region!.tr(),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AchievementCard extends StatelessWidget {
-  const _AchievementCard({required this.achievement});
-
-  final Achievement achievement;
-
-  @override
-  Widget build(BuildContext context) {
-    final earned = achievement.earned;
-
-    return Container(
-      width: 80,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: earned
-            ? ColorManager.secondary.withValues(alpha: 0.15)
-            : ColorManager.darkSurface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(
-          color: earned
-              ? ColorManager.secondary.withValues(alpha: 0.3)
-              : ColorManager.darkBorderSoft,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            _iconForName(achievement.iconName),
-            color: earned ? ColorManager.secondary : ColorManager.darkTextMuted,
-            size: 28,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            achievement.title.tr(),
-            style: TextStyle(
-              fontSize: 10,
-              color: earned ? ColorManager.secondary : ColorManager.darkTextMuted,
-            ),
-          ),
-          if (earned && achievement.unlockedAt != null) ...[
-            const SizedBox(height: 2),
-            Text(
-              _formatUnlockDate(achievement.unlockedAt!),
-              style: const TextStyle(
-                fontSize: 9,
-                color: ColorManager.darkTextMuted,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  IconData _iconForName(String? name) {
-    switch (name) {
-      case 'emoji_events':
-        return Icons.emoji_events_rounded;
-      case 'local_fire_department':
-        return Icons.local_fire_department_rounded;
-      case 'star':
-        return Icons.star_rounded;
-      case 'people':
-        return Icons.people_rounded;
-      case 'monetization_on':
-        return Icons.monetization_on_rounded;
-      case 'workspace_premium':
-        return Icons.workspace_premium_rounded;
-      default:
-        return Icons.lock_rounded;
-    }
-  }
-
-  String _formatUnlockDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
-}
-
-class _AboutCard extends StatelessWidget {
-  const _AboutCard({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: ColorManager.darkSurface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: ColorManager.darkBorderSoft),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: ColorManager.primary),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: ColorManager.darkTextMuted,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: ColorManager.darkTextPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

@@ -53,6 +53,8 @@ import 'package:bloot/features/settings/presentation/pages/language_settings_pag
 import 'package:bloot/features/settings/presentation/pages/notification_settings_page.dart';
 import 'package:bloot/features/settings/presentation/pages/privacy_policy_page.dart';
 import 'package:bloot/features/settings/presentation/pages/privacy_settings_page.dart';
+import 'package:bloot/features/moderation/presentation/cubit/blocked_users_cubit.dart';
+import 'package:bloot/features/moderation/presentation/pages/blocked_users_page.dart';
 import 'package:bloot/features/settings/presentation/pages/settings_page.dart';
 import 'package:bloot/features/settings/presentation/pages/terms_page.dart';
 import 'package:bloot/features/shell/presentation/widgets/main_shell_widget.dart';
@@ -287,6 +289,14 @@ final GoRouter appRouter = GoRouter(
       path: RoutePaths.privacySettings,
       name: RouteNames.privacySettings,
       builder: (context, state) => const PrivacySettingsPage(),
+    ),
+    GoRoute(
+      path: RoutePaths.blockedUsers,
+      name: RouteNames.blockedUsers,
+      builder: (context, state) => BlocProvider(
+        create: (_) => getIt<BlockedUsersCubit>()..watchBlockedUsers(),
+        child: const BlockedUsersPage(),
+      ),
     ),
     GoRoute(
       path: RoutePaths.audioSettings,

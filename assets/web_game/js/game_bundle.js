@@ -329,7 +329,7 @@
   function startHand(match, rng) {
     const deck = shuffle(makeDeck(), rng);
     const hands = [[], [], [], []];
-    const firstPlayer = (match.dealer + 1) % 4;
+    const firstPlayer = match.dealer;
     let di = 0;
     for (let round = 0; round < 5; round++) {
       for (let p = 0; p < 4; p++) hands[(firstPlayer + p) % 4].push(deck[di++]);
@@ -865,7 +865,15 @@
       matchOver: !!obj.matchOver,
       winnerTeam: obj.winnerTeam == null ? null : obj.winnerTeam,
       safeMode: !!obj.safeMode,
-      state: null
+      state: null,
+      metrics: obj.metrics || {
+        humanBids: 0,
+        humanBidWins: 0,
+        teamTricks: 0,
+        totalTricks: 0,
+        pointMistakes: 0,
+        missedWins: 0
+      }
     };
     if (obj.state) {
       const s = obj.state;
@@ -956,22 +964,33 @@
   var SUIT_FILE = { "♠": "S", "♥": "H", "♦": "D", "♣": "C" };
   var RANK_NAME_AR = { "7": "سبعة", "8": "ثمانية", "9": "تسعة", "10": "عشرة", J: "جاك", Q: "بنت", K: "شايب", A: "أص" };
   var SUIT_NAME_AR = { "♠": "سباتي", "♥": "قلب", "♦": "ديناري", "♣": "كلاوب" };
+  function cardKey2(card) {
+    return card.rank + card.suit;
+  }
   function cardFace(card) {
     return "assets/cards/" + card.rank + SUIT_FILE[card.suit] + ".svg";
   }
   function cardLabel(card) {
     return (RANK_NAME_AR[card.rank] || card.rank) + " " + (SUIT_NAME_AR[card.suit] || card.suit);
   }
+  var CARD_IMG_CACHE = /* @__PURE__ */ new Map();
+  function getCardImg(card) {
+    const key = cardKey2(card);
+    if (!CARD_IMG_CACHE.has(key)) {
+      const img = el("img", "bt-card-face");
+      img.src = cardFace(card);
+      img.alt = "";
+      img.draggable = false;
+      CARD_IMG_CACHE.set(key, img);
+    }
+    return CARD_IMG_CACHE.get(key).cloneNode(true);
+  }
   function cardEl(card, extraClass) {
     const d = el("div", "bt-card" + (extraClass ? " " + extraClass : ""), {
       role: "img",
       "aria-label": cardLabel(card)
     });
-    const img = el("img", "bt-card-face");
-    img.src = cardFace(card);
-    img.alt = "";
-    img.draggable = false;
-    d.appendChild(img);
+    d.appendChild(getCardImg(card));
     return d;
   }
   function cardBackEl() {
@@ -1008,6 +1027,9 @@
   var AVATAR_FALLBACKS = { 0: "😎", 1: "🤖", 2: "🤝", 3: "🤖" };
   function renderAvatar(avatarEl, player, pos) {
     if (!avatarEl) return;
+    const key = player ? `${player.name}|${player.avatarUrl}|${pos}` : `_fallback_${pos}`;
+    if (avatarEl._lastAvatarKey === key) return;
+    avatarEl._lastAvatarKey = key;
     if (player && player.avatarUrl) {
       const img = document.createElement("img");
       img.src = player.avatarUrl;
@@ -1030,45 +1052,57 @@
     if (st.phase === "playing") return st.turn;
     return null;
   }
+  var SEAT_CACHE = /* @__PURE__ */ new Map();
+  function getSeatRefs(pos) {
+    let refs = SEAT_CACHE.get(pos);
+    if (!refs) {
+      const seatEl = $("seat-" + pos);
+      if (!seatEl) return null;
+      refs = {
+        seatEl,
+        nameEl: seatEl.querySelector(".bt-pname"),
+        levelEl: seatEl.querySelector(".bt-plevel"),
+        avatarEl: seatEl.querySelector(".bt-avatar"),
+        hukumBadge: seatEl.querySelector(".bt-hukum-badge"),
+        backs: seatEl.querySelector(".bt-backs"),
+        projs: seatEl.querySelector(".bt-projs")
+      };
+      SEAT_CACHE.set(pos, refs);
+    }
+    return refs;
+  }
   function renderSeats(match, mySeat, players) {
     const st = match.state;
     const vs = vsFor(mySeat);
     const active = activeSeat(st);
     for (let seat = 0; seat < 4; seat++) {
       const pos = vs(seat);
-      const seatEl = $("seat-" + pos);
-      if (!seatEl) continue;
+      const refs = getSeatRefs(pos);
+      if (!refs) continue;
+      const { seatEl, nameEl, levelEl, avatarEl, hukumBadge, backs, projs } = refs;
       seatEl.classList.toggle("is-turn", active === seat);
       seatEl.classList.toggle("is-dealer", match.dealer === seat);
-      const nameEl = seatEl.querySelector(".bt-pname");
-      const levelEl = seatEl.querySelector(".bt-plevel");
-      const avatarEl = seatEl.querySelector(".bt-avatar");
       if (nameEl) nameEl.textContent = players[seat] ? players[seat].name : "";
       if (levelEl) levelEl.textContent = players[seat] && players[seat].isBot ? levelBadge(players[seat].level) : "";
       renderAvatar(avatarEl, players[seat], pos);
-      const hukumBadge = seatEl.querySelector(".bt-hukum-badge");
       if (hukumBadge) {
         const showTrump = st && st.mode === "hokum" && st.buyer === seat;
         hukumBadge.hidden = !showTrump;
         if (showTrump) hukumBadge.textContent = st.trump;
       }
-      if (pos !== 0) {
-        const backs = seatEl.querySelector(".bt-backs");
-        if (backs) {
-          const count = st ? st.hands[seat] ? st.hands[seat].length : 0 : 0;
-          const lastCount = backs._lastCount ?? -1;
-          if (count !== lastCount) {
-            backs._lastCount = count;
-            const current = backs.children.length;
-            if (current < count) {
-              for (let i = current; i < Math.min(count, 8); i++) backs.appendChild(cardBackEl());
-            } else if (current > count) {
-              for (let i = current - 1; i >= count; i--) backs.removeChild(backs.children[i]);
-            }
+      if (pos !== 0 && backs) {
+        const count = st ? st.hands[seat] ? st.hands[seat].length : 0 : 0;
+        const lastCount = backs._lastCount ?? -1;
+        if (count !== lastCount) {
+          backs._lastCount = count;
+          const current = backs.children.length;
+          if (current < count) {
+            for (let i = current; i < Math.min(count, 8); i++) backs.appendChild(cardBackEl());
+          } else if (current > count) {
+            for (let i = current - 1; i >= count; i--) backs.removeChild(backs.children[i]);
           }
         }
       }
-      const projs = seatEl.querySelector(".bt-projs");
       if (projs) {
         const mine = (st.announcedProjects || []).filter((p) => p.seat === seat);
         const projsKey = mine.map((p) => p.name).join(",");
@@ -1091,25 +1125,55 @@
     if (!st || st.phase !== "playing") {
       handEl.innerHTML = "";
       handEl._lastKey = null;
+      handEl._onPlay = null;
       return;
     }
     const hand = sortHand(st.hands[mySeat], st.trump);
-    const handKey = hand.map((c) => c.key).join(",");
+    const handKey = hand.map((c) => cardKey2(c)).join(",");
     const stateKey = `${handKey}|${st.turn}|${st.currentTrick.length}|${st.doubleLevel || 1}`;
     if (handEl._lastKey === stateKey) return;
     handEl._lastKey = stateKey;
-    handEl.innerHTML = "";
+    if (handEl._onPlay !== onPlay) {
+      handEl._onPlay = onPlay;
+      handEl.onclick = (e) => {
+        const cardEl2 = e.target.closest(".bt-card[data-key]");
+        if (!cardEl2 || !cardEl2.classList.contains("is-legal")) return;
+        const card = handEl._cardsByKey?.[cardEl2.dataset.key];
+        if (card) onPlay(card);
+      };
+    }
     const strict = (st.doubleLevel || 1) >= 2;
     let legal = [];
     if (st.turn === mySeat) {
       legal = legalMoves(hand, st.currentTrick, st.mode, st.trump, mySeat, strict);
     }
-    for (const c of hand) {
-      const isLegal = st.turn === mySeat && legal.some((l) => l.suit === c.suit && l.rank === c.rank);
-      const card = cardEl(c, isLegal ? "is-legal" : "");
-      if (isLegal) card.addEventListener("click", () => onPlay(c));
-      handEl.appendChild(card);
+    const inputLocked = !!(S.online && S.awaitingServerAck);
+    const wantedKeys = /* @__PURE__ */ new Set();
+    const cardsByKey = {};
+    const existingEls = /* @__PURE__ */ new Map();
+    for (const el2 of handEl.children) {
+      if (el2.dataset.key) existingEls.set(el2.dataset.key, el2);
     }
+    const fragment = document.createDocumentFragment();
+    for (const c of hand) {
+      const key = cardKey2(c);
+      wantedKeys.add(key);
+      cardsByKey[key] = c;
+      const isLegal = !inputLocked && st.turn === mySeat && legal.some((l) => l.suit === c.suit && l.rank === c.rank);
+      let el2 = existingEls.get(key);
+      if (el2) {
+        el2.classList.toggle("is-legal", isLegal);
+      } else {
+        el2 = cardEl(c, isLegal ? "is-legal" : "");
+        el2.dataset.key = key;
+        fragment.appendChild(el2);
+      }
+    }
+    handEl._cardsByKey = cardsByKey;
+    for (const [key, el2] of existingEls) {
+      if (!wantedKeys.has(key)) el2.remove();
+    }
+    if (fragment.childNodes.length) handEl.appendChild(fragment);
   }
   var TRICK_ANCHORS = {
     0: { top: "78%", left: "50%" },
@@ -1122,17 +1186,32 @@
     const trickKey = plays.map((p) => `${p.seat}:${p.card.key}`).join(",");
     if (zone._lastKey === trickKey) return;
     zone._lastKey = trickKey;
-    zone.innerHTML = "";
     const vs = vsFor(mySeat);
-    for (const play of plays) {
-      const pos = vs(play.seat);
-      const a = TRICK_ANCHORS[pos];
-      const card = cardEl(play.card, "bt-played-card");
-      card.style.top = a.top;
-      card.style.left = a.left;
-      card.style.transform = "translate(-50%,-50%)";
-      zone.appendChild(card);
+    const wantedKeys = /* @__PURE__ */ new Set();
+    const existingEls = /* @__PURE__ */ new Map();
+    for (const el2 of zone.children) {
+      if (el2.dataset.key) existingEls.set(el2.dataset.key, el2);
     }
+    const fragment = document.createDocumentFragment();
+    for (const play of plays) {
+      const key = `${play.seat}:${cardKey2(play.card)}`;
+      wantedKeys.add(key);
+      let card = existingEls.get(key);
+      if (!card) {
+        const pos = vs(play.seat);
+        const a = TRICK_ANCHORS[pos];
+        card = cardEl(play.card, "bt-played-card");
+        card.dataset.key = key;
+        card.style.top = a.top;
+        card.style.left = a.left;
+        card.style.transform = "translate(-50%,-50%)";
+        fragment.appendChild(card);
+      }
+    }
+    for (const [key, el2] of existingEls) {
+      if (!wantedKeys.has(key)) el2.remove();
+    }
+    if (fragment.childNodes.length) zone.appendChild(fragment);
   }
   function renderTrick(match, mySeat) {
     if (!match.state) return;
@@ -1511,7 +1590,14 @@
     [-1, "F", "خويك بيعتذر عن الصكة الجاية 😂"]
   ];
   function computeGrade(match, mySeat) {
-    const m = match.metrics;
+    const m = match.metrics || {
+      humanBids: 0,
+      humanBidWins: 0,
+      teamTricks: 0,
+      totalTricks: 0,
+      pointMistakes: 0,
+      missedWins: 0
+    };
     const myTeam = teamOf(mySeat);
     const total = match.totals[0] + match.totals[1];
     const qaidShare = total ? match.totals[myTeam] / total : 0.5;
@@ -1714,6 +1800,7 @@
     return st.turn === S.mySeat && st.currentTrick.length === 0 && 8 - st.trickHistory.length <= 4;
   }
   function canShowActionButtons() {
+    if (S.online && S.awaitingServerAck) return false;
     return S.uiStatus === "playing" || S.uiStatus == null;
   }
   async function maybeBotClaims() {
@@ -2030,7 +2117,14 @@
     $("match-score").innerHTML = `<b style="font-size:1.4rem">${S.match.totals[myTeam]} — ${S.match.totals[1 - myTeam]}</b>`;
     $("grade-circle").textContent = g.grade;
     $("grade-comment").textContent = g.comment;
-    const m = S.match.metrics;
+    const m = S.match.metrics || {
+      humanBids: 0,
+      humanBidWins: 0,
+      teamTricks: 0,
+      totalTricks: 0,
+      pointMistakes: 0,
+      missedWins: 0
+    };
     const rows = [
       ["قيدكم من الكل", Math.round(g.qaidShare * 100) + "%"],
       ["الأكلات اللي أخذتوها", Math.round(g.trickShare * 100) + "%"],
@@ -2119,6 +2213,8 @@
     if (prev && !prev.matchOver && next.matchOver) {
       const myTeam = S.mySeat % 2;
       if (next.winnerTeam === myTeam) spawnConfetti();
+      hideOverlay("hand-overlay");
+      setTimeout(() => showMatchOverlay(), 400);
     }
   }
   function renderClient() {
@@ -2130,12 +2226,14 @@
     updateSawaButton(
       canShowActions && st.turn === S.mySeat && st.currentTrick.length === 0 && 8 - st.trickHistory.length <= 4
     );
-    if (st.awaitingDeclare && (st.declareSeats || []).includes(S.mySeat)) {
-      showDeclareDialog();
-    } else if (st.awaitingDouble && st.doubling.turn === S.mySeat) {
-      showDoubleDialog();
-    } else if (st.phase === "bidding" && st.bidding.turn === S.mySeat) {
-      showBidDialog();
+    if (!S.awaitingServerAck) {
+      if (st.awaitingDeclare && (st.declareSeats || []).includes(S.mySeat)) {
+        showDeclareDialog();
+      } else if (st.awaitingDouble && st.doubling.turn === S.mySeat) {
+        showDoubleDialog();
+      } else if (st.phase === "bidding" && st.bidding.turn === S.mySeat) {
+        showBidDialog();
+      }
     }
   }
   function bootUI() {
@@ -2169,6 +2267,19 @@
     if (menuBtn) menuBtn.parentElement.hidden = true;
     wireDialogs();
     wireMenu();
+    if (window.__BLOOT_BRIDGE_ENABLED) {
+      const againBtn = $("again-btn");
+      if (againBtn) againBtn.hidden = true;
+      const homeBtn = $("match-overlay")?.querySelector(".bt-btn--ghost");
+      if (homeBtn) {
+        homeBtn.textContent = "🏠 خروج";
+        homeBtn.onclick = () => {
+          if (window.BlootBridge && window.BlootBridge.send) {
+            window.BlootBridge.send({ type: "exit" });
+          }
+        };
+      }
+    }
     S.online.unsubs.push(
       watchSnapshot(cfg.code, (snap) => {
         if (!snap) return;

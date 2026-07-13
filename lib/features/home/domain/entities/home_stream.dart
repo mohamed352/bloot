@@ -9,6 +9,7 @@ class HomeStream {
     this.type = 'Baloot',
     this.thumbnailUrl,
     this.isPremium = false,
+    this.roomId,
   });
 
   final String id;
@@ -19,4 +20,5 @@ class HomeStream {
   final String type;
   final String? thumbnailUrl;
   final bool isPremium;
+  final String? roomId;
 }

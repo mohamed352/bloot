@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
+import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
+import 'package:bloot/core/di/injection.dart';
 import 'package:bloot/core/style/colors.dart';
+import 'package:bloot/features/moderation/domain/repositories/moderation_repository.dart';
 import 'package:bloot/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:bloot/features/settings/presentation/cubit/settings_state.dart';
 
@@ -46,23 +50,31 @@ class PrivacySettingsPage extends StatelessWidget {
                 onTap: () => _showVisibilitySheet(context, visibility),
               ),
               const Divider(color: ColorManager.darkBorderSoft),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  'blocked_users'.tr(),
-                  style: const TextStyle(color: ColorManager.darkTextPrimary),
-                ),
-                subtitle: const Text(
-                  'No blocked users',
-                  style: TextStyle(color: ColorManager.darkTextSecondary),
-                ),
-                trailing: const Icon(
-                  Icons.chevron_right_rounded,
-                  color: ColorManager.darkTextMuted,
-                ),
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('No blocked users')),
+              StreamBuilder<Set<String>>(
+                stream: getIt<ModerationRepository>().watchBlockedUserIds(),
+                builder: (context, snapshot) {
+                  final count = snapshot.data?.length ?? 0;
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      'blocked_users'.tr(),
+                      style: const TextStyle(
+                        color: ColorManager.darkTextPrimary,
+                      ),
+                    ),
+                    subtitle: Text(
+                      count > 0
+                          ? 'blocked_users_count'.tr(args: ['$count'])
+                          : 'no_blocked_users'.tr(),
+                      style: const TextStyle(
+                        color: ColorManager.darkTextSecondary,
+                      ),
+                    ),
+                    trailing: const Icon(
+                      Icons.chevron_right_rounded,
+                      color: ColorManager.darkTextMuted,
+                    ),
+                    onTap: () => context.pushNamed(RouteNames.blockedUsers),
                   );
                 },
               ),
@@ -79,9 +91,7 @@ class PrivacySettingsPage extends StatelessWidget {
                 ),
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Data download request sent'),
-                    ),
+                    const SnackBar(content: Text('Data download request sent')),
                   );
                 },
               ),

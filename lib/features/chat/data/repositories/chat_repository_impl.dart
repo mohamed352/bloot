@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:bloot/features/chat/data/datasources/chat_remote_data_source.dart';
 import 'package:bloot/features/chat/data/models/chat_model.dart';
 import 'package:bloot/features/chat/domain/entities/chat.dart';
+import 'package:bloot/features/chat/domain/entities/chat_user.dart';
 import 'package:bloot/features/chat/domain/repositories/chat_repository.dart';
 
 @LazySingleton(as: ChatRepository)
@@ -37,7 +38,7 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<List<ChatConversation>> searchUsers(String query) async {
+  Future<List<ChatUser>> searchUsers(String query) async {
     final models = await _remoteDataSource.searchUsers(query);
     return models.map((m) => m.toEntity()).toList();
   }

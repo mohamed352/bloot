@@ -28,7 +28,10 @@ export const leaveGame = functions.https.onCall(async (request) => {
   return db.runTransaction(async (transaction) => {
     const doc = await transaction.get(roomRef);
     if (!doc.exists) {
-      throw new functions.https.HttpsError('not-found', 'Room not found');
+      // The room is already gone, so the user has effectively left. Treat as
+      // success to avoid errors when the client back-presses before the room
+      // document is fully replicated to the server.
+      return { success: true };
     }
 
     const data = doc.data()!;
@@ -81,6 +84,16 @@ export const leaveGame = functions.https.onCall(async (request) => {
     }
 
     if (playerUids.length === 0) {
+      // If this room was streaming, end the stream so it doesn't stay live
+      // after the room is gone.
+      const streamId = data.streamId as string | undefined;
+      if (streamId != null && streamId.length > 0) {
+        const streamRef = db.collection('streams').doc(streamId);
+        transaction.update(streamRef, {
+          status: 'ended',
+          endedAt: FieldValue.serverTimestamp(),
+        });
+      }
       transaction.delete(roomRef);
     } else {
       const updateData: Record<string, any> = {

@@ -24,6 +24,7 @@ class PublicRoomsPage extends StatefulWidget {
 
 class _PublicRoomsPageState extends State<PublicRoomsPage> {
   bool _joining = false;
+  final _codeController = TextEditingController();
 
   @override
   void initState() {
@@ -31,10 +32,23 @@ class _PublicRoomsPageState extends State<PublicRoomsPage> {
     context.read<RoomCubit>().watchPublicRooms();
   }
 
+  @override
+  void dispose() {
+    _codeController.dispose();
+    super.dispose();
+  }
+
   void _joinRoom(BuildContext context, Room room) {
     if (_joining || room.inviteCode == null || room.inviteCode!.isEmpty) return;
     setState(() => _joining = true);
     context.read<RoomCubit>().joinRoomByCode(room.inviteCode!);
+  }
+
+  void _searchByCode(BuildContext context) {
+    final code = _codeController.text.trim().toUpperCase();
+    if (code.isEmpty || _joining) return;
+    setState(() => _joining = true);
+    context.read<RoomCubit>().joinRoomByCode(code);
   }
 
   @override
@@ -72,31 +86,50 @@ class _PublicRoomsPageState extends State<PublicRoomsPage> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (rooms.isEmpty) {
-            return EmptyStateWidget(
-              title: 'no_public_rooms'.tr(),
-              icon: Icons.meeting_room_outlined,
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () async {
-              context.read<RoomCubit>().watchPublicRooms();
-            },
-            child: ListView.builder(
-              padding: const EdgeInsetsDirectional.all(
-                AppSpacing.screenHorizontal,
+          return Column(
+            children: [
+              // Join-by-code card: always visible, even when the public list
+              // is empty, so users can still join a room by its code.
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  AppSpacing.screenHorizontal,
+                  AppSpacing.screenHorizontal,
+                  AppSpacing.screenHorizontal,
+                  0,
+                ),
+                child: _RoomCodeSearchCard(
+                  controller: _codeController,
+                  loading: _joining,
+                  onSubmitted: () => _searchByCode(context),
+                ),
               ),
-              itemCount: rooms.length,
-              itemBuilder: (context, index) {
-                final room = rooms[index];
-                return _RoomCard(
-                  room: room,
-                  joining: _joining,
-                  onTap: () => _joinRoom(context, room),
-                );
-              },
-            ),
+              Expanded(
+                child: rooms.isEmpty
+                    ? EmptyStateWidget(
+                        title: 'no_public_rooms'.tr(),
+                        icon: Icons.meeting_room_outlined,
+                      )
+                    : RefreshIndicator(
+                        onRefresh: () async {
+                          context.read<RoomCubit>().watchPublicRooms();
+                        },
+                        child: ListView.builder(
+                          padding: const EdgeInsetsDirectional.all(
+                            AppSpacing.screenHorizontal,
+                          ),
+                          itemCount: rooms.length,
+                          itemBuilder: (context, index) {
+                            final room = rooms[index];
+                            return _RoomCard(
+                              room: room,
+                              joining: _joining,
+                              onTap: () => _joinRoom(context, room),
+                            );
+                          },
+                        ),
+                      ),
+              ),
+            ],
           );
         },
       ),
@@ -208,6 +241,95 @@ class _RoomCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _RoomCodeSearchCard extends StatelessWidget {
+  const _RoomCodeSearchCard({
+    required this.controller,
+    required this.loading,
+    required this.onSubmitted,
+  });
+
+  final TextEditingController controller;
+  final bool loading;
+  final VoidCallback onSubmitted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.md),
+      padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: ColorManager.darkSurface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: ColorManager.darkBorderSoft),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'join_room'.tr(),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: ColorManager.darkTextPrimary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: ColorManager.darkCanvas,
+                    borderRadius: BorderRadius.circular(AppRadius.full),
+                  ),
+                  child: TextField(
+                    controller: controller,
+                    textCapitalization: TextCapitalization.characters,
+                    textInputAction: TextInputAction.search,
+                    style: const TextStyle(
+                      color: ColorManager.darkTextPrimary,
+                      fontSize: 14,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'room_code'.tr(),
+                      hintStyle: const TextStyle(
+                        color: ColorManager.darkTextMuted,
+                        fontSize: 14,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search_rounded,
+                        color: ColorManager.darkTextMuted,
+                        size: 20,
+                      ),
+                      contentPadding: const EdgeInsetsDirectional.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      border: InputBorder.none,
+                    ),
+                    onSubmitted: (_) => onSubmitted(),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              SizedBox(
+                width: 48,
+                height: 48,
+                child: AppButton(
+                  text: '',
+                  icon: Icons.arrow_forward_rounded,
+                  isLoading: loading,
+                  onPressed: loading ? null : onSubmitted,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

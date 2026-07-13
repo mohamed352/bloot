@@ -44,30 +44,48 @@ class DiscoverCubit extends Cubit<DiscoverState> {
       // Emit the stream immediately so the UI is not stuck in loading if the
       // chat stream is empty or slow to emit.
       emit(DiscoverState.streamLoaded(stream: stream, messages: const []));
-      _chatSubscription = _discoverRepository.watchStreamChat(id).listen(
-        (messages) {
-          if (isClosed) return;
-          emit(DiscoverState.streamLoaded(stream: stream, messages: messages));
-        },
-        onError: (Object e) {
-          AppLogger.error('Failed to watch stream chat', error: e);
-          if (!isClosed) {
-            emit(const DiscoverState.error(message: 'Failed to load stream chat.'));
-          }
-        },
-      );
+      _chatSubscription = _discoverRepository
+          .watchStreamChat(id)
+          .listen(
+            (messages) {
+              if (isClosed) return;
+              emit(
+                DiscoverState.streamLoaded(stream: stream, messages: messages),
+              );
+            },
+            onError: (Object e) {
+              AppLogger.error('Failed to watch stream chat', error: e);
+              if (!isClosed) {
+                emit(
+                  const DiscoverState.error(
+                    message: 'Failed to load stream chat.',
+                  ),
+                );
+              }
+            },
+          );
     } catch (e) {
       AppLogger.error('Failed to load stream', error: e);
       emit(const DiscoverState.error(message: 'Failed to load stream.'));
     }
   }
 
-  Future<void> sendChatMessage(String streamId, String message) async {
+  /// Sends a chat message; returns `true` on success so the UI can keep the
+  /// typed text (instead of clearing it) when the send fails.
+  Future<bool> sendChatMessage(String streamId, String message) async {
     try {
       await _discoverRepository.sendChatMessage(streamId, message);
+      return true;
     } catch (e) {
       AppLogger.error('Failed to send message', error: e);
+      return false;
     }
+  }
+
+  /// Resolves a live stream by room invite [code]. Returns the stream id, or
+  /// `null` when no live stream matches. Does not emit state changes.
+  Future<String?> findStreamByCode(String code) {
+    return _discoverRepository.findStreamIdByCode(code);
   }
 
   @override

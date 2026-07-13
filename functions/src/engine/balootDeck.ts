@@ -47,7 +47,9 @@ export class BalootDeck {
 export function dealBalootHands(deck: BalootDeck, dealer: number): BalootDealResult {
   const d = deck.shuffledDeck();
   const hands: BalootCard[][] = [[], [], [], []];
-  const firstPlayer = (dealer + 1) % 4;
+  // Bidding starts with the dealer (not the player to the dealer's right), per
+  // the house rule set: the dealer is the first to choose Sun/Hokm/Pass.
+  const firstPlayer = dealer;
 
   let di = 0;
   for (let round = 0; round < 5; round++) {

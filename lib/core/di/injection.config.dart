@@ -14,6 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart' as _i974;
 import 'package:cloud_functions/cloud_functions.dart' as _i809;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart' as _i141;
+import 'package:firebase_database/firebase_database.dart' as _i345;
 import 'package:firebase_messaging/firebase_messaging.dart' as _i892;
 import 'package:firebase_performance/firebase_performance.dart' as _i346;
 import 'package:firebase_remote_config/firebase_remote_config.dart' as _i627;
@@ -56,6 +57,14 @@ import '../../features/home/data/repositories/home_repository_impl.dart'
     as _i76;
 import '../../features/home/domain/repositories/home_repository.dart' as _i0;
 import '../../features/home/presentation/cubit/home_cubit.dart' as _i9;
+import '../../features/moderation/data/datasources/moderation_remote_data_source.dart'
+    as _i200;
+import '../../features/moderation/data/repositories/moderation_repository_impl.dart'
+    as _i378;
+import '../../features/moderation/domain/repositories/moderation_repository.dart'
+    as _i106;
+import '../../features/moderation/presentation/cubit/blocked_users_cubit.dart'
+    as _i793;
 import '../../features/notifications/data/datasources/notifications_remote_data_source.dart'
     as _i951;
 import '../../features/notifications/data/repositories/notifications_repository_impl.dart'
@@ -111,6 +120,7 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i59.FirebaseAuth>(() => thirdPartyModule.auth);
     gh.lazySingleton<_i974.FirebaseFirestore>(() => thirdPartyModule.firestore);
+    gh.lazySingleton<_i345.FirebaseDatabase>(() => thirdPartyModule.database);
     gh.lazySingleton<_i457.FirebaseStorage>(() => thirdPartyModule.storage);
     gh.lazySingleton<_i809.FirebaseFunctions>(() => thirdPartyModule.functions);
     gh.lazySingleton<_i892.FirebaseMessaging>(() => thirdPartyModule.messaging);
@@ -126,6 +136,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i327.AppLinks>(() => thirdPartyModule.appLinks);
     gh.lazySingleton<_i15.AudioService>(
       () => _i15.AudioService(prefs: gh<_i460.SharedPreferences>()),
+    );
+    gh.lazySingleton<_i200.ModerationRemoteDataSource>(
+      () => _i200.ModerationRemoteDataSource(
+        firestore: gh<_i974.FirebaseFirestore>(),
+        firebaseAuth: gh<_i59.FirebaseAuth>(),
+        functions: gh<_i809.FirebaseFunctions>(),
+      ),
     );
     gh.lazySingleton<_i918.RoomRemoteDataSource>(
       () => _i918.RoomRemoteDataSource(
@@ -162,6 +179,11 @@ extension GetItInjectableX on _i174.GetIt {
         messaging: gh<_i892.FirebaseMessaging>(),
         firestore: gh<_i974.FirebaseFirestore>(),
         auth: gh<_i59.FirebaseAuth>(),
+      ),
+    );
+    gh.lazySingleton<_i106.ModerationRepository>(
+      () => _i378.ModerationRepositoryImpl(
+        remoteDataSource: gh<_i200.ModerationRemoteDataSource>(),
       ),
     );
     gh.lazySingleton<_i894.ProfileRepository>(
@@ -252,6 +274,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i36.ProfileCubit>(
       () => _i36.ProfileCubit(profileRepository: gh<_i894.ProfileRepository>()),
+    );
+    gh.factory<_i793.BlockedUsersCubit>(
+      () => _i793.BlockedUsersCubit(
+        moderationRepository: gh<_i106.ModerationRepository>(),
+      ),
     );
     gh.singleton<_i117.AuthCubit>(
       () => _i117.AuthCubit(

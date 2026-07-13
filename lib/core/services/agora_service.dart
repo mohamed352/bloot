@@ -44,6 +44,13 @@ class AgoraAudioVolumeIndicationEvent {
   final List<AudioVolumeInfo> speakers;
 }
 
+/// Agora token response from Cloud Functions.
+class _TokenResult {
+  const _TokenResult({required this.token, this.expiresAt});
+  final String token;
+  final int? expiresAt;
+}
+
 /// Manages Agora voice/video engine lifecycle for a single channel.
 ///
 /// Follows the singleton pattern via DI and provides:
@@ -59,10 +66,10 @@ class AgoraService {
     required CacheHelper cacheHelper,
     required FirebaseAuth firebaseAuth,
     required RemoteConfigService remoteConfig,
-  })  : _functions = functions,
-        _cacheHelper = cacheHelper,
-        _firebaseAuth = firebaseAuth,
-        _remoteConfig = remoteConfig;
+  }) : _functions = functions,
+       _cacheHelper = cacheHelper,
+       _firebaseAuth = firebaseAuth,
+       _remoteConfig = remoteConfig;
 
   final FirebaseFunctions _functions;
   final CacheHelper _cacheHelper;
@@ -76,10 +83,13 @@ class AgoraService {
   bool _isCameraOn = false;
   int _remoteVideoSubscriberCount = 0;
   bool _leaveRequested = false;
+  Timer? _tokenRenewalTimer;
 
   // Event controllers
-  final _userJoinedController = StreamController<AgoraUserJoinedEvent>.broadcast();
-  final _userOfflineController = StreamController<AgoraUserOfflineEvent>.broadcast();
+  final _userJoinedController =
+      StreamController<AgoraUserJoinedEvent>.broadcast();
+  final _userOfflineController =
+      StreamController<AgoraUserOfflineEvent>.broadcast();
   final _connectionStateController =
       StreamController<AgoraConnectionStateChangedEvent>.broadcast();
   final _audioVolumeController =
@@ -142,9 +152,7 @@ class AgoraService {
       smooth: 3,
       reportVad: true,
     );
-    await _engine!.setClientRole(
-      role: ClientRoleType.clientRoleBroadcaster,
-    );
+    await _engine!.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
 
     _registerEventHandlers();
 
@@ -212,7 +220,7 @@ class AgoraService {
   }
 
   /// Request an Agora token from Cloud Functions.
-  Future<String> _fetchToken({
+  Future<_TokenResult> _fetchToken({
     required String channelName,
     required int uid,
     required String role,
@@ -221,31 +229,50 @@ class AgoraService {
       final result = await _functions
           .httpsCallable('generateAgoraToken')
           .call<Map<String, dynamic>>({
-        'channelName': channelName,
-        'uid': uid,
-        'role': role,
-      }).timeout(const Duration(seconds: 10));
+            'channelName': channelName,
+            'uid': uid,
+            'role': role,
+          })
+          .timeout(const Duration(seconds: 10));
       final token = result.data['token'] as String?;
+      final expiresAt = result.data['expiresAt'] as int?;
       if (token == null || token.isEmpty) {
         throw Exception('Token generation returned empty token');
       }
       AppLogger.info('Agora token obtained', tag: 'Agora');
-      return token;
+      return _TokenResult(token: token, expiresAt: expiresAt);
     } catch (e) {
       AppLogger.error('Failed to fetch Agora token', error: e, tag: 'Agora');
       rethrow;
     }
   }
 
+  void _scheduleTokenRenewal(int? expiresAtUnix) {
+    _tokenRenewalTimer?.cancel();
+    if (expiresAtUnix == null) return;
+
+    final expiresAt = DateTime.fromMillisecondsSinceEpoch(expiresAtUnix * 1000);
+    var renewIn =
+        expiresAt.difference(DateTime.now()) - const Duration(minutes: 5);
+    if (renewIn.isNegative) renewIn = const Duration(seconds: 30);
+
+    _tokenRenewalTimer = Timer(renewIn, () {
+      if (_currentChannelId != null) {
+        _renewToken(_currentChannelId!);
+      }
+    });
+  }
+
   Future<void> _renewToken(String channelName) async {
     if (_currentUid == null || _currentChannelId == null) return;
     try {
-      final token = await _fetchToken(
+      final tokenResult = await _fetchToken(
         channelName: channelName,
         uid: _currentUid!,
         role: 'publisher',
       );
-      await _engine?.renewToken(token);
+      await _engine?.renewToken(tokenResult.token);
+      _scheduleTokenRenewal(tokenResult.expiresAt);
       AppLogger.info('Token renewed', tag: 'Agora');
     } catch (e) {
       AppLogger.error('Failed to renew token', error: e, tag: 'Agora');
@@ -254,20 +281,37 @@ class AgoraService {
 
   /// Join an Agora channel as a broadcaster (player).
   ///
-  /// Uses the current Firebase Auth UID hash as the Agora UID.
-  Future<void> joinChannel({required String channelName}) async {
+  /// [agoraUid] is the Agora UID to use. When null, a deterministic UID is
+  /// derived from the Firebase Auth UID. Callers should pass the UID stored
+  /// on the room/game/stream player record when available.
+  ///
+  /// [subscribeVideo] controls whether remote video streams are decoded.
+  /// Disable in the game screen (no video UI) to reduce GPU/CPU load.
+  Future<void> joinChannel({
+    required String channelName,
+    int? agoraUid,
+    bool subscribeVideo = true,
+  }) async {
     await _joinChannelInternal(
       channelName: channelName,
+      agoraUid: agoraUid,
       isAudience: false,
+      subscribeVideo: subscribeVideo,
     );
   }
 
   /// Join an Agora channel as an audience member (spectator).
   ///
+  /// [agoraUid] is the Agora UID to use. When null, a deterministic UID is
+  /// derived from the Firebase Auth UID.
   /// Subscribes to audio and video but does not publish.
-  Future<void> joinAsAudience({required String channelName}) async {
+  Future<void> joinAsAudience({
+    required String channelName,
+    int? agoraUid,
+  }) async {
     await _joinChannelInternal(
       channelName: channelName,
+      agoraUid: agoraUid,
       isAudience: true,
     );
   }
@@ -275,6 +319,8 @@ class AgoraService {
   Future<void> _joinChannelInternal({
     required String channelName,
     required bool isAudience,
+    int? agoraUid,
+    bool subscribeVideo = true,
   }) async {
     await initialize();
 
@@ -290,29 +336,28 @@ class AgoraService {
       throw Exception('Cannot join Agora channel: user not authenticated');
     }
 
-    final agoraUid = firebaseUid.hashCode.abs();
-    final token = await _fetchToken(
+    final effectiveAgoraUid = agoraUid ?? _deriveAgoraUid(firebaseUid);
+    final tokenResult = await _fetchToken(
       channelName: channelName,
-      uid: agoraUid,
+      uid: effectiveAgoraUid,
       role: isAudience ? 'subscriber' : 'publisher',
     );
+    final token = tokenResult.token;
 
     try {
-      // Audience needs video enabled to decode remote video streams
-      if (isAudience) {
+      // Audience needs video enabled to decode remote video streams.
+      // Game broadcasters can skip video subscription when no video UI is shown.
+      if (isAudience || subscribeVideo) {
         await _engine!.enableVideo();
-        await _engine!.updateChannelMediaOptions(
-          const ChannelMediaOptions(autoSubscribeVideo: true),
-        );
       }
 
       await _engine!.joinChannel(
         token: token,
         channelId: channelName,
-        uid: agoraUid,
+        uid: effectiveAgoraUid,
         options: ChannelMediaOptions(
           autoSubscribeAudio: true,
-          autoSubscribeVideo: true,
+          autoSubscribeVideo: isAudience || subscribeVideo,
           publishMicrophoneTrack: !isAudience,
           publishCameraTrack: !isAudience && _isCameraOn,
           clientRoleType: isAudience
@@ -328,13 +373,18 @@ class AgoraService {
       }
 
       _currentChannelId = channelName;
-      _currentUid = agoraUid;
+      _currentUid = effectiveAgoraUid;
+
+      _scheduleTokenRenewal(tokenResult.expiresAt);
 
       // Crash recovery: save active room/channel
-      await _cacheHelper.saveData(key: CacheKeys.activeChannelId, value: channelName);
+      await _cacheHelper.saveData(
+        key: CacheKeys.activeChannelId,
+        value: channelName,
+      );
 
       AppLogger.info(
-        'Joined Agora channel: $channelName, uid: $agoraUid',
+        'Joined Agora channel: $channelName, uid: $effectiveAgoraUid',
         tag: 'Agora',
       );
     } catch (e) {
@@ -345,9 +395,15 @@ class AgoraService {
 
   /// Leave the current Agora channel.
   Future<void> leaveChannel() async {
-    if (_engine == null) return;
+    if (_engine == null) {
+      _leaveRequested = true;
+      return;
+    }
     _leaveRequested = true;
     if (_currentChannelId == null) return;
+
+    _tokenRenewalTimer?.cancel();
+    _tokenRenewalTimer = null;
 
     try {
       await _engine!.leaveChannel();
@@ -391,9 +447,7 @@ class AgoraService {
 
     if (_currentChannelId != null) {
       await _engine!.updateChannelMediaOptions(
-        ChannelMediaOptions(
-          publishCameraTrack: _isCameraOn,
-        ),
+        ChannelMediaOptions(publishCameraTrack: _isCameraOn),
       );
     }
 
@@ -485,7 +539,11 @@ class AgoraService {
         );
         AppLogger.debug('Remote video subscribed', tag: 'Agora');
       } catch (e) {
-        AppLogger.error('Failed to subscribe to remote video', error: e, tag: 'Agora');
+        AppLogger.error(
+          'Failed to subscribe to remote video',
+          error: e,
+          tag: 'Agora',
+        );
       }
     }
   }
@@ -503,7 +561,11 @@ class AgoraService {
         );
         AppLogger.debug('Remote video unsubscribed', tag: 'Agora');
       } catch (e) {
-        AppLogger.error('Failed to unsubscribe from remote video', error: e, tag: 'Agora');
+        AppLogger.error(
+          'Failed to unsubscribe from remote video',
+          error: e,
+          tag: 'Agora',
+        );
       }
     }
     if (_remoteVideoSubscriberCount < 0) _remoteVideoSubscriberCount = 0;
@@ -524,8 +586,22 @@ class AgoraService {
 
   /// Leave background mode — restore normal media options.
   Future<void> leaveBackgroundMode() async {
-    if (_engine == null) return;
+    if (_engine == null || _currentChannelId == null) return;
+    await _engine!.updateChannelMediaOptions(
+      ChannelMediaOptions(
+        publishMicrophoneTrack: _isMicOn,
+        publishCameraTrack: _isCameraOn,
+      ),
+    );
     AppLogger.debug('Left background mode', tag: 'Agora');
+  }
+
+  /// Derives a deterministic Agora UID from a Firebase UID.
+  ///
+  /// Prefer backend-assigned UIDs whenever possible; this fallback is only
+  /// used when no explicit UID is supplied.
+  static int _deriveAgoraUid(String firebaseUid) {
+    return firebaseUid.hashCode.abs();
   }
 
   // ---------------------------------------------------------------------------
@@ -548,6 +624,7 @@ class AgoraService {
 
   /// Release the Agora engine and free resources.
   Future<void> dispose() async {
+    _tokenRenewalTimer?.cancel();
     await leaveChannel();
 
     await _userJoinedController.close();

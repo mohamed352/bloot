@@ -68,6 +68,8 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         final cubit = context.read<RoomCubit>();
+        // The cubit may already be closed if the user double-pressed back.
+        if (cubit.isClosed) return;
         final router = GoRouter.of(context);
         await cubit.leaveRoom(widget.id);
         if (mounted) router.goNamed(RouteNames.home);
@@ -135,9 +137,9 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                             builder: (context) => RoomSettingsBottomSheet(
                               room: room,
                               onLeave: () async {
-                                await context
-                                    .read<RoomCubit>()
-                                    .leaveRoom(room.id);
+                                await context.read<RoomCubit>().leaveRoom(
+                                  room.id,
+                                );
                                 if (context.mounted) {
                                   context.goNamed(RouteNames.home);
                                 }

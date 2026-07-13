@@ -206,7 +206,6 @@ class TestAssetLoader extends AssetLoader {
     'say_something': 'Say something',
     'chat_unavailable': 'Chat unavailable',
     'like': 'Like',
-    'gift': 'Gift',
     'share': 'Share',
     'follow': 'Follow',
     'send': 'Send',

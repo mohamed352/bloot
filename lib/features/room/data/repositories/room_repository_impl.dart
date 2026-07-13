@@ -35,16 +35,17 @@ class RoomRepositoryImpl implements RoomRepository {
 
   @override
   Stream<Room> watchRoom(String id) {
-    return _remoteDataSource.watchRoom(id).map(
-      (model) => model.toEntity(currentUserUid: _currentUid),
-    );
+    return _remoteDataSource
+        .watchRoom(id)
+        .map((model) => model.toEntity(currentUserUid: _currentUid));
   }
 
   @override
   Stream<List<Room>> watchPublicRooms() {
     return _remoteDataSource.watchPublicRooms().map(
-          (models) => models.map((m) => m.toEntity(currentUserUid: _currentUid)).toList(),
-        );
+      (models) =>
+          models.map((m) => m.toEntity(currentUserUid: _currentUid)).toList(),
+    );
   }
 
   @override
@@ -77,10 +78,7 @@ class RoomRepositoryImpl implements RoomRepository {
       _remoteDataSource.isPasswordRequired(inviteCode);
 
   @override
-  Future<Room> joinRoomByCode(
-    String inviteCode, {
-    String? password,
-  }) async {
+  Future<Room> joinRoomByCode(String inviteCode, {String? password}) async {
     final model = await _remoteDataSource.joinRoomByCode(
       inviteCode,
       password: password,
@@ -99,7 +97,9 @@ class RoomRepositoryImpl implements RoomRepository {
   }
 
   @override
-  Future<({String roomId, String? gameId})> inviteBotsToRoom(String roomId) async {
+  Future<({String roomId, String? gameId})> inviteBotsToRoom(
+    String roomId,
+  ) async {
     return _remoteDataSource.inviteBotsToRoom(roomId);
   }
 

@@ -124,17 +124,23 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                       filled: true,
                       fillColor: ColorManager.darkSectionGray,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.cardCompact),
+                        borderRadius: BorderRadius.circular(
+                          AppRadius.cardCompact,
+                        ),
                         borderSide: BorderSide.none,
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.cardCompact),
+                        borderRadius: BorderRadius.circular(
+                          AppRadius.cardCompact,
+                        ),
                         borderSide: const BorderSide(
                           color: ColorManager.darkBorderSoft,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.cardCompact),
+                        borderRadius: BorderRadius.circular(
+                          AppRadius.cardCompact,
+                        ),
                         borderSide: const BorderSide(
                           color: ColorManager.primary,
                           width: 1.5,
@@ -179,7 +185,9 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                                 height: 40,
                                 decoration: BoxDecoration(
                                   color: e.value.color.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(AppRadius.iconContainer),
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.iconContainer,
+                                  ),
                                 ),
                                 child: Icon(
                                   e.value.icon,
@@ -218,7 +226,9 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                                               color: ColorManager.live
                                                   .withValues(alpha: 0.15),
                                               borderRadius:
-                                                  BorderRadius.circular(AppRadius.xs),
+                                                  BorderRadius.circular(
+                                                    AppRadius.xs,
+                                                  ),
                                             ),
                                             child: Text(
                                               LocaleKeys.liveBadge.tr(),
@@ -312,31 +322,41 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                         filled: true,
                         fillColor: ColorManager.darkSectionGray,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.cardCompact),
+                          borderRadius: BorderRadius.circular(
+                            AppRadius.cardCompact,
+                          ),
                           borderSide: BorderSide.none,
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.cardCompact),
+                          borderRadius: BorderRadius.circular(
+                            AppRadius.cardCompact,
+                          ),
                           borderSide: const BorderSide(
                             color: ColorManager.darkBorderSoft,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.cardCompact),
+                          borderRadius: BorderRadius.circular(
+                            AppRadius.cardCompact,
+                          ),
                           borderSide: const BorderSide(
                             color: ColorManager.primary,
                             width: 1.5,
                           ),
                         ),
                         errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.cardCompact),
+                          borderRadius: BorderRadius.circular(
+                            AppRadius.cardCompact,
+                          ),
                           borderSide: const BorderSide(
                             color: ColorManager.error,
                             width: 1.5,
                           ),
                         ),
                         focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.cardCompact),
+                          borderRadius: BorderRadius.circular(
+                            AppRadius.cardCompact,
+                          ),
                           borderSide: const BorderSide(
                             color: ColorManager.error,
                             width: 1.5,
@@ -414,10 +434,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _buildPreviewAvatar(
-                              null,
-                              true,
-                            ),
+                            _buildPreviewAvatar(null, true),
                             const SizedBox(width: AppSpacing.sm),
                             _buildPreviewAvatar(null, false),
                             const SizedBox(width: AppSpacing.sm),
@@ -473,7 +490,8 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                     gradient: GradientButton.goldGradient,
                     icon: Icons.add_rounded,
                     isLoading: isLoading,
-                    onPressed: isLoading || (_selectedType == 0 && !_isPasswordValid)
+                    onPressed:
+                        isLoading || (_selectedType == 0 && !_isPasswordValid)
                         ? null
                         : () {
                             final name = _nameController.text.trim();

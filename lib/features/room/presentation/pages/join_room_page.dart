@@ -86,9 +86,9 @@ class _JoinRoomPageState extends State<JoinRoomPage> {
     final code = _codeController.text.trim().toUpperCase();
     if (!_canJoin) return;
     context.read<RoomCubit>().joinRoomByCode(
-          code,
-          password: _passwordController.text.trim(),
-        );
+      code,
+      password: _passwordController.text.trim(),
+    );
   }
 
   void _pasteFromClipboard() async {
@@ -249,10 +249,7 @@ class _JoinRoomPageState extends State<JoinRoomPage> {
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     LocaleKeys.password_required_for_locked_room.tr(),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colors.error,
-                    ),
+                    style: TextStyle(fontSize: 12, color: colors.error),
                   ),
                 ],
                 const SizedBox(height: AppSpacing.xxxl),

@@ -29,9 +29,21 @@ export const forceCloseRoom = functions.https.onCall(async (request) => {
     if (!roomDoc.exists) {
       throw new functions.https.HttpsError('not-found', 'Room not found');
     }
+
+    const roomData = roomDoc.data()!;
+    const streamId = roomData.streamId as string | undefined;
+    if (streamId != null && streamId.length > 0) {
+      const streamRef = db.collection('streams').doc(streamId);
+      transaction.update(streamRef, {
+        status: 'ended',
+        endedAt: new Date(),
+      });
+    }
+
     transaction.update(roomRef, {
       status: 'finished',
       isStreaming: false,
+      streamId: null,
       updatedAt: new Date(),
     });
   });

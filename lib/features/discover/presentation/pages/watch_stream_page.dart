@@ -10,12 +10,15 @@ import 'package:share_plus/share_plus.dart';
 import 'package:bloot/core/components/cached_avatar.dart';
 import 'package:bloot/core/constants/app_radius.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
+import 'package:bloot/core/di/injection.dart';
 import 'package:bloot/core/services/agora_service.dart';
 import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/features/discover/domain/entities/discover_stream.dart';
 import 'package:bloot/features/discover/presentation/cubit/discover_cubit.dart';
 import 'package:bloot/features/discover/presentation/cubit/discover_state.dart';
 import 'package:bloot/features/discover/presentation/widgets/stream_video_square.dart';
+import 'package:bloot/features/moderation/domain/repositories/moderation_repository.dart';
+import 'package:bloot/features/moderation/presentation/widgets/report_user_sheet.dart';
 
 class WatchStreamPage extends StatefulWidget {
   const WatchStreamPage({super.key, required this.id});
@@ -28,28 +31,16 @@ class WatchStreamPage extends StatefulWidget {
 class _WatchStreamPageState extends State<WatchStreamPage> {
   final TextEditingController _chatController = TextEditingController();
   late final AgoraService _agoraService;
-  StreamSubscription<AgoraUserJoinedEvent>? _userJoinedSub;
-  StreamSubscription<AgoraUserOfflineEvent>? _userOfflineSub;
-  int _liveViewerCount = 0;
 
   @override
   void initState() {
     super.initState();
     _agoraService = context.read<AgoraService>();
-    _listenToAgoraEvents();
-  }
-
-  void _listenToAgoraEvents() {
-    _userJoinedSub = _agoraService.onUserJoined.listen((event) {
-      setState(() => _liveViewerCount++);
-    });
-    _userOfflineSub = _agoraService.onUserOffline.listen((event) {
-      setState(() => _liveViewerCount = (_liveViewerCount - 1).clamp(0, 9999));
-    });
   }
 
   Future<void> _joinAgoraChannel(String? channelName) async {
     if (channelName == null || channelName.isEmpty) return;
+    if (_agoraService.currentChannelId == channelName) return;
     try {
       await _agoraService.joinAsAudience(channelName: channelName);
     } catch (e) {
@@ -65,17 +56,43 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
     }
   }
 
-  void _sendMessage() {
+  Future<void> _sendMessage() async {
     final text = _chatController.text.trim();
     if (text.isEmpty) return;
-    context.read<DiscoverCubit>().sendChatMessage(widget.id, text);
-    _chatController.clear();
+    final sent = await context.read<DiscoverCubit>().sendChatMessage(
+      widget.id,
+      text,
+    );
+    if (!mounted) return;
+    if (sent) {
+      _chatController.clear();
+    } else {
+      // Keep the typed text so the user can retry instead of losing it.
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('failed_to_send'.tr())));
+    }
+  }
+
+  Future<void> _reportStream(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final hostUid = await getIt<ModerationRepository>().getStreamHostUid(
+      widget.id,
+    );
+    if (!context.mounted) return;
+    if (hostUid == null) {
+      messenger.showSnackBar(SnackBar(content: Text('report_failed'.tr())));
+      return;
+    }
+    await showReportUserSheet(
+      context,
+      targetUid: hostUid,
+      targetType: 'stream',
+    );
   }
 
   @override
   void dispose() {
-    _userJoinedSub?.cancel();
-    _userOfflineSub?.cancel();
     _chatController.dispose();
     _leaveAgoraChannel();
     super.dispose();
@@ -151,9 +168,7 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                stream != null
-                                    ? '${stream.viewers + _liveViewerCount}'
-                                    : '--',
+                                stream != null ? '${stream.viewers}' : '--',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: ColorManager.darkTextPrimary
@@ -161,11 +176,13 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
                                 ),
                               ),
                               const Spacer(),
-                              Icon(
-                                Icons.more_vert_rounded,
-                                color: ColorManager.darkTextPrimary.withValues(
-                                  alpha: 0.7,
+                              IconButton(
+                                icon: Icon(
+                                  Icons.more_vert_rounded,
+                                  color: ColorManager.darkTextPrimary
+                                      .withValues(alpha: 0.7),
                                 ),
+                                onPressed: () => _reportStream(context),
                               ),
                             ],
                           ),
@@ -262,10 +279,13 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
                               ),
                               decoration: BoxDecoration(
                                 color: msg.isMe
-                                    ? ColorManager.primary.withValues(alpha: 0.2)
+                                    ? ColorManager.primary.withValues(
+                                        alpha: 0.2,
+                                      )
                                     : ColorManager.darkSurface,
-                                borderRadius:
-                                    BorderRadius.circular(AppRadius.md),
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.md,
+                                ),
                               ),
                               child: Column(
                                 crossAxisAlignment: msg.isMe
@@ -336,19 +356,14 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
                         color: ColorManager.error,
                       ),
                       _ActionButton(
-                        icon: Icons.card_giftcard_rounded,
-                        label: 'gift'.tr(),
-                        color: ColorManager.secondary,
-                      ),
-                      _ActionButton(
                         icon: Icons.share_rounded,
                         label: 'share'.tr(),
                         color: ColorManager.info,
                         onTap: stream != null
                             ? () => Share.share(
-                                  '\u{1F4FA} ${stream.title} by ${stream.host}\n'
-                                  'https://bloot.app/stream/${widget.id}',
-                                )
+                                '\u{1F4FA} ${stream.title} by ${stream.host}\n'
+                                'https://bloot.app/stream/${widget.id}',
+                              )
                             : null,
                       ),
                       _ActionButton(
@@ -431,7 +446,7 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
   Widget _buildVideoGrid(DiscoverStream? stream) {
     final players = stream?.players ?? [];
 
-    if (players.length == 4) {
+    if (players.isNotEmpty) {
       return GridView.count(
         crossAxisCount: 2,
         padding: EdgeInsets.zero,
@@ -473,9 +488,10 @@ class _PulsingLiveBadgeState extends State<_PulsingLiveBadge>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
-    _animation = Tween<double>(begin: 0.6, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: 0.6,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -524,10 +540,7 @@ class _PulsingLiveBadgeState extends State<_PulsingLiveBadge>
 }
 
 class _FallbackVideoSquare extends StatelessWidget {
-  const _FallbackVideoSquare({
-    required this.name,
-    required this.team,
-  });
+  const _FallbackVideoSquare({required this.name, required this.team});
 
   final String name;
   final String team;
@@ -542,10 +555,7 @@ class _FallbackVideoSquare extends StatelessWidget {
       decoration: BoxDecoration(
         color: ColorManager.darkCanvas,
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
-          color: teamColor.withValues(alpha: 0.5),
-          width: 2,
-        ),
+        border: Border.all(color: teamColor.withValues(alpha: 0.5), width: 2),
       ),
       child: Stack(
         fit: StackFit.expand,
@@ -621,15 +631,17 @@ class _ActionButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, color: color, size: 22),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: TextStyle(fontSize: 10, color: color.withValues(alpha: 0.8)),
-          ),
-        ],
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                color: color.withValues(alpha: 0.8),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
   }
 }
-

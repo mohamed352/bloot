@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:bloot/features/chat/domain/entities/chat.dart';
+import 'package:bloot/features/chat/domain/entities/chat_user.dart';
 
 part 'new_message_state.freezed.dart';
 
@@ -8,9 +9,8 @@ part 'new_message_state.freezed.dart';
 class NewMessageState with _$NewMessageState {
   const factory NewMessageState.initial() = _Initial;
   const factory NewMessageState.loading() = _Loading;
-  const factory NewMessageState.loaded({
-    required List<ChatConversation> users,
-  }) = _Loaded;
+  const factory NewMessageState.loaded({required List<ChatUser> users}) =
+      _Loaded;
   const factory NewMessageState.creating() = _Creating;
   const factory NewMessageState.conversationCreated({
     required ChatConversation conversation,

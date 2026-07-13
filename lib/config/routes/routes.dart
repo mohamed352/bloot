@@ -41,6 +41,7 @@ abstract class RouteNames {
   static const String languageSettings = 'languageSettings';
   static const String notificationSettings = 'notificationSettings';
   static const String privacySettings = 'privacySettings';
+  static const String blockedUsers = 'blockedUsers';
   static const String audioSettings = 'audioSettings';
   static const String accountSettings = 'accountSettings';
   static const String aboutSettings = 'aboutSettings';
@@ -85,6 +86,7 @@ abstract class RoutePaths {
   static const String languageSettings = '/settings/language';
   static const String notificationSettings = '/settings/notifications';
   static const String privacySettings = '/settings/privacy';
+  static const String blockedUsers = '/settings/blocked-users';
   static const String audioSettings = '/settings/audio';
   static const String accountSettings = '/settings/account';
   static const String aboutSettings = '/settings/about';

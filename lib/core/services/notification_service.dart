@@ -43,6 +43,14 @@ class NotificationService {
     // Request permissions
     await requestPermission();
 
+    // iOS: show notifications as banners/sound/badge while app is in foreground.
+    // Without this, foreground FCM notifications are silently swallowed on iOS.
+    await _messaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
     // Get and save token.
     final token = await getToken();
     if (token != null) {

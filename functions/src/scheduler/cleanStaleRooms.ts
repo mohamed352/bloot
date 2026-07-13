@@ -1,4 +1,5 @@
 import { onSchedule } from 'firebase-functions/v2/scheduler';
+import { FieldValue } from 'firebase-admin/firestore';
 import { db } from '../config/admin';
 
 export const cleanStaleRooms = onSchedule(
@@ -17,10 +18,21 @@ export const cleanStaleRooms = onSchedule(
 
     const batch = db.batch();
     let count = 0;
+    const streamIdsToEnd = new Set<string>();
 
-    for (const doc of staleQuery.docs) {
+    const collectRoomDeletion = (
+      doc: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>,
+    ) => {
       batch.delete(doc.ref);
       count++;
+      const streamId = doc.data().streamId as string | undefined;
+      if (streamId != null && streamId.length > 0) {
+        streamIdsToEnd.add(streamId);
+      }
+    };
+
+    for (const doc of staleQuery.docs) {
+      collectRoomDeletion(doc);
     }
 
     // Also delete any rooms with no players regardless of timestamp
@@ -33,15 +45,25 @@ export const cleanStaleRooms = onSchedule(
     for (const doc of emptyQuery.docs) {
       // Avoid double-deleting
       if (!staleQuery.docs.find((d) => d.id === doc.id)) {
-        batch.delete(doc.ref);
-        count++;
+        collectRoomDeletion(doc);
       }
+    }
+
+    // End any streams tied to deleted rooms so they don't remain live.
+    for (const streamId of streamIdsToEnd) {
+      const streamRef = db.collection('streams').doc(streamId);
+      batch.update(streamRef, {
+        status: 'ended',
+        endedAt: FieldValue.serverTimestamp(),
+      });
     }
 
     if (count > 0) {
       await batch.commit();
     }
 
-    console.log(`cleanStaleRooms: deleted ${count} rooms`);
+    console.log(
+      `cleanStaleRooms: deleted ${count} rooms, ended ${streamIdsToEnd.size} streams`,
+    );
   },
 );

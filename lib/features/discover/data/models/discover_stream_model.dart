@@ -60,41 +60,41 @@ abstract class StreamChatMessageModel with _$StreamChatMessageModel {
 
 extension StreamPlayerModelX on StreamPlayerModel {
   StreamPlayer toEntity() => StreamPlayer(
-        uid: uid,
-        name: name,
-        avatarUrl: avatarUrl,
-        agoraUid: agoraUid,
-        team: team,
-        isCameraOn: isCameraOn,
-        isMicOn: isMicOn,
-      );
+    uid: uid,
+    name: name,
+    avatarUrl: avatarUrl,
+    agoraUid: agoraUid,
+    team: team,
+    isCameraOn: isCameraOn,
+    isMicOn: isMicOn,
+  );
 }
 
 extension DiscoverStreamModelX on DiscoverStreamModel {
   DiscoverStream toEntity() => DiscoverStream(
-        id: id,
-        title: title,
-        host: host,
-        viewers: viewers,
-        avatarUrl: avatarUrl,
-        category: category,
-        isLive: isLive,
-        isPremium: isPremium,
-        agoraChannelName: agoraChannelName,
-        roomId: roomId,
-        players: players.map((p) => p.toEntity()).toList(),
-      );
+    id: id,
+    title: title,
+    host: host,
+    viewers: viewers,
+    avatarUrl: avatarUrl,
+    category: category,
+    isLive: isLive,
+    isPremium: isPremium,
+    agoraChannelName: agoraChannelName,
+    roomId: roomId,
+    players: players.map((p) => p.toEntity()).toList(),
+  );
 }
 
 extension StreamChatMessageModelX on StreamChatMessageModel {
   StreamChatMessage toEntity() => StreamChatMessage(
-        id: id,
-        senderUid: senderUid,
-        senderName: senderName,
-        senderAvatar: senderAvatar,
-        text: text,
-        type: type,
-        createdAt: createdAt,
-        isMe: isMe,
-      );
+    id: id,
+    senderUid: senderUid,
+    senderName: senderName,
+    senderAvatar: senderAvatar,
+    text: text,
+    type: type,
+    createdAt: createdAt,
+    isMe: isMe,
+  );
 }

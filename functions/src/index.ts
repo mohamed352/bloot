@@ -68,6 +68,7 @@ export { startStream } from './https/startStream';
 export { endStream } from './https/endStream';
 export { deleteAccount } from './https/deleteAccount';
 export { reportUser } from './https/reportUser';
+export { blockUser, unblockUser } from './https/blockUser';
 export { followUser } from './https/followUser';
 export { unfollowUser } from './https/unfollowUser';
 

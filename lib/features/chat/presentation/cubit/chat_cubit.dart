@@ -83,10 +83,51 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> sendMessage(String conversationId, String message) async {
+    final trimmed = message.trim();
+    if (trimmed.isEmpty) return;
+
+    final currentState = state;
+    ChatMessage? optimisticMessage;
+
+    // Optimistically add the message to the local list so the user sees it
+    // immediately, even before Firestore resolves the server timestamp.
+    if (currentState is ChatMessagesLoaded) {
+      final now = DateTime.now();
+      final time =
+          '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+      optimisticMessage = ChatMessage(
+        id: 'local_${now.millisecondsSinceEpoch}',
+        text: trimmed,
+        isMe: true,
+        time: time,
+      );
+      emit(
+        ChatState.messagesLoaded(
+          conversationId: currentState.conversationId,
+          messages: [optimisticMessage, ...currentState.messages],
+        ),
+      );
+    }
+
     try {
-      await _chatRepository.sendMessage(conversationId, message);
+      await _chatRepository.sendMessage(conversationId, trimmed);
     } catch (e) {
       AppLogger.error('Failed to send message', error: e);
+
+      // Remove the optimistic message on failure so the user knows it didn't
+      // go through.
+      if (optimisticMessage != null && state is ChatMessagesLoaded) {
+        final loadedState = state as ChatMessagesLoaded;
+        emit(
+          ChatState.messagesLoaded(
+            conversationId: loadedState.conversationId,
+            messages: loadedState.messages
+                .where((m) => m.id != optimisticMessage!.id)
+                .toList(),
+          ),
+        );
+      }
+
       emit(const ChatState.error(message: 'Failed to send message.'));
     }
   }

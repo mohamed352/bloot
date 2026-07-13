@@ -14,8 +14,65 @@ import 'package:bloot/features/discover/presentation/cubit/discover_cubit.dart';
 import 'package:bloot/features/discover/presentation/cubit/discover_state.dart';
 import 'package:bloot/features/discover/presentation/widgets/stream_card.dart';
 
-class DiscoverStreamsPage extends StatelessWidget {
+class DiscoverStreamsPage extends StatefulWidget {
   const DiscoverStreamsPage({super.key});
+
+  @override
+  State<DiscoverStreamsPage> createState() => _DiscoverStreamsPageState();
+}
+
+class _DiscoverStreamsPageState extends State<DiscoverStreamsPage> {
+  final TextEditingController _searchController = TextEditingController();
+  String _query = '';
+  bool _searching = false;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() => _query = value.trim());
+  }
+
+  Future<void> _onSearchSubmitted() async {
+    final query = _searchController.text.trim();
+    if (query.isEmpty || _searching) return;
+
+    setState(() => _searching = true);
+    final streamId = await context.read<DiscoverCubit>().findStreamByCode(
+      query,
+    );
+    if (!mounted) return;
+    setState(() => _searching = false);
+
+    if (streamId != null) {
+      _clearSearch();
+      context.pushNamed(
+        RouteNames.watchStream,
+        pathParameters: {'id': streamId},
+      );
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('no_live_for_code'.tr())));
+    }
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    setState(() => _query = '');
+  }
+
+  List<DiscoverStream> _filterStreams(List<DiscoverStream> streams) {
+    if (_query.isEmpty) return streams;
+    final lowerQuery = _query.toLowerCase();
+    return streams.where((stream) {
+      return stream.title.toLowerCase().contains(lowerQuery) ||
+          stream.host.toLowerCase().contains(lowerQuery);
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +87,9 @@ class DiscoverStreamsPage extends StatelessWidget {
         );
       },
       builder: (context, state) {
-        final streams = state is DiscoverStreamsLoaded
-            ? state.streams
-            : <DiscoverStream>[];
+        final streams = _filterStreams(
+          state is DiscoverStreamsLoaded ? state.streams : <DiscoverStream>[],
+        );
         final selectedFilter = state is DiscoverStreamsLoaded
             ? state.selectedFilterIndex
             : 0;
@@ -70,7 +127,9 @@ class DiscoverStreamsPage extends StatelessWidget {
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: ColorManager.primary.withValues(alpha: 0.15),
+                              color: ColorManager.primary.withValues(
+                                alpha: 0.15,
+                              ),
                               borderRadius: BorderRadius.circular(AppRadius.md),
                             ),
                             child: const Icon(
@@ -122,6 +181,8 @@ class DiscoverStreamsPage extends StatelessWidget {
                       border: Border.all(color: ColorManager.darkBorderSoft),
                     ),
                     child: TextField(
+                      controller: _searchController,
+                      textInputAction: TextInputAction.search,
                       style: const TextStyle(
                         color: ColorManager.darkTextPrimary,
                         fontSize: 15,
@@ -135,11 +196,35 @@ class DiscoverStreamsPage extends StatelessWidget {
                           Icons.search_rounded,
                           color: ColorManager.darkTextMuted,
                         ),
+                        suffixIcon: _searching
+                            ? const Padding(
+                                padding: EdgeInsets.all(14),
+                                child: SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: ColorManager.darkTextMuted,
+                                  ),
+                                ),
+                              )
+                            : _query.isNotEmpty
+                            ? IconButton(
+                                onPressed: _clearSearch,
+                                icon: const Icon(
+                                  Icons.clear_rounded,
+                                  color: ColorManager.darkTextMuted,
+                                  size: 18,
+                                ),
+                              )
+                            : null,
                         border: InputBorder.none,
                         contentPadding: const EdgeInsetsDirectional.symmetric(
                           vertical: 14,
                         ),
                       ),
+                      onChanged: _onSearchChanged,
+                      onSubmitted: (_) => _onSearchSubmitted(),
                     ),
                   ),
                 ),
@@ -211,10 +296,16 @@ class DiscoverStreamsPage extends StatelessWidget {
                       final stream = streams[index];
                       return StreamCard(
                         stream: stream,
-                        onTap: () => context.pushNamed(
-                          RouteNames.watchStream,
-                          pathParameters: {'id': stream.id},
-                        ),
+                        onTap: () {
+                          // The shell keeps this page alive (IndexedStack), so
+                          // clear the search before navigating out to ensure a
+                          // clean state when the user comes back.
+                          _clearSearch();
+                          context.pushNamed(
+                            RouteNames.watchStream,
+                            pathParameters: {'id': stream.id},
+                          );
+                        },
                       );
                     },
                   ),

@@ -45,6 +45,11 @@ export function deserializeMatch(obj) {
     handsPlayed: obj.handsPlayed || 0, matchOver: !!obj.matchOver,
     winnerTeam: obj.winnerTeam == null ? null : obj.winnerTeam,
     safeMode: !!obj.safeMode, state: null,
+    metrics: obj.metrics || {
+      humanBids: 0, humanBidWins: 0,
+      teamTricks: 0, totalTricks: 0,
+      pointMistakes: 0, missedWins: 0,
+    },
   };
   if (obj.state) {
     const s = obj.state;

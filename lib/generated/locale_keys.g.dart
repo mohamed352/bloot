@@ -135,7 +135,6 @@ abstract class  LocaleKeys {
   static const games = 'games';
   static const get_started = 'get_started';
   static const gg = 'gg';
-  static const gift = 'gift';
   static const go_home = 'go_home';
   static const go_to_settings = 'go_to_settings';
   static const good_game = 'good_game';

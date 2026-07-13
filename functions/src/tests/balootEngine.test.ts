@@ -25,7 +25,8 @@ function createTestMatch(autoDeclare = true): BalootMatch {
     { autoDeclare },
   );
   // Fix dealer so the first player is seat 0, making tests deterministic.
-  match.dealer = 3;
+  // With dealer-first bidding, dealer == firstPlayer.
+  match.dealer = 0;
   engine.startHand(match);
   return match;
 }
@@ -56,6 +57,150 @@ describe('BalootEngine', () => {
     for (const hand of state.hands) {
       expect(hand).toHaveLength(8);
     }
+  });
+
+  it('gives Sun priority over Hokm during dealer-first bidding', () => {
+    const engine = new BalootEngine(seededRng(12345));
+    const match = engine.createMatch(
+      [
+        { name: 'A', uid: 'a', team: 'A' },
+        { name: 'B', uid: 'b', team: 'B' },
+        { name: 'C', uid: 'c', team: 'A' },
+        { name: 'D', uid: 'd', team: 'B' },
+      ],
+      { autoDeclare: true },
+    );
+    match.dealer = 0;
+    engine.startHand(match);
+
+    // Dealer chooses Hokm, then the next player immediately chooses Sun.
+    engine.applyBid(match, 0, { type: 'hokum' });
+    engine.applyBid(match, 1, { type: 'sun' });
+
+    const state = match.state!;
+    expect(state.phase).toBe('playing');
+    expect(state.mode).toBe('sun');
+    expect(state.buyer).toBe(1);
+  });
+
+  it('starts bidding with the dealer (dealer-first house rule)', () => {
+    const engine = new BalootEngine(seededRng(12345));
+    const match = engine.createMatch(
+      [
+        { name: 'A', uid: 'a', team: 'A' },
+        { name: 'B', uid: 'b', team: 'B' },
+        { name: 'C', uid: 'c', team: 'A' },
+        { name: 'D', uid: 'd', team: 'B' },
+      ],
+      { autoDeclare: true },
+    );
+    // Try several dealers to ensure firstPlayer always equals dealer.
+    for (let dealer = 0; dealer < 4; dealer++) {
+      match.dealer = dealer;
+      engine.startHand(match);
+      const state = match.state!;
+      expect(state.firstPlayer).toBe(dealer);
+      expect(state.bidding.turn).toBe(dealer);
+      expect(state.leader).toBe(dealer);
+      expect(state.turn).toBe(dealer);
+    }
+  });
+
+  describe('dealer-first Hokm/Sun/Pass bidding rules', () => {
+    function makeMatch(engine: BalootEngine, dealer: number) {
+      const match = engine.createMatch(
+        [
+          { name: 'A', uid: 'a', team: 'A' },
+          { name: 'B', uid: 'b', team: 'B' },
+          { name: 'C', uid: 'c', team: 'A' },
+          { name: 'D', uid: 'd', team: 'B' },
+        ],
+        { autoDeclare: true },
+      );
+      match.dealer = dealer;
+      engine.startHand(match);
+      return match;
+    }
+
+    it('dealer Sun ends bidding immediately in Sun mode', () => {
+      const engine = new BalootEngine();
+      const match = makeMatch(engine, 0);
+      engine.applyBid(match, 0, { type: 'sun' });
+      expect(match.state!.phase).toBe('playing');
+      expect(match.state!.mode).toBe('sun');
+      expect(match.state!.buyer).toBe(0);
+    });
+
+    it('dealer Hokm then all pass ends as Hokm with dealer as buyer', () => {
+      const engine = new BalootEngine();
+      const match = makeMatch(engine, 0);
+      engine.applyBid(match, 0, { type: 'hokum' });
+      engine.applyBid(match, 1, { type: 'pass' });
+      engine.applyBid(match, 2, { type: 'pass' });
+      engine.applyBid(match, 3, { type: 'pass' });
+      expect(match.state!.phase).toBe('playing');
+      expect(match.state!.mode).toBe('hokum');
+      expect(match.state!.buyer).toBe(0);
+    });
+
+    it('dealer passes and a later Hokm wins when no Sun is called', () => {
+      const engine = new BalootEngine();
+      const match = makeMatch(engine, 0);
+      engine.applyBid(match, 0, { type: 'pass' });
+      engine.applyBid(match, 1, { type: 'pass' });
+      engine.applyBid(match, 2, { type: 'hokum' });
+      engine.applyBid(match, 3, { type: 'pass' });
+      expect(match.state!.phase).toBe('playing');
+      expect(match.state!.mode).toBe('hokum');
+      expect(match.state!.buyer).toBe(2);
+    });
+
+    it('multiple Hokm bids keep the first Hokm bidder and continue around', () => {
+      const engine = new BalootEngine();
+      const match = makeMatch(engine, 0);
+      engine.applyBid(match, 0, { type: 'hokum' });
+      engine.applyBid(match, 1, { type: 'hokum' });
+      engine.applyBid(match, 2, { type: 'pass' });
+      engine.applyBid(match, 3, { type: 'pass' });
+      expect(match.state!.phase).toBe('playing');
+      expect(match.state!.mode).toBe('hokum');
+      expect(match.state!.buyer).toBe(0); // first Hokm wins
+    });
+
+    it('Sun by any player overrides Hokm and ends bidding immediately', () => {
+      const engine = new BalootEngine();
+      const match = makeMatch(engine, 0);
+      engine.applyBid(match, 0, { type: 'hokum' });
+      engine.applyBid(match, 1, { type: 'pass' });
+      engine.applyBid(match, 2, { type: 'sun' });
+      expect(match.state!.phase).toBe('playing');
+      expect(match.state!.mode).toBe('sun');
+      expect(match.state!.buyer).toBe(2);
+    });
+
+    it('asks each player only once per round; all pass in round 1 opens round 2', () => {
+      const engine = new BalootEngine();
+      const match = makeMatch(engine, 0);
+      engine.applyBid(match, 0, { type: 'pass' });
+      engine.applyBid(match, 1, { type: 'pass' });
+      engine.applyBid(match, 2, { type: 'pass' });
+      engine.applyBid(match, 3, { type: 'pass' });
+      const state = match.state!;
+      expect(state.bidding.round).toBe(2);
+      expect(state.bidding.spoken).toBe(0);
+      expect(state.bidding.turn).toBe(0); // dealer starts round 2
+      expect(state.bidding.best).toBeUndefined();
+    });
+
+    it('all pass in round 2 triggers a redeal with the next dealer', () => {
+      const engine = new BalootEngine();
+      const match = makeMatch(engine, 0);
+      const originalDealer = match.dealer;
+      for (let i = 0; i < 4; i++) engine.applyBid(match, match.state!.bidding.turn, { type: 'pass' });
+      for (let i = 0; i < 4; i++) engine.applyBid(match, match.state!.bidding.turn, { type: 'pass' });
+      expect(match.dealer).toBe((originalDealer + 1) % 4);
+      expect(match.state!.hands[0]).toHaveLength(5);
+    });
   });
 
   it('supports a full Sun hand', () => {

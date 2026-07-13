@@ -5,6 +5,10 @@ const SUIT_FILE = { "♠": "S", "♥": "H", "♦": "D", "♣": "C" };
 const RANK_NAME_AR = { "7": "سبعة", "8": "ثمانية", "9": "تسعة", "10": "عشرة", J: "جاك", Q: "بنت", K: "شايب", A: "أص" };
 const SUIT_NAME_AR = { "♠": "سباتي", "♥": "قلب", "♦": "ديناري", "♣": "كلاوب" };
 
+export function cardKey(card) {
+  return card.rank + card.suit;
+}
+
 export function cardFace(card) {
   return "assets/cards/" + card.rank + SUIT_FILE[card.suit] + ".svg";
 }
@@ -13,15 +17,25 @@ export function cardLabel(card) {
   return (RANK_NAME_AR[card.rank] || card.rank) + " " + (SUIT_NAME_AR[card.suit] || card.suit);
 }
 
+const CARD_IMG_CACHE = new Map();
+
+function getCardImg(card) {
+  const key = cardKey(card);
+  if (!CARD_IMG_CACHE.has(key)) {
+    const img = el("img", "bt-card-face");
+    img.src = cardFace(card);
+    img.alt = "";
+    img.draggable = false;
+    CARD_IMG_CACHE.set(key, img);
+  }
+  return CARD_IMG_CACHE.get(key).cloneNode(true);
+}
+
 export function cardEl(card, extraClass) {
   const d = el("div", "bt-card" + (extraClass ? " " + extraClass : ""), {
     role: "img", "aria-label": cardLabel(card),
   });
-  const img = el("img", "bt-card-face");
-  img.src = cardFace(card);
-  img.alt = "";
-  img.draggable = false;
-  d.appendChild(img);
+  d.appendChild(getCardImg(card));
   return d;
 }
 

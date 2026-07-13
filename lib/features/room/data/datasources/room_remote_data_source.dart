@@ -27,18 +27,31 @@ class RoomRemoteDataSource {
   String get _currentUid => _firebaseAuth.currentUser?.uid ?? '';
 
   Stream<List<RoomModel>> watchPublicRooms() {
+    // NOTE: Intentionally no orderBy() here — a compound query with orderBy
+    // needs a composite index, and when that index is missing Firestore
+    // fails the whole listener (previously swallowed, showing a permanent
+    // empty list). Two equality filters work with automatic single-field
+    // indexes; we sort client-side by createdAt instead.
     return _firestore
         .collection('rooms')
         .where('type', isEqualTo: 'public')
         .where('status', isEqualTo: 'waiting')
-        .orderBy('createdAt', descending: true)
         .limit(50)
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs.map((doc) => _mapDocToModel(doc.id, doc.data())).toList();
-        })
-        .handleError((Object error) {
-          AppLogger.error('Failed to watch public rooms', error: error, tag: 'Room');
+          final docs = snapshot.docs.toList()
+            ..sort((a, b) {
+              final aTime = a.data()['createdAt'];
+              final bTime = b.data()['createdAt'];
+              final aMillis = aTime is Timestamp
+                  ? aTime.millisecondsSinceEpoch
+                  : 0;
+              final bMillis = bTime is Timestamp
+                  ? bTime.millisecondsSinceEpoch
+                  : 0;
+              return bMillis.compareTo(aMillis);
+            });
+          return docs.map((doc) => _mapDocToModel(doc.id, doc.data())).toList();
         });
   }
 
@@ -63,9 +76,12 @@ class RoomRemoteDataSource {
         .collection('users')
         .doc(user.uid)
         .get()
-        .timeout(timeout, onTimeout: () {
-      throw const RoomException('Timed out reading user profile.');
-    });
+        .timeout(
+          timeout,
+          onTimeout: () {
+            throw const RoomException('Timed out reading user profile.');
+          },
+        );
     final userData = userDoc.data();
     final displayName = userData?['displayName'] as String? ?? 'Player';
     final avatarUrl = userData?['avatarUrl'] as String?;
@@ -112,12 +128,14 @@ class RoomRemoteDataSource {
     };
 
     AppLogger.info('Writing room document to Firestore...', tag: 'Room');
-    await roomRef.set(roomData).timeout(
-      timeout,
-      onTimeout: () => throw const RoomException(
-        'Timed out creating room. Please check your connection and try again.',
-      ),
-    );
+    await roomRef
+        .set(roomData)
+        .timeout(
+          timeout,
+          onTimeout: () => throw const RoomException(
+            'Timed out creating room. Please check your connection and try again.',
+          ),
+        );
     AppLogger.info('Room created: ${roomRef.id}', tag: 'Room');
 
     // Write notification docs for invited players (deferred to direct-invite UI)
@@ -241,7 +259,9 @@ class RoomRemoteDataSource {
 
   Future<String> startGame(String roomId) async {
     final callable = _functions.httpsCallable('startGame');
-    final result = await callable.call<Map<String, dynamic>>({'roomId': roomId});
+    final result = await callable.call<Map<String, dynamic>>({
+      'roomId': roomId,
+    });
     final data = result.data;
     return data['gameId'] as String;
   }
@@ -250,7 +270,9 @@ class RoomRemoteDataSource {
   /// the game. Returns both the room ID and the game ID.
   Future<({String roomId, String gameId})> createRoomWithBots() async {
     final callable = _functions.httpsCallable('createRoomWithBots');
-    final result = await callable.call<Map<String, dynamic>>(<String, dynamic>{});
+    final result = await callable.call<Map<String, dynamic>>(
+      <String, dynamic>{},
+    );
     final data = result.data;
     final roomId = data['roomId'] as String?;
     final gameId = data['gameId'] as String?;
@@ -263,7 +285,9 @@ class RoomRemoteDataSource {
   /// Invites bots to fill empty seats in an existing [roomId]. If the room
   /// becomes full, the game is started automatically and the game ID is
   /// returned.
-  Future<({String roomId, String? gameId})> inviteBotsToRoom(String roomId) async {
+  Future<({String roomId, String? gameId})> inviteBotsToRoom(
+    String roomId,
+  ) async {
     final callable = _functions.httpsCallable('inviteBotsToRoom');
     final result = await callable.call<Map<String, dynamic>>({
       'roomId': roomId,
@@ -309,9 +333,7 @@ class RoomRemoteDataSource {
     final user = _firebaseAuth.currentUser;
     if (user == null) throw const UnauthenticatedException();
 
-    await _functions.httpsCallable('endStream').call<void>({
-      'roomId': roomId,
-    });
+    await _functions.httpsCallable('endStream').call<void>({'roomId': roomId});
 
     // Return updated room
     return getRoomById(roomId);
@@ -334,10 +356,14 @@ class RoomRemoteDataSource {
 
       final players = List<Map<String, dynamic>>.from(data['players'] as List);
       final playerUids = List<String>.from(data['playerUids'] as List? ?? []);
-      final readyPlayers = List<String>.from(data['readyPlayers'] as List? ?? []);
+      final readyPlayers = List<String>.from(
+        data['readyPlayers'] as List? ?? [],
+      );
       final teamA = List<String>.from(data['teamA'] as List? ?? []);
       final teamB = List<String>.from(data['teamB'] as List? ?? []);
-      final kickedPlayerUids = List<String>.from(data['kickedPlayerUids'] as List? ?? []);
+      final kickedPlayerUids = List<String>.from(
+        data['kickedPlayerUids'] as List? ?? [],
+      );
 
       final playerIndex = players.indexWhere((p) => p['uid'] == targetUid);
       if (playerIndex == -1) throw const PlayerNotInRoomException();
@@ -418,10 +444,7 @@ class RoomRemoteDataSource {
     }
   }
 
-  RoomModel _mapDocToModel(
-    String id,
-    Map<String, dynamic> data,
-  ) {
+  RoomModel _mapDocToModel(String id, Map<String, dynamic> data) {
     final currentUid = _currentUid;
     final players = (data['players'] as List? ?? []).map((p) {
       final map = p as Map<String, dynamic>;

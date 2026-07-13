@@ -15,6 +15,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:bloot/firebase_options.dart';
 
 import 'package:bloot/config/routes/routes.dart';
+import 'package:bloot/core/constants/app_spacing.dart';
 import 'package:bloot/core/di/injection.dart';
 import 'package:bloot/core/services/agora_service.dart';
 import 'package:bloot/core/style/colors.dart';
@@ -49,9 +50,11 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
   bool _webViewReady = false;
   bool _startSent = false;
   Game? _lastPushedGame;
+  String? _lastPushedPayload;
   String? _lastError;
   String? _rtdbToken;
   bool _rtdbAuthInProgress = false;
+  bool _rtdbActive = false;
   DateTime _lastAudioResume = DateTime.fromMillisecondsSinceEpoch(0);
 
   @override
@@ -121,13 +124,10 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
   }
 
   Future<void> _loadGamePage() async {
-    // Clear any stale WebView cache so a fresh install or rebuild always picks
-    // up the latest bundled JS/CSS (e.g. hamburger hiding / audio fixes).
-    try {
-      await _controller.clearCache();
-    } catch (e) {
-      debugPrint('[HtmlGame] clearCache error: $e');
-    }
+    // Load the bundled HTML game directly. We intentionally avoid clearing the
+    // WebView cache on every launch because it causes a noticeable stall on
+    // lower-end devices. Flutter assets are version-locked to the app binary,
+    // so the bundled JS/CSS are always current.
     await _controller.loadFlutterAsset('assets/web_game/play.html');
   }
 
@@ -136,6 +136,16 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
     WidgetsBinding.instance.removeObserver(this);
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    // Tell the WebView to stop its RTDB watcher and release audio/DOM resources
+    // before the native view is torn down.
+    try {
+      _controller.runJavaScript(
+        'if (window.__bloot_bridge && window.__bloot_bridge.stopRtdb) __bloot_bridge.stopRtdb();',
+      );
+      _controller.loadRequest(Uri.parse('about:blank'));
+    } catch (e) {
+      debugPrint('[HtmlGame] dispose cleanup error: $e');
+    }
     super.dispose();
   }
 
@@ -234,6 +244,12 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
 
     if (type == 'action') {
       _handleAction(payload as Map<String, dynamic>);
+      return;
+    }
+
+    if (type == 'rtdbActive') {
+      debugPrint('[HtmlGame] RTDB fast path confirmed by WebView');
+      _rtdbActive = true;
       return;
     }
 
@@ -344,12 +360,30 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
   void _pushState(Game game) {
     if (!_webViewReady) return;
     _lastPushedGame = game;
-    debugPrint('[HtmlGame] pushing state status=${game.status}');
-    _send('state', <String, dynamic>{
+    // Once the WebView confirms RTDB is delivering snapshots, the JS bridge
+    // state push is redundant and only burns CPU/battery. Keep audio resume
+    // and error clearing so the UI stays responsive.
+    if (_rtdbActive) {
+      debugPrint('[HtmlGame] RTDB active; skipping bridge state push');
+      _resumeWebAudio();
+      if (mounted) setState(() => _lastError = null);
+      return;
+    }
+    final payload = <String, dynamic>{
       'engineState': game.engineState,
       'status': game.status,
       'players': game.players.map(_playerToJson).toList(),
-    });
+    };
+    final payloadJson = jsonEncode(payload);
+    if (_lastPushedPayload == payloadJson) {
+      debugPrint('[HtmlGame] payload unchanged; skipping bridge state push');
+      _resumeWebAudio();
+      if (mounted) setState(() => _lastError = null);
+      return;
+    }
+    _lastPushedPayload = payloadJson;
+    debugPrint('[HtmlGame] pushing state status=${game.status}');
+    _send('state', payload);
     _resumeWebAudio();
     if (mounted) setState(() => _lastError = null);
   }
@@ -419,6 +453,7 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
             fit: StackFit.expand,
             children: [
               WebViewWidget(controller: _controller),
+              _buildMediaControls(),
               // Loading / error overlay until the first state is pushed.
               if (!_startSent || _lastError != null)
                 Positioned.fill(
@@ -486,6 +521,80 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
       trickEnd: (s) => s.lastActionError,
       roundEnd: (s) => s.lastActionError,
       gameEnd: (s) => s.lastActionError,
+    );
+  }
+
+  Widget _buildMediaControls() {
+    // Spectators don't publish audio/video; no local toggles needed.
+    if (widget.isSpectator) return const SizedBox.shrink();
+
+    final agoraService = context.read<AgoraService>();
+    return SafeArea(
+      child: Align(
+        alignment: AlignmentDirectional.bottomEnd,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _MediaToggleButton(
+                icon: agoraService.isMicOn
+                    ? Icons.mic_rounded
+                    : Icons.mic_off_rounded,
+                color: agoraService.isMicOn
+                    ? ColorManager.success
+                    : ColorManager.error,
+                onTap: () async {
+                  await context.read<GameCubit>().toggleMic();
+                  if (mounted) setState(() {});
+                },
+              ),
+              const SizedBox(width: AppSpacing.md),
+              _MediaToggleButton(
+                icon: agoraService.isCameraOn
+                    ? Icons.videocam_rounded
+                    : Icons.videocam_off_rounded,
+                color: agoraService.isCameraOn
+                    ? ColorManager.success
+                    : ColorManager.darkTextMuted,
+                onTap: () async {
+                  await context.read<GameCubit>().toggleCamera();
+                  if (mounted) setState(() {});
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MediaToggleButton extends StatelessWidget {
+  const _MediaToggleButton({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color color;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: ColorManager.darkSurface,
+          shape: BoxShape.circle,
+          border: Border.all(color: color.withValues(alpha: 0.5), width: 1.5),
+        ),
+        child: Icon(icon, color: color, size: 20),
+      ),
     );
   }
 }

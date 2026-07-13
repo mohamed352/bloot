@@ -15,16 +15,15 @@ class RoomCubit extends Cubit<RoomState> {
   RoomCubit({
     required RoomRepository roomRepository,
     required AgoraService agoraService,
-  })  : _roomRepository = roomRepository,
-        _agoraService = agoraService,
-        super(const RoomState.initial());
+  }) : _roomRepository = roomRepository,
+       _agoraService = agoraService,
+       super(const RoomState.initial());
 
   final RoomRepository _roomRepository;
   final AgoraService _agoraService;
   StreamSubscription<Room>? _roomSubscription;
   StreamSubscription<List<Room>>? _publicRoomsSubscription;
-  StreamSubscription<AgoraAudioVolumeIndicationEvent>?
-      _audioVolumeSubscription;
+  StreamSubscription<AgoraAudioVolumeIndicationEvent>? _audioVolumeSubscription;
   Room? _currentRoom;
   String? _joinedAgoraChannelName;
   Future<void>? _pendingAgoraJoin;
@@ -108,7 +107,11 @@ class RoomCubit extends Cubit<RoomState> {
       emit(currentState);
     } catch (e) {
       AppLogger.error('Failed to invite bots', error: e);
-      emit(const RoomState.error(message: 'Failed to invite bots. Please try again.'));
+      emit(
+        const RoomState.error(
+          message: 'Failed to invite bots. Please try again.',
+        ),
+      );
       emit(currentState);
     }
   }
@@ -120,61 +123,74 @@ class RoomCubit extends Cubit<RoomState> {
     _currentRoom = null;
     _gameStartedEmitted = false;
 
-    _roomSubscription = _roomRepository.watchRoom(roomId).listen(
-      (room) {
-        _currentRoom = room;
+    _roomSubscription = _roomRepository
+        .watchRoom(roomId)
+        .listen(
+          (room) {
+            _currentRoom = room;
 
-        // Auto-navigate when game starts, but only once per room session.
-        if (room.status == RoomStatus.playing &&
-            room.gameId != null &&
-            !_gameStartedEmitted) {
-          _gameStartedEmitted = true;
-          emit(RoomState.gameStarted(gameId: room.gameId!));
-          return;
-        }
+            // Auto-navigate when game starts, but only once per room session.
+            if (room.status == RoomStatus.playing &&
+                room.gameId != null &&
+                !_gameStartedEmitted) {
+              _gameStartedEmitted = true;
+              emit(RoomState.gameStarted(gameId: room.gameId!));
+              return;
+            }
 
-        _emitMergedState();
+            _emitMergedState();
 
-        // Auto-join Agora voice channel once per channel name change.
-        // Only actual room participants should join voice; spectators should not.
-        final isParticipant = room.players.any((p) => p.isMe);
-        final agoraChannelName = room.agoraChannelName ?? 'room_${room.id}';
-        if (isParticipant &&
-            (room.voiceEnabled || room.cameraEnabled) &&
-            _joinedAgoraChannelName != agoraChannelName &&
-            _pendingAgoraJoin == null) {
-          final pendingJoin = _agoraService.joinChannel(channelName: agoraChannelName);
-          _pendingAgoraJoin = pendingJoin;
-          pendingJoin.then((_) {
-            if (isClosed) return;
-            _joinedAgoraChannelName = agoraChannelName;
-            _listenToAudioVolume(room);
-          }).catchError((Object e) {
-            AppLogger.error('Failed to join Agora', error: e);
-          }).whenComplete(() {
-            _pendingAgoraJoin = null;
-          });
-        }
-      },
-      onError: (Object error) {
-        AppLogger.error('Room stream error', error: error);
-        if (error is RoomException) {
-          emit(RoomState.error(message: error.message));
-        } else {
-          emit(
-            const RoomState.error(
-              message: 'Failed to load room. Please try again.',
-            ),
-          );
-        }
-      },
-    );
+            // Auto-join Agora voice channel once per channel name change.
+            // Only actual room participants should join voice; spectators should not.
+            final isParticipant = room.players.any((p) => p.isMe);
+            final agoraChannelName = room.agoraChannelName ?? 'room_${room.id}';
+            if (isParticipant &&
+                (room.voiceEnabled || room.cameraEnabled) &&
+                _joinedAgoraChannelName != agoraChannelName &&
+                _pendingAgoraJoin == null) {
+              final localPlayer = room.players.firstWhere(
+                (p) => p.isMe,
+                orElse: () => room.players.first,
+              );
+              final pendingJoin = _agoraService.joinChannel(
+                channelName: agoraChannelName,
+                agoraUid: localPlayer.agoraUid,
+              );
+              _pendingAgoraJoin = pendingJoin;
+              pendingJoin
+                  .then((_) {
+                    if (isClosed) return;
+                    _joinedAgoraChannelName = agoraChannelName;
+                    _listenToAudioVolume(room);
+                  })
+                  .catchError((Object e) {
+                    AppLogger.error('Failed to join Agora', error: e);
+                  })
+                  .whenComplete(() {
+                    _pendingAgoraJoin = null;
+                  });
+            }
+          },
+          onError: (Object error) {
+            AppLogger.error('Room stream error', error: error);
+            if (error is RoomException) {
+              emit(RoomState.error(message: error.message));
+            } else {
+              emit(
+                const RoomState.error(
+                  message: 'Failed to load room. Please try again.',
+                ),
+              );
+            }
+          },
+        );
   }
 
   void _listenToAudioVolume(Room room) {
     _audioVolumeSubscription?.cancel();
-    _audioVolumeSubscription =
-        _agoraService.onAudioVolumeIndication.listen((event) {
+    _audioVolumeSubscription = _agoraService.onAudioVolumeIndication.listen((
+      event,
+    ) {
       if (_currentRoom == null) return;
 
       final speakingUids = event.speakers
@@ -211,10 +227,7 @@ class RoomCubit extends Cubit<RoomState> {
     }
   }
 
-  Future<void> joinRoomByCode(
-    String inviteCode, {
-    String? password,
-  }) async {
+  Future<void> joinRoomByCode(String inviteCode, {String? password}) async {
     emit(const RoomState.loading());
     try {
       final room = await _roomRepository.joinRoomByCode(
@@ -250,7 +263,11 @@ class RoomCubit extends Cubit<RoomState> {
       if (currentState is RoomLoaded) emit(currentState);
     } catch (e) {
       AppLogger.error('Failed to start game', error: e);
-      emit(const RoomState.error(message: 'Failed to start game. Please try again.'));
+      emit(
+        const RoomState.error(
+          message: 'Failed to start game. Please try again.',
+        ),
+      );
       if (currentState is RoomLoaded) emit(currentState);
     }
   }
@@ -339,14 +356,23 @@ class RoomCubit extends Cubit<RoomState> {
       await _roomRepository.leaveRoom(roomId);
       await _agoraService.leaveChannel();
       _joinedAgoraChannelName = null;
-      emit(const RoomState.initial());
+      if (!isClosed) emit(const RoomState.initial());
     } on RoomException catch (e) {
-      emit(RoomState.error(message: e.message));
-      emit(currentState);
+      AppLogger.error('Failed to leave room', error: e.message);
+      if (!isClosed) {
+        emit(RoomState.error(message: e.message));
+        emit(currentState);
+      }
     } catch (e) {
       AppLogger.error('Failed to leave room', error: e);
-      emit(const RoomState.error(message: 'Failed to leave room. Please try again.'));
-      emit(currentState);
+      if (!isClosed) {
+        emit(
+          const RoomState.error(
+            message: 'Failed to leave room. Please try again.',
+          ),
+        );
+        emit(currentState);
+      }
     }
   }
 
@@ -362,7 +388,11 @@ class RoomCubit extends Cubit<RoomState> {
       emit(currentState);
     } catch (e) {
       AppLogger.error('Failed to kick player', error: e);
-      emit(const RoomState.error(message: 'Failed to kick player. Please try again.'));
+      emit(
+        const RoomState.error(
+          message: 'Failed to kick player. Please try again.',
+        ),
+      );
       emit(currentState);
     }
   }
@@ -376,7 +406,11 @@ class RoomCubit extends Cubit<RoomState> {
       // Real-time listener updates UI with isStreaming=true
     } catch (e) {
       AppLogger.error('Failed to start stream', error: e);
-      emit(const RoomState.error(message: 'Failed to start stream. Please try again.'));
+      emit(
+        const RoomState.error(
+          message: 'Failed to start stream. Please try again.',
+        ),
+      );
       emit(currentState);
     }
   }
@@ -390,7 +424,11 @@ class RoomCubit extends Cubit<RoomState> {
       // Real-time listener updates UI with isStreaming=false
     } catch (e) {
       AppLogger.error('Failed to end stream', error: e);
-      emit(const RoomState.error(message: 'Failed to end stream. Please try again.'));
+      emit(
+        const RoomState.error(
+          message: 'Failed to end stream. Please try again.',
+        ),
+      );
       emit(currentState);
     }
   }

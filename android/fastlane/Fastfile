@@ -27,7 +27,7 @@ platform :android do
 
     firebase_app_distribution(
       app: "1:738592764893:android:e9cf7172926e3a227efc34",
-      testers: "mohamedmostafa5830@gmail.com",
+      testers: "mohamedmostafa5830@gmail.com,doaafoaad13@gmail.com",
       release_notes: release_notes.strip,
       apk_path: apk_path,
       service_credentials_file: service_credentials_file

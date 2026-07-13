@@ -108,8 +108,8 @@ class _SeatWidgetState extends State<SeatWidget> {
           color: isEmpty
               ? colors.border
               : isSpeaking
-                  ? ColorManager.success.withValues(alpha: 0.8)
-                  : teamColor.withValues(alpha: isReady ? 0.6 : 0.3),
+              ? ColorManager.success.withValues(alpha: 0.8)
+              : teamColor.withValues(alpha: isReady ? 0.6 : 0.3),
           width: isSpeaking ? 3 : (isReady ? 2.5 : 1.5),
         ),
         boxShadow: isSpeaking
@@ -223,8 +223,7 @@ class _SeatWidgetState extends State<SeatWidget> {
                           ),
                           decoration: BoxDecoration(
                             color: colors.secondary,
-                            borderRadius:
-                                BorderRadius.circular(AppRadius.full),
+                            borderRadius: BorderRadius.circular(AppRadius.full),
                           ),
                           child: Text(
                             'Lvl $level',

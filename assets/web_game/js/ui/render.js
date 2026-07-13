@@ -1,7 +1,8 @@
 // عرض حالة المباراة على DOM — دوال قراءة فقط (state -> DOM)، بدون أي منطق لعبة
 import { $ } from "./dom.js";
-import { cardEl, cardBackEl, sortHand } from "./cards.js";
+import { cardEl, cardBackEl, cardKey, sortHand } from "./cards.js";
 import { TARGET_QAID, legalMoves } from "../engine/index.js";
+import { S } from "./state.js";
 
 export const vsFor = (mySeat) => (actual) => (actual - mySeat + 4) % 4;
 
@@ -22,6 +23,9 @@ const AVATAR_FALLBACKS = { 0: "😎", 1: "🤖", 2: "🤝", 3: "🤖" };
 
 function renderAvatar(avatarEl, player, pos) {
   if (!avatarEl) return;
+  const key = player ? `${player.name}|${player.avatarUrl}|${pos}` : `_fallback_${pos}`;
+  if (avatarEl._lastAvatarKey === key) return;
+  avatarEl._lastAvatarKey = key;
   if (player && player.avatarUrl) {
     const img = document.createElement("img");
     img.src = player.avatarUrl;
@@ -46,49 +50,63 @@ function activeSeat(st) {
   return null;
 }
 
+const SEAT_CACHE = new Map();
+
+function getSeatRefs(pos) {
+  let refs = SEAT_CACHE.get(pos);
+  if (!refs) {
+    const seatEl = $("seat-" + pos);
+    if (!seatEl) return null;
+    refs = {
+      seatEl,
+      nameEl: seatEl.querySelector(".bt-pname"),
+      levelEl: seatEl.querySelector(".bt-plevel"),
+      avatarEl: seatEl.querySelector(".bt-avatar"),
+      hukumBadge: seatEl.querySelector(".bt-hukum-badge"),
+      backs: seatEl.querySelector(".bt-backs"),
+      projs: seatEl.querySelector(".bt-projs"),
+    };
+    SEAT_CACHE.set(pos, refs);
+  }
+  return refs;
+}
+
 export function renderSeats(match, mySeat, players) {
   const st = match.state;
   const vs = vsFor(mySeat);
   const active = activeSeat(st);
   for (let seat = 0; seat < 4; seat++) {
     const pos = vs(seat);
-    const seatEl = $("seat-" + pos);
-    if (!seatEl) continue;
+    const refs = getSeatRefs(pos);
+    if (!refs) continue;
+    const { seatEl, nameEl, levelEl, avatarEl, hukumBadge, backs, projs } = refs;
     seatEl.classList.toggle("is-turn", active === seat);
     seatEl.classList.toggle("is-dealer", match.dealer === seat);
 
-    const nameEl = seatEl.querySelector(".bt-pname");
-    const levelEl = seatEl.querySelector(".bt-plevel");
-    const avatarEl = seatEl.querySelector(".bt-avatar");
     if (nameEl) nameEl.textContent = players[seat] ? players[seat].name : "";
     if (levelEl) levelEl.textContent = players[seat] && players[seat].isBot ? levelBadge(players[seat].level) : "";
     renderAvatar(avatarEl, players[seat], pos);
 
-    const hukumBadge = seatEl.querySelector(".bt-hukum-badge");
     if (hukumBadge) {
       const showTrump = st && st.mode === "hokum" && st.buyer === seat;
       hukumBadge.hidden = !showTrump;
       if (showTrump) hukumBadge.textContent = st.trump;
     }
 
-    if (pos !== 0) {
-      const backs = seatEl.querySelector(".bt-backs");
-      if (backs) {
-        const count = st ? (st.hands[seat] ? st.hands[seat].length : 0) : 0;
-        const lastCount = backs._lastCount ?? -1;
-        if (count !== lastCount) {
-          backs._lastCount = count;
-          const current = backs.children.length;
-          if (current < count) {
-            for (let i = current; i < Math.min(count, 8); i++) backs.appendChild(cardBackEl());
-          } else if (current > count) {
-            for (let i = current - 1; i >= count; i--) backs.removeChild(backs.children[i]);
-          }
+    if (pos !== 0 && backs) {
+      const count = st ? (st.hands[seat] ? st.hands[seat].length : 0) : 0;
+      const lastCount = backs._lastCount ?? -1;
+      if (count !== lastCount) {
+        backs._lastCount = count;
+        const current = backs.children.length;
+        if (current < count) {
+          for (let i = current; i < Math.min(count, 8); i++) backs.appendChild(cardBackEl());
+        } else if (current > count) {
+          for (let i = current - 1; i >= count; i--) backs.removeChild(backs.children[i]);
         }
       }
     }
 
-    const projs = seatEl.querySelector(".bt-projs");
     if (projs) {
       const mine = (st.announcedProjects || []).filter((p) => p.seat === seat);
       const projsKey = mine.map((p) => p.name).join(",");
@@ -112,27 +130,65 @@ export function renderHand(match, mySeat, onPlay) {
   if (!st || st.phase !== "playing") {
     handEl.innerHTML = "";
     handEl._lastKey = null;
+    handEl._onPlay = null;
     return;
   }
   const hand = sortHand(st.hands[mySeat], st.trump);
-  const handKey = hand.map((c) => c.key).join(",");
+  const handKey = hand.map((c) => cardKey(c)).join(",");
   const stateKey = `${handKey}|${st.turn}|${st.currentTrick.length}|${st.doubleLevel || 1}`;
   if (handEl._lastKey === stateKey) return;
   handEl._lastKey = stateKey;
 
-  handEl.innerHTML = "";
+  // Use a single delegated click listener to avoid listener leaks and re-attachment cost.
+  if (handEl._onPlay !== onPlay) {
+    handEl._onPlay = onPlay;
+    handEl.onclick = (e) => {
+      const cardEl = e.target.closest(".bt-card[data-key]");
+      if (!cardEl || !cardEl.classList.contains("is-legal")) return;
+      const card = handEl._cardsByKey?.[cardEl.dataset.key];
+      if (card) onPlay(card);
+    };
+  }
+
   const strict = (st.doubleLevel || 1) >= 2;
   let legal = [];
   if (st.turn === mySeat) {
     // نفس بوابة legalMoves بالمحرك بالضبط — العرض والتفعيل يعتمدان عليها حصراً
     legal = legalMoves(hand, st.currentTrick, st.mode, st.trump, mySeat, strict);
   }
-  for (const c of hand) {
-    const isLegal = st.turn === mySeat && legal.some((l) => l.suit === c.suit && l.rank === c.rank);
-    const card = cardEl(c, isLegal ? "is-legal" : "");
-    if (isLegal) card.addEventListener("click", () => onPlay(c));
-    handEl.appendChild(card);
+  // While waiting for the server to acknowledge a play, do not show cards as
+  // legal or attach click handlers, preventing duplicate taps.
+  const inputLocked = !!(S.online && S.awaitingServerAck);
+
+  // Diff the DOM: reuse existing card elements, add new ones, remove discarded ones.
+  const wantedKeys = new Set();
+  const cardsByKey = {};
+  const existingEls = new Map();
+  for (const el of handEl.children) {
+    if (el.dataset.key) existingEls.set(el.dataset.key, el);
   }
+
+  const fragment = document.createDocumentFragment();
+  for (const c of hand) {
+    const key = cardKey(c);
+    wantedKeys.add(key);
+    cardsByKey[key] = c;
+    const isLegal = !inputLocked && st.turn === mySeat && legal.some((l) => l.suit === c.suit && l.rank === c.rank);
+    let el = existingEls.get(key);
+    if (el) {
+      el.classList.toggle("is-legal", isLegal);
+    } else {
+      el = cardEl(c, isLegal ? "is-legal" : "");
+      el.dataset.key = key;
+      fragment.appendChild(el);
+    }
+  }
+  handEl._cardsByKey = cardsByKey;
+
+  for (const [key, el] of existingEls) {
+    if (!wantedKeys.has(key)) el.remove();
+  }
+  if (fragment.childNodes.length) handEl.appendChild(fragment);
 }
 
 const TRICK_ANCHORS = {
@@ -149,17 +205,36 @@ export function renderTrickCards(plays, mySeat) {
   const trickKey = plays.map((p) => `${p.seat}:${p.card.key}`).join(",");
   if (zone._lastKey === trickKey) return;
   zone._lastKey = trickKey;
-  zone.innerHTML = "";
+
+  // Diff trick cards instead of full rebuild to avoid image decode/layout churn.
   const vs = vsFor(mySeat);
-  for (const play of plays) {
-    const pos = vs(play.seat);
-    const a = TRICK_ANCHORS[pos];
-    const card = cardEl(play.card, "bt-played-card");
-    card.style.top = a.top;
-    card.style.left = a.left;
-    card.style.transform = "translate(-50%,-50%)";
-    zone.appendChild(card);
+  const wantedKeys = new Set();
+  const existingEls = new Map();
+  for (const el of zone.children) {
+    if (el.dataset.key) existingEls.set(el.dataset.key, el);
   }
+
+  const fragment = document.createDocumentFragment();
+  for (const play of plays) {
+    const key = `${play.seat}:${cardKey(play.card)}`;
+    wantedKeys.add(key);
+    let card = existingEls.get(key);
+    if (!card) {
+      const pos = vs(play.seat);
+      const a = TRICK_ANCHORS[pos];
+      card = cardEl(play.card, "bt-played-card");
+      card.dataset.key = key;
+      card.style.top = a.top;
+      card.style.left = a.left;
+      card.style.transform = "translate(-50%,-50%)";
+      fragment.appendChild(card);
+    }
+  }
+
+  for (const [key, el] of existingEls) {
+    if (!wantedKeys.has(key)) el.remove();
+  }
+  if (fragment.childNodes.length) zone.appendChild(fragment);
 }
 
 export function renderTrick(match, mySeat) {

@@ -24,11 +24,18 @@ class NewMessageCubit extends Cubit<NewMessageState> {
     }
   }
 
+  /// Clears search results back to the initial state (used when the search
+  /// field is emptied or the page is closed and reopened).
+  void reset() {
+    emit(const NewMessageState.initial());
+  }
+
   Future<void> createConversation(String otherUserId) async {
     emit(const NewMessageState.creating());
     try {
-      final conversation =
-          await _chatRepository.createDirectConversation(otherUserId);
+      final conversation = await _chatRepository.createDirectConversation(
+        otherUserId,
+      );
       emit(NewMessageState.conversationCreated(conversation: conversation));
     } catch (e) {
       AppLogger.error('Failed to create conversation', error: e);

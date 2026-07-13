@@ -3,17 +3,44 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 import 'package:bloot/config/routes/routes.dart';
+import 'package:bloot/core/di/injection.dart';
 import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
 import 'package:bloot/core/constants/app_radius.dart';
 import 'package:bloot/features/chat/domain/entities/chat.dart';
 import 'package:bloot/features/chat/presentation/cubit/chat_cubit.dart';
 import 'package:bloot/features/chat/presentation/cubit/chat_state.dart';
+import 'package:bloot/features/moderation/domain/repositories/moderation_repository.dart';
 
-class ChatListPage extends StatelessWidget {
+class ChatListPage extends StatefulWidget {
   const ChatListPage({super.key});
+
+  @override
+  State<ChatListPage> createState() => _ChatListPageState();
+}
+
+class _ChatListPageState extends State<ChatListPage> {
+  late final Stream<Set<String>> _blockedUserIdsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _blockedUserIdsStream = getIt<ModerationRepository>().watchBlockedUserIds();
+  }
+
+  /// Returns the other participant UID for `dm_<uidA>_<uidB>` conversations.
+  String? _otherUserId(String conversationId) {
+    final currentUid = getIt<firebase_auth.FirebaseAuth>().currentUser?.uid;
+    if (currentUid == null || !conversationId.startsWith('dm_')) return null;
+    final parts = conversationId.substring(3).split('_');
+    for (final part in parts) {
+      if (part.isNotEmpty && part != currentUid) return part;
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +61,7 @@ class ChatListPage extends StatelessWidget {
         final selectedFilter = state is ChatConversationsLoaded
             ? state.selectedFilterIndex
             : 0;
-        final filters = [
-          'all'.tr(),
-          'rooms'.tr(),
-          'direct'.tr(),
-        ];
+        final filters = ['all'.tr(), 'rooms'.tr(), 'direct'.tr()];
 
         return Scaffold(
           backgroundColor: ColorManager.darkCanvas,
@@ -127,20 +150,32 @@ class ChatListPage extends StatelessWidget {
                 const SizedBox(height: AppSpacing.md),
                 // Chat list
                 Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsetsDirectional.symmetric(
-                      horizontal: AppSpacing.screenHorizontal,
-                    ),
-                    itemCount: conversations.length,
-                    itemBuilder: (context, index) {
-                      final chat = conversations[index];
-                      return _ChatListItem(
-                        chat: chat,
-                        onTap: () => context.pushNamed(
-                          RouteNames.directMessage,
-                          pathParameters: {'conversationId': chat.id},
-                          extra: chat,
+                  child: StreamBuilder<Set<String>>(
+                    stream: _blockedUserIdsStream,
+                    builder: (context, snapshot) {
+                      final blockedIds = snapshot.data ?? const <String>{};
+                      final visibleConversations = conversations.where((c) {
+                        final otherUserId = _otherUserId(c.id);
+                        return otherUserId == null ||
+                            !blockedIds.contains(otherUserId);
+                      }).toList();
+
+                      return ListView.builder(
+                        padding: const EdgeInsetsDirectional.symmetric(
+                          horizontal: AppSpacing.screenHorizontal,
                         ),
+                        itemCount: visibleConversations.length,
+                        itemBuilder: (context, index) {
+                          final chat = visibleConversations[index];
+                          return _ChatListItem(
+                            chat: chat,
+                            onTap: () => context.pushNamed(
+                              RouteNames.directMessage,
+                              pathParameters: {'conversationId': chat.id},
+                              extra: chat,
+                            ),
+                          );
+                        },
                       );
                     },
                   ),

@@ -50,7 +50,11 @@ const GRADE_TABLE = [
 ];
 
 export function computeGrade(match, mySeat) {
-  const m = match.metrics;
+  const m = match.metrics || {
+    humanBids: 0, humanBidWins: 0,
+    teamTricks: 0, totalTricks: 0,
+    pointMistakes: 0, missedWins: 0,
+  };
   const myTeam = teamOf(mySeat);
   const total = match.totals[0] + match.totals[1];
   const qaidShare = total ? match.totals[myTeam] / total : 0.5;

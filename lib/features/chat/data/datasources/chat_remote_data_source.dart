@@ -4,14 +4,15 @@ import 'package:injectable/injectable.dart';
 
 import 'package:bloot/core/logger/app_logger.dart';
 import 'package:bloot/features/chat/data/models/chat_model.dart';
+import 'package:bloot/features/chat/data/models/chat_user_model.dart';
 
 @lazySingleton
 class ChatRemoteDataSource {
   ChatRemoteDataSource({
     required FirebaseFirestore firestore,
     required firebase_auth.FirebaseAuth firebaseAuth,
-  })  : _firestore = firestore,
-        _firebaseAuth = firebaseAuth;
+  }) : _firestore = firestore,
+       _firebaseAuth = firebaseAuth;
 
   final FirebaseFirestore _firestore;
   final firebase_auth.FirebaseAuth _firebaseAuth;
@@ -76,12 +77,13 @@ class ChatRemoteDataSource {
         .orderBy('createdAt', descending: true)
         .limit(100)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs.map(_mapMessageDoc).toList(),
-        )
+        .map((snapshot) => snapshot.docs.map(_mapMessageDoc).toList())
         .handleError((Object e) {
-      AppLogger.error('Failed to watch messages for $conversationId', error: e);
-    });
+          AppLogger.error(
+            'Failed to watch messages for $conversationId',
+            error: e,
+          );
+        });
   }
 
   ChatMessageModel _mapMessageDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -128,20 +130,19 @@ class ChatRemoteDataSource {
     });
 
     // Update main conversation and per-user metadata for the list view
-    final conversationDoc =
-        await _firestore.collection('conversations').doc(conversationId).get();
+    final conversationDoc = await _firestore
+        .collection('conversations')
+        .doc(conversationId)
+        .get();
     final participantUids = List<String>.from(
       (conversationDoc.data()?['participantUids'] as List<dynamic>?) ?? [],
     );
 
     final batch = _firestore.batch();
-    batch.update(
-      _firestore.collection('conversations').doc(conversationId),
-      {
-        'lastMessage': message,
-        'updatedAt': FieldValue.serverTimestamp(),
-      },
-    );
+    batch.update(_firestore.collection('conversations').doc(conversationId), {
+      'lastMessage': message,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
 
     for (final participantUid in participantUids) {
       final isSender = participantUid == uid;
@@ -162,40 +163,49 @@ class ChatRemoteDataSource {
     await batch.commit();
   }
 
-  /// Searches users by [query] across displayName and username.
-  /// Returns an empty list when the user is not authenticated.
-  Future<List<ChatConversationModel>> searchUsers(String query) async {
+  /// Searches users by [query] across displayName and username using
+  /// server-side prefix queries. Returns an empty list when the user is not
+  /// authenticated.
+  Future<List<ChatUserModel>> searchUsers(String query) async {
     try {
       final uid = _uid;
       if (uid == null) return [];
 
-      final snapshot = await _firestore.collection('users').limit(50).get();
+      final trimmed = query.trim();
+      if (trimmed.isEmpty) return [];
 
-      final lowerQuery = query.toLowerCase().trim();
-      return snapshot.docs
-          .where((d) => d.id != uid)
-          .where((d) {
+      // Firestore has no "contains" query, so we run prefix range queries on
+      // both name fields with a few case variants to cover how names were
+      // originally stored (as typed, lower-cased, or capitalized).
+      final variants = <String>{
+        trimmed,
+        trimmed.toLowerCase(),
+        trimmed[0].toUpperCase() + trimmed.substring(1).toLowerCase(),
+      };
+
+      final byId = <String, ChatUserModel>{};
+      for (final field in ['username', 'displayName']) {
+        for (final variant in variants) {
+          final snapshot = await _firestore
+              .collection('users')
+              .where(field, isGreaterThanOrEqualTo: variant)
+              .where(field, isLessThan: '$variant\uf8ff')
+              .limit(10)
+              .get();
+          for (final d in snapshot.docs) {
+            if (d.id == uid || byId.containsKey(d.id)) continue;
             final data = d.data();
-            final name =
-                (data['displayName'] ?? '').toString().toLowerCase();
-            final username =
-                (data['username'] ?? '').toString().toLowerCase();
-            return lowerQuery.isEmpty ||
-                name.contains(lowerQuery) ||
-                username.contains(lowerQuery);
-          })
-          .map((d) {
-            final data = d.data();
-            return ChatConversationModel(
+            byId[d.id] = ChatUserModel(
               id: d.id,
-              name: data['displayName'] as String? ?? '',
+              displayName: (data['displayName'] as String? ?? '').trim(),
+              username: (data['username'] as String?)?.trim(),
               avatarUrl: data['avatarUrl'] as String?,
-              lastMessage: '',
-              time: '',
-              type: 'direct',
             );
-          })
-          .toList();
+          }
+        }
+      }
+
+      return byId.values.take(20).toList();
     } catch (e) {
       AppLogger.error('Failed to search users', error: e);
       return [];
@@ -214,20 +224,25 @@ class ChatRemoteDataSource {
     final ids = [uid, otherUserId]..sort();
     final conversationId = 'dm_${ids[0]}_${ids[1]}';
 
-    final conversationRef =
-        _firestore.collection('conversations').doc(conversationId);
+    final conversationRef = _firestore
+        .collection('conversations')
+        .doc(conversationId);
     final doc = await conversationRef.get();
 
     if (!doc.exists) {
       // Fetch the other user's profile for name/avatar
-      final otherUserDoc =
-          await _firestore.collection('users').doc(otherUserId).get();
+      final otherUserDoc = await _firestore
+          .collection('users')
+          .doc(otherUserId)
+          .get();
       final otherData = otherUserDoc.data() ?? {};
       final otherName = otherData['displayName'] ?? 'Unknown';
       final otherAvatar = otherData['avatarUrl'];
 
-      final currentUserDoc =
-          await _firestore.collection('users').doc(uid).get();
+      final currentUserDoc = await _firestore
+          .collection('users')
+          .doc(uid)
+          .get();
       final currentData = currentUserDoc.data() ?? {};
       final currentName = currentData['displayName'] ?? 'Unknown';
       final currentAvatar = currentData['avatarUrl'];
@@ -301,10 +316,7 @@ class ChatRemoteDataSource {
 
       return snapshot.docs.map(_mapMessageDoc).toList();
     } catch (e) {
-      AppLogger.error(
-        'Failed to get messages for $conversationId',
-        error: e,
-      );
+      AppLogger.error('Failed to get messages for $conversationId', error: e);
       return [];
     }
   }

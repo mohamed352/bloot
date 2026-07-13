@@ -126,6 +126,18 @@ Active game state is mirrored to Firebase Realtime Database for low-latency deli
 | `duration` | int | Game duration in seconds |
 | `playedAt` | timestamp | When the game occurred |
 
+#### `users/{uid}/blockedUsers`
+
+Written only by the `blockUser`/`unblockUser` Cloud Functions; readable only by the owner. Used by clients to hide blocked users' content (chat, profile, streams).
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `uid` | string | UID of the user who blocked |
+| `blockedUid` | string | UID of the blocked user (also the document ID) |
+| `displayName` | string | Blocked user's display name (snapshot at block time) |
+| `avatarUrl` | string | Blocked user's avatar URL (snapshot at block time) |
+| `createdAt` | timestamp | When the block happened |
+
 ### Indexes
 
 - `users` collection: `username` (unique), `displayName`, `level` (desc), `gamesWon` (desc), `isOnline`
@@ -684,6 +696,8 @@ Active game state is mirrored to Firebase Realtime Database for low-latency deli
 | `startGame` | Validate all players ready, create game document |
 | `playCard` | Validate and process card play (with game rules) |
 | `reportUser` | Create a report document |
+| `blockUser` | Add a user to the caller's `blockedUsers` subcollection |
+| `unblockUser` | Remove a user from the caller's `blockedUsers` subcollection |
 | `markNotificationRead` | Mark a notification as read |
 | `getLeaderboard` | Fetch leaderboard entries with user's rank |
 | `getUserNotifications` | Fetch paginated notifications for current user |

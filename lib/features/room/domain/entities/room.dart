@@ -124,18 +124,17 @@ class RoomPlayer {
     bool? isCameraOn,
     int? agoraUid,
     bool? isSpeaking,
-  }) =>
-      RoomPlayer(
-        uid: uid ?? this.uid,
-        name: name ?? this.name,
-        avatarUrl: avatarUrl ?? this.avatarUrl,
-        isReady: isReady ?? this.isReady,
-        isMe: isMe ?? this.isMe,
-        team: team ?? this.team,
-        level: level ?? this.level,
-        isMicOn: isMicOn ?? this.isMicOn,
-        isCameraOn: isCameraOn ?? this.isCameraOn,
-        agoraUid: agoraUid ?? this.agoraUid,
-        isSpeaking: isSpeaking ?? this.isSpeaking,
-      );
+  }) => RoomPlayer(
+    uid: uid ?? this.uid,
+    name: name ?? this.name,
+    avatarUrl: avatarUrl ?? this.avatarUrl,
+    isReady: isReady ?? this.isReady,
+    isMe: isMe ?? this.isMe,
+    team: team ?? this.team,
+    level: level ?? this.level,
+    isMicOn: isMicOn ?? this.isMicOn,
+    isCameraOn: isCameraOn ?? this.isCameraOn,
+    agoraUid: agoraUid ?? this.agoraUid,
+    isSpeaking: isSpeaking ?? this.isSpeaking,
+  );
 }

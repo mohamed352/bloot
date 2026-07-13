@@ -30,7 +30,8 @@ export function createMatch(opts) {
 export function startHand(match, rng) {
   const deck = shuffle(makeDeck(), rng);
   const hands = [[], [], [], []];
-  const firstPlayer = (match.dealer + 1) % 4;
+  // Bidding starts with the dealer (house rule).
+  const firstPlayer = match.dealer;
   // 5 لكل لاعب
   let di = 0;
   for (let round = 0; round < 5; round++) {

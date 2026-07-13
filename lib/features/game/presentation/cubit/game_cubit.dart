@@ -69,11 +69,31 @@ class GameCubit extends Cubit<GameState> {
   }
 
   String? _previousStatus;
+  String? _lastEmittedSignature;
+
+  String _gameSignature(Game game) {
+    final trick = game.currentTrick;
+    final trickSig = trick == null
+        ? ''
+        : trick.cards.entries.map((e) => '${e.key}:${e.value}').join(',');
+    return '${game.status}|${game.turnIndex}|${game.scoreUs}|${game.scoreThem}|'
+        '${game.teamAScore}|${game.teamBScore}|${game.currentRound}|'
+        '${game.myHand.join(',')}|$trickSig';
+  }
 
   void _emitStateForGame(Game game) {
     final current = state;
     final previousStatus = _previousStatus;
     _previousStatus = game.status;
+
+    // Skip emitting an identical game state to avoid rebuilding the WebView host
+    // and re-encoding the engine state on every Firestore timestamp update.
+    final signature = _gameSignature(game);
+    if (_lastEmittedSignature == signature) {
+      _joinAgoraIfNeeded(game);
+      return;
+    }
+    _lastEmittedSignature = signature;
 
     _joinAgoraIfNeeded(game);
     _playSoundsForTransition(previousStatus, game);
@@ -288,11 +308,15 @@ class GameCubit extends Cubit<GameState> {
   Future<void> placeBid(String bid) async {
     if (_bidInProgress) return;
     final current = state;
-    if (current is! GameBidding) return;
+    // Use the current game entity rather than requiring GameBidding. The WebView
+    // receives state via RTDB which can be ahead of the Firestore stream that
+    // drives this Cubit, so a strict state check would silently drop valid taps.
+    final game = _currentGame(current);
+    if (game == null) return;
     _bidInProgress = true;
     _emitActionInProgress();
     try {
-      await _gameRepository.placeBid(current.game.id, bid);
+      await _gameRepository.placeBid(game.id, bid);
     } catch (e) {
       AppLogger.error('Failed to place bid', error: e);
       _emitActionError('Failed to place bid. Please try again.');
@@ -304,11 +328,15 @@ class GameCubit extends Cubit<GameState> {
   Future<void> playCard(String card) async {
     if (_cardInProgress) return;
     final current = state;
-    if (current is! GamePlaying) return;
+    // Use the current game entity rather than requiring GamePlaying. The WebView
+    // receives state via RTDB which can be ahead of the Firestore stream that
+    // drives this Cubit, so a strict state check would silently drop valid taps.
+    final game = _currentGame(current);
+    if (game == null) return;
     _cardInProgress = true;
     _emitActionInProgress();
     try {
-      await _gameRepository.playCard(current.game.id, card);
+      await _gameRepository.playCard(game.id, card);
     } catch (e) {
       AppLogger.error('Failed to play card', error: e);
       _emitActionError('Failed to play card. Please try again.');
@@ -394,8 +422,9 @@ class GameCubit extends Cubit<GameState> {
 
   Future<void> claimSawa() async {
     final current = state;
-    // Sawa is only meaningful while the hand is in progress.
-    if (current is! GamePlaying) return;
+    // Use the current game entity rather than requiring GamePlaying. The WebView
+    // receives state via RTDB which can be ahead of the Firestore stream that
+    // drives this Cubit, so a strict state check would silently drop valid claims.
     final game = _currentGame(current);
     if (game == null) return;
     _emitActionInProgress();
@@ -523,16 +552,32 @@ class GameCubit extends Cubit<GameState> {
     if (_joinedAgoraChannelName == channelName) return;
     if (_pendingAgoraJoin != null) return;
 
-    final pendingJoin = _agoraService.joinChannel(channelName: channelName);
+    // Use the Agora UID assigned to the local player by the backend when
+    // available; otherwise the service will derive a fallback UID.
+    final localPlayer = game.players.firstWhere(
+      (p) => p.seatIndex == game.mySeatIndex,
+      orElse: () => game.players.first,
+    );
+
+    // In the game screen we only need audio; video decoding is unused and
+    // wastes GPU/CPU on lower-end devices.
+    final pendingJoin = _agoraService.joinChannel(
+      channelName: channelName,
+      agoraUid: localPlayer.agoraUid,
+      subscribeVideo: false,
+    );
     _pendingAgoraJoin = pendingJoin;
-    pendingJoin.then((_) {
-      if (_isClosed) return;
-      _joinedAgoraChannelName = channelName;
-    }).catchError((Object e) {
-      AppLogger.error('Failed to join Agora from game', error: e);
-    }).whenComplete(() {
-      _pendingAgoraJoin = null;
-    });
+    pendingJoin
+        .then((_) {
+          if (_isClosed) return;
+          _joinedAgoraChannelName = channelName;
+        })
+        .catchError((Object e) {
+          AppLogger.error('Failed to join Agora from game', error: e);
+        })
+        .whenComplete(() {
+          _pendingAgoraJoin = null;
+        });
   }
 
   @override
@@ -553,10 +598,13 @@ class GameCubit extends Cubit<GameState> {
       _pendingAgoraJoin = null;
     }
 
-    // Leave the Agora channel if this cubit joined it.
-    if (_joinedAgoraChannelName != null) {
+    // Leave the Agora channel if this cubit joined it or is still trying to
+    // join. Relying only on [_joinedAgoraChannelName] would leak the channel
+    // when a late join completes after [_isClosed] is set.
+    if (_joinedAgoraChannelName != null || _pendingAgoraJoin != null) {
       await _agoraService.leaveChannel();
       _joinedAgoraChannelName = null;
+      _pendingAgoraJoin = null;
     }
 
     // NOTE: We intentionally do NOT call _roomRepository.leaveRoom() here.

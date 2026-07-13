@@ -17,11 +17,12 @@ class HomeRemoteDataSource {
         .where('status', isEqualTo: 'live')
         .orderBy('viewerCount', descending: true)
         .snapshots()
-        .map((snapshot) {
-          return snapshot.docs.map((doc) {
+        .asyncMap((snapshot) async {
+          final streams = snapshot.docs.map((doc) {
             final data = doc.data();
             return _mapDocToEntity(doc.id, data);
           }).toList();
+          return _filterActiveStreams(streams);
         })
         .handleError((Object error) {
           AppLogger.error(
@@ -40,10 +41,11 @@ class HomeRemoteDataSource {
           .where('status', isEqualTo: 'live')
           .orderBy('viewerCount', descending: true)
           .get();
-      return snapshot.docs.map((doc) {
+      final streams = snapshot.docs.map((doc) {
         final data = doc.data();
         return _mapDocToEntity(doc.id, data);
       }).toList();
+      return _filterActiveStreams(streams);
     } catch (e) {
       AppLogger.error('Failed to get live streams', error: e, tag: 'Home');
       return [];
@@ -60,6 +62,42 @@ class HomeRemoteDataSource {
       type: data['type'] as String? ?? 'Baloot',
       thumbnailUrl: data['thumbnailUrl'] as String?,
       isPremium: data['isPremium'] == true,
+      roomId: data['roomId'] as String?,
     );
+  }
+
+  /// Filters out streams whose parent room is missing, finished, or has no
+  /// players so closed/empty rooms never appear as live.
+  Future<List<HomeStream>> _filterActiveStreams(List<HomeStream> streams) async {
+    if (streams.isEmpty) return streams;
+
+    final roomIds = streams
+        .map((s) => s.roomId)
+        .where((id) => id != null && id.isNotEmpty)
+        .cast<String>()
+        .toSet();
+
+    if (roomIds.isEmpty) return streams;
+
+    final roomDocs = await Future.wait(
+      roomIds.map((id) => _firestore.collection('rooms').doc(id).get()),
+    );
+
+    final validRoomIds = <String>{};
+    for (final doc in roomDocs) {
+      if (!doc.exists) continue;
+      final data = doc.data()!;
+      final playerUids = data['playerUids'];
+      final status = data['status'] as String?;
+      final hasPlayers = playerUids is List && playerUids.isNotEmpty;
+      if (hasPlayers && status != 'finished') {
+        validRoomIds.add(doc.id);
+      }
+    }
+
+    return streams.where((s) {
+      final roomId = s.roomId;
+      return roomId == null || roomId.isEmpty || validRoomIds.contains(roomId);
+    }).toList();
   }
 }

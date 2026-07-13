@@ -175,8 +175,12 @@
       rtdbUnsub = ref.on('value', function (snap) {
         const data = snap.val() || {};
         if (snapshotCb && data.engineState) {
+          const wasActive = rtdbActive;
           rtdbActive = true;
           snapshotCb(mapBlootState(data.engineState));
+          // Notify Flutter that RTDB is now the active fast path so it can
+          // stop pushing the same state over the slower JS bridge.
+          if (!wasActive) sendToFlutter({ type: 'rtdbActive' });
         }
       }, function (err) {
         console.error('[BlootBridge] RTDB value error:', err);
@@ -322,6 +326,7 @@
         return;
       }
     },
+    stopRtdb: stopRtdb,
   };
 
   function injectTheme(css) {

@@ -163,26 +163,62 @@ void main() {
 
   group('sendMessage', () {
     blocTest<ChatCubit, ChatState>(
-      'does not emit error on success',
+      'does not emit error on success when no messages loaded',
       build: buildCubit,
       setUp: () {
         when(() => chatRepository.sendMessage('c1', 'hello'))
             .thenAnswer((_) async {});
       },
       act: (cubit) => cubit.sendMessage('c1', 'hello'),
-      expect: () => const <ChatState>[]
+      expect: () => const <ChatState>[],
     );
 
     blocTest<ChatCubit, ChatState>(
-      'emits error when send fails',
+      'optimistically adds message then removes it on failure',
       build: buildCubit,
+      seed: () => const ChatState.messagesLoaded(
+        conversationId: 'c1',
+        messages: [message],
+      ),
       setUp: () {
         when(() => chatRepository.sendMessage('c1', 'hello'))
             .thenThrow(Exception('network'));
       },
       act: (cubit) => cubit.sendMessage('c1', 'hello'),
       expect: () => [
+        predicate<ChatState>((s) {
+          return s is ChatMessagesLoaded &&
+              s.messages.length == 2 &&
+              s.messages.first.isMe == true &&
+              s.messages.first.text == 'hello';
+        }),
+        const ChatState.messagesLoaded(
+          conversationId: 'c1',
+          messages: [message],
+        ),
         const ChatState.error(message: 'Failed to send message.'),
+      ],
+    );
+
+    blocTest<ChatCubit, ChatState>(
+      'optimistically adds message on success',
+      build: buildCubit,
+      seed: () => const ChatState.messagesLoaded(
+        conversationId: 'c1',
+        messages: [message],
+      ),
+      setUp: () {
+        when(() => chatRepository.sendMessage('c1', 'hello'))
+            .thenAnswer((_) async {});
+      },
+      act: (cubit) => cubit.sendMessage('c1', 'hello'),
+      expect: () => [
+        predicate<ChatState>((s) {
+          return s is ChatMessagesLoaded &&
+              s.messages.length == 2 &&
+              s.messages.first.isMe == true &&
+              s.messages.first.text == 'hello';
+        }),
       ],
     );
   });

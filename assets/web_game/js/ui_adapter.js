@@ -25,6 +25,7 @@ import {
   resetAck,
   canShowActionButtons,
   showHandOverlay,
+  showMatchOverlay,
 } from "./ui/controller.js";
 
 let previousSnap = null;
@@ -129,10 +130,12 @@ function playTransitionAnimations(prev, next) {
     }
   }
 
-  // Match ended: celebrate a win.
+  // Match ended: show the winner/loser overlay (and confetti for a win).
   if (prev && !prev.matchOver && next.matchOver) {
     const myTeam = S.mySeat % 2;
     if (next.winnerTeam === myTeam) spawnConfetti();
+    hideOverlay("hand-overlay");
+    setTimeout(() => showMatchOverlay(), 400);
   }
 }
 
@@ -155,12 +158,17 @@ function renderClient() {
       8 - st.trickHistory.length <= 4
   );
 
-  if (st.awaitingDeclare && (st.declareSeats || []).includes(S.mySeat)) {
-    showDeclareDialog();
-  } else if (st.awaitingDouble && st.doubling.turn === S.mySeat) {
-    showDoubleDialog();
-  } else if (st.phase === "bidding" && st.bidding.turn === S.mySeat) {
-    showBidDialog();
+  // While waiting for the server to acknowledge an action, keep the input
+  // dialogs closed so a stale snapshot cannot reopen them and tempt a
+  // duplicate tap.
+  if (!S.awaitingServerAck) {
+    if (st.awaitingDeclare && (st.declareSeats || []).includes(S.mySeat)) {
+      showDeclareDialog();
+    } else if (st.awaitingDouble && st.doubling.turn === S.mySeat) {
+      showDoubleDialog();
+    } else if (st.phase === "bidding" && st.bidding.turn === S.mySeat) {
+      showBidDialog();
+    }
   }
 }
 
@@ -205,6 +213,23 @@ function startBlootOnline(cfg) {
 
   wireDialogs();
   wireMenu();
+
+  // In Bloot mode the end-of-match buttons must talk to the Flutter host.
+  // Hide the standalone "play again" button (rematch is handled by Flutter)
+  // and make the home button send an exit message instead of reloading.
+  if (window.__BLOOT_BRIDGE_ENABLED) {
+    const againBtn = $("again-btn");
+    if (againBtn) againBtn.hidden = true;
+    const homeBtn = $("match-overlay")?.querySelector(".bt-btn--ghost");
+    if (homeBtn) {
+      homeBtn.textContent = "🏠 خروج";
+      homeBtn.onclick = () => {
+        if (window.BlootBridge && window.BlootBridge.send) {
+          window.BlootBridge.send({ type: "exit" });
+        }
+      };
+    }
+  }
 
   S.online.unsubs.push(
     Net.watchSnapshot(cfg.code, (snap) => {

@@ -10,8 +10,8 @@
 	<array>
 		<string>Default</string>
 	</array>
-	<!-- Push notifications (uncomment after adding APNs certificate in Firebase) -->
-	<!-- <key>aps-environment</key> -->
-	<!-- <string>development</string> -->
+	<!-- Push notifications -->
+	<key>aps-environment</key>
+	<string>development</string>
 </dict>
 </plist>
