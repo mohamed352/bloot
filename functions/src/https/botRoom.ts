@@ -2,6 +2,7 @@ import * as functions from 'firebase-functions';
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { db, auth } from '../config/admin';
 import { requireAppCheck } from '../utils/appCheck';
+import { getOrCreateUserAgoraUid } from '../utils/agoraUid';
 import { createGameDocument, RoomPlayer } from '../engine/gameAdapter';
 
 const BOT_NAMES = ['Faisal', 'Omar', 'Khalid'];
@@ -10,6 +11,7 @@ const BOT_AVATAR_URL = 'https://cdn-icons-png.flaticon.com/512/4712/4712035.png'
 interface BotProfile {
   uid: string;
   displayName: string;
+  agoraUid: number;
 }
 
 interface RoomPlayerData {
@@ -58,6 +60,9 @@ export const createRoomWithBots = functions.https.onCall(
   const humanDisplayName = (humanData.displayName as string) || 'Player';
   const humanAvatarUrl = (humanData.avatarUrl as string) || '';
 
+  // Ensure the human has a stable Agora UID before creating the room.
+  const humanAgoraUid = await getOrCreateUserAgoraUid(humanUid);
+
   // Create 3 real Firebase Auth bot users outside the transaction so retries
   // do not spawn duplicate accounts.
   const bots = await createBotUsers(3);
@@ -74,6 +79,7 @@ export const createRoomWithBots = functions.https.onCall(
       'A',
       0,
       false,
+      humanAgoraUid,
     );
 
     const botPlayers = assignBotsToRoom(bots, [humanPlayer]);
@@ -253,10 +259,17 @@ async function createBotUsers(count: number): Promise<BotProfile[]> {
       }),
     ),
   );
-  return records.map((record, i) => ({
-    uid: record.uid,
-    displayName: BOT_NAMES[i],
-  }));
+  const profiles = await Promise.all(
+    records.map(async (record, i) => {
+      const agoraUid = await getOrCreateUserAgoraUid(record.uid);
+      return {
+        uid: record.uid,
+        displayName: BOT_NAMES[i],
+        agoraUid,
+      };
+    }),
+  );
+  return profiles;
 }
 
 function buildBotUserDoc(bot: BotProfile): Record<string, any> {
@@ -264,6 +277,7 @@ function buildBotUserDoc(bot: BotProfile): Record<string, any> {
     uid: bot.uid,
     displayName: bot.displayName,
     avatarUrl: BOT_AVATAR_URL,
+    agoraUid: bot.agoraUid,
     isBot: true,
     level: 1,
     coins: 0,
@@ -301,6 +315,7 @@ function assignBotsToRoom(bots: BotProfile[], existingPlayers: RoomPlayerData[])
       team,
       nextSeat++,
       true,
+      bot.agoraUid,
       { isMicOn: true, isCameraOn: true },
     );
   });
@@ -313,6 +328,7 @@ function createRoomPlayer(
   team: 'A' | 'B',
   seatIndex: number,
   isBot: boolean,
+  agoraUid: number,
   options?: { isReady?: boolean; isMicOn?: boolean; isCameraOn?: boolean },
 ): RoomPlayerData {
   return {
@@ -324,7 +340,7 @@ function createRoomPlayer(
     isReady: options?.isReady ?? isBot,
     isMicOn: options?.isMicOn ?? true,
     isCameraOn: options?.isCameraOn ?? false,
-    agoraUid: uidToAgoraUid(uid),
+    agoraUid,
     joinedAt: new Date(),
     isBot,
   };
@@ -401,14 +417,4 @@ function generateInviteCode(): string {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return code;
-}
-
-function uidToAgoraUid(uid: string): number {
-  let hash = 0;
-  for (let i = 0; i < uid.length; i++) {
-    const char = uid.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
-  }
-  return Math.abs(hash) % 2147483647;
 }

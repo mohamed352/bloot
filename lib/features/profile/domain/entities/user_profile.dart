@@ -1,7 +1,7 @@
 /// Domain entity representing a user's profile data.
 ///
 /// This is separate from the Auth [User] entity because profile stats
-/// (level, coins, etc.) are not authentication concerns.
+/// (level, xp, etc.) are not authentication concerns.
 class UserProfile {
   const UserProfile({
     required this.uid,
@@ -14,7 +14,6 @@ class UserProfile {
     this.level = 1,
     this.xp = 0,
     this.xpToNextLevel = 100,
-    this.coins = 0,
     this.gamesPlayed = 0,
     this.gamesWon = 0,
     this.sunGamesPlayed = 0,
@@ -36,7 +35,6 @@ class UserProfile {
   final int level;
   final int xp;
   final int xpToNextLevel;
-  final int coins;
   final int gamesPlayed;
   final int gamesWon;
   final int sunGamesPlayed;

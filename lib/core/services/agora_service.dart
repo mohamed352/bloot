@@ -81,9 +81,16 @@ class AgoraService {
   int? _currentUid;
   bool _isMicOn = true;
   bool _isCameraOn = false;
+  bool _isAudience = false;
+  bool _subscribeVideo = true;
   int _remoteVideoSubscriberCount = 0;
   bool _leaveRequested = false;
   Timer? _tokenRenewalTimer;
+  Timer? _reconnectTimer;
+  int _reconnectAttempts = 0;
+
+  static const _maxReconnectAttempts = 5;
+  static const _baseReconnectDelay = Duration(seconds: 1);
 
   // Event controllers
   final _userJoinedController =
@@ -200,6 +207,14 @@ class AgoraService {
               reason: reason,
             ),
           );
+          if (state == ConnectionStateType.connectionStateConnected) {
+            _cancelReconnect();
+            _reconnectAttempts = 0;
+          } else if ((state == ConnectionStateType.connectionStateFailed ||
+                  state == ConnectionStateType.connectionStateDisconnected) &&
+              !_leaveRequested) {
+            _scheduleReconnect();
+          }
         },
         onAudioVolumeIndication: (connection, speakers, totalVolume, vad) {
           if (speakers.isNotEmpty) {
@@ -330,6 +345,8 @@ class AgoraService {
     }
 
     _leaveRequested = false;
+    _isAudience = isAudience;
+    _subscribeVideo = subscribeVideo;
 
     final firebaseUid = _firebaseAuth.currentUser?.uid;
     if (firebaseUid == null) {
@@ -393,6 +410,73 @@ class AgoraService {
     }
   }
 
+  void _cancelReconnect() {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+  }
+
+  void _scheduleReconnect() {
+    _cancelReconnect();
+    if (_leaveRequested) return;
+    if (_currentChannelId == null || _currentUid == null) return;
+    if (_reconnectAttempts >= _maxReconnectAttempts) {
+      AppLogger.warning(
+        'Max reconnect attempts reached for $_currentChannelId',
+        tag: 'Agora',
+      );
+      return;
+    }
+
+    final delay = Duration(
+      milliseconds:
+          _baseReconnectDelay.inMilliseconds * (1 << _reconnectAttempts),
+    );
+    final clampedDelay = delay > const Duration(seconds: 30)
+        ? const Duration(seconds: 30)
+        : delay;
+    _reconnectAttempts++;
+
+    AppLogger.info(
+      'Scheduling Agora reconnect in ${clampedDelay.inSeconds}s '
+      '(attempt $_reconnectAttempts/$_maxReconnectAttempts)',
+      tag: 'Agora',
+    );
+
+    _reconnectTimer = Timer(clampedDelay, _performReconnect);
+  }
+
+  Future<void> _performReconnect() async {
+    if (_leaveRequested || _currentChannelId == null || _currentUid == null) {
+      return;
+    }
+
+    final channelName = _currentChannelId!;
+    final uid = _currentUid!;
+
+    AppLogger.info(
+      'Attempting Agora reconnect to $channelName with uid $uid',
+      tag: 'Agora',
+    );
+
+    try {
+      // Force a fresh join by clearing the cached channel id. The engine is
+      // already disconnected at this point, but leaveChannel() cleans up state.
+      await _engine?.leaveChannel();
+      _currentChannelId = null;
+      await _joinChannelInternal(
+        channelName: channelName,
+        agoraUid: uid,
+        isAudience: _isAudience,
+        subscribeVideo: _subscribeVideo,
+      );
+      _reconnectAttempts = 0;
+      AppLogger.info('Agora reconnect succeeded', tag: 'Agora');
+    } catch (e) {
+      AppLogger.error('Agora reconnect failed', error: e, tag: 'Agora');
+      _scheduleReconnect();
+    }
+  }
+
   /// Leave the current Agora channel.
   Future<void> leaveChannel() async {
     if (_engine == null) {
@@ -404,6 +488,7 @@ class AgoraService {
 
     _tokenRenewalTimer?.cancel();
     _tokenRenewalTimer = null;
+    _cancelReconnect();
 
     try {
       await _engine!.leaveChannel();
@@ -625,6 +710,7 @@ class AgoraService {
   /// Release the Agora engine and free resources.
   Future<void> dispose() async {
     _tokenRenewalTimer?.cancel();
+    _cancelReconnect();
     await leaveChannel();
 
     await _userJoinedController.close();

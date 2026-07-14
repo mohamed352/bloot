@@ -1,0 +1,280 @@
+00:00 +0: loading I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart
+00:00 +0: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: signInWithGoogle emits authenticated when profile is complete
+[38;5;12m┌───────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 [AuthCubit] Google sign-in returned uid=u1, isProfileComplete=true[0m
+[38;5;12m└───────────────────────────────────────────────────────────────────────────────[0m
+00:00 +1: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: signInWithGoogle emits profileRequired when profile is incomplete
+[38;5;12m┌───────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 [AuthCubit] Google sign-in returned uid=u1, isProfileComplete=false[0m
+[38;5;12m└───────────────────────────────────────────────────────────────────────────────[0m
+00:00 +2: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: signInWithGoogle emits initial when user cancels
+00:00 +3: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: signInWithGoogle emits error on failure
+00:00 +4: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: signInWithApple emits authenticated when profile is complete
+[38;5;12m┌───────────────────────────────────────────────────────────────────────────────[0m
+[38;5;12m│ 💡 [AuthCubit] Apple sign-in returned uid=u1, isProfileComplete=true[0m
+[38;5;12m└───────────────────────────────────────────────────────────────────────────────[0m
+00:00 +5: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: signInWithApple emits initial when user cancels
+00:00 +6: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: signInWithApple emits error on failure
+00:00 +7: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: completeProfile emits loading then authenticated on success
+00:00 +8: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: completeProfile emits error when repository fails
+00:00 +9: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: completeProfile emits error when new sign-ups are disabled
+00:00 +10: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: checkAuthStatus emits authenticated for complete user
+00:00 +11: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: checkAuthStatus emits profileRequired for incomplete user
+00:00 +12: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: checkAuthStatus emits initial when no current user
+00:00 +13: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: signOut emits loading then initial
+00:00 +14: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: deleteAccount emits loading then initial on success
+00:00 +15: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: checkUsernameAvailability returns false for invalid username
+00:00 +16: I:/Work/StudioProjects/bloot/test/auth_cubit_test.dart: checkUsernameAvailability returns repository result for valid username
+00:00 +17: I:/Work/StudioProjects/bloot/test/auth_validators_test.dart: AuthValidators validateDisplayName returns name_required for null or empty input
+00:00 +18: I:/Work/StudioProjects/bloot/test/auth_validators_test.dart: AuthValidators validateDisplayName returns name_too_short for single character
+00:00 +19: I:/Work/StudioProjects/bloot/test/auth_validators_test.dart: AuthValidators validateDisplayName returns name_too_long for overly long names
+00:00 +20: I:/Work/StudioProjects/bloot/test/auth_validators_test.dart: AuthValidators validateDisplayName returns null for valid names
+00:00 +21: I:/Work/StudioProjects/bloot/test/auth_validators_test.dart: AuthValidators validateUsername returns username_required for null or empty input
+00:00 +22: I:/Work/StudioProjects/bloot/test/auth_validators_test.dart: AuthValidators validateUsername returns username_too_short for short usernames
+00:00 +23: I:/Work/StudioProjects/bloot/test/auth_validators_test.dart: AuthValidators validateUsername returns username_too_long for long usernames
+00:00 +24: I:/Work/StudioProjects/bloot/test/auth_validators_test.dart: AuthValidators validateUsername returns username_invalid for invalid characters
+00:00 +25: I:/Work/StudioProjects/bloot/test/auth_validators_test.dart: AuthValidators validateUsername returns null for valid usernames
+00:00 +26: I:/Work/StudioProjects/bloot/test/auth_validators_test.dart: AuthValidators normalizeUsername trims, removes leading @, and lowercases
+00:00 +27: I:/Work/StudioProjects/bloot/test/chat_cubit_test.dart: loadConversations emits loaded state with conversations
+00:00 +28: I:/Work/StudioProjects/bloot/test/chat_cubit_test.dart: loadConversations emits empty loaded state when no conversations
+00:00 +29: I:/Work/StudioProjects/bloot/test/chat_cubit_test.dart: loadConversations emits error when repository fails
+[38;5;196m┌───────────────────────────────────────────────────────────────────────────────[0m
+[38;5;196m│ Exception: network[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ #0   AppLogger.error (package:bloot/core/logger/app_logger.dart:28:13)[0m
+[38;5;196m│ #1   ChatCubit.loadConversations (package:bloot/features/chat/presentation/cubit/chat_cubit.dart:26:17)[0m
+[38;5;196m│ #2   main.<anonymous closure>.<anonymous closure> (file:///I:/Work/StudioProjects/bloot/test/chat_cubit_test.dart:71:29)[0m
+[38;5;196m│ #3   testBloc.<anonymous closure> (package:bloc_test/src/bloc_test.dart:206:20)[0m
+[38;5;196m│ #4   <asynchronous suspension>[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ ⛔ Failed to load conversations[0m
+[38;5;196m└───────────────────────────────────────────────────────────────────────────────[0m
+00:00 +30: I:/Work/StudioProjects/bloot/test/chat_cubit_test.dart: selectFilter updates selected filter index
+00:00 +31: I:/Work/StudioProjects/bloot/test/chat_cubit_test.dart: selectFilter does nothing when not in conversations loaded state
+00:00 +32: I:/Work/StudioProjects/bloot/test/chat_cubit_test.dart: watchMessages emits empty messages immediately then updates on stream events
+00:00 +33: I:/Work/StudioProjects/bloot/test/chat_cubit_test.dart: watchMessages emits error when stream fails
+[38;5;196m┌───────────────────────────────────────────────────────────────────────────────[0m
+[38;5;196m│ Exception: network[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ #0   AppLogger.error (package:bloot/core/logger/app_logger.dart:28:13)[0m
+[38;5;196m│ #1   ChatCubit.watchMessages.<anonymous closure> (package:bloot/features/chat/presentation/cubit/chat_cubit.dart:61:23)[0m
+[38;5;196m│ #2   StackZoneSpecification._registerUnaryCallback.<anonymous closure>.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:127:36)[0m
+[38;5;196m│ #3   StackZoneSpecification._run (package:stack_trace/src/stack_zone_specification.dart:207:15)[0m
+[38;5;196m│ #4   StackZoneSpecification._registerUnaryCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:127:24)[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ ⛔ Failed to watch messages[0m
+[38;5;196m└───────────────────────────────────────────────────────────────────────────────[0m
+00:00 +34: I:/Work/StudioProjects/bloot/test/chat_cubit_test.dart: loadMessages emits loaded messages
+00:00 +35: I:/Work/StudioProjects/bloot/test/chat_cubit_test.dart: sendMessage does not emit error on success when no messages loaded
+00:00 +36: I:/Work/StudioProjects/bloot/test/chat_cubit_test.dart: sendMessage optimistically adds message then removes it on failure
+[38;5;196m┌───────────────────────────────────────────────────────────────────────────────[0m
+[38;5;196m│ Exception: network[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ #0   AppLogger.error (package:bloot/core/logger/app_logger.dart:28:13)[0m
+[38;5;196m│ #1   ChatCubit.sendMessage (package:bloot/features/chat/presentation/cubit/chat_cubit.dart:115:17)[0m
+[38;5;196m│ #2   main.<anonymous closure>.<anonymous closure> (file:///I:/Work/StudioProjects/bloot/test/chat_cubit_test.dart:187:29)[0m
+[38;5;196m│ #3   testBloc.<anonymous closure> (package:bloc_test/src/bloc_test.dart:206:20)[0m
+[38;5;196m│ #4   <asynchronous suspension>[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ ⛔ Failed to send message[0m
+[38;5;196m└───────────────────────────────────────────────────────────────────────────────[0m
+00:00 +37: I:/Work/StudioProjects/bloot/test/chat_cubit_test.dart: sendMessage optimistically adds message on success
+00:01 +38: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: (setUpAll)
+00:01 +38: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:01 +39: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:01 +39: I:/Work/StudioProjects/bloot/test/discover_cubit_test.dart: loadStreams emits error when repository fails
+[38;5;196m┌───────────────────────────────────────────────────────────────────────────────[0m
+[38;5;196m│ Exception: network[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ #0   AppLogger.error (package:bloot/core/logger/app_logger.dart:28:13)[0m
+[38;5;196m│ #1   DiscoverCubit.loadStreams (package:bloot/features/discover/presentation/cubit/discover_cubit.dart:26:17)[0m
+[38;5;196m│ #2   main.<anonymous closure>.<anonymous closure> (file:///I:/Work/StudioProjects/bloot/test/discover_cubit_test.dart:58:29)[0m
+[38;5;196m│ #3   testBloc.<anonymous closure> (package:bloc_test/src/bloc_test.dart:206:20)[0m
+[38;5;196m│ #4   <asynchronous suspension>[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ ⛔ Failed to load streams[0m
+[38;5;196m└───────────────────────────────────────────────────────────────────────────────[0m
+00:01 +40: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:01 +41: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:01 +42: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:01 +43: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:01 +43: I:/Work/StudioProjects/bloot/test/discover_cubit_test.dart: loadStream emits error when stream load fails
+[38;5;196m┌───────────────────────────────────────────────────────────────────────────────[0m
+[38;5;196m│ Exception: network[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ #0   AppLogger.error (package:bloot/core/logger/app_logger.dart:28:13)[0m
+[38;5;196m│ #1   DiscoverCubit.loadStream (package:bloot/features/discover/presentation/cubit/discover_cubit.dart:68:17)[0m
+[38;5;196m│ #2   <asynchronous suspension>[0m
+[38;5;196m│ #3   testBloc.<anonymous closure> (package:bloc_test/src/bloc_test.dart:206:9)[0m
+[38;5;196m│ #4   <asynchronous suspension>[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ ⛔ Failed to load stream[0m
+[38;5;196m└───────────────────────────────────────────────────────────────────────────────[0m
+00:01 +44: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:01 +44: I:/Work/StudioProjects/bloot/test/discover_cubit_test.dart: loadStream emits error when chat stream fails
+[38;5;196m┌───────────────────────────────────────────────────────────────────────────────[0m
+[38;5;196m│ Exception: network[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ #0   AppLogger.error (package:bloot/core/logger/app_logger.dart:28:13)[0m
+[38;5;196m│ #1   DiscoverCubit.loadStream.<anonymous closure> (package:bloot/features/discover/presentation/cubit/discover_cubit.dart:57:25)[0m
+[38;5;196m│ #2   StackZoneSpecification._registerUnaryCallback.<anonymous closure>.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:127:36)[0m
+[38;5;196m│ #3   StackZoneSpecification._run (package:stack_trace/src/stack_zone_specification.dart:207:15)[0m
+[38;5;196m│ #4   StackZoneSpecification._registerUnaryCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:127:24)[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ ⛔ Failed to watch stream chat[0m
+[38;5;196m└───────────────────────────────────────────────────────────────────────────────[0m
+00:01 +45: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:01 +46: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:02 +47: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:02 +48: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:02 +49: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:02 +50: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:02 +51: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:02 +52: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:02 +53: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:02 +54: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:02 +55: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:02 +55: I:/Work/StudioProjects/bloot/test/game_cubit_test.dart: GameCubit emits action error when placeBid fails
+[38;5;196m┌───────────────────────────────────────────────────────────────────────────────[0m
+[38;5;196m│ Exception: network[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ #0   AppLogger.error (package:bloot/core/logger/app_logger.dart:28:13)[0m
+[38;5;196m│ #1   GameCubit.placeBid (package:bloot/features/game/presentation/cubit/game_cubit.dart:321:17)[0m
+[38;5;196m│ #2   main.<anonymous closure>.<anonymous closure> (file:///I:/Work/StudioProjects/bloot/test/game_cubit_test.dart:259:29)[0m
+[38;5;196m│ #3   testBloc.<anonymous closure> (package:bloc_test/src/bloc_test.dart:206:20)[0m
+[38;5;196m│ #4   <asynchronous suspension>[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ ⛔ Failed to place bid[0m
+[38;5;196m└───────────────────────────────────────────────────────────────────────────────[0m
+00:02 +56: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:02 +57: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:03 +58: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:03 +59: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:03 +59: I:/Work/StudioProjects/bloot/test/profile_cubit_test.dart: loadProfile for current user emits error when stream fails
+[38;5;196m┌───────────────────────────────────────────────────────────────────────────────[0m
+[38;5;196m│ Exception: network[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ #0   AppLogger.error (package:bloot/core/logger/app_logger.dart:28:13)[0m
+[38;5;196m│ #1   ProfileCubit.loadProfile.<anonymous closure> (package:bloot/features/profile/presentation/cubit/profile_cubit.dart:53:25)[0m
+[38;5;196m│ #2   StackZoneSpecification._registerUnaryCallback.<anonymous closure>.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:127:36)[0m
+[38;5;196m│ #3   StackZoneSpecification._run (package:stack_trace/src/stack_zone_specification.dart:207:15)[0m
+[38;5;196m│ #4   StackZoneSpecification._registerUnaryCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:127:24)[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ ⛔ Profile stream error[0m
+[38;5;196m└───────────────────────────────────────────────────────────────────────────────[0m
+00:03 +60: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:03 +61: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:03 +62: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:03 +62: I:/Work/StudioProjects/bloot/test/profile_cubit_test.dart: loadProfile for other user emits error when fetch fails
+[38;5;196m┌───────────────────────────────────────────────────────────────────────────────[0m
+[38;5;196m│ Exception: network[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ #0   AppLogger.error (package:bloot/core/logger/app_logger.dart:28:13)[0m
+[38;5;196m│ #1   ProfileCubit._loadOtherUserProfile (package:bloot/features/profile/presentation/cubit/profile_cubit.dart:85:17)[0m
+[38;5;196m│ #2   ProfileCubit.loadProfile (package:bloot/features/profile/presentation/cubit/profile_cubit.dart:62:7)[0m
+[38;5;196m│ #3   main.<anonymous closure>.<anonymous closure> (file:///I:/Work/StudioProjects/bloot/test/profile_cubit_test.dart:141:29)[0m
+[38;5;196m│ #4   testBloc.<anonymous closure> (package:bloc_test/src/bloc_test.dart:206:20)[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ ⛔ Failed to load user profile[0m
+[38;5;196m└───────────────────────────────────────────────────────────────────────────────[0m
+00:03 +63: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage renders room name field and type options
+00:03 +64: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:04 +65: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:04 +66: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:04 +67: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:04 +68: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:04 +69: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:04 +69: I:/Work/StudioProjects/bloot/test/room_cubit_test.dart: loadRoom emits error when room stream fails
+[38;5;196m┌───────────────────────────────────────────────────────────────────────────────[0m
+[38;5;196m│ Exception: network[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ #0   AppLogger.error (package:bloot/core/logger/app_logger.dart:28:13)[0m
+[38;5;196m│ #1   RoomCubit.loadRoom.<anonymous closure> (package:bloot/features/room/presentation/cubit/room_cubit.dart:175:23)[0m
+[38;5;196m│ #2   StackZoneSpecification._registerUnaryCallback.<anonymous closure>.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:127:36)[0m
+[38;5;196m│ #3   StackZoneSpecification._run (package:stack_trace/src/stack_zone_specification.dart:207:15)[0m
+[38;5;196m│ #4   StackZoneSpecification._registerUnaryCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:127:24)[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ ⛔ Room stream error[0m
+[38;5;196m└───────────────────────────────────────────────────────────────────────────────[0m
+00:04 +70: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:04 +71: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:04 +72: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:04 +73: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:04 +74: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:04 +75: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:04 +76: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:04 +76: I:/Work/StudioProjects/bloot/test/room_cubit_test.dart: isPasswordRequired returns false when repository throws
+[38;5;196m┌───────────────────────────────────────────────────────────────────────────────[0m
+[38;5;196m│ Exception: network[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ #0   AppLogger.error (package:bloot/core/logger/app_logger.dart:28:13)[0m
+[38;5;196m│ #1   RoomCubit.isPasswordRequired (package:bloot/features/room/presentation/cubit/room_cubit.dart:225:17)[0m
+[38;5;196m│ #2   main.<anonymous closure>.<anonymous closure> (file:///I:/Work/StudioProjects/bloot/test/room_cubit_test.dart:237:34)[0m
+[38;5;196m│ #3   Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:25)[0m
+[38;5;196m│ #4   <asynchronous suspension>[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ ⛔ Failed to check password requirement[0m
+[38;5;196m└───────────────────────────────────────────────────────────────────────────────[0m
+00:04 +77: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:04 +78: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:04 +79: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:04 +80: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:05 +81: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage renders code input and join button
+00:05 +82: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage renders room code and player seats
+00:05 +83: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage renders room code and player seats
+00:05 +84: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage renders room code and player seats
+00:05 +85: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage renders room code and player seats
+00:05 +86: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage renders room code and player seats
+00:05 +87: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage renders room code and player seats
+00:05 +88: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage renders room code and player seats
+00:05 +89: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage renders room code and player seats
+00:05 +90: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage renders room code and player seats
+00:05 +91: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage renders room code and player seats
+00:05 +92: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage renders room code and player seats
+00:06 +93: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage renders room code and player seats
+00:06 +94: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage renders room code and player seats
+00:06 +95: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage renders room code and player seats
+00:06 +96: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage renders room code and player seats
+00:07 +96: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: JoinRoomPage shows snackbar when join fails
+[38;5;196m┌───────────────────────────────────────────────────────────────────────────────[0m
+[38;5;196m│ Exception: network[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ #0   AppLogger.error (package:bloot/core/logger/app_logger.dart:28:13)[0m
+[38;5;196m│ #1   RoomCubit.joinRoomByCode (package:bloot/features/room/presentation/cubit/room_cubit.dart:241:17)[0m
+[38;5;196m│ #2   _JoinRoomPageState._joinRoom (package:bloot/features/room/presentation/pages/join_room_page.dart:88:31)[0m
+[38;5;196m│ #3   _InkResponseState.handleTap (package:flutter/src/material/ink_well.dart:1224:21)[0m
+[38;5;196m│ #4   GestureRecognizer.invokeCallback (package:flutter/src/gestures/recognizer.dart:345:24)[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ ⛔ Failed to join room[0m
+[38;5;196m└───────────────────────────────────────────────────────────────────────────────[0m
+00:07 +97: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage renders room code and player seats
+00:07 +98: I:/Work/StudioProjects/bloot/test/create_room_page_test.dart: CreateRoomPage shows snackbar when room creation fails
+[38;5;196m┌───────────────────────────────────────────────────────────────────────────────[0m
+[38;5;196m│ Exception: network[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ #0   AppLogger.error (package:bloot/core/logger/app_logger.dart:28:13)[0m
+[38;5;196m│ #1   RoomCubit.createRoom (package:bloot/features/room/presentation/cubit/room_cubit.dart:65:17)[0m
+[38;5;196m│ #2   _CreateRoomPageState.build.<anonymous closure>.<anonymous closure> (package:bloot/features/room/presentation/pages/create_room_page.dart:503:55)[0m
+[38;5;196m│ #3   _InkResponseState.handleTap (package:flutter/src/material/ink_well.dart:1224:21)[0m
+[38;5;196m│ #4   GestureRecognizer.invokeCallback (package:flutter/src/gestures/recognizer.dart:345:24)[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ ⛔ Failed to create room[0m
+[38;5;196m└───────────────────────────────────────────────────────────────────────────────[0m
+00:07 +99: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: PublicRoomsPage loads and displays public rooms
+00:07 +100: I:/Work/StudioProjects/bloot/test/room_lobby_page_test.dart: RoomLobbyPage shows mic and camera toggle buttons
+00:07 +101: I:/Work/StudioProjects/bloot/test/join_room_page_test.dart: PublicRoomsPage joins room when tapping join button
+00:07 +102: I:/Work/StudioProjects/bloot/test/watch_stream_page_test.dart: WatchStreamPage renders stream title and host
+00:07 +103: I:/Work/StudioProjects/bloot/test/watch_stream_page_test.dart: WatchStreamPage renders stream title and host
+00:07 +104: I:/Work/StudioProjects/bloot/test/watch_stream_page_test.dart: WatchStreamPage renders stream title and host
+00:07 +105: I:/Work/StudioProjects/bloot/test/watch_stream_page_test.dart: WatchStreamPage renders stream title and host
+00:07 +106: I:/Work/StudioProjects/bloot/test/watch_stream_page_test.dart: WatchStreamPage renders stream title and host
+00:08 +107: I:/Work/StudioProjects/bloot/test/watch_stream_page_test.dart: WatchStreamPage renders stream title and host
+00:08 +108: I:/Work/StudioProjects/bloot/test/watch_stream_page_test.dart: WatchStreamPage renders stream title and host
+00:08 +109: I:/Work/StudioProjects/bloot/test/watch_stream_page_test.dart: WatchStreamPage renders stream title and host
+00:08 +110: I:/Work/StudioProjects/bloot/test/watch_stream_page_test.dart: WatchStreamPage joins Agora as audience when stream loaded
+00:08 +111: I:/Work/StudioProjects/bloot/test/watch_stream_page_test.dart: WatchStreamPage renders video grid with four player squares
+00:09 +112: I:/Work/StudioProjects/bloot/test/watch_stream_page_test.dart: WatchStreamPage renders chat messages
+00:09 +113: I:/Work/StudioProjects/bloot/test/watch_stream_page_test.dart: WatchStreamPage sends chat message on submit
+00:09 +114: I:/Work/StudioProjects/bloot/test/watch_stream_page_test.dart: WatchStreamPage shows viewer count from stream document
+00:09 +115: I:/Work/StudioProjects/bloot/test/watch_stream_page_test.dart: (tearDownAll)
+00:09 +115: All tests passed!

@@ -5,6 +5,7 @@ export {
   banUser,
   resetUserCoins,
   forceLogoutUser,
+  backfillMissingAgoraUids,
 } from './userAdmin';
 
 export {

@@ -201,7 +201,11 @@ void main() {
       agoraService = MockAgoraService();
       audioService = MockAudioService();
       when(
-        () => agoraService.joinChannel(channelName: any(named: 'channelName')),
+        () => agoraService.joinChannel(
+          channelName: any(named: 'channelName'),
+          agoraUid: any(named: 'agoraUid'),
+          subscribeVideo: any(named: 'subscribeVideo'),
+        ),
       ).thenAnswer((_) async {});
       when(() => agoraService.leaveChannel()).thenAnswer((_) async {});
       when(() => agoraService.toggleMic()).thenAnswer((_) async => true);
@@ -227,7 +231,11 @@ void main() {
       expect: () => [const GameState.loading(), isA<GamePlaying>()],
       verify: (_) {
         verify(
-          () => agoraService.joinChannel(channelName: 'room_r1'),
+          () => agoraService.joinChannel(
+            channelName: 'room_r1',
+            agoraUid: any(named: 'agoraUid'),
+            subscribeVideo: false,
+          ),
         ).called(1);
       },
     );
@@ -244,8 +252,11 @@ void main() {
       expect: () => [const GameState.loading(), isA<GamePlaying>()],
       verify: (_) {
         verifyNever(
-          () =>
-              agoraService.joinChannel(channelName: any(named: 'channelName')),
+          () => agoraService.joinChannel(
+            channelName: any(named: 'channelName'),
+            agoraUid: any(named: 'agoraUid'),
+            subscribeVideo: any(named: 'subscribeVideo'),
+          ),
         );
       },
     );

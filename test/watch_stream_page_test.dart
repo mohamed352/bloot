@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:bloot/core/services/agora_service.dart';
 import 'package:bloot/features/discover/domain/entities/discover_stream.dart';
 import 'package:bloot/features/discover/presentation/cubit/discover_cubit.dart';
 import 'package:bloot/features/discover/presentation/pages/watch_stream_page.dart';
@@ -164,15 +163,8 @@ void main() {
       });
     });
 
-    testWidgets('updates viewer count on Agora user join events', (
-      tester,
-    ) async {
+    testWidgets('shows viewer count from stream document', (tester) async {
       await runWithFakeHttp(() async {
-        final userJoinedController =
-            StreamController<AgoraUserJoinedEvent>.broadcast();
-        when(
-          () => agoraService.onUserJoined,
-        ).thenAnswer((_) => userJoinedController.stream);
         when(
           () => discoverRepository.getStreamById('s1'),
         ).thenAnswer((_) async => testStream(viewers: 10));
@@ -186,15 +178,6 @@ void main() {
         await tester.pump(const Duration(milliseconds: 100));
 
         expect(find.text('10'), findsOneWidget);
-
-        userJoinedController.add(
-          const AgoraUserJoinedEvent(uid: 99, elapsed: 0),
-        );
-        await tester.pump();
-
-        expect(find.text('11'), findsOneWidget);
-
-        await userJoinedController.close();
       });
     });
   });

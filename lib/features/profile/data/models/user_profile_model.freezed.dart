@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserProfileModel {
 
- String get uid; String? get displayName; String? get username; String? get avatarUrl; String? get bio; String? get region; String? get favoriteMode; int get level; int get xp; int get xpToNextLevel; int get coins; int get gamesPlayed; int get gamesWon; int get sunGamesPlayed; int get sunGamesWon; int get hokmGamesPlayed; int get hokmGamesWon; int get followersCount; int get followingCount; bool get isOnline;
+ String get uid; String? get displayName; String? get username; String? get avatarUrl; String? get bio; String? get region; String? get favoriteMode; int get level; int get xp; int get xpToNextLevel; int get gamesPlayed; int get gamesWon; int get sunGamesPlayed; int get sunGamesWon; int get hokmGamesPlayed; int get hokmGamesWon; int get followersCount; int get followingCount; bool get isOnline;
 /// Create a copy of UserProfileModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $UserProfileModelCopyWith<UserProfileModel> get copyWith => _$UserProfileModelCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfileModel&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.username, username) || other.username == username)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.region, region) || other.region == region)&&(identical(other.favoriteMode, favoriteMode) || other.favoriteMode == favoriteMode)&&(identical(other.level, level) || other.level == level)&&(identical(other.xp, xp) || other.xp == xp)&&(identical(other.xpToNextLevel, xpToNextLevel) || other.xpToNextLevel == xpToNextLevel)&&(identical(other.coins, coins) || other.coins == coins)&&(identical(other.gamesPlayed, gamesPlayed) || other.gamesPlayed == gamesPlayed)&&(identical(other.gamesWon, gamesWon) || other.gamesWon == gamesWon)&&(identical(other.sunGamesPlayed, sunGamesPlayed) || other.sunGamesPlayed == sunGamesPlayed)&&(identical(other.sunGamesWon, sunGamesWon) || other.sunGamesWon == sunGamesWon)&&(identical(other.hokmGamesPlayed, hokmGamesPlayed) || other.hokmGamesPlayed == hokmGamesPlayed)&&(identical(other.hokmGamesWon, hokmGamesWon) || other.hokmGamesWon == hokmGamesWon)&&(identical(other.followersCount, followersCount) || other.followersCount == followersCount)&&(identical(other.followingCount, followingCount) || other.followingCount == followingCount)&&(identical(other.isOnline, isOnline) || other.isOnline == isOnline));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfileModel&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.username, username) || other.username == username)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.region, region) || other.region == region)&&(identical(other.favoriteMode, favoriteMode) || other.favoriteMode == favoriteMode)&&(identical(other.level, level) || other.level == level)&&(identical(other.xp, xp) || other.xp == xp)&&(identical(other.xpToNextLevel, xpToNextLevel) || other.xpToNextLevel == xpToNextLevel)&&(identical(other.gamesPlayed, gamesPlayed) || other.gamesPlayed == gamesPlayed)&&(identical(other.gamesWon, gamesWon) || other.gamesWon == gamesWon)&&(identical(other.sunGamesPlayed, sunGamesPlayed) || other.sunGamesPlayed == sunGamesPlayed)&&(identical(other.sunGamesWon, sunGamesWon) || other.sunGamesWon == sunGamesWon)&&(identical(other.hokmGamesPlayed, hokmGamesPlayed) || other.hokmGamesPlayed == hokmGamesPlayed)&&(identical(other.hokmGamesWon, hokmGamesWon) || other.hokmGamesWon == hokmGamesWon)&&(identical(other.followersCount, followersCount) || other.followersCount == followersCount)&&(identical(other.followingCount, followingCount) || other.followingCount == followingCount)&&(identical(other.isOnline, isOnline) || other.isOnline == isOnline));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,uid,displayName,username,avatarUrl,bio,region,favoriteMode,level,xp,xpToNextLevel,coins,gamesPlayed,gamesWon,sunGamesPlayed,sunGamesWon,hokmGamesPlayed,hokmGamesWon,followersCount,followingCount,isOnline]);
+int get hashCode => Object.hashAll([runtimeType,uid,displayName,username,avatarUrl,bio,region,favoriteMode,level,xp,xpToNextLevel,gamesPlayed,gamesWon,sunGamesPlayed,sunGamesWon,hokmGamesPlayed,hokmGamesWon,followersCount,followingCount,isOnline]);
 
 @override
 String toString() {
-  return 'UserProfileModel(uid: $uid, displayName: $displayName, username: $username, avatarUrl: $avatarUrl, bio: $bio, region: $region, favoriteMode: $favoriteMode, level: $level, xp: $xp, xpToNextLevel: $xpToNextLevel, coins: $coins, gamesPlayed: $gamesPlayed, gamesWon: $gamesWon, sunGamesPlayed: $sunGamesPlayed, sunGamesWon: $sunGamesWon, hokmGamesPlayed: $hokmGamesPlayed, hokmGamesWon: $hokmGamesWon, followersCount: $followersCount, followingCount: $followingCount, isOnline: $isOnline)';
+  return 'UserProfileModel(uid: $uid, displayName: $displayName, username: $username, avatarUrl: $avatarUrl, bio: $bio, region: $region, favoriteMode: $favoriteMode, level: $level, xp: $xp, xpToNextLevel: $xpToNextLevel, gamesPlayed: $gamesPlayed, gamesWon: $gamesWon, sunGamesPlayed: $sunGamesPlayed, sunGamesWon: $sunGamesWon, hokmGamesPlayed: $hokmGamesPlayed, hokmGamesWon: $hokmGamesWon, followersCount: $followersCount, followingCount: $followingCount, isOnline: $isOnline)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $UserProfileModelCopyWith<$Res>  {
   factory $UserProfileModelCopyWith(UserProfileModel value, $Res Function(UserProfileModel) _then) = _$UserProfileModelCopyWithImpl;
 @useResult
 $Res call({
- String uid, String? displayName, String? username, String? avatarUrl, String? bio, String? region, String? favoriteMode, int level, int xp, int xpToNextLevel, int coins, int gamesPlayed, int gamesWon, int sunGamesPlayed, int sunGamesWon, int hokmGamesPlayed, int hokmGamesWon, int followersCount, int followingCount, bool isOnline
+ String uid, String? displayName, String? username, String? avatarUrl, String? bio, String? region, String? favoriteMode, int level, int xp, int xpToNextLevel, int gamesPlayed, int gamesWon, int sunGamesPlayed, int sunGamesWon, int hokmGamesPlayed, int hokmGamesWon, int followersCount, int followingCount, bool isOnline
 });
 
 
@@ -65,7 +65,7 @@ class _$UserProfileModelCopyWithImpl<$Res>
 
 /// Create a copy of UserProfileModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? displayName = freezed,Object? username = freezed,Object? avatarUrl = freezed,Object? bio = freezed,Object? region = freezed,Object? favoriteMode = freezed,Object? level = null,Object? xp = null,Object? xpToNextLevel = null,Object? coins = null,Object? gamesPlayed = null,Object? gamesWon = null,Object? sunGamesPlayed = null,Object? sunGamesWon = null,Object? hokmGamesPlayed = null,Object? hokmGamesWon = null,Object? followersCount = null,Object? followingCount = null,Object? isOnline = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? displayName = freezed,Object? username = freezed,Object? avatarUrl = freezed,Object? bio = freezed,Object? region = freezed,Object? favoriteMode = freezed,Object? level = null,Object? xp = null,Object? xpToNextLevel = null,Object? gamesPlayed = null,Object? gamesWon = null,Object? sunGamesPlayed = null,Object? sunGamesWon = null,Object? hokmGamesPlayed = null,Object? hokmGamesWon = null,Object? followersCount = null,Object? followingCount = null,Object? isOnline = null,}) {
   return _then(_self.copyWith(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
@@ -77,7 +77,6 @@ as String?,favoriteMode: freezed == favoriteMode ? _self.favoriteMode : favorite
 as String?,level: null == level ? _self.level : level // ignore: cast_nullable_to_non_nullable
 as int,xp: null == xp ? _self.xp : xp // ignore: cast_nullable_to_non_nullable
 as int,xpToNextLevel: null == xpToNextLevel ? _self.xpToNextLevel : xpToNextLevel // ignore: cast_nullable_to_non_nullable
-as int,coins: null == coins ? _self.coins : coins // ignore: cast_nullable_to_non_nullable
 as int,gamesPlayed: null == gamesPlayed ? _self.gamesPlayed : gamesPlayed // ignore: cast_nullable_to_non_nullable
 as int,gamesWon: null == gamesWon ? _self.gamesWon : gamesWon // ignore: cast_nullable_to_non_nullable
 as int,sunGamesPlayed: null == sunGamesPlayed ? _self.sunGamesPlayed : sunGamesPlayed // ignore: cast_nullable_to_non_nullable
@@ -172,10 +171,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  String? displayName,  String? username,  String? avatarUrl,  String? bio,  String? region,  String? favoriteMode,  int level,  int xp,  int xpToNextLevel,  int coins,  int gamesPlayed,  int gamesWon,  int sunGamesPlayed,  int sunGamesWon,  int hokmGamesPlayed,  int hokmGamesWon,  int followersCount,  int followingCount,  bool isOnline)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  String? displayName,  String? username,  String? avatarUrl,  String? bio,  String? region,  String? favoriteMode,  int level,  int xp,  int xpToNextLevel,  int gamesPlayed,  int gamesWon,  int sunGamesPlayed,  int sunGamesWon,  int hokmGamesPlayed,  int hokmGamesWon,  int followersCount,  int followingCount,  bool isOnline)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserProfileModel() when $default != null:
-return $default(_that.uid,_that.displayName,_that.username,_that.avatarUrl,_that.bio,_that.region,_that.favoriteMode,_that.level,_that.xp,_that.xpToNextLevel,_that.coins,_that.gamesPlayed,_that.gamesWon,_that.sunGamesPlayed,_that.sunGamesWon,_that.hokmGamesPlayed,_that.hokmGamesWon,_that.followersCount,_that.followingCount,_that.isOnline);case _:
+return $default(_that.uid,_that.displayName,_that.username,_that.avatarUrl,_that.bio,_that.region,_that.favoriteMode,_that.level,_that.xp,_that.xpToNextLevel,_that.gamesPlayed,_that.gamesWon,_that.sunGamesPlayed,_that.sunGamesWon,_that.hokmGamesPlayed,_that.hokmGamesWon,_that.followersCount,_that.followingCount,_that.isOnline);case _:
   return orElse();
 
 }
@@ -193,10 +192,10 @@ return $default(_that.uid,_that.displayName,_that.username,_that.avatarUrl,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  String? displayName,  String? username,  String? avatarUrl,  String? bio,  String? region,  String? favoriteMode,  int level,  int xp,  int xpToNextLevel,  int coins,  int gamesPlayed,  int gamesWon,  int sunGamesPlayed,  int sunGamesWon,  int hokmGamesPlayed,  int hokmGamesWon,  int followersCount,  int followingCount,  bool isOnline)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  String? displayName,  String? username,  String? avatarUrl,  String? bio,  String? region,  String? favoriteMode,  int level,  int xp,  int xpToNextLevel,  int gamesPlayed,  int gamesWon,  int sunGamesPlayed,  int sunGamesWon,  int hokmGamesPlayed,  int hokmGamesWon,  int followersCount,  int followingCount,  bool isOnline)  $default,) {final _that = this;
 switch (_that) {
 case _UserProfileModel():
-return $default(_that.uid,_that.displayName,_that.username,_that.avatarUrl,_that.bio,_that.region,_that.favoriteMode,_that.level,_that.xp,_that.xpToNextLevel,_that.coins,_that.gamesPlayed,_that.gamesWon,_that.sunGamesPlayed,_that.sunGamesWon,_that.hokmGamesPlayed,_that.hokmGamesWon,_that.followersCount,_that.followingCount,_that.isOnline);case _:
+return $default(_that.uid,_that.displayName,_that.username,_that.avatarUrl,_that.bio,_that.region,_that.favoriteMode,_that.level,_that.xp,_that.xpToNextLevel,_that.gamesPlayed,_that.gamesWon,_that.sunGamesPlayed,_that.sunGamesWon,_that.hokmGamesPlayed,_that.hokmGamesWon,_that.followersCount,_that.followingCount,_that.isOnline);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -213,10 +212,10 @@ return $default(_that.uid,_that.displayName,_that.username,_that.avatarUrl,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  String? displayName,  String? username,  String? avatarUrl,  String? bio,  String? region,  String? favoriteMode,  int level,  int xp,  int xpToNextLevel,  int coins,  int gamesPlayed,  int gamesWon,  int sunGamesPlayed,  int sunGamesWon,  int hokmGamesPlayed,  int hokmGamesWon,  int followersCount,  int followingCount,  bool isOnline)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  String? displayName,  String? username,  String? avatarUrl,  String? bio,  String? region,  String? favoriteMode,  int level,  int xp,  int xpToNextLevel,  int gamesPlayed,  int gamesWon,  int sunGamesPlayed,  int sunGamesWon,  int hokmGamesPlayed,  int hokmGamesWon,  int followersCount,  int followingCount,  bool isOnline)?  $default,) {final _that = this;
 switch (_that) {
 case _UserProfileModel() when $default != null:
-return $default(_that.uid,_that.displayName,_that.username,_that.avatarUrl,_that.bio,_that.region,_that.favoriteMode,_that.level,_that.xp,_that.xpToNextLevel,_that.coins,_that.gamesPlayed,_that.gamesWon,_that.sunGamesPlayed,_that.sunGamesWon,_that.hokmGamesPlayed,_that.hokmGamesWon,_that.followersCount,_that.followingCount,_that.isOnline);case _:
+return $default(_that.uid,_that.displayName,_that.username,_that.avatarUrl,_that.bio,_that.region,_that.favoriteMode,_that.level,_that.xp,_that.xpToNextLevel,_that.gamesPlayed,_that.gamesWon,_that.sunGamesPlayed,_that.sunGamesWon,_that.hokmGamesPlayed,_that.hokmGamesWon,_that.followersCount,_that.followingCount,_that.isOnline);case _:
   return null;
 
 }
@@ -228,7 +227,7 @@ return $default(_that.uid,_that.displayName,_that.username,_that.avatarUrl,_that
 @JsonSerializable()
 
 class _UserProfileModel implements UserProfileModel {
-  const _UserProfileModel({required this.uid, this.displayName, this.username, this.avatarUrl, this.bio, this.region, this.favoriteMode, this.level = 1, this.xp = 0, this.xpToNextLevel = 100, this.coins = 0, this.gamesPlayed = 0, this.gamesWon = 0, this.sunGamesPlayed = 0, this.sunGamesWon = 0, this.hokmGamesPlayed = 0, this.hokmGamesWon = 0, this.followersCount = 0, this.followingCount = 0, this.isOnline = false});
+  const _UserProfileModel({required this.uid, this.displayName, this.username, this.avatarUrl, this.bio, this.region, this.favoriteMode, this.level = 1, this.xp = 0, this.xpToNextLevel = 100, this.gamesPlayed = 0, this.gamesWon = 0, this.sunGamesPlayed = 0, this.sunGamesWon = 0, this.hokmGamesPlayed = 0, this.hokmGamesWon = 0, this.followersCount = 0, this.followingCount = 0, this.isOnline = false});
   factory _UserProfileModel.fromJson(Map<String, dynamic> json) => _$UserProfileModelFromJson(json);
 
 @override final  String uid;
@@ -241,7 +240,6 @@ class _UserProfileModel implements UserProfileModel {
 @override@JsonKey() final  int level;
 @override@JsonKey() final  int xp;
 @override@JsonKey() final  int xpToNextLevel;
-@override@JsonKey() final  int coins;
 @override@JsonKey() final  int gamesPlayed;
 @override@JsonKey() final  int gamesWon;
 @override@JsonKey() final  int sunGamesPlayed;
@@ -265,16 +263,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfileModel&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.username, username) || other.username == username)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.region, region) || other.region == region)&&(identical(other.favoriteMode, favoriteMode) || other.favoriteMode == favoriteMode)&&(identical(other.level, level) || other.level == level)&&(identical(other.xp, xp) || other.xp == xp)&&(identical(other.xpToNextLevel, xpToNextLevel) || other.xpToNextLevel == xpToNextLevel)&&(identical(other.coins, coins) || other.coins == coins)&&(identical(other.gamesPlayed, gamesPlayed) || other.gamesPlayed == gamesPlayed)&&(identical(other.gamesWon, gamesWon) || other.gamesWon == gamesWon)&&(identical(other.sunGamesPlayed, sunGamesPlayed) || other.sunGamesPlayed == sunGamesPlayed)&&(identical(other.sunGamesWon, sunGamesWon) || other.sunGamesWon == sunGamesWon)&&(identical(other.hokmGamesPlayed, hokmGamesPlayed) || other.hokmGamesPlayed == hokmGamesPlayed)&&(identical(other.hokmGamesWon, hokmGamesWon) || other.hokmGamesWon == hokmGamesWon)&&(identical(other.followersCount, followersCount) || other.followersCount == followersCount)&&(identical(other.followingCount, followingCount) || other.followingCount == followingCount)&&(identical(other.isOnline, isOnline) || other.isOnline == isOnline));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfileModel&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.username, username) || other.username == username)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.region, region) || other.region == region)&&(identical(other.favoriteMode, favoriteMode) || other.favoriteMode == favoriteMode)&&(identical(other.level, level) || other.level == level)&&(identical(other.xp, xp) || other.xp == xp)&&(identical(other.xpToNextLevel, xpToNextLevel) || other.xpToNextLevel == xpToNextLevel)&&(identical(other.gamesPlayed, gamesPlayed) || other.gamesPlayed == gamesPlayed)&&(identical(other.gamesWon, gamesWon) || other.gamesWon == gamesWon)&&(identical(other.sunGamesPlayed, sunGamesPlayed) || other.sunGamesPlayed == sunGamesPlayed)&&(identical(other.sunGamesWon, sunGamesWon) || other.sunGamesWon == sunGamesWon)&&(identical(other.hokmGamesPlayed, hokmGamesPlayed) || other.hokmGamesPlayed == hokmGamesPlayed)&&(identical(other.hokmGamesWon, hokmGamesWon) || other.hokmGamesWon == hokmGamesWon)&&(identical(other.followersCount, followersCount) || other.followersCount == followersCount)&&(identical(other.followingCount, followingCount) || other.followingCount == followingCount)&&(identical(other.isOnline, isOnline) || other.isOnline == isOnline));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,uid,displayName,username,avatarUrl,bio,region,favoriteMode,level,xp,xpToNextLevel,coins,gamesPlayed,gamesWon,sunGamesPlayed,sunGamesWon,hokmGamesPlayed,hokmGamesWon,followersCount,followingCount,isOnline]);
+int get hashCode => Object.hashAll([runtimeType,uid,displayName,username,avatarUrl,bio,region,favoriteMode,level,xp,xpToNextLevel,gamesPlayed,gamesWon,sunGamesPlayed,sunGamesWon,hokmGamesPlayed,hokmGamesWon,followersCount,followingCount,isOnline]);
 
 @override
 String toString() {
-  return 'UserProfileModel(uid: $uid, displayName: $displayName, username: $username, avatarUrl: $avatarUrl, bio: $bio, region: $region, favoriteMode: $favoriteMode, level: $level, xp: $xp, xpToNextLevel: $xpToNextLevel, coins: $coins, gamesPlayed: $gamesPlayed, gamesWon: $gamesWon, sunGamesPlayed: $sunGamesPlayed, sunGamesWon: $sunGamesWon, hokmGamesPlayed: $hokmGamesPlayed, hokmGamesWon: $hokmGamesWon, followersCount: $followersCount, followingCount: $followingCount, isOnline: $isOnline)';
+  return 'UserProfileModel(uid: $uid, displayName: $displayName, username: $username, avatarUrl: $avatarUrl, bio: $bio, region: $region, favoriteMode: $favoriteMode, level: $level, xp: $xp, xpToNextLevel: $xpToNextLevel, gamesPlayed: $gamesPlayed, gamesWon: $gamesWon, sunGamesPlayed: $sunGamesPlayed, sunGamesWon: $sunGamesWon, hokmGamesPlayed: $hokmGamesPlayed, hokmGamesWon: $hokmGamesWon, followersCount: $followersCount, followingCount: $followingCount, isOnline: $isOnline)';
 }
 
 
@@ -285,7 +283,7 @@ abstract mixin class _$UserProfileModelCopyWith<$Res> implements $UserProfileMod
   factory _$UserProfileModelCopyWith(_UserProfileModel value, $Res Function(_UserProfileModel) _then) = __$UserProfileModelCopyWithImpl;
 @override @useResult
 $Res call({
- String uid, String? displayName, String? username, String? avatarUrl, String? bio, String? region, String? favoriteMode, int level, int xp, int xpToNextLevel, int coins, int gamesPlayed, int gamesWon, int sunGamesPlayed, int sunGamesWon, int hokmGamesPlayed, int hokmGamesWon, int followersCount, int followingCount, bool isOnline
+ String uid, String? displayName, String? username, String? avatarUrl, String? bio, String? region, String? favoriteMode, int level, int xp, int xpToNextLevel, int gamesPlayed, int gamesWon, int sunGamesPlayed, int sunGamesWon, int hokmGamesPlayed, int hokmGamesWon, int followersCount, int followingCount, bool isOnline
 });
 
 
@@ -302,7 +300,7 @@ class __$UserProfileModelCopyWithImpl<$Res>
 
 /// Create a copy of UserProfileModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? displayName = freezed,Object? username = freezed,Object? avatarUrl = freezed,Object? bio = freezed,Object? region = freezed,Object? favoriteMode = freezed,Object? level = null,Object? xp = null,Object? xpToNextLevel = null,Object? coins = null,Object? gamesPlayed = null,Object? gamesWon = null,Object? sunGamesPlayed = null,Object? sunGamesWon = null,Object? hokmGamesPlayed = null,Object? hokmGamesWon = null,Object? followersCount = null,Object? followingCount = null,Object? isOnline = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? displayName = freezed,Object? username = freezed,Object? avatarUrl = freezed,Object? bio = freezed,Object? region = freezed,Object? favoriteMode = freezed,Object? level = null,Object? xp = null,Object? xpToNextLevel = null,Object? gamesPlayed = null,Object? gamesWon = null,Object? sunGamesPlayed = null,Object? sunGamesWon = null,Object? hokmGamesPlayed = null,Object? hokmGamesWon = null,Object? followersCount = null,Object? followingCount = null,Object? isOnline = null,}) {
   return _then(_UserProfileModel(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
@@ -314,7 +312,6 @@ as String?,favoriteMode: freezed == favoriteMode ? _self.favoriteMode : favorite
 as String?,level: null == level ? _self.level : level // ignore: cast_nullable_to_non_nullable
 as int,xp: null == xp ? _self.xp : xp // ignore: cast_nullable_to_non_nullable
 as int,xpToNextLevel: null == xpToNextLevel ? _self.xpToNextLevel : xpToNextLevel // ignore: cast_nullable_to_non_nullable
-as int,coins: null == coins ? _self.coins : coins // ignore: cast_nullable_to_non_nullable
 as int,gamesPlayed: null == gamesPlayed ? _self.gamesPlayed : gamesPlayed // ignore: cast_nullable_to_non_nullable
 as int,gamesWon: null == gamesWon ? _self.gamesWon : gamesWon // ignore: cast_nullable_to_non_nullable
 as int,sunGamesPlayed: null == sunGamesPlayed ? _self.sunGamesPlayed : sunGamesPlayed // ignore: cast_nullable_to_non_nullable

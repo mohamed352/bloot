@@ -51,9 +51,7 @@ class HomePage extends StatelessWidget {
                             child: _UserAvatar(state: state),
                           ),
                           const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: _UserInfo(state: state),
-                          ),
+                          Expanded(child: _UserInfo(state: state)),
                           Stack(
                             children: [
                               IconButton(
@@ -392,7 +390,6 @@ class HomePage extends StatelessWidget {
       orElse: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
     );
   }
-
 }
 
 class _UserAvatar extends StatelessWidget {
@@ -431,7 +428,6 @@ class _UserInfo extends StatelessWidget {
 
     final displayName = profile?.displayName ?? 'User';
     final level = profile?.level ?? 1;
-    final coins = profile?.coins ?? 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -443,25 +439,6 @@ class _UserInfo extends StatelessWidget {
             fontWeight: FontWeight.w600,
             color: ColorManager.darkTextPrimary,
           ),
-        ),
-        const SizedBox(height: 2),
-        Row(
-          children: [
-            const Icon(
-              Icons.monetization_on_rounded,
-              size: 14,
-              color: ColorManager.secondary,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              '$coins',
-              style: const TextStyle(
-                fontSize: 13,
-                color: ColorManager.secondary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
         ),
       ],
     );
@@ -732,8 +709,6 @@ class _StreamCard extends StatelessWidget {
   }
 }
 
-
-
 /// "Play with Bots" button with a full-screen loading overlay that stays
 /// visible until the room is created and the game auto-joins.
 class _PlayWithBotsButton extends StatefulWidget {
@@ -810,9 +785,9 @@ class _PlayWithBotsButtonState extends State<_PlayWithBotsButton> {
             },
             error: (message) {
               if (!mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(message)),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(message)));
             },
           );
         },
@@ -838,8 +813,9 @@ class _PlayWithBotsButtonState extends State<_PlayWithBotsButton> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.success.withValues(alpha: 0.15),
                 foregroundColor: ColorManager.success,
-                disabledForegroundColor:
-                    ColorManager.success.withValues(alpha: 0.5),
+                disabledForegroundColor: ColorManager.success.withValues(
+                  alpha: 0.5,
+                ),
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(

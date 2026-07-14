@@ -39,11 +39,7 @@ class ProfileRemoteDataSource {
       final data = doc.data()!;
       return _mapDocToModel(uid, data);
     } catch (e) {
-      AppLogger.error(
-        'Failed to get user profile',
-        error: e,
-        tag: 'Profile',
-      );
+      AppLogger.error('Failed to get user profile', error: e, tag: 'Profile');
       return null;
     }
   }
@@ -55,11 +51,7 @@ class ProfileRemoteDataSource {
       final profiles = await Future.wait(futures);
       return profiles.whereType<UserProfileModel>().toList();
     } catch (e) {
-      AppLogger.error(
-        'Failed to get user profiles',
-        error: e,
-        tag: 'Profile',
-      );
+      AppLogger.error('Failed to get user profiles', error: e, tag: 'Profile');
       return [];
     }
   }
@@ -114,11 +106,7 @@ class ProfileRemoteDataSource {
 
       return snapshot.docs.map(_mapGameDocToModel).toList();
     } catch (e) {
-      AppLogger.error(
-        'Failed to get game history',
-        error: e,
-        tag: 'Profile',
-      );
+      AppLogger.error('Failed to get game history', error: e, tag: 'Profile');
       return [];
     }
   }
@@ -135,11 +123,7 @@ class ProfileRemoteDataSource {
 
       return snapshot.docs.map(_mapAchievementDocToModel).toList();
     } catch (e) {
-      AppLogger.error(
-        'Failed to get achievements',
-        error: e,
-        tag: 'Profile',
-      );
+      AppLogger.error('Failed to get achievements', error: e, tag: 'Profile');
       return [];
     }
   }
@@ -187,7 +171,6 @@ class ProfileRemoteDataSource {
       level: (data['level'] as num?)?.toInt() ?? 1,
       xp: (data['xp'] as num?)?.toInt() ?? 0,
       xpToNextLevel: (data['xpToNextLevel'] as num?)?.toInt() ?? 100,
-      coins: (data['coins'] as num?)?.toInt() ?? 0,
       gamesPlayed: (data['gamesPlayed'] as num?)?.toInt() ?? 0,
       gamesWon: (data['gamesWon'] as num?)?.toInt() ?? 0,
       sunGamesPlayed: (data['sunGamesPlayed'] as num?)?.toInt() ?? 0,

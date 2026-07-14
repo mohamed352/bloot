@@ -2,6 +2,7 @@ import * as functions from 'firebase-functions';
 import { FieldValue } from 'firebase-admin/firestore';
 import { db } from '../config/admin';
 import { requireAppCheck } from '../utils/appCheck';
+import { getOrCreateUserAgoraUid } from '../utils/agoraUid';
 
 /**
  * Server-side handler for joining a room by invite code.
@@ -45,6 +46,11 @@ export const joinRoom = functions.https.onCall(async (request) => {
   const userData = userDoc.data();
   const displayName = userData?.displayName as string | undefined ?? 'Player';
   const avatarUrl = userData?.avatarUrl as string | undefined;
+
+  // Ensure the user has a stable, unique Agora UID before adding them to the
+  // room. This prevents hash collisions that can cause two users to share the
+  // same Agora identity and kick each other from voice channels.
+  const userAgoraUid = await getOrCreateUserAgoraUid(currentUid);
 
   return db.runTransaction(async (transaction) => {
     const doc = await transaction.get(roomRef);
@@ -98,7 +104,7 @@ export const joinRoom = functions.https.onCall(async (request) => {
       isReady: false,
       isMicOn: voiceEnabled,
       isCameraOn: cameraEnabled,
-      agoraUid: Math.abs(hashCode(currentUid)),
+      agoraUid: userAgoraUid,
       joinedAt: FieldValue.serverTimestamp(),
     });
     playerUids.push(currentUid);
@@ -115,13 +121,3 @@ export const joinRoom = functions.https.onCall(async (request) => {
     return { roomId: roomRef.id };
   });
 });
-
-function hashCode(value: string): number {
-  let hash = 0;
-  for (let i = 0; i < value.length; i++) {
-    const char = value.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
-  }
-  return hash;
-}

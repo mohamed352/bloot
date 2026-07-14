@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions';
 import { db, auth } from '../config/admin';
 import { verifyPermission, logAdminAction } from './helpers';
+import { getOrCreateUserAgoraUid } from '../utils/agoraUid';
 import {
   SuspendUserInput,
   BanUserInput,
@@ -136,3 +137,31 @@ export const forceLogoutUser = functions.https.onCall(async (request) => {
   await logAdminAction(actorUid, 'forceLogoutUser', 'user', uid, {});
   return { success: true } as SuccessResponse;
 });
+
+/**
+ * One-time migration: assigns a unique Agora UID to every user document that
+ * does not already have one. Call this after deploying the UID collision fix.
+ */
+export const backfillMissingAgoraUids = functions.https.onCall(
+  async (request) => {
+    const actorUid = assertAuth(request);
+    await verifyPermission(actorUid, 'manage');
+
+    const snapshot = await db.collection('users').limit(500).get();
+
+    let processed = 0;
+    for (const doc of snapshot.docs) {
+      const agoraUid = doc.data()?.agoraUid as number | undefined;
+      if (agoraUid && Number.isInteger(agoraUid) && agoraUid > 0) {
+        continue;
+      }
+      await getOrCreateUserAgoraUid(doc.id);
+      processed++;
+    }
+
+    await logAdminAction(actorUid, 'backfillMissingAgoraUids', 'user', '', {
+      processed,
+    });
+    return { success: true, processed } as SuccessResponse;
+  },
+);

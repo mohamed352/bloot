@@ -10,6 +10,7 @@ export {
   banUser,
   resetUserCoins,
   forceLogoutUser,
+  backfillMissingAgoraUids,
   resolveReport,
   dismissReport,
   escalateReport,
@@ -63,6 +64,7 @@ export { sendGameStartingNotification } from './triggers/sendGameStartingNotific
 export { updateViewerCount } from './triggers/updateViewerCount';
 export { syncUserSearchKeywords } from './triggers/syncUserSearchKeywords';
 export { syncReportSearchKeywords } from './triggers/syncReportSearchKeywords';
+export { assignUserAgoraUid } from './triggers/assignUserAgoraUid';
 export { cleanStaleRooms } from './scheduler/cleanStaleRooms';
 export { startStream } from './https/startStream';
 export { endStream } from './https/endStream';

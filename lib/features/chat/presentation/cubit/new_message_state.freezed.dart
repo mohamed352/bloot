@@ -388,12 +388,12 @@ _$ConversationCreatedCopyWith<_ConversationCreated> get copyWith => __$Conversat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ConversationCreated&&const DeepCollectionEquality().equals(other.conversation, conversation));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ConversationCreated&&(identical(other.conversation, conversation) || other.conversation == conversation));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(conversation));
+int get hashCode => Object.hash(runtimeType,conversation);
 
 @override
 String toString() {
@@ -425,9 +425,9 @@ class __$ConversationCreatedCopyWithImpl<$Res>
 
 /// Create a copy of NewMessageState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? conversation = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? conversation = null,}) {
   return _then(_ConversationCreated(
-conversation: freezed == conversation ? _self.conversation : conversation // ignore: cast_nullable_to_non_nullable
+conversation: null == conversation ? _self.conversation : conversation // ignore: cast_nullable_to_non_nullable
 as ChatConversation,
   ));
 }

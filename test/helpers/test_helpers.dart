@@ -78,10 +78,17 @@ class MockAgoraService extends Mock implements AgoraService {
 /// Call this in `setUp` for widget tests that use [MockAgoraService].
 void stubAgoraServiceDefaults(MockAgoraService service) {
   when(
-    () => service.joinChannel(channelName: any(named: 'channelName')),
+    () => service.joinChannel(
+      channelName: any(named: 'channelName'),
+      agoraUid: any(named: 'agoraUid'),
+      subscribeVideo: any(named: 'subscribeVideo'),
+    ),
   ).thenAnswer((_) async {});
   when(
-    () => service.joinAsAudience(channelName: any(named: 'channelName')),
+    () => service.joinAsAudience(
+      channelName: any(named: 'channelName'),
+      agoraUid: any(named: 'agoraUid'),
+    ),
   ).thenAnswer((_) async {});
   when(() => service.leaveChannel()).thenAnswer((_) async {});
   when(() => service.toggleMic()).thenAnswer((_) async => false);
@@ -512,7 +519,9 @@ Game testGame({
     turnIndex: turnIndex,
     mySeatIndex: mySeatIndex,
     myHand: myHand,
-    engineState: engineState ?? (jsonDecode(kTestEngineStateJson) as Map<String, dynamic>),
+    engineState:
+        engineState ??
+        (jsonDecode(kTestEngineStateJson) as Map<String, dynamic>),
     players:
         players ??
         const [

@@ -52,15 +52,11 @@ class TermsPage extends StatelessWidget {
                 'Users are prohibited from posting offensive, harmful, or illegal content. We reserve the right to remove content and suspend accounts that violate these guidelines.',
               ),
               _buildParagraph(
-                '6. Virtual Currency',
-                'Coins and other virtual items have no real-world value and cannot be exchanged for real money. All purchases are final and non-refundable.',
-              ),
-              _buildParagraph(
-                '7. Limitation of Liability',
+                '6. Limitation of Liability',
                 'Bloot is provided "as is" without warranties of any kind. We are not liable for any damages arising from your use of our services.',
               ),
               _buildParagraph(
-                '8. Changes to Terms',
+                '7. Changes to Terms',
                 'We may update these terms from time to time. Continued use of Bloot after changes constitutes acceptance of the updated terms.',
               ),
             ],
