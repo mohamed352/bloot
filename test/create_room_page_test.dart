@@ -116,7 +116,10 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // Private is selected by default; password field should be visible.
+        // Select private room (default is public).
+        await tester.tap(find.text('Private'));
+        await tester.pumpAndSettle();
+
         expect(find.text('Room Password'), findsOneWidget);
 
         // Select public room.
@@ -145,6 +148,10 @@ void main() {
             agoraService: agoraService,
           ),
         );
+        await tester.pumpAndSettle();
+
+        // Select private room (default is public).
+        await tester.tap(find.text('Private'));
         await tester.pumpAndSettle();
 
         final nameField = find.byType(TextField).first;

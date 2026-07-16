@@ -2,17 +2,11 @@ import 'dart:async';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:bloc_test/bloc_test.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-
 import 'package:bloot/core/services/agora_service.dart';
-import 'package:bloot/core/services/audio_service.dart';
 import 'package:bloot/features/discover/domain/entities/discover_stream.dart';
-import 'package:bloot/features/discover/domain/repositories/discover_repository.dart';
 import 'package:bloot/features/discover/presentation/cubit/discover_cubit.dart';
 import 'package:bloot/features/discover/presentation/cubit/discover_state.dart';
 import 'package:bloot/features/game/domain/entities/game.dart';
-import 'package:bloot/features/game/domain/repositories/game_repository.dart';
 import 'package:bloot/features/game/presentation/cubit/game_cubit.dart';
 import 'package:bloot/features/game/presentation/cubit/game_state.dart';
 import 'package:bloot/features/room/domain/entities/room.dart';
@@ -20,6 +14,8 @@ import 'package:bloot/features/room/domain/exceptions/room_exception.dart';
 import 'package:bloot/features/room/domain/repositories/room_repository.dart';
 import 'package:bloot/features/room/presentation/cubit/room_cubit.dart';
 import 'package:bloot/features/room/presentation/cubit/room_state.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 
 import 'helpers/test_helpers.dart';
 
@@ -184,7 +180,7 @@ void main() {
         gameController!.add(
           g.copyWith(
             status: 'trickEnd',
-            currentTrick: Trick(
+            currentTrick: const Trick(
               trickNumber: 1,
               trickLeaderIndex: 0,
               winnerSeat: 0,
@@ -424,7 +420,7 @@ void main() {
         roomController!.add(
           testRoom(
             players: [
-              testPlayer(uid: 'u1', name: 'Host', isMe: true, agoraUid: 101),
+              testPlayer(name: 'Host', isMe: true, agoraUid: 101),
               testPlayer(uid: 'u2', name: 'P2', agoraUid: 102),
             ],
           ),
@@ -434,7 +430,7 @@ void main() {
 
         // P2 starts speaking
         volumeController!.add(
-          AgoraAudioVolumeIndicationEvent(
+          const AgoraAudioVolumeIndicationEvent(
             speakers: [AudioVolumeInfo(uid: 102, volume: 200, vad: 1)],
           ),
         );
@@ -442,7 +438,7 @@ void main() {
 
         // Both speaking
         volumeController!.add(
-          AgoraAudioVolumeIndicationEvent(
+          const AgoraAudioVolumeIndicationEvent(
             speakers: [
               AudioVolumeInfo(uid: 101, volume: 150, vad: 1),
               AudioVolumeInfo(uid: 102, volume: 200, vad: 1),
@@ -486,8 +482,8 @@ void main() {
   // ===========================================================================
   group('Room to game Agora channel handoff', () {
     test('room and game share the same Agora channel name', () {
-      final room = testRoom(agoraChannelName: 'room_r1');
-      final game = testGame(agoraChannelName: 'room_r1');
+      final room = testRoom();
+      final game = testGame();
 
       expect(room.agoraChannelName, 'room_r1');
       expect(game.agoraChannelName, 'room_r1');
@@ -497,9 +493,9 @@ void main() {
     blocTest<GameCubit, GameState>(
       'game cubit joins same Agora channel as room, leaves on close',
       build: () {
-        when(() => gameRepository.watchGame('g1')).thenAnswer(
-          (_) => Stream.value(testGame(agoraChannelName: 'room_r1')),
-        );
+        when(
+          () => gameRepository.watchGame('g1'),
+        ).thenAnswer((_) => Stream.value(testGame()));
         return GameCubit(
           gameRepository: gameRepository,
           roomRepository: roomRepository,
@@ -569,7 +565,7 @@ void main() {
         roomController!.add(
           testRoom(
             players: [
-              testPlayer(name: 'Me', isMe: true, isMicOn: true),
+              testPlayer(name: 'Me', isMe: true),
               testPlayer(uid: 'u2', name: 'P2'),
             ],
           ),
@@ -656,7 +652,7 @@ void main() {
         await Future<void>.delayed(Duration.zero);
 
         // Game data arrives, recovering
-        gameController!.add(testGame(status: 'playing'));
+        gameController!.add(testGame());
         await Future<void>.delayed(Duration.zero);
       },
       expect: () => [
@@ -753,7 +749,7 @@ void main() {
         );
       },
       seed: () => GameState.gameEnd(
-        game: testGame(status: 'gameEnd', roomId: 'r1'),
+        game: testGame(status: 'gameEnd'),
         winnerTeam: 'A',
       ),
       act: (cubit) => cubit.rematch(),
@@ -791,9 +787,9 @@ void main() {
     blocTest<GameCubit, GameState>(
       'watchGameAsSpectator uses spectator stream and joins Agora',
       build: () {
-        when(() => gameRepository.watchGameAsSpectator('g1')).thenAnswer(
-          (_) => Stream.value(testGame(agoraChannelName: 'room_r1')),
-        );
+        when(
+          () => gameRepository.watchGameAsSpectator('g1'),
+        ).thenAnswer((_) => Stream.value(testGame()));
         return GameCubit(
           gameRepository: gameRepository,
           roomRepository: roomRepository,

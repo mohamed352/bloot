@@ -38,6 +38,7 @@ abstract class AppRedirect {
       RoutePaths.maintenance,
       RoutePaths.offline,
       RoutePaths.gameSim,
+      RoutePaths.roomInvitation,
     ].contains(currentPath);
 
     // Pure authentication flow routes (welcome → login).
@@ -76,10 +77,7 @@ abstract class AppRedirect {
 
     // Complete users should never land on the profile completion screen.
     if (isProfileComplete && currentPath == RoutePaths.completeProfile) {
-      AppLogger.debug(
-        'Profile already complete → home',
-        tag: LogTags.router,
-      );
+      AppLogger.debug('Profile already complete → home', tag: LogTags.router);
       return RoutePaths.home;
     }
 
@@ -135,10 +133,9 @@ abstract class AppRedirect {
   static bool _shouldForceUpdate(String current, String forced) {
     final currentParts = current.split('.').map(int.tryParse).toList();
     final forcedParts = forced.split('.').map(int.tryParse).toList();
-    final length =
-        currentParts.length > forcedParts.length
-            ? currentParts.length
-            : forcedParts.length;
+    final length = currentParts.length > forcedParts.length
+        ? currentParts.length
+        : forcedParts.length;
 
     for (var i = 0; i < length; i++) {
       final c = i < currentParts.length ? currentParts[i] ?? 0 : 0;

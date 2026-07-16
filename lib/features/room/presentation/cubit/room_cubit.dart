@@ -435,6 +435,19 @@ class RoomCubit extends Cubit<RoomState> {
     }
   }
 
+  Future<bool> sendRoomInvite(String roomId, String friendUid) async {
+    try {
+      await _roomRepository.sendRoomInvite(roomId, friendUid);
+      return true;
+    } on RoomException catch (e) {
+      AppLogger.error('Failed to send room invite', error: e.message);
+      return false;
+    } catch (e) {
+      AppLogger.error('Failed to send room invite', error: e);
+      return false;
+    }
+  }
+
   @override
   Future<void> close() async {
     await _roomSubscription?.cancel();

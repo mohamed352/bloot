@@ -17,6 +17,23 @@ class StreamPlayer {
   final String team;
   final bool isCameraOn;
   final bool isMicOn;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StreamPlayer &&
+          runtimeType == other.runtimeType &&
+          uid == other.uid &&
+          name == other.name &&
+          avatarUrl == other.avatarUrl &&
+          agoraUid == other.agoraUid &&
+          team == other.team &&
+          isCameraOn == other.isCameraOn &&
+          isMicOn == other.isMicOn;
+
+  @override
+  int get hashCode =>
+      Object.hash(uid, name, avatarUrl, agoraUid, team, isCameraOn, isMicOn);
 }
 
 /// Domain entity representing a discoverable stream.
@@ -74,6 +91,47 @@ class DiscoverStream {
       players: players ?? this.players,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DiscoverStream &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          title == other.title &&
+          host == other.host &&
+          viewers == other.viewers &&
+          avatarUrl == other.avatarUrl &&
+          category == other.category &&
+          isLive == other.isLive &&
+          isPremium == other.isPremium &&
+          agoraChannelName == other.agoraChannelName &&
+          roomId == other.roomId &&
+          _listEquals(players, other.players);
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    title,
+    host,
+    viewers,
+    avatarUrl,
+    category,
+    isLive,
+    isPremium,
+    agoraChannelName,
+    roomId,
+    Object.hashAll(players),
+  );
+
+  static bool _listEquals<T>(List<T> a, List<T> b) {
+    if (identical(a, b)) return true;
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 }
 
 class StreamChatMessage {
@@ -96,4 +154,30 @@ class StreamChatMessage {
   final String type;
   final DateTime? createdAt;
   final bool isMe;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StreamChatMessage &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          senderUid == other.senderUid &&
+          senderName == other.senderName &&
+          senderAvatar == other.senderAvatar &&
+          text == other.text &&
+          type == other.type &&
+          createdAt == other.createdAt &&
+          isMe == other.isMe;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    senderUid,
+    senderName,
+    senderAvatar,
+    text,
+    type,
+    createdAt,
+    isMe,
+  );
 }

@@ -34,6 +34,24 @@ class DiscoverRemoteDataSource {
     }
   }
 
+  /// Returns a real-time stream of live streams so the discover page
+  /// updates automatically when new streams go live or existing ones end.
+  Stream<List<DiscoverStreamModel>> watchStreams() {
+    return _firestore
+        .collection('streams')
+        .where('status', isEqualTo: 'live')
+        .snapshots()
+        .asyncMap((snapshot) async {
+          final streams = snapshot.docs
+              .map((doc) => _mapStreamDoc(doc))
+              .toList();
+          return _filterActiveStreams(streams);
+        })
+        .handleError((Object error) {
+          AppLogger.error('Failed to watch discover streams', error: error);
+        });
+  }
+
   Future<DiscoverStreamModel> getStreamById(String id) => loadStream(id);
 
   Future<DiscoverStreamModel> loadStream(String id) async {
@@ -111,8 +129,101 @@ class DiscoverRemoteDataSource {
         });
   }
 
+  /// Increments the viewer count for [streamId] when a spectator joins.
+  Future<void> incrementViewerCount(String streamId) async {
+    try {
+      await _firestore.collection('streams').doc(streamId).update({
+        'viewerCount': FieldValue.increment(1),
+      });
+    } catch (e) {
+      AppLogger.error('Failed to increment viewer count', error: e);
+    }
+  }
+
+  /// Decrements the viewer count for [streamId] when a spectator leaves.
+  Future<void> decrementViewerCount(String streamId) async {
+    try {
+      await _firestore.collection('streams').doc(streamId).update({
+        'viewerCount': FieldValue.increment(-1),
+      });
+    } catch (e) {
+      AppLogger.error('Failed to decrement viewer count', error: e);
+    }
+  }
+
+  /// Returns true if the room associated with [streamId] allows spectators.
+  Future<bool> isSpectatorsAllowed(String streamId) async {
+    try {
+      final streamDoc = await _firestore
+          .collection('streams')
+          .doc(streamId)
+          .get();
+      if (!streamDoc.exists) return false;
+      final roomId = streamDoc.data()?['roomId'] as String?;
+      if (roomId == null || roomId.isEmpty) return false;
+      final roomDoc = await _firestore.collection('rooms').doc(roomId).get();
+      if (!roomDoc.exists) return false;
+      return roomDoc.data()?['allowSpectators'] == true;
+    } catch (e) {
+      AppLogger.error('Failed to check spectator access', error: e);
+      return true;
+    }
+  }
+
+  /// Returns the active gameId for the room associated with [streamId],
+  /// or null if the room has no active game.
+  Future<String?> getRoomGameId(String streamId) async {
+    try {
+      final streamDoc = await _firestore
+          .collection('streams')
+          .doc(streamId)
+          .get();
+      if (!streamDoc.exists) return null;
+      final roomId = streamDoc.data()?['roomId'] as String?;
+      if (roomId == null || roomId.isEmpty) return null;
+      final roomDoc = await _firestore.collection('rooms').doc(roomId).get();
+      if (!roomDoc.exists) return null;
+      final status = roomDoc.data()?['status'] as String?;
+      final gameId = roomDoc.data()?['gameId'] as String?;
+      if (status == 'playing' && gameId != null && gameId.isNotEmpty) {
+        return gameId;
+      }
+      return null;
+    } catch (e) {
+      AppLogger.error('Failed to get room game id', error: e);
+      return null;
+    }
+  }
+
+  /// Watches the room associated with [streamId] and emits the active gameId
+  /// when the room status becomes 'playing'. Emits null when no game is active.
+  Stream<String?> watchRoomGameId(String streamId) {
+    return _firestore
+        .collection('streams')
+        .doc(streamId)
+        .snapshots()
+        .where((doc) => doc.exists)
+        .asyncMap((streamDoc) async {
+          final roomId = streamDoc.data()?['roomId'] as String?;
+          if (roomId == null || roomId.isEmpty) return null;
+          final roomDoc = await _firestore
+              .collection('rooms')
+              .doc(roomId)
+              .get();
+          if (!roomDoc.exists) return null;
+          final status = roomDoc.data()?['status'] as String?;
+          final gameId = roomDoc.data()?['gameId'] as String?;
+          if (status == 'playing' && gameId != null && gameId.isNotEmpty) {
+            return gameId;
+          }
+          return null;
+        })
+        .handleError((Object error) {
+          AppLogger.error('Failed to watch room game id', error: error);
+        });
+  }
+
   /// Finds a live stream by its room invite [code].
-  ///
   /// Codes live on `rooms.inviteCode`; stream docs reference their room via
   /// `roomId`, so we resolve the room first, then look up its live stream.
   /// Returns the stream document id, or `null` when nothing matches.

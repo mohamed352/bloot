@@ -73,6 +73,7 @@ export { reportUser } from './https/reportUser';
 export { blockUser, unblockUser } from './https/blockUser';
 export { followUser } from './https/followUser';
 export { unfollowUser } from './https/unfollowUser';
+export { sendRoomInvite } from './https/sendRoomInvite';
 
 const APP_ID = functions.params.defineString('AGORA_APP_ID', {
   description: 'Agora App ID used to generate RTC/RTM tokens.',

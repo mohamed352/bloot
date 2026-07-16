@@ -25,7 +25,7 @@ class JoinRoomPage extends StatefulWidget {
 }
 
 class _JoinRoomPageState extends State<JoinRoomPage> {
-  final _codeController = TextEditingController(text: 'CE4N34');
+  final _codeController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isValid = false;
   bool _passwordRequired = false;
@@ -195,67 +195,80 @@ class _JoinRoomPageState extends State<JoinRoomPage> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xxxl),
-                // Password (required for private rooms that have one)
-                Row(
-                  children: [
-                    Text(
-                      'room_password'.tr(),
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: colors.textSecondary,
+                // Password (only shown for private rooms that require one)
+                if (_passwordRequired) ...[
+                  Row(
+                    children: [
+                      Text(
+                        'room_password'.tr(),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: colors.textSecondary,
+                        ),
                       ),
-                    ),
-                    if (_isCheckingPasswordRequirement) ...[
-                      const SizedBox(width: AppSpacing.sm),
-                      const SizedBox(
-                        width: 12,
-                        height: 12,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
+                      if (_isCheckingPasswordRequirement) ...[
+                        const SizedBox(width: AppSpacing.sm),
+                        const SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ],
                     ],
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  enabled: !isLoading,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: colors.textPrimary,
                   ),
-                  decoration: InputDecoration(
-                    hintText: 'enter_password'.tr(),
-                    hintStyle: TextStyle(
+                  const SizedBox(height: AppSpacing.sm),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    enabled: !isLoading,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
-                      color: colors.textPlaceholder,
+                      color: colors.textPrimary,
                     ),
-                    filled: true,
-                    fillColor: colors.surfaceVariant,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
+                    decoration: InputDecoration(
+                      hintText: 'enter_password'.tr(),
+                      hintStyle: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: colors.textPlaceholder,
+                      ),
+                      filled: true,
+                      fillColor: colors.surfaceVariant,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: colors.border),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(
+                          color: colors.primary,
+                          width: 1.5,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 18),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: colors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: colors.primary, width: 1.5),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 18),
                   ),
-                ),
-                if (_passwordRequired) ...[
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     LocaleKeys.password_required_for_locked_room.tr(),
                     style: TextStyle(fontSize: 12, color: colors.error),
+                  ),
+                  const SizedBox(height: AppSpacing.xxxl),
+                ] else if (_isCheckingPasswordRequirement) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  const Center(
+                    child: SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
                   ),
                 ],
                 const SizedBox(height: AppSpacing.xxxl),

@@ -64,7 +64,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.byType(TextField), findsNWidgets(2));
+        expect(find.byType(TextField), findsNWidgets(1));
         expect(find.text('Join Room'), findsWidgets);
       });
     });

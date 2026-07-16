@@ -24,6 +24,9 @@ class ChatListPage extends StatefulWidget {
 
 class _ChatListPageState extends State<ChatListPage> {
   late final Stream<Set<String>> _blockedUserIdsStream;
+  final TextEditingController _searchController = TextEditingController();
+  bool _searchVisible = false;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -58,10 +61,6 @@ class _ChatListPageState extends State<ChatListPage> {
         final conversations = state is ChatConversationsLoaded
             ? state.conversations
             : <ChatConversation>[];
-        final selectedFilter = state is ChatConversationsLoaded
-            ? state.selectedFilterIndex
-            : 0;
-        final filters = ['all'.tr(), 'rooms'.tr(), 'direct'.tr()];
 
         return Scaffold(
           backgroundColor: ColorManager.darkCanvas,
@@ -87,66 +86,65 @@ class _ChatListPageState extends State<ChatListPage> {
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
-                          icon: const Icon(
-                            Icons.edit_rounded,
+                          icon: Icon(
+                            _searchVisible
+                                ? Icons.close_rounded
+                                : Icons.search_rounded,
                             color: ColorManager.primary,
                           ),
-                          onPressed: () =>
-                              context.pushNamed(RouteNames.newMessage),
+                          onPressed: () {
+                            setState(() {
+                              _searchVisible = !_searchVisible;
+                              if (!_searchVisible) {
+                                _searchController.clear();
+                                _searchQuery = '';
+                              }
+                            });
+                          },
                         ),
                       ),
                     ],
                   ),
                 ),
-                // Filters
-                SizedBox(
-                  height: 40,
-                  child: ListView.separated(
+                if (_searchVisible)
+                  Padding(
                     padding: const EdgeInsetsDirectional.symmetric(
-                      horizontal: AppSpacing.screenHorizontal,
+                      horizontal: AppSpacing.lg,
                     ),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: filters.length,
-                    separatorBuilder: (_, _) =>
-                        const SizedBox(width: AppSpacing.sm),
-                    itemBuilder: (context, index) {
-                      final isSelected = index == selectedFilter;
-                      return GestureDetector(
-                        onTap: () =>
-                            context.read<ChatCubit>().selectFilter(index),
-                        child: Container(
-                          padding: const EdgeInsetsDirectional.symmetric(
-                            horizontal: AppSpacing.screenHorizontal,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? ColorManager.primary
-                                : ColorManager.darkSurface,
-                            borderRadius: BorderRadius.circular(AppRadius.full),
-                            border: Border.all(
-                              color: isSelected
-                                  ? ColorManager.primary
-                                  : ColorManager.darkBorderSoft,
-                            ),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            filters[index],
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                              color: isSelected
-                                  ? ColorManager.darkTextPrimary
-                                  : ColorManager.darkTextSecondary,
-                            ),
-                          ),
+                    child: TextField(
+                      controller: _searchController,
+                      autofocus: true,
+                      style: const TextStyle(
+                        color: ColorManager.darkTextPrimary,
+                        fontSize: 14,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'search_messages'.tr(),
+                        hintStyle: const TextStyle(
+                          color: ColorManager.darkTextMuted,
+                          fontSize: 14,
                         ),
-                      );
-                    },
+                        prefixIcon: const Icon(
+                          Icons.search_rounded,
+                          color: ColorManager.darkTextMuted,
+                          size: 20,
+                        ),
+                        filled: true,
+                        fillColor: ColorManager.darkSurface,
+                        contentPadding: const EdgeInsetsDirectional.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.full),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setState(() => _searchQuery = value.toLowerCase());
+                      },
+                    ),
                   ),
-                ),
                 const SizedBox(height: AppSpacing.md),
                 // Chat list
                 Expanded(
@@ -154,11 +152,19 @@ class _ChatListPageState extends State<ChatListPage> {
                     stream: _blockedUserIdsStream,
                     builder: (context, snapshot) {
                       final blockedIds = snapshot.data ?? const <String>{};
-                      final visibleConversations = conversations.where((c) {
+                      var visibleConversations = conversations.where((c) {
                         final otherUserId = _otherUserId(c.id);
                         return otherUserId == null ||
                             !blockedIds.contains(otherUserId);
                       }).toList();
+                      if (_searchQuery.isNotEmpty) {
+                        visibleConversations = visibleConversations
+                            .where(
+                              (c) =>
+                                  c.name.toLowerCase().contains(_searchQuery),
+                            )
+                            .toList();
+                      }
 
                       return ListView.builder(
                         padding: const EdgeInsetsDirectional.symmetric(

@@ -31,15 +31,17 @@ void main() {
     text: 'Hello',
   );
 
-  DiscoverCubit buildCubit() => DiscoverCubit(discoverRepository: discoverRepository);
+  DiscoverCubit buildCubit() =>
+      DiscoverCubit(discoverRepository: discoverRepository);
 
   group('loadStreams', () {
     blocTest<DiscoverCubit, DiscoverState>(
       'emits loaded state with streams',
       build: buildCubit,
       setUp: () {
-        when(() => discoverRepository.getStreams())
-            .thenAnswer((_) async => [stream]);
+        when(
+          () => discoverRepository.watchStreams(),
+        ).thenAnswer((_) => Stream.value([stream]));
       },
       act: (cubit) => cubit.loadStreams(),
       expect: () => [
@@ -52,8 +54,9 @@ void main() {
       'emits error when repository fails',
       build: buildCubit,
       setUp: () {
-        when(() => discoverRepository.getStreams())
-            .thenThrow(Exception('network'));
+        when(
+          () => discoverRepository.watchStreams(),
+        ).thenAnswer((_) => Stream.error(Exception('network')));
       },
       act: (cubit) => cubit.loadStreams(),
       expect: () => [
@@ -67,9 +70,7 @@ void main() {
     blocTest<DiscoverCubit, DiscoverState>(
       'updates selected filter index',
       build: buildCubit,
-      seed: () => const DiscoverState.streamsLoaded(
-        streams: [stream],
-      ),
+      seed: () => const DiscoverState.streamsLoaded(streams: [stream]),
       act: (cubit) => cubit.selectFilter(1),
       expect: () => [
         const DiscoverState.streamsLoaded(
@@ -91,26 +92,34 @@ void main() {
     blocTest<DiscoverCubit, DiscoverState>(
       'emits stream with empty chat immediately then updates on chat events',
       build: () {
-        when(() => discoverRepository.getStreamById('s1'))
-            .thenAnswer((_) async => stream);
-        when(() => discoverRepository.watchStreamChat('s1')).thenAnswer(
-          (_) => Stream.value([chatMessage]),
-        );
+        when(
+          () => discoverRepository.getStreamById('s1'),
+        ).thenAnswer((_) async => stream);
+        when(
+          () => discoverRepository.watchStream('s1'),
+        ).thenAnswer((_) => const Stream.empty());
+        when(
+          () => discoverRepository.watchStreamChat('s1'),
+        ).thenAnswer((_) => Stream.value([chatMessage]));
         return buildCubit();
       },
       act: (cubit) => cubit.loadStream('s1'),
       expect: () => [
         const DiscoverState.loading(),
         const DiscoverState.streamLoaded(stream: stream, messages: []),
-        const DiscoverState.streamLoaded(stream: stream, messages: [chatMessage]),
+        const DiscoverState.streamLoaded(
+          stream: stream,
+          messages: [chatMessage],
+        ),
       ],
     );
 
     blocTest<DiscoverCubit, DiscoverState>(
       'emits error when stream load fails',
       build: () {
-        when(() => discoverRepository.getStreamById('s1'))
-            .thenThrow(Exception('network'));
+        when(
+          () => discoverRepository.getStreamById('s1'),
+        ).thenThrow(Exception('network'));
         return buildCubit();
       },
       act: (cubit) => cubit.loadStream('s1'),
@@ -123,10 +132,15 @@ void main() {
     blocTest<DiscoverCubit, DiscoverState>(
       'emits error when chat stream fails',
       build: () {
-        when(() => discoverRepository.getStreamById('s1'))
-            .thenAnswer((_) async => stream);
-        when(() => discoverRepository.watchStreamChat('s1'))
-            .thenAnswer((_) => Stream.error(Exception('network')));
+        when(
+          () => discoverRepository.getStreamById('s1'),
+        ).thenAnswer((_) async => stream);
+        when(
+          () => discoverRepository.watchStream('s1'),
+        ).thenAnswer((_) => const Stream.empty());
+        when(
+          () => discoverRepository.watchStreamChat('s1'),
+        ).thenAnswer((_) => Stream.error(Exception('network')));
         return buildCubit();
       },
       act: (cubit) => cubit.loadStream('s1'),
@@ -143,8 +157,9 @@ void main() {
       'sends message through repository',
       build: buildCubit,
       setUp: () {
-        when(() => discoverRepository.sendChatMessage('s1', 'hello'))
-            .thenAnswer((_) async {});
+        when(
+          () => discoverRepository.sendChatMessage('s1', 'hello'),
+        ).thenAnswer((_) async {});
       },
       act: (cubit) => cubit.sendChatMessage('s1', 'hello'),
       expect: () => const <DiscoverState>[],

@@ -149,6 +149,7 @@ class AgoraService {
       ),
     );
     await _engine!.enableAudio();
+    await _engine!.setDefaultAudioRouteToSpeakerphone(true);
     await _engine!.setAudioProfile(
       profile: AudioProfileType.audioProfileMusicStandard,
       // Game-streaming scenario mixes with other app audio instead of taking
@@ -503,6 +504,7 @@ class AgoraService {
 
     try {
       await _engine!.leaveChannel();
+      await _engine!.stopPreview();
       AppLogger.info('Left Agora channel: $_currentChannelId', tag: 'Agora');
     } catch (e) {
       AppLogger.error('Failed to leave Agora channel', error: e, tag: 'Agora');
@@ -541,9 +543,11 @@ class AgoraService {
         return false;
       }
       await _engine!.enableVideo();
+      await _engine!.startPreview();
       await _engine!.muteLocalVideoStream(false);
     } else {
       await _engine!.muteLocalVideoStream(true);
+      await _engine!.stopPreview();
     }
 
     if (_currentChannelId != null) {
@@ -578,9 +582,11 @@ class AgoraService {
           return;
         }
         await _engine!.enableVideo();
+        await _engine!.startPreview();
         await _engine!.muteLocalVideoStream(false);
       } else {
         await _engine!.muteLocalVideoStream(true);
+        await _engine!.stopPreview();
       }
 
       if (_currentChannelId != null) {
@@ -683,7 +689,7 @@ class AgoraService {
 
   /// Enter background mode — keep audio session active.
   Future<void> enterBackgroundMode() async {
-    if (_engine == null) return;
+    if (_engine == null || _currentChannelId == null) return;
     await _engine!.updateChannelMediaOptions(
       const ChannelMediaOptions(publishMicrophoneTrack: true),
     );

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'package:get_it/get_it.dart';
+import 'package:bloot/features/discover/domain/repositories/discover_repository.dart';
 import 'package:bloot/features/discover/domain/entities/discover_stream.dart';
 import 'package:bloot/features/discover/presentation/cubit/discover_cubit.dart';
 import 'package:bloot/features/discover/presentation/pages/watch_stream_page.dart';
@@ -21,6 +23,27 @@ void main() {
     discoverRepository = MockDiscoverRepository();
     agoraService = MockAgoraService();
     stubAgoraServiceDefaults(agoraService);
+
+    // Register mocks in GetIt for pages that use getIt<DiscoverRepository>()
+    final getIt = GetIt.instance;
+    if (getIt.isRegistered<DiscoverRepository>()) {
+      getIt.unregister<DiscoverRepository>();
+    }
+    getIt.registerSingleton<DiscoverRepository>(discoverRepository);
+
+    // Default stubs for new methods called during stream load
+    when(
+      () => discoverRepository.isSpectatorsAllowed(any()),
+    ).thenAnswer((_) async => true);
+    when(
+      () => discoverRepository.getRoomGameId(any()),
+    ).thenAnswer((_) async => null);
+    when(
+      () => discoverRepository.incrementViewerCount(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => discoverRepository.decrementViewerCount(any()),
+    ).thenAnswer((_) async {});
 
     cubit = DiscoverCubit(discoverRepository: discoverRepository);
   });

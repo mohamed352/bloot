@@ -410,5 +410,9 @@
   "block_failed": "فشل الإجراء. حاول مرة أخرى.",
   "no_blocked_users": "لا يوجد مستخدمون محظورون",
   "blocked_users_count": "{} محظور",
-  "user_blocked_banner": "لقد حظرت هذا المستخدم. ألغِ الحظر للدردشة مرة أخرى."
+  "user_blocked_banner": "لقد حظرت هذا المستخدم. ألغِ الحظر للدردشة مرة أخرى.",
+  "invite_friend": "دعوة صديق",
+  "invite_sent_to": "تم إرسال دعوة إلى {name}",
+  "failed_to_send_invite": "فشل إرسال الدعوة. حاول مرة أخرى.",
+  "login_to_join": "سجل الدخول للانضمام"
 }

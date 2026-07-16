@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/components/cached_avatar.dart';
 import 'package:bloot/core/constants/app_radius.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
@@ -14,6 +15,7 @@ import 'package:bloot/core/di/injection.dart';
 import 'package:bloot/core/services/agora_service.dart';
 import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/features/discover/domain/entities/discover_stream.dart';
+import 'package:bloot/features/discover/domain/repositories/discover_repository.dart';
 import 'package:bloot/features/discover/presentation/cubit/discover_cubit.dart';
 import 'package:bloot/features/discover/presentation/cubit/discover_state.dart';
 import 'package:bloot/features/discover/presentation/widgets/stream_video_square.dart';
@@ -31,11 +33,17 @@ class WatchStreamPage extends StatefulWidget {
 class _WatchStreamPageState extends State<WatchStreamPage> {
   final TextEditingController _chatController = TextEditingController();
   late final AgoraService _agoraService;
+  late final DiscoverRepository _discoverRepository;
+  bool _viewerCountIncremented = false;
+  bool _accessChecked = false;
+  String? _gameId;
+  StreamSubscription<String?>? _gameIdSubscription;
 
   @override
   void initState() {
     super.initState();
     _agoraService = context.read<AgoraService>();
+    _discoverRepository = getIt<DiscoverRepository>();
   }
 
   Future<void> _joinAgoraChannel(String? channelName) async {
@@ -43,6 +51,11 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
     if (_agoraService.currentChannelId == channelName) return;
     try {
       await _agoraService.joinAsAudience(channelName: channelName);
+      // Increment viewer count once when we successfully join the channel.
+      if (!_viewerCountIncremented) {
+        _viewerCountIncremented = true;
+        _discoverRepository.incrementViewerCount(widget.id);
+      }
     } catch (e) {
       debugPrint('Failed to join Agora stream: $e');
     }
@@ -53,6 +66,10 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
       await _agoraService.leaveChannel();
     } catch (e) {
       debugPrint('Failed to leave Agora stream: $e');
+    }
+    if (_viewerCountIncremented) {
+      _viewerCountIncremented = false;
+      _discoverRepository.decrementViewerCount(widget.id);
     }
   }
 
@@ -94,8 +111,42 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
   @override
   void dispose() {
     _chatController.dispose();
+    _gameIdSubscription?.cancel();
     _leaveAgoraChannel();
     super.dispose();
+  }
+
+  /// Checks whether the room allows spectators. If not, shows a message and
+  /// pops the page.
+  Future<void> _checkSpectatorAccess() async {
+    if (_accessChecked) return;
+    _accessChecked = true;
+    try {
+      final allowed = await _discoverRepository.isSpectatorsAllowed(widget.id);
+      if (!allowed && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Spectators are not allowed in this room'),
+          ),
+        );
+        context.pop();
+      }
+    } catch (_) {
+      // If the check fails, allow watching rather than blocking erroneously.
+    }
+  }
+
+  /// Subscribes to the room's game status so the "Watch Game" button
+  /// appears automatically when the game starts, even if the spectator
+  /// opened the stream before the game began.
+  void _subscribeToGameId() {
+    _gameIdSubscription?.cancel();
+    _gameIdSubscription = _discoverRepository.watchRoomGameId(widget.id).listen(
+      (gameId) {
+        if (!mounted) return;
+        setState(() => _gameId = gameId);
+      },
+    );
   }
 
   @override
@@ -110,6 +161,8 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
           },
           streamLoaded: (stream, _) {
             _joinAgoraChannel(stream.agoraChannelName);
+            _checkSpectatorAccess();
+            _subscribeToGameId();
           },
         );
       },
@@ -124,71 +177,75 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
           body: Column(
             children: [
               // Video grid
-              AspectRatio(
-                aspectRatio: 1,
-                child: Container(
-                  color: ColorManager.darkSurface,
-                  child: Stack(
-                    children: [
-                      _buildVideoGrid(stream),
-                      // Top bar overlay
-                      SafeArea(
-                        child: Container(
-                          padding: const EdgeInsetsDirectional.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                ColorManager.darkCanvas.withValues(alpha: 0.6),
-                                const Color(0x00000000),
+              Expanded(
+                flex: 3,
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: Container(
+                    color: ColorManager.darkSurface,
+                    child: Stack(
+                      children: [
+                        _buildVideoGrid(stream),
+                        // Top bar overlay
+                        SafeArea(
+                          child: Container(
+                            padding: const EdgeInsetsDirectional.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  ColorManager.darkCanvas.withValues(
+                                    alpha: 0.6,
+                                  ),
+                                  const Color(0x00000000),
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.arrow_back_rounded,
+                                    color: ColorManager.darkTextPrimary,
+                                  ),
+                                  onPressed: () => context.pop(),
+                                ),
+                                _PulsingLiveBadge(),
+                                const SizedBox(width: 10),
+                                Icon(
+                                  Icons.visibility_rounded,
+                                  size: 14,
+                                  color: ColorManager.darkTextPrimary
+                                      .withValues(alpha: 0.7),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  stream != null ? '${stream.viewers}' : '--',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: ColorManager.darkTextPrimary
+                                        .withValues(alpha: 0.7),
+                                  ),
+                                ),
+                                const Spacer(),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.more_vert_rounded,
+                                    color: ColorManager.darkTextPrimary
+                                        .withValues(alpha: 0.7),
+                                  ),
+                                  onPressed: () => _reportStream(context),
+                                ),
                               ],
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.arrow_back_rounded,
-                                  color: ColorManager.darkTextPrimary,
-                                ),
-                                onPressed: () => context.pop(),
-                              ),
-                              _PulsingLiveBadge(),
-                              const SizedBox(width: 10),
-                              Icon(
-                                Icons.visibility_rounded,
-                                size: 14,
-                                color: ColorManager.darkTextPrimary.withValues(
-                                  alpha: 0.7,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                stream != null ? '${stream.viewers}' : '--',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: ColorManager.darkTextPrimary
-                                      .withValues(alpha: 0.7),
-                                ),
-                              ),
-                              const Spacer(),
-                              IconButton(
-                                icon: Icon(
-                                  Icons.more_vert_rounded,
-                                  color: ColorManager.darkTextPrimary
-                                      .withValues(alpha: 0.7),
-                                ),
-                                onPressed: () => _reportStream(context),
-                              ),
-                            ],
-                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -247,6 +304,44 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
                         ),
                       ),
                     ),
+                    if (_gameId != null) ...[
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () => context.pushNamed(
+                          RouteNames.spectate,
+                          pathParameters: {'id': _gameId!},
+                        ),
+                        child: Container(
+                          padding: const EdgeInsetsDirectional.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: ColorManager.success.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(AppRadius.sm),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.sports_esports_rounded,
+                                size: 14,
+                                color: ColorManager.success,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Watch Game',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: ColorManager.success,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -351,11 +446,6 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
                   child: Row(
                     children: [
                       _ActionButton(
-                        icon: Icons.favorite_rounded,
-                        label: 'like'.tr(),
-                        color: ColorManager.error,
-                      ),
-                      _ActionButton(
                         icon: Icons.share_rounded,
                         label: 'share'.tr(),
                         color: ColorManager.info,
@@ -365,11 +455,6 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
                                 'https://bloot.app/stream/${widget.id}',
                               )
                             : null,
-                      ),
-                      _ActionButton(
-                        icon: Icons.person_add_rounded,
-                        label: 'follow'.tr(),
-                        color: ColorManager.primary,
                       ),
                     ],
                   ),

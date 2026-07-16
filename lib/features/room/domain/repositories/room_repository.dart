@@ -56,4 +56,8 @@ abstract class RoomRepository {
 
   /// Ends the stream for [roomId] (host only).
   Future<Room> endStream(String roomId);
+
+  /// Sends a room invitation push notification to [friendUid].
+  /// Only the room creator can send invites.
+  Future<void> sendRoomInvite(String roomId, String friendUid);
 }

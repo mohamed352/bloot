@@ -115,11 +115,32 @@ class ChatRemoteDataSource {
     final uid = _uid;
     if (uid == null) throw Exception('User not authenticated');
 
-    final messageRef = _firestore
+    // Ensure the conversation document exists before writing a message.
+    // If it doesn't exist (e.g., race condition or deleted), create a minimal
+    // one so Firestore security rules don't block the message write.
+    final conversationRef = _firestore
         .collection('conversations')
-        .doc(conversationId)
-        .collection('messages')
-        .doc();
+        .doc(conversationId);
+    final conversationDoc = await conversationRef.get();
+
+    if (!conversationDoc.exists) {
+      // Extract participant UIDs from the deterministic conversation ID
+      // format: dm_{uid1}_{uid2} (sorted).
+      final parts = conversationId.split('_');
+      final participantUids = parts.length == 3
+          ? [parts[1], parts[2]]
+          : <String>[uid];
+
+      await conversationRef.set({
+        'participantUids': participantUids,
+        'lastMessage': '',
+        'updatedAt': FieldValue.serverTimestamp(),
+        'unread': 0,
+        'type': 'direct',
+      }, SetOptions(merge: true));
+    }
+
+    final messageRef = conversationRef.collection('messages').doc();
 
     await messageRef.set({
       'senderId': uid,
@@ -129,21 +150,17 @@ class ChatRemoteDataSource {
       'readBy': [uid],
     });
 
-    // Update main conversation and per-user metadata for the list view
-    final conversationDoc = await _firestore
-        .collection('conversations')
-        .doc(conversationId)
-        .get();
+    // Re-read to get participantUids (may have just been created).
+    final updatedDoc = await conversationRef.get();
     final participantUids = List<String>.from(
-      (conversationDoc.data()?['participantUids'] as List<dynamic>?) ?? [],
+      (updatedDoc.data()?['participantUids'] as List<dynamic>?) ?? [],
     );
 
     final batch = _firestore.batch();
-    batch.set(
-      _firestore.collection('conversations').doc(conversationId),
-      {'lastMessage': message, 'updatedAt': FieldValue.serverTimestamp()},
-      SetOptions(merge: true),
-    );
+    batch.set(conversationRef, {
+      'lastMessage': message,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
 
     for (final participantUid in participantUids) {
       final isSender = participantUid == uid;

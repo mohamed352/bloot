@@ -16,6 +16,7 @@ import 'package:bloot/features/room/domain/entities/room.dart';
 import 'package:bloot/features/room/presentation/cubit/room_cubit.dart';
 import 'package:bloot/features/room/presentation/cubit/room_state.dart';
 import 'package:bloot/features/room/presentation/widgets/room_settings_bottom_sheet.dart';
+import 'package:bloot/features/room/presentation/widgets/invite_friend_sheet.dart';
 import 'package:bloot/core/services/agora_service.dart';
 import 'package:bloot/features/room/presentation/widgets/seat_widget.dart';
 
@@ -555,6 +556,31 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                               onPressed: () => context
                                   .read<RoomCubit>()
                                   .inviteBotsToRoom(room.id),
+                            ),
+                          ),
+                        if (room != null &&
+                            room.status == RoomStatus.waiting &&
+                            isCreator &&
+                            players.length < 4)
+                          const SizedBox(height: AppSpacing.md),
+                        if (room != null &&
+                            room.status == RoomStatus.waiting &&
+                            isCreator &&
+                            players.length < 4)
+                          SizedBox(
+                            width: double.infinity,
+                            child: AppButton(
+                              text: 'invite_friend'.tr(),
+                              icon: Icons.person_add_rounded,
+                              onPressed: () {
+                                showModalBottomSheet<void>(
+                                  context: context,
+                                  backgroundColor: Colors.transparent,
+                                  isScrollControlled: true,
+                                  builder: (_) =>
+                                      InviteFriendSheet(roomId: room.id),
+                                );
+                              },
                             ),
                           ),
                         if (room != null &&

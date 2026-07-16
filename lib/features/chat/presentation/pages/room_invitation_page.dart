@@ -4,6 +4,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/components/app_button.dart';
 import 'package:bloot/core/components/cached_avatar.dart';
@@ -29,10 +31,12 @@ class _RoomInvitationPageState extends State<RoomInvitationPage> {
   bool _loading = true;
   bool _joining = false;
   String? _error;
+  bool _isAuthenticated = false;
 
   @override
   void initState() {
     super.initState();
+    _isAuthenticated = FirebaseAuth.instance.currentUser != null;
     _loadRoom();
   }
 
@@ -242,11 +246,15 @@ class _RoomInvitationPageState extends State<RoomInvitationPage> {
           )
         else
           GradientButton(
-            text: 'join_room'.tr(),
+            text: _isAuthenticated ? 'join_room'.tr() : 'login_to_join'.tr(),
             gradient: GradientButton.goldGradient,
             onPressed: _joining || room.inviteCode == null
                 ? null
                 : () {
+                    if (!_isAuthenticated) {
+                      context.goNamed(RouteNames.login);
+                      return;
+                    }
                     setState(() => _joining = true);
                     context.read<RoomCubit>().joinRoomByCode(room.inviteCode!);
                   },

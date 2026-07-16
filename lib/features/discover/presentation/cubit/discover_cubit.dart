@@ -20,11 +20,24 @@ class DiscoverCubit extends Cubit<DiscoverState> {
   DiscoverStream? _latestStream;
   List<StreamChatMessage> _latestMessages = const [];
 
+  StreamSubscription<List<DiscoverStream>>? _streamsSubscription;
+
   Future<void> loadStreams() async {
     emit(const DiscoverState.loading());
+    await _streamsSubscription?.cancel();
     try {
-      final streams = await _discoverRepository.getStreams();
-      emit(DiscoverState.streamsLoaded(streams: streams));
+      _streamsSubscription = _discoverRepository.watchStreams().listen(
+        (streams) {
+          if (isClosed) return;
+          emit(DiscoverState.streamsLoaded(streams: streams));
+        },
+        onError: (Object e) {
+          AppLogger.error('Failed to watch streams', error: e);
+          if (!isClosed) {
+            emit(const DiscoverState.error(message: 'Failed to load streams.'));
+          }
+        },
+      );
     } catch (e) {
       AppLogger.error('Failed to load streams', error: e);
       emit(const DiscoverState.error(message: 'Failed to load streams.'));
@@ -131,6 +144,8 @@ class DiscoverCubit extends Cubit<DiscoverState> {
     _chatSubscription = null;
     await _streamSubscription?.cancel();
     _streamSubscription = null;
+    await _streamsSubscription?.cancel();
+    _streamsSubscription = null;
     return super.close();
   }
 }

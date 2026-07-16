@@ -85,8 +85,7 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
             setState(() => _lastError = error.description);
           },
         ),
-      )
-      ;
+      );
 
     _configureWebView();
     _loadGamePage();
@@ -324,13 +323,19 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
 
   Map<String, dynamic> _buildRtdbConfig(String gameId) {
     const web = DefaultFirebaseOptions.web;
+    String databaseURL;
+    try {
+      databaseURL =
+          FirebaseDatabase.instance.databaseURL ??
+          'https://bloot-89b2b-default-rtdb.firebaseio.com';
+    } catch (_) {
+      databaseURL = 'https://bloot-89b2b-default-rtdb.firebaseio.com';
+    }
     return <String, dynamic>{
       'firebaseConfig': <String, dynamic>{
         'apiKey': web.apiKey,
         'authDomain': web.authDomain,
-        'databaseURL':
-            FirebaseDatabase.instance.databaseURL ??
-            'https://bloot-89b2b-default-rtdb.firebaseio.com',
+        'databaseURL': databaseURL,
         'projectId': web.projectId,
         'storageBucket': web.storageBucket,
         'messagingSenderId': web.messagingSenderId,

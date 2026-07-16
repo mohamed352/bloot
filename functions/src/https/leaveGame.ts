@@ -56,8 +56,22 @@ export const leaveGame = functions.https.onCall(async (request) => {
 
     let newCreatorUid: string | undefined;
     const oldCreatorUid = data.creatorUid as string | undefined;
-    if (oldCreatorUid === currentUid && playerUids.length > 0) {
+    const isCreatorLeaving = oldCreatorUid === currentUid;
+    if (isCreatorLeaving && playerUids.length > 0) {
       newCreatorUid = playerUids[0];
+    }
+
+    // If the creator is leaving and the room is streaming, end the stream
+    // so it doesn't stay live after the host is gone.
+    if (isCreatorLeaving && data.isStreaming === true) {
+      const streamId = data.streamId as string | undefined;
+      if (streamId != null && streamId.length > 0) {
+        const streamRef = db.collection('streams').doc(streamId);
+        transaction.update(streamRef, {
+          status: 'ended',
+          endedAt: FieldValue.serverTimestamp(),
+        });
+      }
     }
 
     // Mark player as disconnected in the active game document.
@@ -107,6 +121,10 @@ export const leaveGame = functions.https.onCall(async (request) => {
       };
       if (newCreatorUid != null) {
         updateData.creatorUid = newCreatorUid;
+      }
+      if (isCreatorLeaving && data.isStreaming === true) {
+        updateData.isStreaming = false;
+        updateData.streamId = null;
       }
       transaction.update(roomRef, updateData);
     }

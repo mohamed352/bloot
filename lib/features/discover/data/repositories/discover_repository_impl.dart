@@ -19,6 +19,13 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
   }
 
   @override
+  Stream<List<DiscoverStream>> watchStreams() {
+    return _remoteDataSource.watchStreams().map(
+      (models) => models.map((m) => m.toEntity()).toList(),
+    );
+  }
+
+  @override
   Future<DiscoverStream> getStreamById(String id) async {
     final model = await _remoteDataSource.getStreamById(id);
     return model.toEntity();
@@ -44,5 +51,30 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
   @override
   Future<String?> findStreamIdByCode(String code) {
     return _remoteDataSource.findStreamIdByCode(code);
+  }
+
+  @override
+  Future<void> incrementViewerCount(String streamId) {
+    return _remoteDataSource.incrementViewerCount(streamId);
+  }
+
+  @override
+  Future<void> decrementViewerCount(String streamId) {
+    return _remoteDataSource.decrementViewerCount(streamId);
+  }
+
+  @override
+  Future<bool> isSpectatorsAllowed(String streamId) {
+    return _remoteDataSource.isSpectatorsAllowed(streamId);
+  }
+
+  @override
+  Future<String?> getRoomGameId(String streamId) {
+    return _remoteDataSource.getRoomGameId(streamId);
+  }
+
+  @override
+  Stream<String?> watchRoomGameId(String streamId) {
+    return _remoteDataSource.watchRoomGameId(streamId);
   }
 }

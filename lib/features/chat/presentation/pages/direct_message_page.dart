@@ -33,6 +33,7 @@ class DirectMessagePage extends StatefulWidget {
 
 class _DirectMessagePageState extends State<DirectMessagePage> {
   final TextEditingController _controller = TextEditingController();
+  final FocusNode _inputFocusNode = FocusNode();
   late final Stream<Set<String>> _blockedUserIdsStream;
 
   String? get _currentUid =>
@@ -55,6 +56,9 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
   void initState() {
     super.initState();
     _blockedUserIdsStream = getIt<ModerationRepository>().watchBlockedUserIds();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _inputFocusNode.unfocus();
+    });
   }
 
   final List<String> _quickActions = [
@@ -111,6 +115,7 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
   @override
   void dispose() {
     _controller.dispose();
+    _inputFocusNode.dispose();
     super.dispose();
   }
 
@@ -484,6 +489,7 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
                                 ),
                                 child: TextField(
                                   controller: _controller,
+                                  focusNode: _inputFocusNode,
                                   style: const TextStyle(
                                     color: ColorManager.darkTextPrimary,
                                     fontSize: 14,

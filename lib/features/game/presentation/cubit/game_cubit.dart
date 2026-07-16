@@ -33,6 +33,7 @@ class GameCubit extends Cubit<GameState> {
   String? _joinedAgoraChannelName;
   Future<void>? _pendingAgoraJoin;
   bool _isClosed = false;
+  bool _isSpectator = false;
 
   /// Countdown seconds left for the current turn. Null when no timer is active
   /// (e.g., non-simulator games). In the local simulator this is updated for
@@ -51,8 +52,10 @@ class GameCubit extends Cubit<GameState> {
       _startWatching(id, _gameRepository.watchGame(id));
 
   /// Starts watching the game as a spectator.
-  void watchGameAsSpectator(String id) =>
-      _startWatching(id, _gameRepository.watchGameAsSpectator(id));
+  void watchGameAsSpectator(String id) {
+    _isSpectator = true;
+    _startWatching(id, _gameRepository.watchGameAsSpectator(id));
+  }
 
   void _startWatching(String id, Stream<Game> stream) {
     emit(const GameState.loading());
@@ -217,8 +220,9 @@ class GameCubit extends Cubit<GameState> {
       }
     }
 
-    // playing -> roundEnd: round ended
-    if (previousStatus == 'playing' && game.status == 'roundEnd') {
+    // playing/trickEnd -> roundEnd: round ended
+    if ((previousStatus == 'playing' || previousStatus == 'trickEnd') &&
+        game.status == 'roundEnd') {
       _audioService.playRoundEndSound();
     }
 
@@ -559,13 +563,20 @@ class GameCubit extends Cubit<GameState> {
       orElse: () => game.players.first,
     );
 
-    // In the game screen we only need audio; video decoding is unused and
-    // wastes GPU/CPU on lower-end devices.
-    final pendingJoin = _agoraService.joinChannel(
-      channelName: channelName,
-      agoraUid: localPlayer.agoraUid,
-      subscribeVideo: false,
-    );
+    // Spectators join as audience (audio only). If already in the channel
+    // (e.g. from WatchStreamPage), AgoraService returns early — no conflict.
+    // Players join as broadcaster with subscribeVideo disabled (audio only
+    // in the game screen to save GPU/CPU).
+    final pendingJoin = _isSpectator
+        ? _agoraService.joinAsAudience(
+            channelName: channelName,
+            agoraUid: localPlayer.agoraUid,
+          )
+        : _agoraService.joinChannel(
+            channelName: channelName,
+            agoraUid: localPlayer.agoraUid,
+            subscribeVideo: false,
+          );
     _pendingAgoraJoin = pendingJoin;
     pendingJoin
         .then((_) {
@@ -598,10 +609,11 @@ class GameCubit extends Cubit<GameState> {
       _pendingAgoraJoin = null;
     }
 
-    // Leave the Agora channel if this cubit joined it or is still trying to
-    // join. Relying only on [_joinedAgoraChannelName] would leak the channel
-    // when a late join completes after [_isClosed] is set.
-    if (_joinedAgoraChannelName != null || _pendingAgoraJoin != null) {
+    // Spectators never leave the Agora channel on close — the WatchStreamPage
+    // owns the channel lifecycle. Leaving here would break audio/video when the
+    // spectator navigates back from the game page to the stream page.
+    if (!_isSpectator &&
+        (_joinedAgoraChannelName != null || _pendingAgoraJoin != null)) {
       await _agoraService.leaveChannel();
       _joinedAgoraChannelName = null;
       _pendingAgoraJoin = null;

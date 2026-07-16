@@ -410,5 +410,9 @@
   "block_failed": "Action failed. Please try again.",
   "no_blocked_users": "No blocked users",
   "blocked_users_count": "{} blocked",
-  "user_blocked_banner": "You blocked this user. Unblock to chat again."
+  "user_blocked_banner": "You blocked this user. Unblock to chat again.",
+  "invite_friend": "Invite Friend",
+  "invite_sent_to": "Invite sent to {name}",
+  "failed_to_send_invite": "Failed to send invite. Please try again.",
+  "login_to_join": "Login to Join"
 }

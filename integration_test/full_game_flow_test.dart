@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -17,6 +18,7 @@ import 'package:bloot/core/services/audio_service.dart';
 import 'package:bloot/core/style/theme_manager.dart';
 import 'package:bloot/features/discover/presentation/cubit/discover_cubit.dart';
 import 'package:bloot/features/discover/presentation/pages/watch_stream_page.dart';
+import 'package:bloot/features/game/domain/repositories/game_repository.dart';
 import 'package:bloot/features/game/presentation/cubit/game_cubit.dart';
 import 'package:bloot/features/game/presentation/cubit/game_state.dart';
 import 'package:bloot/features/game/presentation/pages/html_game_play_page.dart';
@@ -113,6 +115,10 @@ void main() {
     agoraService = helpers.MockAgoraService();
     audioService = helpers.MockAudioService();
     helpers.stubAgoraServiceDefaults(agoraService);
+    // Register mocks in GetIt for pages that access it directly (HtmlGamePlayPage)
+    GetIt.instance.reset();
+    GetIt.instance.registerSingleton<GameRepository>(gameRepository);
+    when(() => gameRepository.createRtdbToken()).thenAnswer((_) async => null);
   });
 
   group('Full game flow on emulator', () {
@@ -269,7 +275,6 @@ void main() {
         // ------------------------------------------------------------------
         final game = helpers.testGame(
           id: 'game-flow',
-          myHand: const ['AH', 'KH', 'QH', 'JH'],
           agoraChannelName: 'room-flow',
         );
         when(
@@ -331,7 +336,6 @@ void main() {
       final createdRoom = helpers.testRoom(
         id: 'room-priv',
         name: 'Private Room',
-        type: RoomType.private,
         inviteCode: 'PRIV44',
         password: 'secret',
         players: [helpers.testPlayer(name: 'Me', isMe: true)],
@@ -403,7 +407,7 @@ void main() {
         inviteCode: 'WAIT22',
         players: [
           helpers.testPlayer(name: 'Me', isMe: true, isReady: true),
-          helpers.testPlayer(uid: 'u2', name: 'P2', isReady: false),
+          helpers.testPlayer(uid: 'u2', name: 'P2'),
         ],
       );
       when(
@@ -471,7 +475,7 @@ void main() {
         name: 'Mic Room',
         inviteCode: 'MIC333',
         players: [
-          helpers.testPlayer(name: 'Me', isMe: true, isMicOn: true),
+          helpers.testPlayer(name: 'Me', isMe: true),
           helpers.testPlayer(uid: 'u2', name: 'P2'),
           helpers.testPlayer(uid: 'u3', name: 'P3'),
           helpers.testPlayer(uid: 'u4', name: 'P4'),
@@ -617,6 +621,9 @@ void main() {
           () => discoverRepository.getStreamById('stream-flow'),
         ).thenAnswer((_) async => stream);
         when(
+          () => discoverRepository.watchStream('stream-flow'),
+        ).thenAnswer((_) => const Stream.empty());
+        when(
           () => discoverRepository.watchStreamChat('stream-flow'),
         ).thenAnswer((_) => const Stream.empty());
         when(
@@ -752,7 +759,7 @@ void main() {
         name: 'Ready Room',
         inviteCode: 'RDY444',
         players: [
-          helpers.testPlayer(name: 'Me', isMe: true, isReady: false),
+          helpers.testPlayer(name: 'Me', isMe: true),
           helpers.testPlayer(uid: 'u2', name: 'P2', isReady: true),
           helpers.testPlayer(uid: 'u3', name: 'P3', isReady: true),
           helpers.testPlayer(uid: 'u4', name: 'P4', isReady: true),

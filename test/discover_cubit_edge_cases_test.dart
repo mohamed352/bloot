@@ -258,7 +258,9 @@ void main() {
     blocTest<DiscoverCubit, DiscoverState>(
       'emits empty streams loaded',
       build: () {
-        when(() => discoverRepository.getStreams()).thenAnswer((_) async => []);
+        when(
+          () => discoverRepository.watchStreams(),
+        ).thenAnswer((_) => Stream.value([]));
         return buildCubit();
       },
       act: (cubit) => cubit.loadStreams(),

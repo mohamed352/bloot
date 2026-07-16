@@ -70,7 +70,9 @@ class _BlootAppState extends State<BlootApp> {
 
   void _initFcmNavigation() {
     _notificationService = getIt<NotificationService>();
-    _fcmSub = _notificationService!.onMessageOpenedApp.listen(_handleFcmMessage);
+    _fcmSub = _notificationService!.onMessageOpenedApp.listen(
+      _handleFcmMessage,
+    );
   }
 
   void _handleDeepLink(Uri uri) {
@@ -83,17 +85,10 @@ class _BlootAppState extends State<BlootApp> {
     if (isInviteScheme || isInviteHttps) {
       final roomId = uri.pathSegments.isNotEmpty ? uri.pathSegments.last : '';
       if (roomId.isNotEmpty) {
-        if (isInviteScheme) {
-          appRouter.goNamed(
-            RouteNames.roomInvitation,
-            pathParameters: {'id': roomId},
-          );
-        } else {
-          appRouter.pushNamed(
-            RouteNames.roomLobby,
-            pathParameters: {'id': roomId},
-          );
-        }
+        appRouter.goNamed(
+          RouteNames.roomInvitation,
+          pathParameters: {'id': roomId},
+        );
       }
     }
   }

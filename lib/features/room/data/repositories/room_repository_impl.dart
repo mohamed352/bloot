@@ -121,4 +121,8 @@ class RoomRepositoryImpl implements RoomRepository {
     final model = await _remoteDataSource.endStream(roomId);
     return model.toEntity(currentUserUid: _currentUid);
   }
+
+  @override
+  Future<void> sendRoomInvite(String roomId, String friendUid) =>
+      _remoteDataSource.sendRoomInvite(roomId, friendUid);
 }
