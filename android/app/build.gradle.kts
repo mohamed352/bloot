@@ -85,3 +85,7 @@ dependencies {
 flutter {
     source = "../.."
 }
+
+firebaseCrashlytics {
+    mappingFileUploadEnabled = false
+}
