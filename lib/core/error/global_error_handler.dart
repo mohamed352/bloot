@@ -11,9 +11,7 @@ abstract class GlobalErrorHandler {
         error: details.exception,
         stackTrace: details.stack,
       );
-      if (!kDebugMode) {
-        FirebaseCrashlytics.instance.recordFlutterError(details);
-      }
+      FirebaseCrashlytics.instance.recordFlutterError(details);
     };
     PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
       AppLogger.fatal(
@@ -22,9 +20,7 @@ abstract class GlobalErrorHandler {
         error: error,
         stackTrace: stack,
       );
-      if (!kDebugMode) {
-        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      }
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
       return true;
     };
   }

@@ -57,6 +57,8 @@ export const startStream = functions.https.onCall(async (request) => {
       isMicOn: p.isMicOn !== false,
     }));
 
+    const playerUids = roomPlayers.map((p) => p.uid);
+
     // Find host name from creator
     const hostPlayer = roomPlayers.find((p) => p.uid === authUid);
     const hostName = hostPlayer?.displayName || room.creatorUid || 'Host';
@@ -75,6 +77,7 @@ export const startStream = functions.https.onCall(async (request) => {
       viewerCount: 0,
       agoraChannelName: room.agoraChannelName || `room_${roomId}`,
       players,
+      playerUids,
       createdAt: now,
     });
 

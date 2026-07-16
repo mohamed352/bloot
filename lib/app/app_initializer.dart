@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
-import 'package:firebase_app_distribution/firebase_app_distribution.dart' as firebase_app_distribution;
+import 'package:firebase_app_distribution/firebase_app_distribution.dart'
+    as firebase_app_distribution;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -75,7 +76,9 @@ abstract class AppInitializer {
     await _initializeCrashlytics();
 
     // Initialize Performance Monitoring.
-    await FirebasePerformance.instance.setPerformanceCollectionEnabled(!kDebugMode);
+    await FirebasePerformance.instance.setPerformanceCollectionEnabled(
+      !kDebugMode,
+    );
 
     // Pre-initialize Google Sign-In so the account picker is ready on login.
     await _initializeGoogleSignIn();
@@ -140,11 +143,10 @@ abstract class AppInitializer {
 
   static Future<void> _initializeCrashlytics() async {
     try {
-      if (kDebugMode) {
-        await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
-      } else {
-        await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
-      }
+      // Always enable Crashlytics so QA testers on emulators and debug
+      // builds also report crashes and caught errors to the Firebase console.
+      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+      AppLogger.info('Crashlytics collection enabled', tag: LogTags.init);
     } catch (e) {
       AppLogger.error('Failed to initialize Crashlytics', error: e);
     }
@@ -196,18 +198,20 @@ abstract class AppInitializer {
   /// Flutter activity is fully in the foreground.
   static void initAppDistribution() {
     if (kIsWeb || !Platform.isAndroid) return;
+    if (kDebugMode) return; // Skip on debug/emulator to avoid Chrome redirect
     if (_didInitAppDistribution) return;
     _didInitAppDistribution = true;
 
     Future.microtask(() async {
       try {
         AppLogger.info('Checking tester sign-in...', tag: LogTags.init);
-        final bool isTesterSignedIn = await firebase_app_distribution.isTesterSignedIn();
+        final bool isTesterSignedIn = await firebase_app_distribution
+            .isTesterSignedIn();
         AppLogger.info('isTesterSignedIn=$isTesterSignedIn', tag: LogTags.init);
 
         if (!isTesterSignedIn) {
-          final prefs = _sharedPreferences ??
-              (await SharedPreferences.getInstance());
+          final prefs =
+              _sharedPreferences ?? (await SharedPreferences.getInstance());
           final lastAttempt = prefs.getInt(_kAppDistSignInAttemptKey) ?? 0;
           final now = DateTime.now().millisecondsSinceEpoch;
 
@@ -234,7 +238,8 @@ abstract class AppInitializer {
 
         // Re-check sign-in state before enabling features that can themselves
         // prompt for sign-in (e.g., updateIfNewReleaseAvailable).
-        final bool signedInNow = await firebase_app_distribution.isTesterSignedIn();
+        final bool signedInNow = await firebase_app_distribution
+            .isTesterSignedIn();
         if (!signedInNow) {
           AppLogger.warning(
             'Tester sign-in not confirmed; skipping feedback/updates',
@@ -257,13 +262,17 @@ abstract class AppInitializer {
         }
 
         await firebase_app_distribution.updateIfNewReleaseAvailable();
-        AppLogger.info('App Distribution initialized for tester', tag: LogTags.init);
-      } catch (e, stackTrace) {
-        AppLogger.error(
-          'App Distribution init failed',
+        AppLogger.info(
+          'App Distribution initialized for tester',
           tag: LogTags.init,
-          error: e,
-          stackTrace: stackTrace,
+        );
+      } catch (e) {
+        // App Distribution sign-in can fail when the tester cancels the
+        // browser flow or on emulators without Play Services. This is not
+        // a real error — log as warning to avoid polluting Crashlytics.
+        AppLogger.warning(
+          'App Distribution init skipped: $e',
+          tag: LogTags.init,
         );
       }
     });

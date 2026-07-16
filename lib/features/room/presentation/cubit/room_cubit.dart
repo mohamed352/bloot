@@ -122,6 +122,7 @@ class RoomCubit extends Cubit<RoomState> {
     _audioVolumeSubscription?.cancel();
     _currentRoom = null;
     _gameStartedEmitted = false;
+    AppLogger.setCustomKey('roomId', roomId);
 
     _roomSubscription = _roomRepository
         .watchRoom(roomId)
@@ -134,6 +135,7 @@ class RoomCubit extends Cubit<RoomState> {
                 room.gameId != null &&
                 !_gameStartedEmitted) {
               _gameStartedEmitted = true;
+              AppLogger.setCustomKey('gameId', room.gameId);
               emit(RoomState.gameStarted(gameId: room.gameId!));
               return;
             }

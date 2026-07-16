@@ -16,6 +16,9 @@ class DiscoverCubit extends Cubit<DiscoverState> {
 
   final DiscoverRepository _discoverRepository;
   StreamSubscription<List<StreamChatMessage>>? _chatSubscription;
+  StreamSubscription<DiscoverStream>? _streamSubscription;
+  DiscoverStream? _latestStream;
+  List<StreamChatMessage> _latestMessages = const [];
 
   Future<void> loadStreams() async {
     emit(const DiscoverState.loading());
@@ -38,20 +41,54 @@ class DiscoverCubit extends Cubit<DiscoverState> {
     emit(const DiscoverState.loading());
     await _chatSubscription?.cancel();
     _chatSubscription = null;
+    await _streamSubscription?.cancel();
+    _streamSubscription = null;
+    _latestStream = null;
+    _latestMessages = const [];
+    AppLogger.setCustomKey('streamId', id);
 
     try {
       final stream = await _discoverRepository.getStreamById(id);
+      _latestStream = stream;
       // Emit the stream immediately so the UI is not stuck in loading if the
       // chat stream is empty or slow to emit.
       emit(DiscoverState.streamLoaded(stream: stream, messages: const []));
+
+      // Subscribe to real-time stream document updates so watchers see live
+      // player camera/mic state changes and stream status transitions.
+      _streamSubscription = _discoverRepository
+          .watchStream(id)
+          .listen(
+            (updatedStream) {
+              if (isClosed) return;
+              _latestStream = updatedStream;
+              emit(
+                DiscoverState.streamLoaded(
+                  stream: updatedStream,
+                  messages: _latestMessages,
+                ),
+              );
+            },
+            onError: (Object e) {
+              AppLogger.error('Failed to watch stream doc', error: e);
+            },
+          );
+
       _chatSubscription = _discoverRepository
           .watchStreamChat(id)
           .listen(
             (messages) {
               if (isClosed) return;
-              emit(
-                DiscoverState.streamLoaded(stream: stream, messages: messages),
-              );
+              _latestMessages = messages;
+              final currentStream = _latestStream;
+              if (currentStream != null) {
+                emit(
+                  DiscoverState.streamLoaded(
+                    stream: currentStream,
+                    messages: messages,
+                  ),
+                );
+              }
             },
             onError: (Object e) {
               AppLogger.error('Failed to watch stream chat', error: e);
@@ -92,6 +129,8 @@ class DiscoverCubit extends Cubit<DiscoverState> {
   Future<void> close() async {
     await _chatSubscription?.cancel();
     _chatSubscription = null;
+    await _streamSubscription?.cancel();
+    _streamSubscription = null;
     return super.close();
   }
 }

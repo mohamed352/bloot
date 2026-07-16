@@ -11,6 +11,7 @@ import 'package:bloot/core/logger/app_logger.dart';
 import 'package:bloot/core/network/cache_helper.dart';
 import 'package:bloot/core/network/cache_keys.dart';
 import 'package:bloot/core/services/remote_config_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// Event fired when a remote user joins the channel.
 class AgoraUserJoinedEvent {
@@ -348,6 +349,16 @@ class AgoraService {
     _isAudience = isAudience;
     _subscribeVideo = subscribeVideo;
 
+    // Ensure microphone permission is granted for broadcasters; audience
+    // members only need to listen, but requesting upfront avoids issues if
+    // they later switch roles.
+    if (!isAudience) {
+      final micStatus = await Permission.microphone.request();
+      if (!micStatus.isGranted) {
+        AppLogger.warning('Microphone permission denied', tag: 'Agora');
+      }
+    }
+
     final firebaseUid = _firebaseAuth.currentUser?.uid;
     if (firebaseUid == null) {
       throw Exception('Cannot join Agora channel: user not authenticated');
@@ -523,8 +534,13 @@ class AgoraService {
     _isCameraOn = !_isCameraOn;
 
     if (_isCameraOn) {
+      final cameraStatus = await Permission.camera.request();
+      if (!cameraStatus.isGranted) {
+        AppLogger.warning('Camera permission denied', tag: 'Agora');
+        _isCameraOn = false;
+        return false;
+      }
       await _engine!.enableVideo();
-      // video enabled
       await _engine!.muteLocalVideoStream(false);
     } else {
       await _engine!.muteLocalVideoStream(true);
@@ -555,8 +571,13 @@ class AgoraService {
     if (_isCameraOn != cameraOn) {
       _isCameraOn = cameraOn;
       if (_isCameraOn) {
+        final cameraStatus = await Permission.camera.request();
+        if (!cameraStatus.isGranted) {
+          AppLogger.warning('Camera permission denied', tag: 'Agora');
+          _isCameraOn = false;
+          return;
+        }
         await _engine!.enableVideo();
-        // video enabled
         await _engine!.muteLocalVideoStream(false);
       } else {
         await _engine!.muteLocalVideoStream(true);
