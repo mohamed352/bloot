@@ -11,6 +11,7 @@ import 'package:bloot/core/components/app_scaffold.dart';
 import 'package:bloot/core/components/custom_app_bar.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
 import 'package:bloot/core/extension/context_values.dart';
+import 'package:bloot/core/logger/app_logger.dart';
 import 'package:bloot/features/room/presentation/cubit/room_cubit.dart';
 import 'package:bloot/features/room/presentation/cubit/room_state.dart';
 import 'package:bloot/generated/locale_keys.g.dart';
@@ -24,7 +25,7 @@ class JoinRoomPage extends StatefulWidget {
 }
 
 class _JoinRoomPageState extends State<JoinRoomPage> {
-  final _codeController = TextEditingController();
+  final _codeController = TextEditingController(text: 'CE4N34');
   final _passwordController = TextEditingController();
   bool _isValid = false;
   bool _passwordRequired = false;
@@ -35,6 +36,9 @@ class _JoinRoomPageState extends State<JoinRoomPage> {
     super.initState();
     _codeController.addListener(_onCodeChanged);
     _passwordController.addListener(_onPasswordChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _onCodeChanged();
+    });
   }
 
   @override
@@ -83,7 +87,9 @@ class _JoinRoomPageState extends State<JoinRoomPage> {
   }
 
   void _joinRoom() {
+    AppLogger.info('Join Room button pressed', tag: 'JoinRoom');
     final code = _codeController.text.trim().toUpperCase();
+    AppLogger.info('Code: $code, canJoin: $_canJoin', tag: 'JoinRoom');
     if (!_canJoin) return;
     context.read<RoomCubit>().joinRoomByCode(
       code,

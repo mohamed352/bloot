@@ -139,14 +139,15 @@ class ChatRemoteDataSource {
     );
 
     final batch = _firestore.batch();
-    batch.update(_firestore.collection('conversations').doc(conversationId), {
-      'lastMessage': message,
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+    batch.set(
+      _firestore.collection('conversations').doc(conversationId),
+      {'lastMessage': message, 'updatedAt': FieldValue.serverTimestamp()},
+      SetOptions(merge: true),
+    );
 
     for (final participantUid in participantUids) {
       final isSender = participantUid == uid;
-      batch.update(
+      batch.set(
         _firestore
             .collection('users')
             .doc(participantUid)
@@ -157,6 +158,7 @@ class ChatRemoteDataSource {
           'updatedAt': FieldValue.serverTimestamp(),
           'unread': isSender ? 0 : FieldValue.increment(1),
         },
+        SetOptions(merge: true),
       );
     }
 

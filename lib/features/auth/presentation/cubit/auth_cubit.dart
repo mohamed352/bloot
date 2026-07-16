@@ -15,9 +15,9 @@ class AuthCubit extends Cubit<AuthState> {
   AuthCubit({
     required AuthRepository authRepository,
     required RemoteConfigService remoteConfigService,
-  })  : _authRepository = authRepository,
-        _remoteConfigService = remoteConfigService,
-        super(const AuthState.initial());
+  }) : _authRepository = authRepository,
+       _remoteConfigService = remoteConfigService,
+       super(const AuthState.initial());
 
   final AuthRepository _authRepository;
   final RemoteConfigService _remoteConfigService;
@@ -37,6 +37,8 @@ class AuthCubit extends Cubit<AuthState> {
         tag: 'AuthCubit',
       );
       if (user.isProfileComplete) {
+        AppLogger.setUserId(user.uid);
+        AppLogger.setCustomKey('username', user.username);
         emit(AuthState.authenticated(user: user));
       } else {
         emit(const AuthState.profileRequired());
@@ -68,6 +70,8 @@ class AuthCubit extends Cubit<AuthState> {
         tag: 'AuthCubit',
       );
       if (user.isProfileComplete) {
+        AppLogger.setUserId(user.uid);
+        AppLogger.setCustomKey('username', user.username);
         emit(AuthState.authenticated(user: user));
       } else {
         emit(const AuthState.profileRequired());
@@ -102,9 +106,7 @@ class AuthCubit extends Cubit<AuthState> {
 
     if (!_remoteConfigService.allowNewSignups) {
       emit(
-        const AuthState.error(
-          message: 'New sign-ups are currently disabled.',
-        ),
+        const AuthState.error(message: 'New sign-ups are currently disabled.'),
       );
       return;
     }
@@ -135,6 +137,8 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       final user = await _authRepository.getCurrentUser();
       if (user != null && user.isProfileComplete) {
+        AppLogger.setUserId(user.uid);
+        AppLogger.setCustomKey('username', user.username);
         emit(AuthState.authenticated(user: user));
       } else if (user != null && !user.isProfileComplete) {
         emit(const AuthState.profileRequired());
@@ -151,6 +155,8 @@ class AuthCubit extends Cubit<AuthState> {
     emit(const AuthState.loading());
     try {
       await _authRepository.signOut();
+      AppLogger.setUserId(null);
+      AppLogger.setCustomKey('username', null);
       emit(const AuthState.initial());
     } catch (e) {
       AppLogger.error('Sign out failed', error: e);
@@ -196,6 +202,8 @@ class AuthCubit extends Cubit<AuthState> {
     emit(const AuthState.loading());
     try {
       await _authRepository.deleteAccount();
+      AppLogger.setUserId(null);
+      AppLogger.setCustomKey('username', null);
       emit(const AuthState.initial());
     } on AuthException catch (e) {
       emit(AuthState.error(message: e.message));

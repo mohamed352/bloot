@@ -460,6 +460,8 @@ Room testRoom({
   bool allowSpectators = true,
   String? password,
   String creatorUid = 'u1',
+  bool isStreaming = false,
+  String? streamId,
 }) {
   return Room(
     id: id,
@@ -475,6 +477,8 @@ Room testRoom({
     allowSpectators: allowSpectators,
     password: password,
     creatorUid: creatorUid,
+    isStreaming: isStreaming,
+    streamId: streamId,
   );
 }
 

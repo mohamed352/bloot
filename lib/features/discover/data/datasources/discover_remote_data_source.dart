@@ -54,6 +54,21 @@ class DiscoverRemoteDataSource {
     throw Exception('Stream not found: $id');
   }
 
+  /// Returns a real-time stream of the stream document for [id].
+  /// This allows watchers to receive live updates to player camera/mic
+  /// states and stream status changes.
+  Stream<DiscoverStreamModel> watchStream(String id) {
+    return _firestore
+        .collection('streams')
+        .doc(id)
+        .snapshots()
+        .where((doc) => doc.exists)
+        .map((doc) => _mapStreamDoc(doc))
+        .handleError((Object error) {
+          AppLogger.error('Failed to watch stream $id', error: error);
+        });
+  }
+
   Stream<List<StreamChatMessageModel>> watchStreamChat(String streamId) {
     final uid = _uid;
 

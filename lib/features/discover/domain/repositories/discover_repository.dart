@@ -8,6 +8,10 @@ abstract class DiscoverRepository {
   /// Returns the stream with the given [id].
   Future<DiscoverStream> getStreamById(String id);
 
+  /// Returns a real-time stream of the stream document for [id].
+  /// Allows watchers to receive live updates to player states and stream status.
+  Stream<DiscoverStream> watchStream(String id);
+
   /// Returns a real-time stream of chat messages for [streamId].
   Stream<List<StreamChatMessage>> watchStreamChat(String streamId);
 

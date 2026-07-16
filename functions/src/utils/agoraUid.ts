@@ -62,10 +62,10 @@ export async function getOrCreateUserAgoraUid(uid: string): Promise<number> {
     }
 
     const agoraUid = await generateUniqueAgoraUid();
-    transaction.update(userRef, {
+    transaction.set(userRef, {
       agoraUid,
       updatedAt: FieldValue.serverTimestamp(),
-    });
+    }, { merge: true });
     return agoraUid;
   });
 }
@@ -87,10 +87,10 @@ export async function getOrCreateUserAgoraUidInTransaction(
   }
 
   const agoraUid = await generateUniqueAgoraUid();
-  transaction.update(userRef, {
+  transaction.set(userRef, {
     agoraUid,
     updatedAt: FieldValue.serverTimestamp(),
-  });
+  }, { merge: true });
   return agoraUid;
 }
 

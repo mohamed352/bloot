@@ -25,6 +25,11 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
   }
 
   @override
+  Stream<DiscoverStream> watchStream(String id) {
+    return _remoteDataSource.watchStream(id).map((model) => model.toEntity());
+  }
+
+  @override
   Stream<List<StreamChatMessage>> watchStreamChat(String streamId) {
     return _remoteDataSource
         .watchStreamChat(streamId)

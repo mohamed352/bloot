@@ -261,8 +261,9 @@ class HomePage extends StatelessWidget {
                                       title: 'voice_tables'.tr(),
                                       subtitle: 'voice_only_games'.tr(),
                                       color: ColorManager.info,
-                                      onTap: () =>
-                                          context.pushNamed(RouteNames.play),
+                                      onTap: () => context.pushNamed(
+                                        RouteNames.joinRoom,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: AppSpacing.md),

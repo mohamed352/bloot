@@ -9,6 +9,7 @@ import 'package:bloot/core/components/app_button.dart';
 import 'package:bloot/core/components/cached_avatar.dart';
 import 'package:bloot/core/constants/app_radius.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
+import 'package:bloot/core/logger/app_logger.dart';
 import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/features/room/domain/entities/room.dart';
 import 'package:bloot/generated/locale_keys.g.dart';
@@ -24,7 +25,7 @@ class CreateRoomPage extends StatefulWidget {
 }
 
 class _CreateRoomPageState extends State<CreateRoomPage> {
-  int _selectedType = 0;
+  int _selectedType = 1; // Default to public for easier testing
   bool _voiceOn = true;
   bool _cameraOn = false;
   bool _spectatorsOn = true;
@@ -469,20 +470,6 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.xxl),
-                  // Cancel text button
-                  Center(
-                    child: TextButton(
-                      onPressed: () => context.goNamed(RouteNames.home),
-                      child: Text(
-                        'cancel'.tr(),
-                        style: const TextStyle(
-                          color: ColorManager.darkTextSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: AppSpacing.sm),
                   // Create Room button with gold gradient and + icon
                   GradientButton(
@@ -494,6 +481,10 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                         isLoading || (_selectedType == 0 && !_isPasswordValid)
                         ? null
                         : () {
+                            AppLogger.info(
+                              'Create Room button pressed',
+                              tag: 'Room',
+                            );
                             final name = _nameController.text.trim();
                             if (_selectedType == 0 &&
                                 _passwordController.text.trim().length < 4) {

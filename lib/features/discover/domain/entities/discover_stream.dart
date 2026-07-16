@@ -46,6 +46,34 @@ class DiscoverStream {
   final String? agoraChannelName;
   final String? roomId;
   final List<StreamPlayer> players;
+
+  DiscoverStream copyWith({
+    String? id,
+    String? title,
+    String? host,
+    int? viewers,
+    String? avatarUrl,
+    String? category,
+    bool? isLive,
+    bool? isPremium,
+    String? agoraChannelName,
+    String? roomId,
+    List<StreamPlayer>? players,
+  }) {
+    return DiscoverStream(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      host: host ?? this.host,
+      viewers: viewers ?? this.viewers,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      category: category ?? this.category,
+      isLive: isLive ?? this.isLive,
+      isPremium: isPremium ?? this.isPremium,
+      agoraChannelName: agoraChannelName ?? this.agoraChannelName,
+      roomId: roomId ?? this.roomId,
+      players: players ?? this.players,
+    );
+  }
 }
 
 class StreamChatMessage {

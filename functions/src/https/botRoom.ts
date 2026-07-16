@@ -67,6 +67,12 @@ export const createRoomWithBots = functions.https.onCall(
   // do not spawn duplicate accounts.
   const bots = await createBotUsers(3);
 
+  // Create bot user docs outside the transaction to avoid NOT_FOUND errors
+  // when Firestore tries to set() non-existent docs inside a transaction.
+  for (const bot of bots) {
+    await db.collection('users').doc(bot.uid).set(buildBotUserDoc(bot));
+  }
+
   return await db.runTransaction(async (transaction) => {
     const roomRef = db.collection('rooms').doc();
     const gameRef = db.collection('games').doc();
@@ -88,11 +94,6 @@ export const createRoomWithBots = functions.https.onCall(
     const playerUids = players.map((p) => p.uid);
     const teamA = players.filter((p) => p.team === 'A').map((p) => p.uid);
     const teamB = players.filter((p) => p.team === 'B').map((p) => p.uid);
-
-    // Create bot user docs.
-    for (const bot of bots) {
-      transaction.set(db.collection('users').doc(bot.uid), buildBotUserDoc(bot));
-    }
 
     const roomData = buildRoomDoc({
       roomId: roomRef.id,
@@ -176,6 +177,11 @@ export const inviteBotsToRoom = functions.https.onCall(
   const botsNeeded = 4 - existingPlayers.length;
   const bots = await createBotUsers(botsNeeded);
 
+  // Create bot user docs outside the transaction to avoid NOT_FOUND errors.
+  for (const bot of bots) {
+    await db.collection('users').doc(bot.uid).set(buildBotUserDoc(bot));
+  }
+
   return await db.runTransaction(async (transaction) => {
     const freshSnap = await transaction.get(roomRef);
     if (!freshSnap.exists) {
@@ -200,11 +206,6 @@ export const inviteBotsToRoom = functions.https.onCall(
     // transaction, only fill the current empty seats. Creating extra bot users
     // is harmless, but we should not exceed 4 players.
     const botsToAdd = bots.slice(0, freshBotsNeeded);
-
-    // Create bot user docs.
-    for (const bot of botsToAdd) {
-      transaction.set(db.collection('users').doc(bot.uid), buildBotUserDoc(bot));
-    }
 
     const botPlayers = assignBotsToRoom(botsToAdd, freshPlayers);
     const players = [...freshPlayers, ...botPlayers];

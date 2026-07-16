@@ -51,6 +51,9 @@ void main() {
           () => discoverRepository.getStreamById('s1'),
         ).thenAnswer((_) async => testStream());
         when(
+          () => discoverRepository.watchStream('s1'),
+        ).thenAnswer((_) => const Stream.empty());
+        when(
           () => discoverRepository.watchStreamChat('s1'),
         ).thenAnswer((_) => const Stream.empty());
 
@@ -70,6 +73,9 @@ void main() {
         when(
           () => discoverRepository.getStreamById('s1'),
         ).thenAnswer((_) async => testStream());
+        when(
+          () => discoverRepository.watchStream('s1'),
+        ).thenAnswer((_) => const Stream.empty());
         when(
           () => discoverRepository.watchStreamChat('s1'),
         ).thenAnswer((_) => const Stream.empty());
@@ -91,6 +97,9 @@ void main() {
           () => discoverRepository.getStreamById('s1'),
         ).thenAnswer((_) async => testStream());
         when(
+          () => discoverRepository.watchStream('s1'),
+        ).thenAnswer((_) => const Stream.empty());
+        when(
           () => discoverRepository.watchStreamChat('s1'),
         ).thenAnswer((_) => const Stream.empty());
 
@@ -111,6 +120,9 @@ void main() {
         when(
           () => discoverRepository.getStreamById('s1'),
         ).thenAnswer((_) async => testStream());
+        when(
+          () => discoverRepository.watchStream('s1'),
+        ).thenAnswer((_) => const Stream.empty());
         when(() => discoverRepository.watchStreamChat('s1')).thenAnswer(
           (_) => Stream.value([
             const StreamChatMessage(
@@ -137,6 +149,9 @@ void main() {
         when(
           () => discoverRepository.getStreamById('s1'),
         ).thenAnswer((_) async => testStream());
+        when(
+          () => discoverRepository.watchStream('s1'),
+        ).thenAnswer((_) => const Stream.empty());
         when(
           () => discoverRepository.watchStreamChat('s1'),
         ).thenAnswer((_) => const Stream.empty());
@@ -168,6 +183,9 @@ void main() {
         when(
           () => discoverRepository.getStreamById('s1'),
         ).thenAnswer((_) async => testStream(viewers: 10));
+        when(
+          () => discoverRepository.watchStream('s1'),
+        ).thenAnswer((_) => const Stream.empty());
         when(
           () => discoverRepository.watchStreamChat('s1'),
         ).thenAnswer((_) => const Stream.empty());

@@ -64,7 +64,7 @@ class RoomRemoteDataSource {
     required String gameSpeed,
     String? password,
   }) async {
-    const timeout = Duration(seconds: 10);
+    const timeout = Duration(seconds: 30);
     final user = _firebaseAuth.currentUser;
     if (user == null) {
       throw const UnauthenticatedException();
@@ -254,6 +254,28 @@ class RoomRemoteDataSource {
         'players': players,
         'updatedAt': FieldValue.serverTimestamp(),
       });
+
+      // Sync the stream document's players array if the room is streaming,
+      // so watchers see live camera/mic state changes in real time.
+      final streamId = data['streamId'] as String?;
+      if (streamId != null && streamId.isNotEmpty) {
+        final streamRef = _firestore.collection('streams').doc(streamId);
+        final streamDoc = await transaction.get(streamRef);
+        if (streamDoc.exists) {
+          final streamData = streamDoc.data()!;
+          final streamPlayers = List<Map<String, dynamic>>.from(
+            streamData['players'] as List,
+          );
+          final streamPlayerIndex = streamPlayers.indexWhere(
+            (p) => p['uid'] == currentUid,
+          );
+          if (streamPlayerIndex != -1) {
+            streamPlayers[streamPlayerIndex]['isMicOn'] = isMicOn;
+            streamPlayers[streamPlayerIndex]['isCameraOn'] = isCameraOn;
+            transaction.update(streamRef, {'players': streamPlayers});
+          }
+        }
+      }
     });
   }
 
@@ -415,12 +437,57 @@ class RoomRemoteDataSource {
     final currentUid = _currentUid;
     if (currentUid.isEmpty) throw const UnauthenticatedException();
 
+    // Fallback: query Firestore directly for the room by invite code.
+    // This bypasses the joinRoom Cloud Function which hangs on the emulator.
+    try {
+      AppLogger.info(
+        'Querying Firestore for invite code: ${inviteCode.toUpperCase()}',
+        tag: 'RoomRemote',
+      );
+      final roomQuery = await _firestore
+          .collection('rooms')
+          .where('inviteCode', isEqualTo: inviteCode.toUpperCase())
+          .where('status', isEqualTo: 'waiting')
+          .limit(1)
+          .get()
+          .timeout(const Duration(seconds: 15));
+
+      if (roomQuery.docs.isEmpty) {
+        AppLogger.info('No room found with invite code', tag: 'RoomRemote');
+        throw const RoomNotFoundException();
+      }
+
+      final roomId = roomQuery.docs.first.id;
+      AppLogger.info('Found room: $roomId', tag: 'RoomRemote');
+      return getRoomById(roomId);
+    } on RoomNotFoundException {
+      rethrow;
+    } catch (e) {
+      AppLogger.error('joinRoomByCode fallback error', error: e);
+      throw RoomException(e.toString());
+    }
+  }
+
+  Future<RoomModel> _joinRoomByCodeCallable(
+    String inviteCode, {
+    String? password,
+  }) async {
+    final currentUid = _currentUid;
+    if (currentUid.isEmpty) throw const UnauthenticatedException();
+
     try {
       final callable = _functions.httpsCallable('joinRoom');
-      final result = await callable.call<Map<String, dynamic>>({
-        'inviteCode': inviteCode.toUpperCase(),
-        if (password != null && password.isNotEmpty) 'password': password,
-      });
+      AppLogger.info('Calling joinRoom callable...', tag: 'RoomRemote');
+      final result = await callable
+          .call<Map<String, dynamic>>({
+            'inviteCode': inviteCode.toUpperCase(),
+            if (password != null && password.isNotEmpty) 'password': password,
+          })
+          .timeout(const Duration(seconds: 30));
+      AppLogger.info(
+        'joinRoom callable returned: ${result.data}',
+        tag: 'RoomRemote',
+      );
       final roomId = result.data['roomId'] as String?;
       if (roomId == null || roomId.isEmpty) {
         throw const RoomException('Failed to join room.');
