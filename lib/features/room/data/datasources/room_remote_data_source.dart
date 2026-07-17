@@ -69,6 +69,9 @@ class RoomRemoteDataSource {
     if (user == null) {
       throw const UnauthenticatedException();
     }
+    if (name.trim().isEmpty) {
+      throw const RoomException('Room name is required.');
+    }
 
     // Get user profile from Firestore
     AppLogger.info('Fetching user profile for room creation...', tag: 'Room');
@@ -486,7 +489,9 @@ class RoomRemoteDataSource {
       }
     } catch (e) {
       AppLogger.error('joinRoomByCode fallback error', error: e);
-      throw RoomException(e.toString());
+      throw const RoomException(
+        'Failed to join room. Please check the code and try again.',
+      );
     }
   }
 

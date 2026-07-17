@@ -16,6 +16,7 @@ class SearchBar extends StatefulWidget {
     this.onSubmitted,
     this.autofocus = false,
     this.controller,
+    this.focusNode,
   });
 
   final String? hintText;
@@ -23,6 +24,7 @@ class SearchBar extends StatefulWidget {
   final ValueChanged<String>? onSubmitted;
   final bool autofocus;
   final TextEditingController? controller;
+  final FocusNode? focusNode;
 
   @override
   State<SearchBar> createState() => _SearchBarState();
@@ -73,6 +75,7 @@ class _SearchBarState extends State<SearchBar> {
       ),
       child: TextField(
         controller: _controller,
+        focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         style: TextStyle(color: colors.textPrimary, fontSize: 15),
         decoration: InputDecoration(

@@ -72,10 +72,22 @@ class RoomCubit extends Cubit<RoomState> {
   }
 
   /// Creates a real room with the current user plus 3 bot players, then starts
-  /// the game immediately.
+  /// the game immediately. Leaves any room the user is currently in first so a
+  /// previous live/lobby doesn't linger without its host.
   Future<void> createRoomWithBots() async {
     emit(const RoomState.loading());
     try {
+      final activeRoom = _currentRoom;
+      if (activeRoom != null) {
+        try {
+          await _roomRepository.leaveRoom(activeRoom.id);
+        } catch (e) {
+          AppLogger.error('Failed to leave room before bot game', error: e);
+        }
+        _currentRoom = null;
+        await _agoraService.leaveChannel();
+        _joinedAgoraChannelName = null;
+      }
       final result = await _roomRepository.createRoomWithBots();
       _gameStartedEmitted = true;
       emit(RoomState.gameStarted(gameId: result.gameId));
@@ -358,6 +370,7 @@ class RoomCubit extends Cubit<RoomState> {
       await _roomRepository.leaveRoom(roomId);
       await _agoraService.leaveChannel();
       _joinedAgoraChannelName = null;
+      _currentRoom = null;
       if (!isClosed) emit(const RoomState.initial());
     } on RoomException catch (e) {
       AppLogger.error('Failed to leave room', error: e.message);

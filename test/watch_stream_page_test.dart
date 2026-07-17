@@ -39,6 +39,9 @@ void main() {
       () => discoverRepository.getRoomGameId(any()),
     ).thenAnswer((_) async => null);
     when(
+      () => discoverRepository.watchRoomGameId(any()),
+    ).thenAnswer((_) => Stream<String?>.value(null));
+    when(
       () => discoverRepository.incrementViewerCount(any()),
     ).thenAnswer((_) async {});
     when(

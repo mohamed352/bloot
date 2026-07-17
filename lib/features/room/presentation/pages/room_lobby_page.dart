@@ -98,6 +98,7 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
           final allReady = readyCount == 4 && players.length == 4;
           final isReady =
               room?.players.any((p) => p.isMe && p.isReady) ?? false;
+          final isParticipant = players.any((p) => p.isMe);
           final isCreator =
               room?.creatorUid != null &&
               room?.players.any((p) => p.isMe && p.uid == room.creatorUid) ==
@@ -340,9 +341,15 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                           ],
                         ),
                         const SizedBox(height: AppSpacing.lg),
-                        // You at bottom
+                        // You at bottom — always show the current user in the
+                        // bottom seat, not whoever sits at index 0.
                         SeatWidget(
-                          player: players.isNotEmpty ? players[0] : null,
+                          player: players.isNotEmpty
+                              ? players.firstWhere(
+                                  (p) => p.isMe,
+                                  orElse: () => players.first,
+                                )
+                              : null,
                           label: LocaleKeys.you.tr(),
                           position: SeatPosition.bottom,
                           isCreator: isCreator,
@@ -522,7 +529,10 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                                     ? 'not_ready'.tr()
                                     : 'i_am_ready'.tr(),
                                 isOutlined: isReady,
-                                onPressed: room != null
+                                // Spectators watching the lobby can't ready
+                                // up — the backend would reject it with
+                                // "Player not in room".
+                                onPressed: room != null && isParticipant
                                     ? () => context
                                           .read<RoomCubit>()
                                           .toggleReady(room.id)

@@ -9,12 +9,18 @@ export const sendChatMessageNotification = functions.firestore
     const data = event.data?.data();
     if (!data) return;
 
-    const senderUid = data.senderUid as string | undefined;
-    const senderName = data.senderName as string | undefined;
+    // The client writes messages with `senderId`; the conversation doc stores
+    // `participantUids`. Older code read senderUid/participantIds and silently
+    // early-returned, so no notifications were ever sent.
+    const senderUid = data.senderId as string | undefined;
     const text = data.text as string | undefined;
     const conversationId = event.params.conversationId;
 
     if (!senderUid || !conversationId) return;
+
+    // Resolve the sender's display name for the notification title.
+    const senderDoc = await admin.firestore().collection('users').doc(senderUid).get();
+    const senderName = senderDoc.data()?.displayName as string | undefined;
 
     // Get conversation to find recipients
     const conversationDoc = await admin.firestore()
@@ -25,7 +31,7 @@ export const sendChatMessageNotification = functions.firestore
     const conversationData = conversationDoc.data();
     if (!conversationData) return;
 
-    const participantIds = conversationData.participantIds as string[] | undefined;
+    const participantIds = conversationData.participantUids as string[] | undefined;
     if (!participantIds || participantIds.length === 0) return;
 
     // Send to all participants except sender

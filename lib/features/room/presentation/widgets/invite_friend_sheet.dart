@@ -28,6 +28,9 @@ class InviteFriendSheet extends StatefulWidget {
 
 class _InviteFriendSheetState extends State<InviteFriendSheet> {
   final ChatRepository _chatRepository = getIt<ChatRepository>();
+  // A dedicated focus node keeps the keyboard attached to the search field
+  // across result rebuilds.
+  final FocusNode _searchFocusNode = FocusNode();
   Timer? _debounce;
   List<ChatUser> _users = [];
   bool _loading = false;
@@ -37,6 +40,7 @@ class _InviteFriendSheetState extends State<InviteFriendSheet> {
   @override
   void dispose() {
     _debounce?.cancel();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -94,74 +98,77 @@ class _InviteFriendSheetState extends State<InviteFriendSheet> {
   Widget build(BuildContext context) {
     final colors = context.appColors;
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.75,
-      minChildSize: 0.4,
-      maxChildSize: 0.9,
-      expand: false,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsetsDirectional.symmetric(
-                  vertical: AppSpacing.sm,
+    // Fixed-height container padded by the keyboard inset. The previous
+    // DraggableScrollableSheet re-laid-out its extent whenever the keyboard
+    // opened or results arrived, which dropped the field's focus and closed
+    // the keyboard mid-typing.
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.viewInsetsOf(context).bottom,
+      ),
+      child: Container(
+        height: MediaQuery.sizeOf(context).height * 0.75,
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsetsDirectional.symmetric(
+                vertical: AppSpacing.sm,
+              ),
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colors.divider,
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: colors.divider,
-                    borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: AppSpacing.lg,
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    'invite_friend'.tr(),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: colors.textPrimary,
+                    ),
                   ),
-                ),
+                  const Spacer(),
+                  IconButton(
+                    icon: Icon(Icons.close_rounded, color: colors.textMuted),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsetsDirectional.symmetric(
-                  horizontal: AppSpacing.lg,
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      'invite_friend'.tr(),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      icon: Icon(Icons.close_rounded, color: colors.textMuted),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
+            ),
+            Padding(
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.sm,
               ),
-              Padding(
-                padding: const EdgeInsetsDirectional.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.sm,
-                ),
-                child: app.SearchBar(
-                  hintText: 'search_players'.tr(),
-                  onChanged: _onSearchChanged,
-                  autofocus: true,
-                ),
+              child: app.SearchBar(
+                hintText: 'search_players'.tr(),
+                onChanged: _onSearchChanged,
+                autofocus: true,
+                focusNode: _searchFocusNode,
               ),
-              Expanded(child: _buildBody(context, scrollController)),
-            ],
-          ),
-        );
-      },
+            ),
+            Expanded(child: _buildBody(context)),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildBody(BuildContext context, ScrollController controller) {
+  Widget _buildBody(BuildContext context) {
     if (_query.trim().isEmpty) {
       return Center(
         child: Text(
@@ -182,7 +189,7 @@ class _InviteFriendSheetState extends State<InviteFriendSheet> {
       );
     }
     return ListView.builder(
-      controller: controller,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.sm),
       itemCount: _users.length,
       itemBuilder: (context, index) {

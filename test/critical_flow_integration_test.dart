@@ -802,10 +802,9 @@ void main() {
       verify: (_) {
         verify(() => gameRepository.watchGameAsSpectator('g1')).called(1);
         verify(
-          () => agoraService.joinChannel(
+          () => agoraService.joinAsAudience(
             channelName: 'room_r1',
             agoraUid: any(named: 'agoraUid'),
-            subscribeVideo: false,
           ),
         ).called(1);
       },

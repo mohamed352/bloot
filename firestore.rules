@@ -225,8 +225,12 @@ service cloud.firestore {
       }
       // get: existing docs require participation; non-existing docs are allowed
       // so the client can check existence before creating a direct conversation.
+      // NOTE: for a non-existent doc `resource` is null, and evaluating
+      // resource.data fails closed — the null check must come first.
       allow get: if request.auth != null &&
-        (!resource.data.keys().hasAny(['participantUids']) || isParticipant());
+        (resource == null ||
+         !resource.data.keys().hasAny(['participantUids']) ||
+         isParticipant());
       // listing the top-level conversations collection is not supported; use
       // users/{uid}/conversations for the list view.
       allow list: if false;

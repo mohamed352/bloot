@@ -18,7 +18,7 @@ void main() {
     chatRepository = MockChatRepository();
   });
 
-  const conversation = ChatConversation(
+  const _ = ChatConversation(
     id: 'c1',
     name: 'Ali',
     lastMessage: 'Hello',

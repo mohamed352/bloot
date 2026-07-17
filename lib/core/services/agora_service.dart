@@ -481,6 +481,18 @@ class AgoraService {
         isAudience: _isAudience,
         subscribeVideo: _subscribeVideo,
       );
+      // A fresh join resets SDK-side mute/publish state to defaults; re-apply
+      // the user's mic/camera state or the mic comes back on (or audio stays
+      // silently off) after every reconnect.
+      if (!_isAudience) {
+        await _engine?.muteLocalAudioStream(!_isMicOn);
+        if (_isCameraOn) {
+          await _engine?.updateChannelMediaOptions(
+            const ChannelMediaOptions(publishCameraTrack: true),
+          );
+          await _engine?.startPreview();
+        }
+      }
       _reconnectAttempts = 0;
       AppLogger.info('Agora reconnect succeeded', tag: 'Agora');
     } catch (e) {
@@ -687,11 +699,12 @@ class AgoraService {
   // Background / foreground
   // ---------------------------------------------------------------------------
 
-  /// Enter background mode — keep audio session active.
+  /// Enter background mode — keep the audio session active without flipping
+  /// the mic on for users who had it muted.
   Future<void> enterBackgroundMode() async {
     if (_engine == null || _currentChannelId == null) return;
     await _engine!.updateChannelMediaOptions(
-      const ChannelMediaOptions(publishMicrophoneTrack: true),
+      ChannelMediaOptions(publishMicrophoneTrack: _isMicOn),
     );
     AppLogger.debug('Entered background mode', tag: 'Agora');
   }

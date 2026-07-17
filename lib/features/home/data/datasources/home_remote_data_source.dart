@@ -66,8 +66,9 @@ class HomeRemoteDataSource {
     );
   }
 
-  /// Filters out streams whose parent room is missing, finished, or has no
-  /// players so closed/empty rooms never appear as live.
+  /// Filters out streams whose parent room is missing, finished, has no
+  /// players, or no longer points at this stream (e.g. the host left and the
+  /// room's isStreaming flag was cleared) so stale lives never appear.
   Future<List<HomeStream>> _filterActiveStreams(List<HomeStream> streams) async {
     if (streams.isEmpty) return streams;
 
@@ -83,21 +84,30 @@ class HomeRemoteDataSource {
       roomIds.map((id) => _firestore.collection('rooms').doc(id).get()),
     );
 
-    final validRoomIds = <String>{};
+    // Maps a valid room id to the stream id it currently broadcasts.
+    final activeStreamByRoom = <String, String>{};
     for (final doc in roomDocs) {
       if (!doc.exists) continue;
       final data = doc.data()!;
       final playerUids = data['playerUids'];
       final status = data['status'] as String?;
       final hasPlayers = playerUids is List && playerUids.isNotEmpty;
-      if (hasPlayers && status != 'finished') {
-        validRoomIds.add(doc.id);
+      final isStreaming = data['isStreaming'] == true;
+      final roomStreamId = data['streamId'] as String?;
+      if (hasPlayers &&
+          status != 'finished' &&
+          isStreaming &&
+          roomStreamId != null &&
+          roomStreamId.isNotEmpty) {
+        activeStreamByRoom[doc.id] = roomStreamId;
       }
     }
 
     return streams.where((s) {
       final roomId = s.roomId;
-      return roomId == null || roomId.isEmpty || validRoomIds.contains(roomId);
+      return roomId == null ||
+          roomId.isEmpty ||
+          activeStreamByRoom[roomId] == s.id;
     }).toList();
   }
 }

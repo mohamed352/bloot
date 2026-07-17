@@ -45,10 +45,11 @@ class _StreamVideoSquareState extends State<StreamVideoSquare> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Video feed or avatar fallback
+          // Video feed or avatar fallback. A missing agoraUid (0) can never
+          // resolve to a real feed — show the avatar instead of a black box.
           ClipRRect(
             borderRadius: BorderRadius.circular(AppRadius.md - 2),
-            child: widget.player.isCameraOn
+            child: widget.player.isCameraOn && widget.player.agoraUid != 0
                 ? _agoraService.getRemoteVideoView(widget.player.agoraUid)
                 : Center(
                     child: CachedAvatar(

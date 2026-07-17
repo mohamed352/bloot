@@ -24,6 +24,9 @@ class PublicRoomsPage extends StatefulWidget {
 
 class _PublicRoomsPageState extends State<PublicRoomsPage> {
   bool _joining = false;
+  // Keep the last successfully loaded list so a transient error (e.g. a
+  // failed join) doesn't replace the rooms with an empty screen.
+  List<Room> _lastRooms = [];
   final _codeController = TextEditingController();
 
   @override
@@ -79,7 +82,10 @@ class _PublicRoomsPageState extends State<PublicRoomsPage> {
           );
         },
         builder: (context, state) {
-          final rooms = state is RoomPublicListLoaded ? state.rooms : <Room>[];
+          if (state is RoomPublicListLoaded) _lastRooms = state.rooms;
+          final rooms = state is RoomPublicListLoaded
+              ? state.rooms
+              : _lastRooms;
           final loading = state is RoomLoading;
 
           if (loading && rooms.isEmpty) {

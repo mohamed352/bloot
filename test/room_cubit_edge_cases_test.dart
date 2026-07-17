@@ -1,16 +1,14 @@
 import 'dart:async';
 
-import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:bloc_test/bloc_test.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-
 import 'package:bloot/core/services/agora_service.dart';
 import 'package:bloot/features/room/domain/entities/create_room_params.dart';
 import 'package:bloot/features/room/domain/entities/room.dart';
 import 'package:bloot/features/room/domain/exceptions/room_exception.dart';
 import 'package:bloot/features/room/presentation/cubit/room_cubit.dart';
 import 'package:bloot/features/room/presentation/cubit/room_state.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 
 import 'helpers/test_helpers.dart';
 

@@ -105,7 +105,9 @@ export const joinRoom = functions.https.onCall(async (request) => {
       isMicOn: voiceEnabled,
       isCameraOn: cameraEnabled,
       agoraUid: userAgoraUid,
-      joinedAt: FieldValue.serverTimestamp(),
+      // NOTE: FieldValue.serverTimestamp() is not supported inside arrays —
+      // it makes the whole update fail with an INTERNAL error on the client.
+      joinedAt: new Date(),
     });
     playerUids.push(currentUid);
 

@@ -317,7 +317,9 @@ function assignBotsToRoom(bots: BotProfile[], existingPlayers: RoomPlayerData[])
       nextSeat++,
       true,
       bot.agoraUid,
-      { isMicOn: true, isCameraOn: true },
+      // Bots never publish real audio/video, so keep both off — otherwise
+      // watchers see black camera squares for bot seats.
+      { isMicOn: false, isCameraOn: false },
     );
   });
 }

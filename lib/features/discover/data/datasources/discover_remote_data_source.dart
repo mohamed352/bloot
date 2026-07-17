@@ -152,6 +152,8 @@ class DiscoverRemoteDataSource {
   }
 
   /// Returns true if the room associated with [streamId] allows spectators.
+  /// Fails closed: any error (offline, missing docs) means "not allowed",
+  /// otherwise spectators could bypass rooms that disabled them.
   Future<bool> isSpectatorsAllowed(String streamId) async {
     try {
       final streamDoc = await _firestore
@@ -166,7 +168,7 @@ class DiscoverRemoteDataSource {
       return roomDoc.data()?['allowSpectators'] == true;
     } catch (e) {
       AppLogger.error('Failed to check spectator access', error: e);
-      return true;
+      return false;
     }
   }
 
@@ -197,19 +199,28 @@ class DiscoverRemoteDataSource {
 
   /// Watches the room associated with [streamId] and emits the active gameId
   /// when the room status becomes 'playing'. Emits null when no game is active.
-  Stream<String?> watchRoomGameId(String streamId) {
-    return _firestore
-        .collection('streams')
-        .doc(streamId)
+  ///
+  /// Listens to the room document itself (not the stream doc): starting a game
+  /// only updates the room, and stream-doc listeners would never fire.
+  Stream<String?> watchRoomGameId(String streamId) async* {
+    DocumentSnapshot<Map<String, dynamic>> streamDoc;
+    try {
+      streamDoc = await _firestore.collection('streams').doc(streamId).get();
+    } catch (e) {
+      AppLogger.error('Failed to resolve stream room', error: e);
+      yield null;
+      return;
+    }
+    final roomId = streamDoc.data()?['roomId'] as String?;
+    if (roomId == null || roomId.isEmpty) {
+      yield null;
+      return;
+    }
+    yield* _firestore
+        .collection('rooms')
+        .doc(roomId)
         .snapshots()
-        .where((doc) => doc.exists)
-        .asyncMap((streamDoc) async {
-          final roomId = streamDoc.data()?['roomId'] as String?;
-          if (roomId == null || roomId.isEmpty) return null;
-          final roomDoc = await _firestore
-              .collection('rooms')
-              .doc(roomId)
-              .get();
+        .map((roomDoc) {
           if (!roomDoc.exists) return null;
           final status = roomDoc.data()?['status'] as String?;
           final gameId = roomDoc.data()?['gameId'] as String?;
@@ -312,8 +323,9 @@ class DiscoverRemoteDataSource {
     );
   }
 
-  /// Filters out streams whose parent room is missing, finished, or has no
-  /// players so closed/empty rooms never appear as live.
+  /// Filters out streams whose parent room is missing, finished, has no
+  /// players, or no longer points at this stream (e.g. the host left and the
+  /// room's isStreaming flag was cleared) so stale lives never appear.
   Future<List<DiscoverStreamModel>> _filterActiveStreams(
     List<DiscoverStreamModel> streams,
   ) async {
@@ -331,21 +343,30 @@ class DiscoverRemoteDataSource {
       roomIds.map((id) => _firestore.collection('rooms').doc(id).get()),
     );
 
-    final validRoomIds = <String>{};
+    // Maps a valid room id to the stream id it currently broadcasts.
+    final activeStreamByRoom = <String, String>{};
     for (final doc in roomDocs) {
       if (!doc.exists) continue;
       final data = doc.data()!;
       final playerUids = data['playerUids'];
       final status = data['status'] as String?;
       final hasPlayers = playerUids is List && playerUids.isNotEmpty;
-      if (hasPlayers && status != 'finished') {
-        validRoomIds.add(doc.id);
+      final isStreaming = data['isStreaming'] == true;
+      final roomStreamId = data['streamId'] as String?;
+      if (hasPlayers &&
+          status != 'finished' &&
+          isStreaming &&
+          roomStreamId != null &&
+          roomStreamId.isNotEmpty) {
+        activeStreamByRoom[doc.id] = roomStreamId;
       }
     }
 
     return streams.where((s) {
       final roomId = s.roomId;
-      return roomId == null || roomId.isEmpty || validRoomIds.contains(roomId);
+      return roomId == null ||
+          roomId.isEmpty ||
+          activeStreamByRoom[roomId] == s.id;
     }).toList();
   }
 }

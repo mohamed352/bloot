@@ -7,8 +7,11 @@ import 'package:go_router/go_router.dart';
 import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/core/constants/app_radius.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
+import 'package:bloot/core/di/injection.dart';
 import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/features/discover/domain/entities/discover_stream.dart';
+import 'package:bloot/features/room/domain/exceptions/room_exception.dart';
+import 'package:bloot/features/room/domain/repositories/room_repository.dart';
 import 'package:bloot/generated/locale_keys.g.dart';
 import 'package:bloot/features/discover/presentation/cubit/discover_cubit.dart';
 import 'package:bloot/features/discover/presentation/cubit/discover_state.dart';
@@ -41,6 +44,32 @@ class _DiscoverStreamsPageState extends State<DiscoverStreamsPage> {
     if (query.isEmpty || _searching) return;
 
     setState(() => _searching = true);
+    try {
+      // Joining with a code should seat the user as a player whenever the
+      // room is joinable; only rooms that can't take more players (full,
+      // already playing, finished) fall through to the spectator path.
+      final room = await getIt<RoomRepository>().joinRoomByCode(query);
+      if (!mounted) return;
+      setState(() => _searching = false);
+      _clearSearch();
+      context.pushNamed(
+        RouteNames.roomLobby,
+        pathParameters: {'id': room.id},
+      );
+      return;
+    } on RoomException catch (e) {
+      if (!mounted) return;
+      if (e is! RoomNotFoundException && e is! RoomFullException) {
+        // Wrong password, unauthenticated, or a real join failure: surface it
+        // instead of silently dropping into spectator mode.
+        setState(() => _searching = false);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+        return;
+      }
+    }
+
     final streamId = await context.read<DiscoverCubit>().findStreamByCode(
       query,
     );

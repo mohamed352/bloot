@@ -599,7 +599,7 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         await Future<void>.delayed(Duration.zero);
         volumeController.add(
-          AgoraAudioVolumeIndicationEvent(
+          const AgoraAudioVolumeIndicationEvent(
             speakers: [
               AudioVolumeInfo(uid: 101, volume: 80),
               AudioVolumeInfo(uid: 103, volume: 70),
@@ -646,13 +646,13 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         await Future<void>.delayed(Duration.zero);
         volumeController.add(
-          AgoraAudioVolumeIndicationEvent(
+          const AgoraAudioVolumeIndicationEvent(
             speakers: [AudioVolumeInfo(uid: 101, volume: 80)],
           ),
         );
         await Future<void>.delayed(Duration.zero);
         volumeController.add(
-          AgoraAudioVolumeIndicationEvent(
+          const AgoraAudioVolumeIndicationEvent(
             speakers: [AudioVolumeInfo(uid: 101, volume: 20)],
           ),
         );
@@ -759,7 +759,7 @@ void main() {
         gameController.add(
           g.copyWith(
             status: 'trickEnd',
-            currentTrick: Trick(
+            currentTrick: const Trick(
               trickNumber: 1,
               trickLeaderIndex: 0,
               winnerSeat: 0,
@@ -1033,7 +1033,7 @@ void main() {
         gameController.add(
           g.copyWith(
             status: 'trickEnd',
-            currentTrick: Trick(
+            currentTrick: const Trick(
               trickNumber: 1,
               trickLeaderIndex: 0,
               winnerSeat: 0,

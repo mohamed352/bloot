@@ -36,6 +36,7 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
   late final DiscoverRepository _discoverRepository;
   bool _viewerCountIncremented = false;
   bool _accessChecked = false;
+  bool _accessGranted = false;
   String? _gameId;
   StreamSubscription<String?>? _gameIdSubscription;
 
@@ -116,24 +117,31 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
     super.dispose();
   }
 
-  /// Checks whether the room allows spectators. If not, shows a message and
-  /// pops the page.
-  Future<void> _checkSpectatorAccess() async {
+  /// Checks whether the room allows spectators *before* connecting to the
+  /// stream. When not allowed (or the check fails), shows a message and pops
+  /// the page without ever joining the Agora channel.
+  Future<void> _checkSpectatorAccess(DiscoverStream stream) async {
     if (_accessChecked) return;
     _accessChecked = true;
+    bool allowed = false;
     try {
-      final allowed = await _discoverRepository.isSpectatorsAllowed(widget.id);
-      if (!allowed && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Spectators are not allowed in this room'),
-          ),
-        );
-        context.pop();
-      }
+      allowed = await _discoverRepository.isSpectatorsAllowed(widget.id);
     } catch (_) {
-      // If the check fails, allow watching rather than blocking erroneously.
+      allowed = false; // Fail closed.
     }
+    if (!mounted) return;
+    if (!allowed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Spectators are not allowed in this room'),
+        ),
+      );
+      context.pop();
+      return;
+    }
+    _accessGranted = true;
+    _joinAgoraChannel(stream.agoraChannelName);
+    _subscribeToGameId();
   }
 
   /// Subscribes to the room's game status so the "Watch Game" button
@@ -160,9 +168,13 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
             ).showSnackBar(SnackBar(content: Text(message)));
           },
           streamLoaded: (stream, _) {
-            _joinAgoraChannel(stream.agoraChannelName);
-            _checkSpectatorAccess();
-            _subscribeToGameId();
+            // Gate on spectator access first; only after access is granted do
+            // we join the Agora channel and subscribe to the game id.
+            if (!_accessChecked) {
+              _checkSpectatorAccess(stream);
+            } else if (_accessGranted) {
+              _joinAgoraChannel(stream.agoraChannelName);
+            }
           },
         );
       },

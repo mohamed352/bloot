@@ -73,11 +73,29 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
       final password = _passwordController.text.trim();
       final isValid = password.isNotEmpty && password.length >= 4;
       if (isValid != _isPasswordValid) {
-        setState(() => _isPasswordValid = isValid);
+        _isPasswordValid = isValid;
       }
     } else if (!_isPasswordValid) {
-      setState(() => _isPasswordValid = true);
+      _isPasswordValid = true;
     }
+    // Rebuild so the create button reflects the current name/password text.
+    setState(() {});
+  }
+
+  /// A new room always needs a non-empty name; private rooms also need a
+  /// valid password.
+  bool get _canCreate {
+    if (_nameController.text.trim().isEmpty) return false;
+    if (_selectedType == 0 && !_isPasswordValid) return false;
+    return true;
+  }
+
+  /// Clears the form after a successful creation so reopening the page (the
+  /// route stays in the navigation stack) shows empty fields again.
+  void _resetForm() {
+    _nameController.clear();
+    _passwordController.clear();
+    setState(() => _isPasswordValid = false);
   }
 
   @override
@@ -85,10 +103,13 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
     return BlocConsumer<RoomCubit, RoomState>(
       listener: (context, state) {
         state.whenOrNull(
-          created: (room) => context.pushNamed(
-            RouteNames.roomLobby,
-            pathParameters: {'id': room.id},
-          ),
+          created: (room) {
+            _resetForm();
+            context.pushNamed(
+              RouteNames.roomLobby,
+              pathParameters: {'id': room.id},
+            );
+          },
           error: (message) {
             ScaffoldMessenger.of(
               context,
@@ -477,8 +498,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                     gradient: GradientButton.goldGradient,
                     icon: Icons.add_rounded,
                     isLoading: isLoading,
-                    onPressed:
-                        isLoading || (_selectedType == 0 && !_isPasswordValid)
+                    onPressed: isLoading || !_canCreate
                         ? null
                         : () {
                             AppLogger.info(
@@ -493,7 +513,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                             }
                             context.read<RoomCubit>().createRoom(
                               CreateRoomParams(
-                                name: name.isNotEmpty ? name : 'room'.tr(),
+                                name: name,
                                 type: RoomType.values[_selectedType],
                                 voiceEnabled: _voiceOn,
                                 cameraEnabled: _cameraOn,

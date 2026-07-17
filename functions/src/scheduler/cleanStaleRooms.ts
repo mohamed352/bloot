@@ -58,12 +58,69 @@ export const cleanStaleRooms = onSchedule(
       });
     }
 
-    if (count > 0) {
+    // Sweep orphaned live streams: the room is gone/finished/empty, the host
+    // left (e.g. app killed without leaveGame), or the room no longer points
+    // at this stream. This is the server-side backstop for "live still
+    // appears after the creator left".
+    const liveStreams = await db
+      .collection('streams')
+      .where('status', '==', 'live')
+      .limit(200)
+      .get();
+
+    let endedLiveStreams = 0;
+    for (const streamDoc of liveStreams.docs) {
+      if (streamIdsToEnd.has(streamDoc.id)) continue;
+      const stream = streamDoc.data();
+      const roomId = stream.roomId as string | undefined;
+      const hostUid = stream.hostUid as string | undefined;
+
+      let shouldEnd = false;
+      let roomRef: FirebaseFirestore.DocumentReference | undefined;
+
+      if (roomId == null || roomId.length === 0) {
+        shouldEnd = true;
+      } else {
+        const roomDoc = await db.collection('rooms').doc(roomId).get();
+        if (!roomDoc.exists) {
+          shouldEnd = true;
+        } else {
+          const room = roomDoc.data()!;
+          const playerUids = (room.playerUids as string[] | undefined) ?? [];
+          shouldEnd =
+            room.status === 'finished' ||
+            playerUids.length === 0 ||
+            (hostUid != null && !playerUids.includes(hostUid)) ||
+            room.isStreaming !== true ||
+            room.streamId !== streamDoc.id;
+          if (shouldEnd && room.isStreaming === true) {
+            roomRef = roomDoc.ref;
+          }
+        }
+      }
+
+      if (shouldEnd) {
+        batch.update(streamDoc.ref, {
+          status: 'ended',
+          endedAt: FieldValue.serverTimestamp(),
+        });
+        if (roomRef != null) {
+          batch.update(roomRef, {
+            isStreaming: false,
+            streamId: null,
+            updatedAt: FieldValue.serverTimestamp(),
+          });
+        }
+        endedLiveStreams++;
+      }
+    }
+
+    if (count > 0 || endedLiveStreams > 0) {
       await batch.commit();
     }
 
     console.log(
-      `cleanStaleRooms: deleted ${count} rooms, ended ${streamIdsToEnd.size} streams`,
+      `cleanStaleRooms: deleted ${count} rooms, ended ${streamIdsToEnd.size} streams, swept ${endedLiveStreams} orphaned live streams`,
     );
   },
 );

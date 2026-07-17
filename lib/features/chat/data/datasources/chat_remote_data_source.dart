@@ -171,6 +171,9 @@ class ChatRemoteDataSource {
             .collection('conversations')
             .doc(conversationId),
         {
+          // Required on create by Firestore rules
+          // (isParticipantInNewMetadata), harmless on update.
+          'participantUids': participantUids,
           'lastMessage': message,
           'updatedAt': FieldValue.serverTimestamp(),
           'unread': isSender ? 0 : FieldValue.increment(1),
@@ -193,16 +196,48 @@ class ChatRemoteDataSource {
       final trimmed = query.trim();
       if (trimmed.isEmpty) return [];
 
-      // Firestore has no "contains" query, so we run prefix range queries on
-      // both name fields with a few case variants to cover how names were
-      // originally stored (as typed, lower-cased, or capitalized).
+      // Firestore has no "contains" query, so we combine:
+      // 1) an exact keyword lookup on `searchKeywords` (lowercased tokens of
+      //    displayName/username/email maintained by a Cloud Function trigger)
+      //    — case-insensitive and script-agnostic (works for Arabic names);
+      // 2) prefix range queries on username/displayName with a few case
+      //    variants for partial matches and for users who don't have
+      //    searchKeywords backfilled yet.
+      final lower = trimmed.toLowerCase();
+      final byId = <String, ChatUserModel>{};
+
+      void collect(Iterable<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
+        for (final d in docs) {
+          if (d.id == uid || byId.containsKey(d.id)) continue;
+          final data = d.data();
+          byId[d.id] = ChatUserModel(
+            id: d.id,
+            displayName: (data['displayName'] as String? ?? '').trim(),
+            username: (data['username'] as String?)?.trim(),
+            avatarUrl: data['avatarUrl'] as String?,
+          );
+        }
+      }
+
+      try {
+        final keywordSnapshot = await _firestore
+            .collection('users')
+            .where('searchKeywords', arrayContains: lower)
+            .limit(10)
+            .get();
+        collect(keywordSnapshot.docs);
+      } catch (e) {
+        // Older users may lack searchKeywords, or the field may not be
+        // indexed yet — fall through to the prefix queries.
+        AppLogger.error('Keyword search failed', error: e);
+      }
+
       final variants = <String>{
         trimmed,
-        trimmed.toLowerCase(),
+        lower,
         trimmed[0].toUpperCase() + trimmed.substring(1).toLowerCase(),
       };
 
-      final byId = <String, ChatUserModel>{};
       for (final field in ['username', 'displayName']) {
         for (final variant in variants) {
           final snapshot = await _firestore
@@ -211,16 +246,7 @@ class ChatRemoteDataSource {
               .where(field, isLessThan: '$variant\uf8ff')
               .limit(10)
               .get();
-          for (final d in snapshot.docs) {
-            if (d.id == uid || byId.containsKey(d.id)) continue;
-            final data = d.data();
-            byId[d.id] = ChatUserModel(
-              id: d.id,
-              displayName: (data['displayName'] as String? ?? '').trim(),
-              username: (data['username'] as String?)?.trim(),
-              avatarUrl: data['avatarUrl'] as String?,
-            );
-          }
+          collect(snapshot.docs);
         }
       }
 
