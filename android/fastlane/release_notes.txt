@@ -1,4 +1,13 @@
-Bloot v1.0.0 (build 1) — QA Release
+Bloot v1.0.0 (build 7) — QA Release
 
-Initial Fastlane + Firebase App Distribution setup.
-Build: clean + release APK
+Fixes from build 5/6 feedback:
+• Fixed join failures: joining public rooms and joining by code now works (server crash fixed)
+• Joining with a code or invitation now seats you as a player (only full/in-progress rooms open as spectator)
+• Fixed "Player not in room" error when tapping Ready
+• Live streams now close automatically when the host leaves; stale lives no longer appear in home/discover
+• Playing with bots no longer kills an ongoing live
+• Watchers: "Watch Game" button appears when the game starts; no more black camera squares for bots; mic/audio state fixes
+• Rooms that disallow spectators can no longer be watched
+• Create room: name is now required and fields reset for each new room
+• Invite-a-friend search: keyboard no longer closes while typing; account search finds users reliably
+• Direct messages to players now work (no more "Failed to start conversation")
