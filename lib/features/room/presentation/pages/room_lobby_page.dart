@@ -31,6 +31,7 @@ class RoomLobbyPage extends StatefulWidget {
 class _RoomLobbyPageState extends State<RoomLobbyPage>
     with WidgetsBindingObserver {
   AgoraService? _agoraService;
+  bool _bypassLeaveHandling = false;
 
   @override
   void initState() {
@@ -65,9 +66,9 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
+      canPop: _bypassLeaveHandling,
       onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) return;
+        if (didPop || _bypassLeaveHandling) return;
         final cubit = context.read<RoomCubit>();
         // The cubit may already be closed if the user double-pressed back.
         if (cubit.isClosed) return;
@@ -90,10 +91,14 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
               );
             },
             kicked: () {
+              // The cubit already cleaned up the room. Bypass the lobby's
+              // back/leave handler so navigation Home is not intercepted as a
+              // voluntary leave (which would emit another loaded state).
+              _bypassLeaveHandling = true;
+              context.goNamed(RouteNames.home);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('kicked_from_room'.tr())),
               );
-              context.goNamed(RouteNames.home);
             },
           );
         },

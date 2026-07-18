@@ -323,9 +323,10 @@ class DiscoverRemoteDataSource {
     );
   }
 
-  /// Filters out streams whose parent room is missing, finished, has no
-  /// players, or no longer points at this stream (e.g. the host left and the
-  /// room's isStreaming flag was cleared) so stale lives never appear.
+  /// Filters out streams that have no parent room, or whose parent room is
+  /// missing, not currently playing, has no players, or no longer points at
+  /// this stream (e.g. the host left and the room's isStreaming flag was
+  /// cleared) so stale lives never appear.
   Future<List<DiscoverStreamModel>> _filterActiveStreams(
     List<DiscoverStreamModel> streams,
   ) async {
@@ -337,7 +338,7 @@ class DiscoverRemoteDataSource {
         .cast<String>()
         .toSet();
 
-    if (roomIds.isEmpty) return streams;
+    if (roomIds.isEmpty) return [];
 
     final roomDocs = await Future.wait(
       roomIds.map((id) => _firestore.collection('rooms').doc(id).get()),
@@ -354,7 +355,7 @@ class DiscoverRemoteDataSource {
       final isStreaming = data['isStreaming'] == true;
       final roomStreamId = data['streamId'] as String?;
       if (hasPlayers &&
-          status != 'finished' &&
+          status == 'playing' &&
           isStreaming &&
           roomStreamId != null &&
           roomStreamId.isNotEmpty) {
@@ -364,8 +365,8 @@ class DiscoverRemoteDataSource {
 
     return streams.where((s) {
       final roomId = s.roomId;
-      return roomId == null ||
-          roomId.isEmpty ||
+      return roomId != null &&
+          roomId.isNotEmpty &&
           activeStreamByRoom[roomId] == s.id;
     }).toList();
   }

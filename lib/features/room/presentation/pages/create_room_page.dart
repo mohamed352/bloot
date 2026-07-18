@@ -455,6 +455,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                                 // Private rooms no longer require a password;
                                 // CreateRoomParams.password stays only for
                                 // legacy rooms that were created with one.
+                                // ignore: avoid_redundant_argument_values
                                 password: null,
                               ),
                             );

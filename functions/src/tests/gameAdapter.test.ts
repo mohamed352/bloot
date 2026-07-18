@@ -1,4 +1,9 @@
-import { createGameDocument, loadMatch, saveMatch } from '../engine/gameAdapter';
+import {
+  createGameDocument,
+  loadMatch,
+  saveMatch,
+  setTrickEndStatus,
+} from '../engine/gameAdapter';
 import { BalootEngine } from '../engine/balootEngine';
 
 describe('gameAdapter', () => {
@@ -34,6 +39,43 @@ describe('gameAdapter', () => {
     expect(game.gameType).toBe('sun');
     expect(game.players['0'].hand).toHaveLength(8);
     expect(game.currentTrick.cards['0']).toBeNull();
+  });
+
+  it('allows the next leader to play immediately after trickEnd', () => {
+    const game = createGameDocument('g1', 'r1', [
+      { uid: 'a', displayName: 'A', team: 'A', seatIndex: 0 },
+      { uid: 'b', displayName: 'B', team: 'B', seatIndex: 1 },
+      { uid: 'c', displayName: 'C', team: 'A', seatIndex: 2 },
+      { uid: 'd', displayName: 'D', team: 'B', seatIndex: 3 },
+    ]);
+
+    const engine = new BalootEngine();
+    const match = loadMatch(game);
+    engine.applyBid(match, match.state!.bidding.turn, { type: 'sun' });
+
+    // Complete the first trick.
+    for (let i = 0; i < 4; i++) {
+      const state = match.state!;
+      const card = engine.legalMoves(state, state.turn)[0];
+      engine.playCard(match, state.turn, card);
+    }
+    saveMatch(game, match);
+    setTrickEndStatus(game, match);
+
+    expect(game.status).toBe('trickEnd');
+    expect(match.state!.phase).toBe('playing');
+
+    // This mirrors the playCard callable: the next leader does not wait for
+    // the scheduled trickEnd cleanup before playing.
+    game.status = 'playing';
+    const nextState = match.state!;
+    const nextSeat = nextState.turn;
+    const nextCard = engine.legalMoves(nextState, nextSeat)[0];
+    engine.playCard(match, nextSeat, nextCard);
+    saveMatch(game, match);
+
+    expect(game.status).toBe('playing');
+    expect(game.currentTrick.cards[String(nextSeat)]).toBe(nextCard.key);
   });
 
   it('defensively sorts roomPlayers by seatIndex before seating', () => {

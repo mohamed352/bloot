@@ -1,4 +1,4 @@
-import { buildStreamPayload, shouldAutoCreateStream } from '../utils/streaming';
+import { buildStreamPayload, isPlayingRoomAbandoned, shouldAutoCreateStream } from '../utils/streaming';
 
 describe('buildStreamPayload', () => {
   const roomPlayers = [
@@ -56,5 +56,50 @@ describe('shouldAutoCreateStream', () => {
     expect(shouldAutoCreateStream({ type: 'liveStream', isStreaming: true })).toBe(false);
     expect(shouldAutoCreateStream({ type: 'private' })).toBe(false);
     expect(shouldAutoCreateStream({})).toBe(false);
+  });
+});
+
+
+describe('isPlayingRoomAbandoned', () => {
+  const now = new Date('2026-01-01T01:00:00Z');
+  const minutesAgo = (m: number) => new Date(now.getTime() - m * 60 * 1000);
+
+  it('is abandoned when the room has no gameId', () => {
+    expect(isPlayingRoomAbandoned({}, null, now)).toBe(true);
+    expect(isPlayingRoomAbandoned({ gameId: null }, null, now)).toBe(true);
+    expect(isPlayingRoomAbandoned({ gameId: '' }, null, now)).toBe(true);
+  });
+
+  it('is abandoned when the game doc is missing', () => {
+    expect(isPlayingRoomAbandoned({ gameId: 'g1' }, null, now)).toBe(true);
+  });
+
+  it('is abandoned when the game has no readable updatedAt', () => {
+    expect(isPlayingRoomAbandoned({ gameId: 'g1' }, {}, now)).toBe(true);
+    expect(
+      isPlayingRoomAbandoned({ gameId: 'g1' }, { updatedAt: 'not-a-date' }, now),
+    ).toBe(true);
+  });
+
+  it('is not abandoned while the game is actively updated', () => {
+    const game = { updatedAt: minutesAgo(5) };
+    expect(isPlayingRoomAbandoned({ gameId: 'g1' }, game, now)).toBe(false);
+  });
+
+  it('is abandoned once the game has been silent past the stale window', () => {
+    const game = { updatedAt: minutesAgo(31) };
+    expect(isPlayingRoomAbandoned({ gameId: 'g1' }, game, now)).toBe(true);
+  });
+
+  it('supports Firestore Timestamp-like updatedAt values', () => {
+    const fresh = { updatedAt: { toMillis: () => minutesAgo(2).getTime() } };
+    const stale = { updatedAt: { toMillis: () => minutesAgo(45).getTime() } };
+    expect(isPlayingRoomAbandoned({ gameId: 'g1' }, fresh, now)).toBe(false);
+    expect(isPlayingRoomAbandoned({ gameId: 'g1' }, stale, now)).toBe(true);
+  });
+
+  it('treats exactly-at-threshold as still alive', () => {
+    const game = { updatedAt: minutesAgo(30) };
+    expect(isPlayingRoomAbandoned({ gameId: 'g1' }, game, now)).toBe(false);
   });
 });

@@ -1,9 +1,10 @@
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { FieldValue } from 'firebase-admin/firestore';
 import { db } from '../config/admin';
+import { isPlayingRoomAbandoned } from '../utils/streaming';
 
 export const cleanStaleRooms = onSchedule(
-  { schedule: 'every 60 minutes', timeZone: 'UTC' },
+  { schedule: 'every 10 minutes', timeZone: 'UTC' },
   async () => {
     const now = new Date();
     const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
@@ -47,6 +48,43 @@ export const cleanStaleRooms = onSchedule(
       if (!staleQuery.docs.find((d) => d.id === doc.id)) {
         collectRoomDeletion(doc);
       }
+    }
+
+    // Sweep abandoned "playing" rooms: the game is gone or has not been
+    // written to for 30 minutes, meaning every client disappeared without
+    // calling leaveGame (app killed, crash, no network). End the stream and
+    // finish the room so it leaves the live list immediately; the
+    // stale-deletion pass above removes the room doc 2h later.
+    const playingQuery = await db
+      .collection('rooms')
+      .where('status', '==', 'playing')
+      .limit(200)
+      .get();
+
+    let abandonedRooms = 0;
+    for (const doc of playingQuery.docs) {
+      const room = doc.data();
+      const gameId = room.gameId as string | undefined;
+      let gameData: { updatedAt?: unknown } | null = null;
+      if (gameId != null && gameId.length > 0) {
+        const gameDoc = await db.collection('games').doc(gameId).get();
+        gameData = gameDoc.exists
+          ? (gameDoc.data() as { updatedAt?: unknown })
+          : null;
+      }
+      if (!isPlayingRoomAbandoned(room, gameData, now)) continue;
+
+      const streamId = room.streamId as string | undefined;
+      if (streamId != null && streamId.length > 0) {
+        streamIdsToEnd.add(streamId);
+      }
+      batch.update(doc.ref, {
+        status: 'finished',
+        isStreaming: false,
+        streamId: null,
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      abandonedRooms++;
     }
 
     // End any streams tied to deleted rooms so they don't remain live.
@@ -115,12 +153,12 @@ export const cleanStaleRooms = onSchedule(
       }
     }
 
-    if (count > 0 || endedLiveStreams > 0) {
+    if (count > 0 || endedLiveStreams > 0 || abandonedRooms > 0) {
       await batch.commit();
     }
 
     console.log(
-      `cleanStaleRooms: deleted ${count} rooms, ended ${streamIdsToEnd.size} streams, swept ${endedLiveStreams} orphaned live streams`,
+      `cleanStaleRooms: deleted ${count} rooms, ended ${streamIdsToEnd.size} streams, swept ${endedLiveStreams} orphaned live streams, finished ${abandonedRooms} abandoned playing rooms`,
     );
   },
 );

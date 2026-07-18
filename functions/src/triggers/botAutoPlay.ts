@@ -10,6 +10,13 @@ import { buildGameUpdate, deepCloneGame } from '../utils/gameUpdate';
  * turn. This makes the "Play with Bots" single-device test flow work against
  * the real database.
  */
+export function isTerminalGameForBotAutoPlay(game: {
+  status?: string;
+  endedAt?: unknown;
+}): boolean {
+  return game.status === 'gameEnd' || game.endedAt != null;
+}
+
 export const botAutoPlay = onDocumentWritten(
   {
     document: 'games/{gameId}',
@@ -21,6 +28,11 @@ export const botAutoPlay = onDocumentWritten(
 
     const gameId = event.params.gameId;
     const game = after.data() as any;
+
+    // Never act on a completed game. Without this guard, the unconditional
+    // turnTimerStart update below writes the game again, re-triggers this
+    // function, and creates an expensive infinite bot/mirror/update loop.
+    if (isTerminalGameForBotAutoPlay(game)) return;
 
     const seatIndex = game.turnIndex;
     const seatStr = String(seatIndex);
@@ -38,14 +50,17 @@ export const botAutoPlay = onDocumentWritten(
         const freshGame = freshDoc.data() as any;
         const originalGame = deepCloneGame(freshGame);
 
+        if (isTerminalGameForBotAutoPlay(freshGame)) return;
         if (freshGame.turnIndex !== seatIndex) return;
         if (!freshGame.players?.[seatStr]?.isBot) return;
 
         const engine = new BalootEngine();
         const match = loadMatch(freshGame);
         let state = match.state!;
+        if (match.matchOver) return;
         const bot = new BalootBot();
         const level = player.level ?? 'amateur';
+        let acted = false;
 
         if (state.phase === 'bidding') {
           const action = bot.decideBid(match, seatIndex, level);
@@ -58,6 +73,7 @@ export const botAutoPlay = onDocumentWritten(
           }
           saveMatch(freshGame, match);
 
+          acted = true;
           if (events.some((e) => e.type === 'redeal')) {
             freshGame.playerBids = {};
           }
@@ -66,10 +82,12 @@ export const botAutoPlay = onDocumentWritten(
           const types = botProjects.map((p) => p.type);
           engine.declareProject(match, seatIndex, types);
           saveMatch(freshGame, match);
+          acted = true;
         } else if (state.awaitingDouble && state.doubling?.turn === seatIndex) {
           const wantsDouble = bot.decideDouble(match, seatIndex, level);
           engine.applyDouble(match, seatIndex, wantsDouble ? 'double' : 'pass');
           saveMatch(freshGame, match);
+          acted = true;
         } else if (state.phase === 'playing') {
           const card = bot.decidePlay(match, seatIndex, level);
           const events = engine.playCard(match, seatIndex, card);
@@ -80,6 +98,7 @@ export const botAutoPlay = onDocumentWritten(
 
           saveMatch(freshGame, match);
 
+          acted = true;
           if (trickEnded && !handEnded && !matchEnded) {
             setTrickEndStatus(freshGame, match);
           }
@@ -98,7 +117,12 @@ export const botAutoPlay = onDocumentWritten(
           freshGame.fellTeam = null;
           freshGame.resolvedBonuses = null;
           saveMatch(freshGame, match);
+          acted = true;
         }
+
+        // Do not write when no bot action was applicable. A timer-only write
+        // would retrigger this function forever on terminal/stale states.
+        if (!acted) return;
 
         freshGame.turnTimerStart = Timestamp.now();
 

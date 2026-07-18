@@ -477,7 +477,6 @@ void main() {
                   name: 'Me',
                   isMe: true,
                   agoraUid: 101,
-                  isSpeaking: false,
                 ),
               ],
             ),

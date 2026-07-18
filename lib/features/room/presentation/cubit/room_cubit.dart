@@ -225,26 +225,18 @@ class RoomCubit extends Cubit<RoomState> {
     _currentRoom = null;
 
     // Do not await cancellation of the subscription whose listener is calling
-    // us; that can deadlock on some stream implementations.
+    // us; that can deadlock on some stream implementations. AgoraService also
+    // handles a leave request that arrives while a join is still in flight.
     final roomSubscription = _roomSubscription;
     _roomSubscription = null;
     unawaited(roomSubscription?.cancel());
-    await _audioVolumeSubscription?.cancel();
+
+    final audioSubscription = _audioVolumeSubscription;
     _audioVolumeSubscription = null;
+    unawaited(audioSubscription?.cancel());
 
-    // Wait for an in-flight Agora join to finish before leaving.
-    if (_pendingAgoraJoin != null) {
-      try {
-        await _pendingAgoraJoin!.timeout(const Duration(seconds: 3));
-      } catch (_) {
-        // Ignore join errors/timeouts during kick cleanup.
-      }
-      _pendingAgoraJoin = null;
-    }
-
-    // Leave unconditionally: if a join is still in flight, AgoraService will
-    // honor its internal leave request and disconnect as soon as it completes.
-    await _agoraService.leaveChannel();
+    _pendingAgoraJoin = null;
+    unawaited(_agoraService.leaveChannel());
     _joinedAgoraChannelName = null;
 
     if (!isClosed) emit(const RoomState.kicked());

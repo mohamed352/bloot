@@ -677,8 +677,8 @@ Written only by the `blockUser`/`unblockUser` Cloud Functions; readable only by 
 | `updateRoomStatus` | `rooms/{id}.onUpdate` | Update room status when all players ready |
 | `updateViewerCount` | `streams/{id}/viewers.onWrite` | Recalculate viewer count |
 | `updateFollowerCount` | `users/{id}/followers.onWrite` | Recalculate follower count |
-| `processGameEnd` | `games/{id}.onUpdate` | Handle game completion, update stats |
-| `cleanExpiredRoom` | Scheduled (every 5 min) | Delete rooms idle > 30 min |
+| `processGameEnd` | `games/{id}.onUpdate` | Handle game completion, update stats, end the room's live stream |
+| `cleanStaleRooms` | Scheduled (every 10 min) | Delete rooms `waiting`/`finished` idle > 2h and empty rooms; end orphaned `live` streams; finish `playing` rooms whose game has been silent > 30 min (abandoned) and end their streams |
 | `checkAchievements` | `users/{uid}.onUpdate` | Check and unlock achievements when stats change |
 | `updateLeaderboards` | Scheduled (every hour) | Recalculate active leaderboards |
 | `sendNotification` | Firestore `onCreate` (various) | Create notification documents on triggers |

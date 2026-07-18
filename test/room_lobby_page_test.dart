@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:bloot/features/room/domain/entities/room.dart';
 import 'package:bloot/features/room/presentation/cubit/room_cubit.dart';
+import 'package:bloot/features/room/presentation/cubit/room_state.dart';
 import 'package:bloot/features/room/presentation/pages/room_lobby_page.dart';
 import 'package:bloot/features/room/presentation/widgets/seat_widget.dart';
 
@@ -335,7 +336,7 @@ void main() {
               players: [
                 testPlayer(uid: 'u3', name: 'Opp1', team: 'B'),
                 testPlayer(uid: 'u2', name: 'Partner'),
-                testPlayer(uid: 'u1', name: 'Me', isMe: true),
+                testPlayer(name: 'Me', isMe: true),
                 testPlayer(uid: 'u4', name: 'Opp2', team: 'B'),
               ],
             ),
@@ -457,17 +458,23 @@ void main() {
 
         // Later snapshot: local user was removed (kicked by the host).
         roomController.add(
-          testRoom(players: [testPlayer(uid: 'u2', name: 'Host')]),
+          testRoom(
+            players: [testPlayer(uid: 'u2', name: 'Host')],
+          ),
         );
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 100));
+        // The kick cleanup is async (cancel subscriptions, leave Agora), so
+        // flush several frames before asserting.
+        for (var i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
 
+        expect(cubit.state, isA<RoomKicked>());
+        expect(find.text('Home'), findsOneWidget);
         expect(find.byType(SnackBar), findsOneWidget);
         expect(
           find.text('You were removed from the room by the host.'),
           findsOneWidget,
         );
-        expect(find.text('Home'), findsOneWidget);
         verifyNever(() => roomRepository.leaveRoom(any()));
       });
     });

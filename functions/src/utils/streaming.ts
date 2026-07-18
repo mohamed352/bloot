@@ -72,3 +72,41 @@ export function shouldAutoCreateStream(room: {
 }): boolean {
   return room.type === 'liveStream' && room.isStreaming !== true;
 }
+
+/** How long a playing room's game may go without a write before the room is
+ * considered abandoned. Game docs are written on every action (and turn
+ * timers / autoPlay keep writes coming), so 30 minutes of silence means all
+ * clients disappeared without calling leaveGame. */
+export const PLAYING_ROOM_STALE_MS = 30 * 60 * 1000;
+
+/**
+ * Whether a room stuck in `playing` status is abandoned: it has no game, the
+ * game doc is gone, or the game has not been written to for `staleMs`.
+ * Pure function so the scheduled sweeper stays unit-testable.
+ */
+export function isPlayingRoomAbandoned(
+  room: { gameId?: string | null },
+  game: { updatedAt?: unknown } | null,
+  now: Date = new Date(),
+  staleMs: number = PLAYING_ROOM_STALE_MS,
+): boolean {
+  if (room.gameId == null || room.gameId.length === 0) return true;
+  if (game == null) return true;
+
+  const updatedAt = game.updatedAt;
+  let millis: number | null = null;
+  if (updatedAt instanceof Date) {
+    millis = updatedAt.getTime();
+  } else if (typeof updatedAt === 'number') {
+    millis = updatedAt;
+  } else if (
+    updatedAt != null &&
+    typeof (updatedAt as { toMillis?: unknown }).toMillis === 'function'
+  ) {
+    millis = (updatedAt as { toMillis: () => number }).toMillis();
+  }
+  // A game with no readable updatedAt cannot prove it is alive.
+  if (millis == null) return true;
+
+  return now.getTime() - millis > staleMs;
+}
