@@ -14,5 +14,8 @@ class RoomState with _$RoomState {
       RoomGameStarted;
   const factory RoomState.publicListLoaded({required List<Room> rooms}) =
       RoomPublicListLoaded;
+
+  /// The local user was removed from the room by the host (kicked).
+  const factory RoomState.kicked() = RoomKicked;
   const factory RoomState.error({required String message}) = RoomError;
 }

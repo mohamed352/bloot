@@ -3,6 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { db } from '../config/admin';
 import { requireAppCheck } from '../utils/appCheck';
 import { getOrCreateUserAgoraUid } from '../utils/agoraUid';
+import { allocateParitySeat } from '../utils/roomPlayers';
 
 /**
  * Server-side handler for joining a room by invite code.
@@ -60,6 +61,15 @@ export const joinRoom = functions.https.onCall(async (request) => {
 
     const data = doc.data()!;
 
+    // Kicked players are not allowed back in.
+    const kickedPlayerUids = (data.kickedPlayerUids as string[] | undefined) ?? [];
+    if (kickedPlayerUids.includes(currentUid)) {
+      throw new functions.https.HttpsError(
+        'permission-denied',
+        'You have been removed from this room',
+      );
+    }
+
     // Private room password check (inside transaction to avoid races).
     const roomType = data.type as string | undefined;
     const roomPassword = data.password as string | undefined;
@@ -85,7 +95,14 @@ export const joinRoom = functions.https.onCall(async (request) => {
 
     const teamA = Array.from(data.teamA as string[] ?? []);
     const teamB = Array.from(data.teamB as string[] ?? []);
-    const team = teamA.length <= teamB.length ? 'A' : 'B';
+
+    // Allocate a free parity seat for the assigned team (A: 0/2, B: 1/3) so
+    // seat/team parity always matches the engine (teamOf(seat) = seat % 2).
+    const allocation = allocateParitySeat(players);
+    if (!allocation) {
+      throw new functions.https.HttpsError('resource-exhausted', 'Room is full');
+    }
+    const { team, seatIndex } = allocation;
     if (team === 'A') {
       teamA.push(currentUid);
     } else {
@@ -100,7 +117,7 @@ export const joinRoom = functions.https.onCall(async (request) => {
       displayName,
       avatarUrl,
       team,
-      seatIndex: players.length,
+      seatIndex,
       isReady: false,
       isMicOn: voiceEnabled,
       isCameraOn: cameraEnabled,
@@ -109,6 +126,8 @@ export const joinRoom = functions.https.onCall(async (request) => {
       // it makes the whole update fail with an INTERNAL error on the client.
       joinedAt: new Date(),
     });
+    // Keep players sorted by seatIndex.
+    players.sort((a: any, b: any) => a.seatIndex - b.seatIndex);
     playerUids.push(currentUid);
 
     transaction.update(roomRef, {

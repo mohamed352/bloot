@@ -324,6 +324,13 @@ button { font-family: var(--font-sans); }
 .bt-ring-timer[hidden] { display: none; }
 .bt-ring-timer--seat { position: absolute; top: -8px; inset-inline-end: -8px; width: 20px; height: 20px; font-size: 8px; }
 #hand-timer-self { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 8px); inset-inline-start: 8px; z-index: var(--z-hud); }
+.bt-ring-timer--urgent {
+  background: conic-gradient(var(--felt-danger) calc(var(--pct) * 1%), rgba(255,255,255,.12) 0);
+  color: #fff;
+  animation: bt-timer-pulse 1s ease-in-out infinite;
+}
+.bt-timer--urgent { animation: bt-timer-pulse 1s ease-in-out infinite; }
+@keyframes bt-timer-pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.12); opacity: .75; } }
 
 /* ===================== النوافذ المنبثقة (نهاية صكة/مباراة) ===================== */
 .bt-overlay {

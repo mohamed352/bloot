@@ -30,6 +30,8 @@ abstract class GameModel with _$GameModel {
     TrickModel? currentTrick,
     String? roomId,
     String? agoraChannelName,
+    @Default(false) bool voiceEnabled,
+    @Default(false) bool cameraEnabled,
     Map<String, dynamic>? engineState,
   }) = _GameModel;
 
@@ -148,6 +150,8 @@ extension GameModelX on GameModel {
       currentTrick: currentTrick?.toEntity(),
       roomId: roomId,
       agoraChannelName: agoraChannelName,
+      voiceEnabled: voiceEnabled,
+      cameraEnabled: cameraEnabled,
       engineState: engineState,
     );
   }

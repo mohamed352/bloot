@@ -7,6 +7,8 @@ export interface RtdbGameValue {
   engineState: Record<string, unknown> | null;
   playerUids: Record<string, boolean>;
   status: string;
+  turnTimerStart: number | null;
+  turnTimeLimit: number;
   updatedAt: number;
 }
 
@@ -21,10 +23,24 @@ export function buildRtdbGameValue(game: GameDocument): RtdbGameValue {
     if (uid) playerUids[uid] = true;
   }
 
+  const timerStart = game.turnTimerStart as unknown as {
+    toMillis?: () => number;
+    getTime?: () => number;
+  } | null;
+  const turnTimerStart = timerStart
+    ? (typeof timerStart.toMillis === 'function'
+        ? timerStart.toMillis()
+        : typeof timerStart.getTime === 'function'
+          ? timerStart.getTime()
+          : null)
+    : null;
+
   return {
     engineState: (game.engineState as Record<string, unknown>) ?? null,
     playerUids,
     status: game.status ?? 'dealing',
+    turnTimerStart,
+    turnTimeLimit: game.turnTimeLimit ?? 45,
     updatedAt: Date.now(),
   };
 }

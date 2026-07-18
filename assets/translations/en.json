@@ -347,6 +347,8 @@
   "push_invite_body": "Room: {roomName}",
   "no_public_rooms": "No public rooms right now. Create your own!",
   "no_live_for_code": "No live stream found for this code.",
+  "room_not_live": "This table is not live right now.",
+  "kicked_from_room": "You were removed from the room by the host.",
   "public_rooms": "Public Tables",
   "join_table": "Join Table",
   "spectate": "Spectate",

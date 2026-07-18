@@ -1801,7 +1801,12 @@
   }
   function canShowActionButtons() {
     if (S.online && S.awaitingServerAck) return false;
-    return S.uiStatus === "playing" || S.uiStatus == null;
+    if (S.uiStatus === "playing" || S.uiStatus == null) return true;
+    if (S.uiStatus === "trickEnd") {
+      const st = S.match?.state;
+      return st?.phase === "playing" && st.turn === S.mySeat;
+    }
+    return false;
   }
   async function maybeBotClaims() {
     const st = S.match.state;

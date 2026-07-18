@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:bloot/core/components/app_button.dart';
+import 'package:bloot/features/room/domain/entities/create_room_params.dart';
+import 'package:bloot/features/room/domain/entities/room.dart';
 import 'package:bloot/features/room/presentation/cubit/room_cubit.dart';
 import 'package:bloot/features/room/presentation/pages/create_room_page.dart';
 import 'package:bloot/features/room/presentation/pages/room_lobby_page.dart';
@@ -102,7 +104,9 @@ void main() {
       });
     });
 
-    testWidgets('shows password field only for private rooms', (tester) async {
+    testWidgets('never shows a password field, even for private rooms', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -116,31 +120,31 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // Select private room (default is public).
+        // Default (public): only the room name field.
+        expect(find.byType(TextField), findsOneWidget);
+        expect(find.text('Room Password'), findsNothing);
+
+        // Select private room.
         await tester.tap(find.text('Private'));
         await tester.pumpAndSettle();
 
-        expect(find.text('Room Password'), findsOneWidget);
-
-        // Select public room.
-        await tester.tap(find.text('Public'));
-        await tester.pumpAndSettle();
-
-        expect(find.text('Room Password'), findsNothing);
-
-        // Select live stream.
-        await tester.tap(find.text('Live Stream'));
-        await tester.pumpAndSettle();
-
+        expect(find.byType(TextField), findsOneWidget);
         expect(find.text('Room Password'), findsNothing);
       });
     });
 
-    testWidgets('validates private room password length', (tester) async {
+    testWidgets('creates a private room with a null password', (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
       await runWithFakeHttp(() async {
+        CreateRoomParams? captured;
+        when(() => roomRepository.createRoom(any())).thenAnswer((invocation) async {
+          captured =
+              invocation.positionalArguments.first as CreateRoomParams;
+          return testRoom();
+        });
+
         await tester.pumpWidget(
           buildTestableWidgetWithRouter(
             router: router,
@@ -154,22 +158,49 @@ void main() {
         await tester.tap(find.text('Private'));
         await tester.pumpAndSettle();
 
-        final nameField = find.byType(TextField).first;
-        await tester.enterText(nameField, 'My Room');
+        await tester.enterText(find.byType(TextField).first, 'My Room');
         await tester.pumpAndSettle();
 
-        final passwordFields = find.byType(TextField);
-        final passwordField = passwordFields.last;
-        await tester.enterText(passwordField, '123');
+        await tester.tap(find.widgetWithText(GradientButton, 'Create Room'));
+        await tester.pump();
+
+        verify(() => roomRepository.createRoom(any())).called(1);
+        expect(captured, isNotNull);
+        expect(captured!.type, RoomType.private);
+        expect(captured!.password, isNull);
+      });
+    });
+
+    testWidgets('shows error and does not create when name is empty', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await runWithFakeHttp(() async {
+        await tester.pumpWidget(
+          buildTestableWidgetWithRouter(
+            router: router,
+            roomCubit: cubit,
+            agoraService: agoraService,
+          ),
+        );
         await tester.pumpAndSettle();
 
-        // Create button should be disabled with short password.
+        // Leave the name empty and tap create.
         final createButton = find.widgetWithText(GradientButton, 'Create Room');
         expect(createButton, findsOneWidget);
         await tester.tap(createButton);
         await tester.pumpAndSettle();
 
+        // Inline validation error is shown and nothing is created.
+        expect(find.text('This field is required'), findsOneWidget);
         verifyNever(() => roomRepository.createRoom(any()));
+
+        // Typing a name clears the error.
+        await tester.enterText(find.byType(TextField).first, 'My Room');
+        await tester.pumpAndSettle();
+        expect(find.text('This field is required'), findsNothing);
       });
     });
 
@@ -195,11 +226,6 @@ void main() {
 
         final nameField = find.byType(TextField).first;
         await tester.enterText(nameField, 'My Room');
-        await tester.pumpAndSettle();
-
-        final passwordFields = find.byType(TextField);
-        final passwordField = passwordFields.last;
-        await tester.enterText(passwordField, 'secret');
         await tester.pumpAndSettle();
 
         final createButton = find.widgetWithText(GradientButton, 'Create Room');
@@ -234,10 +260,6 @@ void main() {
         await tester.enterText(nameField, 'My Room');
         await tester.pumpAndSettle();
 
-        final passwordFields = find.byType(TextField);
-        await tester.enterText(passwordFields.last, 'secret');
-        await tester.pumpAndSettle();
-
         await tester.tap(find.widgetWithText(GradientButton, 'Create Room'));
         await tester.pump();
 
@@ -269,10 +291,6 @@ void main() {
 
         final nameField = find.byType(TextField).first;
         await tester.enterText(nameField, 'My Room');
-        await tester.pumpAndSettle();
-
-        final passwordFields = find.byType(TextField);
-        await tester.enterText(passwordFields.last, 'secret');
         await tester.pumpAndSettle();
 
         await tester.tap(find.widgetWithText(GradientButton, 'Create Room'));

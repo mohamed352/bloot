@@ -35,6 +35,8 @@ _GameModel _$GameModelFromJson(Map<String, dynamic> json) => _GameModel(
       : TrickModel.fromJson(json['currentTrick'] as Map<String, dynamic>),
   roomId: json['roomId'] as String?,
   agoraChannelName: json['agoraChannelName'] as String?,
+  voiceEnabled: json['voiceEnabled'] as bool? ?? false,
+  cameraEnabled: json['cameraEnabled'] as bool? ?? false,
   engineState: json['engineState'] as Map<String, dynamic>?,
 );
 
@@ -62,6 +64,8 @@ Map<String, dynamic> _$GameModelToJson(_GameModel instance) =>
       'currentTrick': instance.currentTrick,
       'roomId': instance.roomId,
       'agoraChannelName': instance.agoraChannelName,
+      'voiceEnabled': instance.voiceEnabled,
+      'cameraEnabled': instance.cameraEnabled,
       'engineState': instance.engineState,
     };
 

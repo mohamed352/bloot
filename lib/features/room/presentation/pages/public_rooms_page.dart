@@ -41,10 +41,21 @@ class _PublicRoomsPageState extends State<PublicRoomsPage> {
     super.dispose();
   }
 
-  void _joinRoom(BuildContext context, Room room) {
-    if (_joining || room.inviteCode == null || room.inviteCode!.isEmpty) return;
-    setState(() => _joining = true);
-    context.read<RoomCubit>().joinRoomByCode(room.inviteCode!);
+  /// Tapping a public room card opens its live stream as a viewer when the
+  /// room is broadcasting. Cards never join the room as a player — joining
+  /// as a player is only done through the search-by-code field below.
+  void _openRoom(BuildContext context, Room room) {
+    final streamId = room.streamId;
+    if (room.isStreaming && streamId != null && streamId.isNotEmpty) {
+      context.pushNamed(
+        RouteNames.watchStream,
+        pathParameters: {'id': streamId},
+      );
+      return;
+    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('room_not_live'.tr())));
   }
 
   void _searchByCode(BuildContext context) {
@@ -129,7 +140,7 @@ class _PublicRoomsPageState extends State<PublicRoomsPage> {
                             return _RoomCard(
                               room: room,
                               joining: _joining,
-                              onTap: () => _joinRoom(context, room),
+                              onTap: () => _openRoom(context, room),
                             );
                           },
                         ),

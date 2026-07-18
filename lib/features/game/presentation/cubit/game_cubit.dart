@@ -553,6 +553,9 @@ class GameCubit extends Cubit<GameState> {
   void _joinAgoraIfNeeded(Game game) {
     final channelName = game.agoraChannelName;
     if (channelName == null || channelName.isEmpty) return;
+    // Rooms created without voice/camera (and bot matches) have no media at
+    // all, so there is no channel worth joining.
+    if (!game.voiceEnabled && !game.cameraEnabled) return;
     if (_joinedAgoraChannelName == channelName) return;
     if (_pendingAgoraJoin != null) return;
 

@@ -4,6 +4,12 @@ import { db, auth } from '../config/admin';
 import { requireAppCheck } from '../utils/appCheck';
 import { getOrCreateUserAgoraUid } from '../utils/agoraUid';
 import { createGameDocument, RoomPlayer } from '../engine/gameAdapter';
+import {
+  canAutoStartGame,
+  computeReadyPlayers,
+  normalizeParitySeats,
+} from '../utils/roomPlayers';
+import { buildStreamPayload, shouldAutoCreateStream } from '../utils/streaming';
 
 const BOT_NAMES = ['Faisal', 'Omar', 'Khalid'];
 const BOT_AVATAR_URL = 'https://cdn-icons-png.flaticon.com/512/4712/4712035.png';
@@ -89,7 +95,7 @@ export const createRoomWithBots = functions.https.onCall(
     );
 
     const botPlayers = assignBotsToRoom(bots, [humanPlayer]);
-    const players = [humanPlayer, ...botPlayers];
+    const players = normalizeParitySeats([humanPlayer, ...botPlayers]);
 
     const playerUids = players.map((p) => p.uid);
     const teamA = players.filter((p) => p.team === 'A').map((p) => p.uid);
@@ -105,13 +111,14 @@ export const createRoomWithBots = functions.https.onCall(
       teamA,
       teamB,
       gameId: gameRef.id,
-      voiceEnabled: true,
-      cameraEnabled: true,
+      // Pure bot matches never use mic/camera; keep the media UI hidden.
+      voiceEnabled: false,
+      cameraEnabled: false,
     });
 
     transaction.set(roomRef, roomData);
 
-    const game = createAndDealGame(gameRef.id, roomRef.id, players, roomData.agoraChannelName);
+    const game = createAndDealGame(gameRef.id, roomRef.id, players, roomData.agoraChannelName, false, false);
     transaction.set(gameRef, game);
 
     console.log('[createRoomWithBots] created', {
@@ -208,12 +215,22 @@ export const inviteBotsToRoom = functions.https.onCall(
     const botsToAdd = bots.slice(0, freshBotsNeeded);
 
     const botPlayers = assignBotsToRoom(botsToAdd, freshPlayers);
-    const players = [...freshPlayers, ...botPlayers];
+    // Keep players sorted by seatIndex.
+    let players = [...freshPlayers, ...botPlayers].sort((a, b) => a.seatIndex - b.seatIndex);
+
+    // Auto-start only when the room is full and every final human player is
+    // ready (bots always count as ready).
+    const autoStart = canAutoStartGame(players);
+    if (autoStart) {
+      // Enforce engine seat/team parity ([A1,B1,A2,B2]) before dealing; the
+      // normalized players are persisted in the same transaction below.
+      players = normalizeParitySeats(players);
+    }
 
     const playerUids = players.map((p) => p.uid);
     const teamA = players.filter((p) => p.team === 'A').map((p) => p.uid);
     const teamB = players.filter((p) => p.team === 'B').map((p) => p.uid);
-    const readyPlayers = players.map((p) => p.uid);
+    const readyPlayers = computeReadyPlayers(players);
 
     const update: Record<string, any> = {
       players,
@@ -229,15 +246,34 @@ export const inviteBotsToRoom = functions.https.onCall(
     };
 
     let gameId: string | undefined;
-    if (players.length === 4) {
-      // All seats filled: auto-start the game.
+    if (autoStart) {
       const gameRef = db.collection('games').doc();
       gameId = gameRef.id;
-      const game = createAndDealGame(gameRef.id, roomId, players, freshData.agoraChannelName);
+      // Inherit the room's media flags (same defaults as the room update).
+      const game = createAndDealGame(
+        gameRef.id,
+        roomId,
+        players,
+        freshData.agoraChannelName,
+        freshData.voiceEnabled ?? true,
+        freshData.cameraEnabled ?? true,
+      );
       transaction.set(gameRef, game);
 
       update.status = 'playing';
       update.gameId = gameId;
+
+      // Live rooms become visible to watchers as soon as the game starts.
+      // Never duplicate an existing stream.
+      if (shouldAutoCreateStream(freshData)) {
+        const streamRef = db.collection('streams').doc();
+        transaction.set(
+          streamRef,
+          buildStreamPayload({ roomId, room: freshData, hostUid: authUid, roomPlayers: players }),
+        );
+        update.isStreaming = true;
+        update.streamId = streamRef.id;
+      }
     }
 
     transaction.update(roomRef, update);
@@ -300,21 +336,28 @@ function buildBotUserDoc(bot: BotProfile): Record<string, any> {
 }
 
 function assignBotsToRoom(bots: BotProfile[], existingPlayers: RoomPlayerData[]): RoomPlayerData[] {
-  const teamA = existingPlayers.filter((p) => p.team === 'A');
-  const teamB = existingPlayers.filter((p) => p.team === 'B');
-  let nextSeat = existingPlayers.length;
+  const takenSeats = new Set(existingPlayers.map((p) => p.seatIndex));
+  let countA = existingPlayers.filter((p) => p.team === 'A').length;
+  let countB = existingPlayers.filter((p) => p.team === 'B').length;
+  const freeSeats = [0, 1, 2, 3].filter((s) => !takenSeats.has(s));
 
   return bots.map((bot) => {
-    const team = teamA.length <= teamB.length ? 'A' : 'B';
-    if (team === 'A') teamA.push({} as any);
-    else teamB.push({} as any);
+    // Occupy a missing team/seat slot rather than blindly appending. Prefer
+    // the first free seat whose parity team (seat % 2: 0 = A, 1 = B) is not
+    // already full.
+    let seat = freeSeats.find((s) => (s % 2 === 0 ? countA : countB) < 2);
+    if (seat === undefined) seat = freeSeats[0];
+    freeSeats.splice(freeSeats.indexOf(seat), 1);
+    const team: 'A' | 'B' = seat % 2 === 0 ? 'A' : 'B';
+    if (team === 'A') countA++;
+    else countB++;
 
     return createRoomPlayer(
       bot.uid,
       bot.displayName,
       BOT_AVATAR_URL,
       team,
-      nextSeat++,
+      seat,
       true,
       bot.agoraUid,
       // Bots never publish real audio/video, so keep both off — otherwise
@@ -393,6 +436,8 @@ function createAndDealGame(
   roomId: string,
   players: RoomPlayerData[],
   agoraChannelName: string | undefined,
+  voiceEnabled?: boolean,
+  cameraEnabled?: boolean,
 ): Record<string, any> {
   const roomPlayers: RoomPlayer[] = players.map((p) => ({
     uid: p.uid,
@@ -408,7 +453,7 @@ function createAndDealGame(
     isConnected: true,
   }));
 
-  const game = createGameDocument(gameId, roomId, roomPlayers, 152, agoraChannelName ?? `room_${roomId}`);
+  const game = createGameDocument(gameId, roomId, roomPlayers, 152, agoraChannelName ?? `room_${roomId}`, voiceEnabled, cameraEnabled);
   game.turnTimerStart = Timestamp.now().toDate();
   return game as any;
 }

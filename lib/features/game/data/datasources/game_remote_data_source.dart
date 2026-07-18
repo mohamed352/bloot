@@ -218,6 +218,8 @@ class GameRemoteDataSource {
       currentTrick: trick,
       roomId: data['roomId'] as String?,
       agoraChannelName: data['agoraChannelName'] as String?,
+      voiceEnabled: data['voiceEnabled'] as bool? ?? false,
+      cameraEnabled: data['cameraEnabled'] as bool? ?? false,
       engineState: data['engineState'] as Map<String, dynamic>?,
     );
   }

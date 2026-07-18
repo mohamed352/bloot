@@ -15,6 +15,10 @@
   let rtdbActive = false;
   let lastBridgeState = null;
 
+  // ── turn timer countdown state ─────────────────────────────────────
+  let timerInfo = null;    // { startMs, limitSec, seat, serverOffsetMs }
+  let timerInterval = null;
+
   function $(id) { return document.getElementById(id); }
 
   // ── card helpers ─────────────────────────────────────────────────────
@@ -177,7 +181,12 @@
         if (snapshotCb && data.engineState) {
           const wasActive = rtdbActive;
           rtdbActive = true;
-          snapshotCb(mapBlootState(data.engineState));
+          const mapped = mapBlootState(data.engineState);
+          // Forward the mirrored game status so the UI can transition its
+          // status channel (bidding → playing → …) on the RTDB fast path.
+          if (data.status) mapped.status = data.status;
+          snapshotCb(mapped);
+          updateTurnTimer(data);
           // Notify Flutter that RTDB is now the active fast path so it can
           // stop pushing the same state over the slower JS bridge.
           if (!wasActive) sendToFlutter({ type: 'rtdbActive' });
@@ -201,6 +210,93 @@
       rtdbUnsub = null;
     }
     rtdbActive = false;
+    timerInfo = null;
+    renderTurnTimer();
+    ensureTimerInterval();
+  }
+
+  // ── turn timer countdown ───────────────────────────────────────────
+  // Mirrors the server-side auto-play timeout (turnTimerStart/turnTimeLimit)
+  // so players see a live countdown before the server bot-plays for them.
+  function activeTimerSeat(bloot) {
+    const st = (bloot && bloot.state) || {};
+    if (st.awaitingDeclare) return (st.declareSeats || [])[0];
+    if (st.awaitingDouble && st.doubling) return st.doubling.turn;
+    if (st.phase === "bidding" && st.bidding) return st.bidding.turn;
+    if (st.phase === "playing") return st.turn;
+    return null;
+  }
+
+  function updateTurnTimer(data) {
+    const startMs = Number(data.turnTimerStart) || 0;
+    const limitSec = Number(data.turnTimeLimit) || 45;
+    const seat = activeTimerSeat(data.engineState);
+    if (!startMs || seat == null) {
+      timerInfo = null;
+    } else {
+      // Estimate server clock offset from the mirror's updatedAt so the
+      // countdown is robust against device clock skew.
+      const updatedAt = Number(data.updatedAt) || 0;
+      const serverOffsetMs = updatedAt ? updatedAt - Date.now() : 0;
+      timerInfo = { startMs: startMs, limitSec: limitSec, seat: seat, serverOffsetMs: serverOffsetMs };
+    }
+    renderTurnTimer();
+    ensureTimerInterval();
+  }
+
+  function ensureTimerInterval() {
+    if (timerInfo && !timerInterval) {
+      timerInterval = setInterval(renderTurnTimer, 500);
+    } else if (!timerInfo && timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
+  function renderTurnTimer() {
+    const ringSelf = $("hand-timer-self");
+    const topTimer = $("turn-timer");
+    const seatRings = document.querySelectorAll(".bt-ring-timer--seat");
+    if (!timerInfo) {
+      if (ringSelf) ringSelf.hidden = true;
+      if (topTimer) topTimer.hidden = true;
+      seatRings.forEach(function (el) { el.hidden = true; });
+      return;
+    }
+    const totalMs = timerInfo.limitSec * 1000;
+    const nowMs = Date.now() + timerInfo.serverOffsetMs;
+    const remainMs = Math.max(0, totalMs - (nowMs - timerInfo.startMs));
+    const remainSec = Math.ceil(remainMs / 1000);
+    const pct = Math.max(0, Math.min(100, (remainMs / totalMs) * 100));
+    const urgent = remainSec <= 10;
+
+    // Visual position: 0 = self (bottom), 1 = right, 2 = top, 3 = left.
+    const pos = (((timerInfo.seat - currentSeat) % 4) + 4) % 4;
+
+    seatRings.forEach(function (el) {
+      const show = pos !== 0 && Number(el.dataset.seat) === pos;
+      el.hidden = !show;
+      if (show) {
+        el.style.setProperty("--pct", pct.toFixed(1));
+        el.textContent = remainSec;
+        el.classList.toggle("bt-ring-timer--urgent", urgent);
+      }
+    });
+
+    if (ringSelf) {
+      ringSelf.hidden = pos !== 0;
+      if (pos === 0) {
+        ringSelf.style.setProperty("--pct", pct.toFixed(1));
+        ringSelf.textContent = remainSec;
+        ringSelf.classList.toggle("bt-ring-timer--urgent", urgent);
+      }
+    }
+
+    if (topTimer) {
+      topTimer.hidden = false;
+      topTimer.textContent = "\u23F1 " + remainSec;
+      topTimer.classList.toggle("bt-timer--urgent", urgent);
+    }
   }
 
   // ── send to Flutter ──────────────────────────────────────────────────

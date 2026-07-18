@@ -237,7 +237,18 @@ export function canShowActionButtons() {
   // The engine phase may stay "playing" during those, so we gate actions by it.
   // Also lock actions while a server request is in flight to prevent duplicates.
   if (S.online && S.awaitingServerAck) return false;
-  return S.uiStatus === "playing" || S.uiStatus == null;
+  if (S.uiStatus === "playing" || S.uiStatus == null) return true;
+
+  // The server already accepts the next leader's card while the completed
+  // trick is being shown and flips status back to "playing". Let that player
+  // act immediately instead of making their cards look enabled but swallowing
+  // the tap until the scheduled trickEnd cleanup runs.
+  if (S.uiStatus === "trickEnd") {
+    const st = S.match?.state;
+    return st?.phase === "playing" && st.turn === S.mySeat;
+  }
+
+  return false;
 }
 
 async function maybeBotClaims() {

@@ -29,6 +29,10 @@ class RoomCubit extends Cubit<RoomState> {
   Future<void>? _pendingAgoraJoin;
   bool _gameStartedEmitted = false;
 
+  /// Whether the local user was a participant in the last room snapshot.
+  /// Used to detect that the host removed (kicked) the local user.
+  bool _wasLocalParticipant = false;
+
   void _emitMergedState() {
     final room = _currentRoom;
     if (room == null) return;
@@ -134,12 +138,21 @@ class RoomCubit extends Cubit<RoomState> {
     _audioVolumeSubscription?.cancel();
     _currentRoom = null;
     _gameStartedEmitted = false;
+    _wasLocalParticipant = false;
     AppLogger.setCustomKey('roomId', roomId);
 
     _roomSubscription = _roomRepository
         .watchRoom(roomId)
         .listen(
-          (room) {
+          (room) async {
+            // If a previous snapshot had the local user as a participant and
+            // this one does not, the host removed them: treat it as a kick.
+            final isParticipant = room.players.any((p) => p.isMe);
+            if (_wasLocalParticipant && !isParticipant) {
+              await _handleKicked();
+              return;
+            }
+            _wasLocalParticipant = isParticipant;
             _currentRoom = room;
 
             // Auto-navigate when game starts, but only once per room session.
@@ -156,7 +169,6 @@ class RoomCubit extends Cubit<RoomState> {
 
             // Auto-join Agora voice channel once per channel name change.
             // Only actual room participants should join voice; spectators should not.
-            final isParticipant = room.players.any((p) => p.isMe);
             final agoraChannelName = room.agoraChannelName ?? 'room_${room.id}';
             if (isParticipant &&
                 (room.voiceEnabled || room.cameraEnabled) &&
@@ -173,7 +185,9 @@ class RoomCubit extends Cubit<RoomState> {
               _pendingAgoraJoin = pendingJoin;
               pendingJoin
                   .then((_) {
-                    if (isClosed) return;
+                    // A kick/reload can clear the current room while the join
+                    // is in flight; never mark that stale join as active.
+                    if (isClosed || _currentRoom == null) return;
                     _joinedAgoraChannelName = agoraChannelName;
                     _listenToAudioVolume(room);
                   })
@@ -198,6 +212,42 @@ class RoomCubit extends Cubit<RoomState> {
             }
           },
         );
+  }
+
+  /// Cleans up local room/audio/Agora state after the local user was removed
+  /// from the room by the host, then emits [RoomState.kicked].
+  ///
+  /// Unlike [leaveRoom], this never calls the repository: the backend already
+  /// removed the player, so calling `leaveRoom` would fail or kick no one.
+  Future<void> _handleKicked() async {
+    AppLogger.info('Local user was removed from the room', tag: 'Room');
+    _wasLocalParticipant = false;
+    _currentRoom = null;
+
+    // Do not await cancellation of the subscription whose listener is calling
+    // us; that can deadlock on some stream implementations.
+    final roomSubscription = _roomSubscription;
+    _roomSubscription = null;
+    unawaited(roomSubscription?.cancel());
+    await _audioVolumeSubscription?.cancel();
+    _audioVolumeSubscription = null;
+
+    // Wait for an in-flight Agora join to finish before leaving.
+    if (_pendingAgoraJoin != null) {
+      try {
+        await _pendingAgoraJoin!.timeout(const Duration(seconds: 3));
+      } catch (_) {
+        // Ignore join errors/timeouts during kick cleanup.
+      }
+      _pendingAgoraJoin = null;
+    }
+
+    // Leave unconditionally: if a join is still in flight, AgoraService will
+    // honor its internal leave request and disconnect as soon as it completes.
+    await _agoraService.leaveChannel();
+    _joinedAgoraChannelName = null;
+
+    if (!isClosed) emit(const RoomState.kicked());
   }
 
   void _listenToAudioVolume(Room room) {

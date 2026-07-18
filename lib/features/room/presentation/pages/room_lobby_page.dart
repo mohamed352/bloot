@@ -89,6 +89,12 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                 pathParameters: {'id': gameId},
               );
             },
+            kicked: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('kicked_from_room'.tr())),
+              );
+              context.goNamed(RouteNames.home);
+            },
           );
         },
         builder: (context, state) {
@@ -103,6 +109,33 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
               room?.creatorUid != null &&
               room?.players.any((p) => p.isMe && p.uid == room.creatorUid) ==
                   true;
+
+          // Derive seats from teams, not from join order: the local player
+          // sits at the bottom, their teammate at the top, and the opposing
+          // team on the left/right. Falls back safely for incomplete rooms
+          // (empty seats simply show the invite placeholder).
+          RoomPlayer? localPlayer;
+          for (final p in players) {
+            if (p.isMe) {
+              localPlayer = p;
+              break;
+            }
+          }
+          localPlayer ??= players.isNotEmpty ? players.first : null;
+          final localUid = localPlayer?.uid;
+          final localTeam = localPlayer?.team;
+          RoomPlayer? partner;
+          final opponents = <RoomPlayer>[];
+          for (final p in players) {
+            if (p.uid == localUid) continue;
+            if (p.team == localTeam) {
+              partner ??= p;
+            } else {
+              opponents.add(p);
+            }
+          }
+          final opponentLeft = opponents.isNotEmpty ? opponents[0] : null;
+          final opponentRight = opponents.length > 1 ? opponents[1] : null;
 
           return Scaffold(
             backgroundColor: ColorManager.darkCanvas,
@@ -270,9 +303,9 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                         ),
                         const SizedBox(height: AppSpacing.xxl),
                         // Diamond seat layout
-                        // Partner at top
+                        // Partner (other player on the local team) at top
                         SeatWidget(
-                          player: players.length > 1 ? players[1] : null,
+                          player: partner,
                           label: LocaleKeys.your_partner.tr(),
                           position: SeatPosition.top,
                           isCreator: isCreator,
@@ -310,12 +343,12 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                           ),
                         ),
                         const SizedBox(height: AppSpacing.lg),
-                        // Opponents left and right
+                        // Opponents (opposite team) left and right
                         Row(
                           children: [
                             Expanded(
                               child: SeatWidget(
-                                player: players.length > 2 ? players[2] : null,
+                                player: opponentLeft,
                                 label: LocaleKeys.opponent_1.tr(),
                                 position: SeatPosition.left,
                                 isCreator: isCreator,
@@ -328,7 +361,7 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                             const SizedBox(width: AppSpacing.lg),
                             Expanded(
                               child: SeatWidget(
-                                player: players.length > 3 ? players[3] : null,
+                                player: opponentRight,
                                 label: LocaleKeys.opponent_2.tr(),
                                 position: SeatPosition.right,
                                 isCreator: isCreator,
@@ -344,12 +377,7 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                         // You at bottom — always show the current user in the
                         // bottom seat, not whoever sits at index 0.
                         SeatWidget(
-                          player: players.isNotEmpty
-                              ? players.firstWhere(
-                                  (p) => p.isMe,
-                                  orElse: () => players.first,
-                                )
-                              : null,
+                          player: localPlayer,
                           label: LocaleKeys.you.tr(),
                           position: SeatPosition.bottom,
                           isCreator: isCreator,
@@ -433,55 +461,61 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                           ),
                         ),
                         const SizedBox(height: AppSpacing.md),
-                        // Mic / Camera toggles (you only)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _MediaToggleButton(
-                              icon:
-                                  room?.players.any(
-                                        (p) => p.isMe && p.isMicOn,
-                                      ) ==
-                                      true
-                                  ? Icons.mic_rounded
-                                  : Icons.mic_off_rounded,
-                              color:
-                                  room?.players.any(
-                                        (p) => p.isMe && p.isMicOn,
-                                      ) ==
-                                      true
-                                  ? ColorManager.success
-                                  : ColorManager.error,
-                              onTap: room != null
-                                  ? () => context.read<RoomCubit>().toggleMic(
-                                      room.id,
-                                    )
-                                  : null,
-                            ),
-                            const SizedBox(width: AppSpacing.lg),
-                            _MediaToggleButton(
-                              icon:
-                                  room?.players.any(
-                                        (p) => p.isMe && p.isCameraOn,
-                                      ) ==
-                                      true
-                                  ? Icons.videocam_rounded
-                                  : Icons.videocam_off_rounded,
-                              color:
-                                  room?.players.any(
-                                        (p) => p.isMe && p.isCameraOn,
-                                      ) ==
-                                      true
-                                  ? ColorManager.success
-                                  : ColorManager.darkTextMuted,
-                              onTap: room != null
-                                  ? () => context
-                                        .read<RoomCubit>()
-                                        .toggleCamera(room.id)
-                                  : null,
-                            ),
-                          ],
-                        ),
+                        // Mic / Camera toggles (you only) — shown only for
+                        // rooms created with voice/camera enabled.
+                        if (room?.voiceEnabled == true ||
+                            room?.cameraEnabled == true)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (room?.voiceEnabled == true) ...[
+                                _MediaToggleButton(
+                                  icon:
+                                      room?.players.any(
+                                            (p) => p.isMe && p.isMicOn,
+                                          ) ==
+                                          true
+                                      ? Icons.mic_rounded
+                                      : Icons.mic_off_rounded,
+                                  color:
+                                      room?.players.any(
+                                            (p) => p.isMe && p.isMicOn,
+                                          ) ==
+                                          true
+                                      ? ColorManager.success
+                                      : ColorManager.error,
+                                  onTap: room != null
+                                      ? () => context
+                                            .read<RoomCubit>()
+                                            .toggleMic(room.id)
+                                      : null,
+                                ),
+                                const SizedBox(width: AppSpacing.lg),
+                              ],
+                              if (room?.cameraEnabled == true)
+                                _MediaToggleButton(
+                                  icon:
+                                      room?.players.any(
+                                            (p) => p.isMe && p.isCameraOn,
+                                          ) ==
+                                          true
+                                      ? Icons.videocam_rounded
+                                      : Icons.videocam_off_rounded,
+                                  color:
+                                      room?.players.any(
+                                            (p) => p.isMe && p.isCameraOn,
+                                          ) ==
+                                          true
+                                      ? ColorManager.success
+                                      : ColorManager.darkTextMuted,
+                                  onTap: room != null
+                                      ? () => context
+                                            .read<RoomCubit>()
+                                            .toggleCamera(room.id)
+                                      : null,
+                                ),
+                            ],
+                          ),
                         const SizedBox(height: AppSpacing.md),
                         // Stream controls (creator only)
                         if (isCreator &&

@@ -629,6 +629,87 @@ void main() {
     );
   });
 
+  group('kicked handling', () {
+    late StreamController<Room> kickRoomController;
+    late StreamController<Room> spectatorRoomController;
+
+    setUp(() {
+      kickRoomController = StreamController<Room>();
+      spectatorRoomController = StreamController<Room>();
+    });
+
+    tearDown(() {
+      kickRoomController.close();
+      spectatorRoomController.close();
+    });
+
+    blocTest<RoomCubit, RoomState>(
+      'emits kicked and leaves Agora when the local user is removed from the room',
+      build: () {
+        when(
+          () => roomRepository.watchRoom('r1'),
+        ).thenAnswer((_) => kickRoomController.stream);
+        return buildCubit();
+      },
+      act: (cubit) async {
+        cubit.loadRoom('r1');
+        await Future<void>.delayed(Duration.zero);
+        // Local user is a participant.
+        kickRoomController.add(
+          testRoom(players: [testPlayer(name: 'Me', isMe: true)]),
+        );
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+        // A later snapshot no longer contains the local user: kicked.
+        kickRoomController.add(
+          testRoom(players: [testPlayer(uid: 'u2', name: 'Host')]),
+        );
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+      },
+      expect: () => [
+        const RoomState.loading(),
+        isA<RoomLoaded>(),
+        const RoomState.kicked(),
+      ],
+      verify: (_) {
+        verify(() => agoraService.leaveChannel()).called(1);
+        // The backend already removed the player; leaveRoom must not be called.
+        verifyNever(() => roomRepository.leaveRoom(any()));
+      },
+    );
+
+    blocTest<RoomCubit, RoomState>(
+      'does not emit kicked when the local user was never a participant',
+      build: () {
+        when(
+          () => roomRepository.watchRoom('r1'),
+        ).thenAnswer((_) => spectatorRoomController.stream);
+        return buildCubit();
+      },
+      act: (cubit) async {
+        cubit.loadRoom('r1');
+        await Future<void>.delayed(Duration.zero);
+        // Spectator view: no isMe player in any snapshot.
+        spectatorRoomController.add(
+          testRoom(players: [testPlayer(uid: 'u2', name: 'Host')]),
+        );
+        await Future<void>.delayed(Duration.zero);
+        spectatorRoomController.add(testRoom(players: const []));
+        await Future<void>.delayed(Duration.zero);
+      },
+      expect: () => [
+        const RoomState.loading(),
+        isA<RoomLoaded>(),
+        isA<RoomLoaded>(),
+      ],
+      verify: (_) {
+        verifyNever(() => agoraService.leaveChannel());
+      },
+    );
+  });
+
   group('watchPublicRooms error', () {
     blocTest<RoomCubit, RoomState>(
       'emits error when public rooms stream fails',

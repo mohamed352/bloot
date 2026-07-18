@@ -104,7 +104,7 @@ async function verifyChannelAccess(
   authUid: string,
   data: GenerateTokenData,
 ): Promise<void> {
-  const { channelName, roomId, gameId, streamId } = data;
+  const { channelName, roomId, gameId, streamId, role } = data;
 
   // Direct lookup when the caller provides the associated resource id.
   if (roomId && typeof roomId === 'string') {
@@ -123,8 +123,10 @@ async function verifyChannelAccess(
 
   if (streamId && typeof streamId === 'string') {
     const streamDoc = await db.collection('streams').doc(streamId).get();
-    if (streamDoc.exists && isStreamParticipant(authUid, streamDoc.data()!)) {
-      return;
+    if (streamDoc.exists) {
+      const streamData = streamDoc.data()!;
+      if (isStreamParticipant(authUid, streamData)) return;
+      if (role === 'subscriber' && await canSpectateStream(streamData)) return;
     }
   }
 
@@ -146,7 +148,7 @@ async function verifyChannelAccess(
     derivedRoomId ? db.collection('rooms').doc(derivedRoomId).get() : Promise.resolve(null),
     db.collection('rooms').where('agoraChannelName', '==', channelName).limit(1).get(),
     db.collection('games').where('agoraChannelName', '==', channelName).limit(1).get(),
-    db.collection('streams').where('agoraChannelName', '==', channelName).limit(1).get(),
+    db.collection('streams').where('agoraChannelName', '==', channelName).get(),
   ]);
 
   if (roomById?.exists && isRoomParticipant(authUid, roomById.data()!)) {
@@ -163,9 +165,10 @@ async function verifyChannelAccess(
     return;
   }
 
-  const streamDoc = streamsByName.docs[0];
-  if (streamDoc && isStreamParticipant(authUid, streamDoc.data())) {
-    return;
+  for (const streamDoc of streamsByName.docs) {
+    const streamData = streamDoc.data();
+    if (isStreamParticipant(authUid, streamData)) return;
+    if (role === 'subscriber' && await canSpectateStream(streamData)) return;
   }
 
   throw new functions.https.HttpsError(
@@ -204,6 +207,18 @@ function isStreamParticipant(authUid: string, data: Record<string, unknown>): bo
     return players.some((p) => p && typeof p === 'object' && (p as Record<string, unknown>).uid === authUid);
   }
   return false;
+}
+
+/**
+ * Returns true when an authenticated spectator may subscribe to a live stream.
+ * Publishing remains restricted to the host/players by isStreamParticipant().
+ */
+async function canSpectateStream(data: Record<string, unknown>): Promise<boolean> {
+  if (data.status !== 'live') return false;
+  const roomId = data.roomId;
+  if (typeof roomId !== 'string' || roomId.length === 0) return false;
+  const roomDoc = await db.collection('rooms').doc(roomId).get();
+  return roomDoc.exists && roomDoc.data()?.allowSpectators === true;
 }
 
 function parseUid(raw: number | string | undefined): number {

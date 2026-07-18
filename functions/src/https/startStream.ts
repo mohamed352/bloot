@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions';
 import { db } from '../config/admin';
 import { requireAppCheck } from '../utils/appCheck';
+import { buildStreamPayload, StreamRoomPlayer } from '../utils/streaming';
 
 export const startStream = functions.https.onCall(async (request) => {
   if (!request.auth) {
@@ -36,50 +37,14 @@ export const startStream = functions.https.onCall(async (request) => {
       throw new functions.https.HttpsError('failed-precondition', 'Room is already streaming');
     }
 
-    // Build player list for stream doc
-    const roomPlayers = (room.players || []) as Array<{
-      uid: string;
-      displayName: string;
-      avatarUrl?: string;
-      team: string;
-      agoraUid?: number;
-      isCameraOn?: boolean;
-      isMicOn?: boolean;
-    }>;
-
-    const players = roomPlayers.map((p) => ({
-      uid: p.uid,
-      name: p.displayName || 'Player',
-      avatarUrl: p.avatarUrl || '',
-      agoraUid: p.agoraUid || 0,
-      team: p.team || 'A',
-      isCameraOn: p.isCameraOn === true,
-      isMicOn: p.isMicOn !== false,
-    }));
-
-    const playerUids = roomPlayers.map((p) => p.uid);
-
-    // Find host name from creator
-    const hostPlayer = roomPlayers.find((p) => p.uid === authUid);
-    const hostName = hostPlayer?.displayName || room.creatorUid || 'Host';
-    const hostAvatar = hostPlayer?.avatarUrl || '';
-
+    const roomPlayers = (room.players || []) as StreamRoomPlayer[];
     const now = new Date();
 
     // Create stream document
-    transaction.set(streamRef, {
-      roomId,
-      hostUid: authUid,
-      hostName,
-      hostAvatar,
-      title: room.name || `${hostName}'s Stream`,
-      status: 'live',
-      viewerCount: 0,
-      agoraChannelName: room.agoraChannelName || `room_${roomId}`,
-      players,
-      playerUids,
-      createdAt: now,
-    });
+    transaction.set(
+      streamRef,
+      buildStreamPayload({ roomId, room, hostUid: authUid, roomPlayers, now }),
+    );
 
     // Update room
     transaction.update(roomRef, {

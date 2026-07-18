@@ -332,7 +332,7 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
                             color: ColorManager.success.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(AppRadius.sm),
                           ),
-                          child: Row(
+                          child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
@@ -340,7 +340,7 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
                                 size: 14,
                                 color: ColorManager.success,
                               ),
-                              const SizedBox(width: 4),
+                              SizedBox(width: 4),
                               Text(
                                 'Watch Game',
                                 style: TextStyle(

@@ -89,6 +89,8 @@ class Game {
     this.projects = const [],
     this.roomId,
     this.agoraChannelName,
+    this.voiceEnabled = false,
+    this.cameraEnabled = false,
     this.engineState,
   });
 
@@ -125,6 +127,11 @@ class Game {
 
   final String? roomId;
   final String? agoraChannelName;
+
+  /// Media flags copied from the room at game start; mic/camera UI is shown
+  /// only when the corresponding flag is true.
+  final bool voiceEnabled;
+  final bool cameraEnabled;
   final Map<String, dynamic>? engineState;
 
   /// Returns true if it's the local player's turn.
@@ -194,6 +201,8 @@ class Game {
     List<Map<String, dynamic>>? projects,
     String? roomId,
     String? agoraChannelName,
+    bool? voiceEnabled,
+    bool? cameraEnabled,
   }) {
     return Game(
       id: id ?? this.id,
@@ -219,6 +228,8 @@ class Game {
       projects: projects ?? this.projects,
       roomId: roomId ?? this.roomId,
       agoraChannelName: agoraChannelName ?? this.agoraChannelName,
+      voiceEnabled: voiceEnabled ?? this.voiceEnabled,
+      cameraEnabled: cameraEnabled ?? this.cameraEnabled,
       // ignore: unnecessary_this
       engineState: engineState ?? this.engineState,
     );

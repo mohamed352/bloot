@@ -62,6 +62,9 @@ export interface GameDocument {
   updatedAt: Date;
   endedAt: Date | null;
   agoraChannelName?: string;
+  /** Media flags copied from the room so clients know if mic/camera UI applies. */
+  voiceEnabled?: boolean;
+  cameraEnabled?: boolean;
   trickEndDelayMs?: number;
   lastActionError?: string | null;
 }
@@ -123,8 +126,13 @@ export function createGameDocument(
   roomPlayers: RoomPlayer[],
   targetScore = 152,
   agoraChannelName?: string,
+  voiceEnabled?: boolean,
+  cameraEnabled?: boolean,
 ): GameDocument {
-  const configs = roomPlayers.map(playerConfigFromRoomPlayer);
+  // Defensively sort by seatIndex: engine seat i (teamOf(seat) = seat % 2)
+  // must map to the player configured for that seat.
+  const seatedPlayers = [...roomPlayers].sort((a, b) => a.seatIndex - b.seatIndex);
+  const configs = seatedPlayers.map(playerConfigFromRoomPlayer);
   const engine = new BalootEngine();
   const match = engine.createMatch(configs, { safeMode: true, autoDeclare: true });
   engine.startHand(match);
@@ -152,7 +160,7 @@ export function createGameDocument(
     roundTricksB: 0,
     currentTrick: emptyTrick(match.state!.turn),
     players: {},
-    playerUids: roomPlayers.map((p) => p.uid),
+    playerUids: seatedPlayers.map((p) => p.uid),
     playerBids: {},
     resolvedBonuses: null,
     fellTeam: null,
@@ -162,6 +170,8 @@ export function createGameDocument(
     updatedAt: now,
     endedAt: null,
     agoraChannelName,
+    voiceEnabled,
+    cameraEnabled,
   };
 
   syncEngineStateToDoc(game, match);

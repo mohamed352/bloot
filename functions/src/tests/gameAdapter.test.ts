@@ -35,4 +35,19 @@ describe('gameAdapter', () => {
     expect(game.players['0'].hand).toHaveLength(8);
     expect(game.currentTrick.cards['0']).toBeNull();
   });
+
+  it('defensively sorts roomPlayers by seatIndex before seating', () => {
+    const game = createGameDocument('g1', 'r1', [
+      { uid: 'd', displayName: 'D', team: 'B', seatIndex: 3 },
+      { uid: 'a', displayName: 'A', team: 'A', seatIndex: 0 },
+      { uid: 'c', displayName: 'C', team: 'A', seatIndex: 2 },
+      { uid: 'b', displayName: 'B', team: 'B', seatIndex: 1 },
+    ]);
+
+    expect(game.playerUids).toEqual(['a', 'b', 'c', 'd']);
+    expect(game.players['0'].uid).toBe('a');
+    expect(game.players['1'].uid).toBe('b');
+    expect(game.players['2'].uid).toBe('c');
+    expect(game.players['3'].uid).toBe('d');
+  });
 });

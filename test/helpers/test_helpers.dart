@@ -166,6 +166,7 @@ class TestAssetLoader extends AssetLoader {
     'room_password': 'Room Password',
     'enter_password': 'Enter password',
     'password_min_length': 'Password must be at least 4 characters',
+    'validationFieldRequired': 'This field is required',
     'private_room_password_required': 'Password required for private room',
     'cancel': 'Cancel',
     'on': 'On',
@@ -222,6 +223,8 @@ class TestAssetLoader extends AssetLoader {
     'end_stream': 'End Stream',
     'public_rooms': 'Public Rooms',
     'no_public_rooms': 'No public rooms',
+    'room_not_live': 'This table is not live right now.',
+    'kicked_from_room': 'You were removed from the room by the host.',
     'join_table': 'Join Table',
     'no_live_streams': 'No live streams',
     'discover_streams': 'Discover Streams',
@@ -515,6 +518,10 @@ Game testGame({
   List<GamePlayer>? players,
   String? roomId = 'r1',
   String? agoraChannelName = 'room_r1',
+  // Default to a voice-enabled game: the factory also defaults an Agora
+  // channel, and existing Agora tests assume media is available.
+  bool voiceEnabled = true,
+  bool cameraEnabled = false,
   Map<String, dynamic>? engineState,
 }) {
   return Game(
@@ -568,6 +575,8 @@ Game testGame({
     targetScore: 152,
     roomId: roomId,
     agoraChannelName: agoraChannelName,
+    voiceEnabled: voiceEnabled,
+    cameraEnabled: cameraEnabled,
   );
 }
 

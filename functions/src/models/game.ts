@@ -69,6 +69,9 @@ export interface GameDocument {
   id: string;
   roomId: string;
   agoraChannelName?: string;
+  /** Media flags copied from the room so clients know if mic/camera UI applies. */
+  voiceEnabled?: boolean;
+  cameraEnabled?: boolean;
   status: GameStatus;
   gameType: GameType | null;
   targetScore: number;

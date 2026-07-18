@@ -4,6 +4,8 @@ import { db } from '../config/admin';
 import { requireAppCheck } from '../utils/appCheck';
 import { createGameDocument, RoomPlayer } from '../engine/gameAdapter';
 import { mirrorGameToRtdb } from '../utils/rtdbMirror';
+import { normalizeParitySeats } from '../utils/roomPlayers';
+import { buildStreamPayload, shouldAutoCreateStream } from '../utils/streaming';
 
 export const startGame = functions.https.onCall(async (request) => {
   console.log('[startGame] invoked', { uid: request.auth?.uid, roomId: request.data?.roomId });
@@ -90,7 +92,12 @@ export const startGame = functions.https.onCall(async (request) => {
       }
 
       const targetScore = room.targetScore || 152;
-      const roomPlayers: RoomPlayer[] = players.map((p) => ({
+
+      // Enforce engine seat/team parity ([A1,B1,A2,B2]) before dealing and
+      // persist the normalized seats back to the room in the same transaction.
+      const normalizedPlayers = normalizeParitySeats(players);
+
+      const roomPlayers: RoomPlayer[] = normalizedPlayers.map((p) => ({
         uid: p.uid,
         displayName: p.displayName,
         avatarUrl: p.avatarUrl,
@@ -110,15 +117,38 @@ export const startGame = functions.https.onCall(async (request) => {
         roomPlayers,
         targetScore,
         room.agoraChannelName ?? `room_${roomId}`,
+        room.voiceEnabled ?? false,
+        room.cameraEnabled ?? false,
       );
       game.turnTimerStart = Timestamp.now().toDate();
 
       transaction.set(gameRef, game);
-      transaction.update(roomRef, {
+
+      const roomUpdate: Record<string, any> = {
         status: 'playing',
         gameId: gameRef.id,
+        players: normalizedPlayers,
         updatedAt: new Date(),
-      });
+      };
+
+      // Live rooms become visible to watchers as soon as the game starts.
+      // Never duplicate an existing stream.
+      if (shouldAutoCreateStream(room)) {
+        const streamRef = db.collection('streams').doc();
+        transaction.set(
+          streamRef,
+          buildStreamPayload({
+            roomId,
+            room,
+            hostUid: authUid,
+            roomPlayers: normalizedPlayers,
+          }),
+        );
+        roomUpdate.isStreaming = true;
+        roomUpdate.streamId = streamRef.id;
+      }
+
+      transaction.update(roomRef, roomUpdate);
 
       return { gameId: gameRef.id, game };
     });

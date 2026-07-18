@@ -347,6 +347,8 @@
   "push_invite_body": "الغرفة: {roomName}",
   "no_public_rooms": "لا توجد غرف عامة حالياً. أنشئ غرفتك الخاصة!",
   "no_live_for_code": "لا يوجد بث مباشر بهذا الرمز.",
+  "room_not_live": "هذه الطاولة غير مباشرة الآن.",
+  "kicked_from_room": "تمت إزالتك من الغرفة من قبل المضيف.",
   "public_rooms": "الطاولات العامة",
   "join_table": "انضم للطاولة",
   "spectate": "مشاهدة",

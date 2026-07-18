@@ -30,8 +30,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
   bool _cameraOn = false;
   bool _spectatorsOn = true;
   final _nameController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _isPasswordValid = false;
+  bool _showNameError = false;
 
   final _roomTypes = [
     _RoomTypeData(
@@ -58,44 +57,30 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
   void initState() {
     super.initState();
     _nameController.addListener(_onFormChanged);
-    _passwordController.addListener(_onFormChanged);
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
   void _onFormChanged() {
-    if (_selectedType == 0) {
-      final password = _passwordController.text.trim();
-      final isValid = password.isNotEmpty && password.length >= 4;
-      if (isValid != _isPasswordValid) {
-        _isPasswordValid = isValid;
-      }
-    } else if (!_isPasswordValid) {
-      _isPasswordValid = true;
+    // Clear the name error as soon as the user types a name.
+    if (_showNameError && _nameController.text.trim().isNotEmpty) {
+      _showNameError = false;
     }
-    // Rebuild so the create button reflects the current name/password text.
+    // Rebuild so the create button reflects the current name text.
     setState(() {});
-  }
-
-  /// A new room always needs a non-empty name; private rooms also need a
-  /// valid password.
-  bool get _canCreate {
-    if (_nameController.text.trim().isEmpty) return false;
-    if (_selectedType == 0 && !_isPasswordValid) return false;
-    return true;
   }
 
   /// Clears the form after a successful creation so reopening the page (the
   /// route stays in the navigation stack) shows empty fields again.
   void _resetForm() {
     _nameController.clear();
-    _passwordController.clear();
-    setState(() => _isPasswordValid = false);
+    setState(() {
+      _showNameError = false;
+    });
   }
 
   @override
@@ -143,6 +128,9 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                     ),
                     decoration: InputDecoration(
                       hintText: 'room_name'.tr(),
+                      errorText: _showNameError
+                          ? 'validationFieldRequired'.tr()
+                          : null,
                       filled: true,
                       fillColor: ColorManager.darkSectionGray,
                       border: OutlineInputBorder(
@@ -165,6 +153,24 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                         ),
                         borderSide: const BorderSide(
                           color: ColorManager.primary,
+                          width: 1.5,
+                        ),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppRadius.cardCompact,
+                        ),
+                        borderSide: const BorderSide(
+                          color: ColorManager.error,
+                          width: 1.5,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppRadius.cardCompact,
+                        ),
+                        borderSide: const BorderSide(
+                          color: ColorManager.error,
                           width: 1.5,
                         ),
                       ),
@@ -324,77 +330,6 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                     _spectatorsOn,
                     (v) => setState(() => _spectatorsOn = v),
                   ),
-                  // Password for private rooms
-                  if (_selectedType == 0) ...[
-                    const SizedBox(height: AppSpacing.xxl),
-                    _buildLabel('room_password'.tr()),
-                    const SizedBox(height: AppSpacing.sm),
-                    TextField(
-                      controller: _passwordController,
-                      obscureText: true,
-                      style: const TextStyle(
-                        color: ColorManager.darkTextPrimary,
-                        fontSize: 15,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'enter_password'.tr(),
-                        errorText: _isPasswordValid
-                            ? null
-                            : 'password_min_length'.tr(),
-                        filled: true,
-                        fillColor: ColorManager.darkSectionGray,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppRadius.cardCompact,
-                          ),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppRadius.cardCompact,
-                          ),
-                          borderSide: const BorderSide(
-                            color: ColorManager.darkBorderSoft,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppRadius.cardCompact,
-                          ),
-                          borderSide: const BorderSide(
-                            color: ColorManager.primary,
-                            width: 1.5,
-                          ),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppRadius.cardCompact,
-                          ),
-                          borderSide: const BorderSide(
-                            color: ColorManager.error,
-                            width: 1.5,
-                          ),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppRadius.cardCompact,
-                          ),
-                          borderSide: const BorderSide(
-                            color: ColorManager.error,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      'private_room_password_required'.tr(),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: ColorManager.darkTextMuted,
-                      ),
-                    ),
-                  ],
                   const SizedBox(height: AppSpacing.xxl),
                   // Lobby Preview with player avatars in a row
                   Container(
@@ -498,7 +433,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                     gradient: GradientButton.goldGradient,
                     icon: Icons.add_rounded,
                     isLoading: isLoading,
-                    onPressed: isLoading || !_canCreate
+                    onPressed: isLoading
                         ? null
                         : () {
                             AppLogger.info(
@@ -506,9 +441,8 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                               tag: 'Room',
                             );
                             final name = _nameController.text.trim();
-                            if (_selectedType == 0 &&
-                                _passwordController.text.trim().length < 4) {
-                              setState(() => _isPasswordValid = false);
+                            if (name.isEmpty) {
+                              setState(() => _showNameError = true);
                               return;
                             }
                             context.read<RoomCubit>().createRoom(
@@ -518,9 +452,10 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                                 voiceEnabled: _voiceOn,
                                 cameraEnabled: _cameraOn,
                                 allowSpectators: _spectatorsOn,
-                                password: _selectedType == 0
-                                    ? _passwordController.text.trim()
-                                    : null,
+                                // Private rooms no longer require a password;
+                                // CreateRoomParams.password stays only for
+                                // legacy rooms that were created with one.
+                                password: null,
                               ),
                             );
                           },

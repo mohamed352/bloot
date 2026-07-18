@@ -533,6 +533,13 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
     // Spectators don't publish audio/video; no local toggles needed.
     if (widget.isSpectator) return const SizedBox.shrink();
 
+    // Media toggles only apply when the room was created with voice/camera
+    // enabled (bot matches and plain rooms have both flags off).
+    final game = _extractGame(context.watch<GameCubit>().state);
+    if (game == null || (!game.voiceEnabled && !game.cameraEnabled)) {
+      return const SizedBox.shrink();
+    }
+
     final agoraService = context.read<AgoraService>();
     return SafeArea(
       child: Align(
@@ -542,31 +549,34 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _MediaToggleButton(
-                icon: agoraService.isMicOn
-                    ? Icons.mic_rounded
-                    : Icons.mic_off_rounded,
-                color: agoraService.isMicOn
-                    ? ColorManager.success
-                    : ColorManager.error,
-                onTap: () async {
-                  await context.read<GameCubit>().toggleMic();
-                  if (mounted) setState(() {});
-                },
-              ),
-              const SizedBox(width: AppSpacing.md),
-              _MediaToggleButton(
-                icon: agoraService.isCameraOn
-                    ? Icons.videocam_rounded
-                    : Icons.videocam_off_rounded,
-                color: agoraService.isCameraOn
-                    ? ColorManager.success
-                    : ColorManager.darkTextMuted,
-                onTap: () async {
-                  await context.read<GameCubit>().toggleCamera();
-                  if (mounted) setState(() {});
-                },
-              ),
+              if (game.voiceEnabled) ...[
+                _MediaToggleButton(
+                  icon: agoraService.isMicOn
+                      ? Icons.mic_rounded
+                      : Icons.mic_off_rounded,
+                  color: agoraService.isMicOn
+                      ? ColorManager.success
+                      : ColorManager.error,
+                  onTap: () async {
+                    await context.read<GameCubit>().toggleMic();
+                    if (mounted) setState(() {});
+                  },
+                ),
+                const SizedBox(width: AppSpacing.md),
+              ],
+              if (game.cameraEnabled)
+                _MediaToggleButton(
+                  icon: agoraService.isCameraOn
+                      ? Icons.videocam_rounded
+                      : Icons.videocam_off_rounded,
+                  color: agoraService.isCameraOn
+                      ? ColorManager.success
+                      : ColorManager.darkTextMuted,
+                  onTap: () async {
+                    await context.read<GameCubit>().toggleCamera();
+                    if (mounted) setState(() {});
+                  },
+                ),
             ],
           ),
         ),
