@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -260,7 +261,7 @@ class GameCubit extends Cubit<GameState> {
     );
   }
 
-  void _emitActionError(String message) {
+  void _emitActionError(String? message) {
     final current = state;
     current.mapOrNull(
       dealing: (s) =>
@@ -279,6 +280,13 @@ class GameCubit extends Cubit<GameState> {
           emit(s.copyWith(actionInProgress: false, lastActionError: message)),
     );
   }
+
+  /// True when the server rejected an action because the game already moved
+  /// past the phase it targets. The WebView runs on the RTDB fast path which
+  /// can be ahead of the Firestore snapshot this Cubit last saw, so this is
+  /// an expected race — not something to alarm the user or Crashlytics with.
+  bool _isStalePhaseRejection(Object e) =>
+      e is FirebaseFunctionsException && e.code == 'failed-precondition';
 
   /// Exposes action-error emission for subclasses (e.g. local simulator).
   void emitActionError(String message) => _emitActionError(message);
@@ -322,8 +330,13 @@ class GameCubit extends Cubit<GameState> {
     try {
       await _gameRepository.placeBid(game.id, bid);
     } catch (e) {
-      AppLogger.error('Failed to place bid', error: e);
-      _emitActionError('Failed to place bid. Please try again.');
+      if (_isStalePhaseRejection(e)) {
+        AppLogger.debug('Ignoring stale bid rejection: $e');
+        _emitActionError(null);
+      } else {
+        AppLogger.error('Failed to place bid', error: e);
+        _emitActionError('Failed to place bid. Please try again.');
+      }
     } finally {
       _bidInProgress = false;
     }
@@ -342,8 +355,13 @@ class GameCubit extends Cubit<GameState> {
     try {
       await _gameRepository.playCard(game.id, card);
     } catch (e) {
-      AppLogger.error('Failed to play card', error: e);
-      _emitActionError('Failed to play card. Please try again.');
+      if (_isStalePhaseRejection(e)) {
+        AppLogger.debug('Ignoring stale card-play rejection: $e');
+        _emitActionError(null);
+      } else {
+        AppLogger.error('Failed to play card', error: e);
+        _emitActionError('Failed to play card. Please try again.');
+      }
     } finally {
       _cardInProgress = false;
     }
@@ -356,8 +374,13 @@ class GameCubit extends Cubit<GameState> {
     try {
       await _gameRepository.claimBonuses(current.game.id, bonuses);
     } catch (e) {
-      AppLogger.error('Failed to claim bonuses', error: e);
-      _emitActionError('Failed to claim bonuses. Please try again.');
+      if (_isStalePhaseRejection(e)) {
+        AppLogger.debug('Ignoring stale bonus-claim rejection: $e');
+        _emitActionError(null);
+      } else {
+        AppLogger.error('Failed to claim bonuses', error: e);
+        _emitActionError('Failed to claim bonuses. Please try again.');
+      }
     }
   }
 
@@ -368,8 +391,13 @@ class GameCubit extends Cubit<GameState> {
     try {
       await _gameRepository.dealNextRound(current.game.id);
     } catch (e) {
-      AppLogger.error('Failed to deal next round', error: e);
-      _emitActionError('Failed to start next round. Please try again.');
+      if (_isStalePhaseRejection(e)) {
+        AppLogger.debug('Ignoring stale next-round rejection: $e');
+        _emitActionError(null);
+      } else {
+        AppLogger.error('Failed to deal next round', error: e);
+        _emitActionError('Failed to start next round. Please try again.');
+      }
     }
   }
 
@@ -380,8 +408,13 @@ class GameCubit extends Cubit<GameState> {
     try {
       await _gameRepository.rematch(roomId);
     } catch (e) {
-      AppLogger.error('Failed to rematch', error: e);
-      _emitActionError('Failed to rematch. Please try again.');
+      if (_isStalePhaseRejection(e)) {
+        AppLogger.debug('Ignoring stale rematch rejection: $e');
+        _emitActionError(null);
+      } else {
+        AppLogger.error('Failed to rematch', error: e);
+        _emitActionError('Failed to rematch. Please try again.');
+      }
     }
   }
 
@@ -393,8 +426,13 @@ class GameCubit extends Cubit<GameState> {
     try {
       await _gameRepository.declareProject(game.id, types);
     } catch (e) {
-      AppLogger.error('Failed to declare project', error: e);
-      _emitActionError('Failed to declare project. Please try again.');
+      if (_isStalePhaseRejection(e)) {
+        AppLogger.debug('Ignoring stale project rejection: $e');
+        _emitActionError(null);
+      } else {
+        AppLogger.error('Failed to declare project', error: e);
+        _emitActionError('Failed to declare project. Please try again.');
+      }
     }
   }
 
@@ -406,8 +444,13 @@ class GameCubit extends Cubit<GameState> {
     try {
       await _gameRepository.applyDouble(game.id, action);
     } catch (e) {
-      AppLogger.error('Failed to apply double', error: e);
-      _emitActionError('Failed to apply double. Please try again.');
+      if (_isStalePhaseRejection(e)) {
+        AppLogger.debug('Ignoring stale double rejection: $e');
+        _emitActionError(null);
+      } else {
+        AppLogger.error('Failed to apply double', error: e);
+        _emitActionError('Failed to apply double. Please try again.');
+      }
     }
   }
 
@@ -419,8 +462,13 @@ class GameCubit extends Cubit<GameState> {
     try {
       await _gameRepository.claimQaid(game.id, claimType);
     } catch (e) {
-      AppLogger.error('Failed to claim qaid', error: e);
-      _emitActionError('Failed to claim qaid. Please try again.');
+      if (_isStalePhaseRejection(e)) {
+        AppLogger.debug('Ignoring stale qaid rejection: $e');
+        _emitActionError(null);
+      } else {
+        AppLogger.error('Failed to claim qaid', error: e);
+        _emitActionError('Failed to claim qaid. Please try again.');
+      }
     }
   }
 
@@ -435,8 +483,13 @@ class GameCubit extends Cubit<GameState> {
     try {
       await _gameRepository.claimSawa(game.id);
     } catch (e) {
-      AppLogger.error('Failed to claim sawa', error: e);
-      _emitActionError('Failed to claim sawa. Please try again.');
+      if (_isStalePhaseRejection(e)) {
+        AppLogger.debug('Ignoring stale sawa rejection: $e');
+        _emitActionError(null);
+      } else {
+        AppLogger.error('Failed to claim sawa', error: e);
+        _emitActionError('Failed to claim sawa. Please try again.');
+      }
     }
   }
 
