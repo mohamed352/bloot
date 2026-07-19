@@ -70,9 +70,19 @@ void main() {
     blocTest<DiscoverCubit, DiscoverState>(
       'updates selected filter index',
       build: buildCubit,
-      seed: () => const DiscoverState.streamsLoaded(streams: [stream]),
-      act: (cubit) => cubit.selectFilter(1),
+      setUp: () {
+        when(
+          () => discoverRepository.watchStreams(),
+        ).thenAnswer((_) => Stream.value([stream]));
+      },
+      act: (cubit) async {
+        cubit.loadStreams();
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        cubit.selectFilter(1);
+      },
       expect: () => [
+        const DiscoverState.loading(),
+        const DiscoverState.streamsLoaded(streams: [stream]),
         const DiscoverState.streamsLoaded(
           streams: [stream],
           selectedFilterIndex: 1,

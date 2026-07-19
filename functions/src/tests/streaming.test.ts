@@ -23,7 +23,7 @@ describe('buildStreamPayload', () => {
       hostAvatar: 'a.png',
       title: 'My Room',
       status: 'live',
-      viewerCount: 0,
+      viewerCount: 2,
       agoraChannelName: 'room_r1',
       playerUids: ['host', 'p2'],
       createdAt: now,

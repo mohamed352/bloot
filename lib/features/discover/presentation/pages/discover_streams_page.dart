@@ -52,10 +52,7 @@ class _DiscoverStreamsPageState extends State<DiscoverStreamsPage> {
       if (!mounted) return;
       setState(() => _searching = false);
       _clearSearch();
-      context.pushNamed(
-        RouteNames.roomLobby,
-        pathParameters: {'id': room.id},
-      );
+      context.pushNamed(RouteNames.roomLobby, pathParameters: {'id': room.id});
       return;
     } on RoomException catch (e) {
       if (!mounted) return;
@@ -70,17 +67,35 @@ class _DiscoverStreamsPageState extends State<DiscoverStreamsPage> {
       }
     }
 
-    final streamId = await context.read<DiscoverCubit>().findStreamByCode(
+    // If the code didn't match a joinable room, try searching by room name
+    // and join as a spectator (stream viewer).
+    final streamId = await context.read<DiscoverCubit>().findStreamByRoomName(
+      query,
+    );
+    if (!mounted) return;
+
+    if (streamId != null) {
+      setState(() => _searching = false);
+      _clearSearch();
+      context.pushNamed(
+        RouteNames.watchStream,
+        pathParameters: {'id': streamId},
+      );
+      return;
+    }
+
+    // Fall back to invite code lookup for live streams.
+    final codeStreamId = await context.read<DiscoverCubit>().findStreamByCode(
       query,
     );
     if (!mounted) return;
     setState(() => _searching = false);
 
-    if (streamId != null) {
+    if (codeStreamId != null) {
       _clearSearch();
       context.pushNamed(
         RouteNames.watchStream,
-        pathParameters: {'id': streamId},
+        pathParameters: {'id': codeStreamId},
       );
     } else {
       ScaffoldMessenger.of(

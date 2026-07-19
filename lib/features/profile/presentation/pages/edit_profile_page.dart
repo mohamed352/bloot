@@ -9,6 +9,7 @@ import 'package:bloot/core/components/cached_avatar.dart';
 import 'package:bloot/core/constants/app_radius.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
 import 'package:bloot/core/style/colors.dart';
+import 'package:bloot/features/profile/domain/entities/user_profile.dart';
 import 'package:bloot/features/profile/presentation/cubit/edit_profile_cubit.dart';
 import 'package:bloot/features/profile/presentation/cubit/edit_profile_state.dart';
 
@@ -28,6 +29,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   String? _avatarUrl;
   String? _region;
   String? _favoriteMode;
+  bool _controllersInitialized = false;
 
   static const List<String> _regions = [
     'riyadh_saudi_arabia',
@@ -46,20 +48,28 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   void initState() {
     super.initState();
-    final state = context.read<EditProfileCubit>().state;
-    final profile = state.whenOrNull(
-          loaded: (profile, _) => profile,
-        ) ??
-        state.whenOrNull(
-          saving: () => null,
-        );
+    _nameController = TextEditingController();
+    _usernameController = TextEditingController();
+    _bioController = TextEditingController();
 
-    _nameController = TextEditingController(text: profile?.displayName ?? '');
-    _usernameController = TextEditingController(text: profile?.username ?? '');
-    _bioController = TextEditingController(text: profile?.bio ?? '');
-    _avatarUrl = profile?.avatarUrl;
-    _region = profile?.region;
-    _favoriteMode = profile?.favoriteMode;
+    final cubit = context.read<EditProfileCubit>();
+    final profile = cubit.state.whenOrNull(loaded: (profile, _) => profile);
+
+    if (profile != null) {
+      _populateControllers(profile);
+    } else {
+      cubit.loadCurrentUserProfile();
+    }
+  }
+
+  void _populateControllers(UserProfile profile) {
+    _nameController.text = profile.displayName ?? '';
+    _usernameController.text = profile.username ?? '';
+    _bioController.text = profile.bio ?? '';
+    _avatarUrl = profile.avatarUrl;
+    _region = profile.region;
+    _favoriteMode = profile.favoriteMode;
+    _controllersInitialized = true;
   }
 
   @override
@@ -75,6 +85,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return BlocConsumer<EditProfileCubit, EditProfileState>(
       listener: (context, state) {
         state.whenOrNull(
+          loaded: (profile, _) {
+            if (!_controllersInitialized) {
+              _populateControllers(profile);
+              setState(() {});
+            }
+          },
           saved: () => context.pop(),
           error: (message) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -234,10 +250,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               decoration: BoxDecoration(
                 color: ColorManager.primary,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: ColorManager.darkCanvas,
-                  width: 2,
-                ),
+                border: Border.all(color: ColorManager.darkCanvas, width: 2),
               ),
               child: const Icon(
                 Icons.camera_alt_rounded,
@@ -277,14 +290,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
           maxLength: maxLength,
           validator: validator,
           onChanged: (_) => context.read<EditProfileCubit>().markChanged(),
-          style: const TextStyle(
-            color: ColorManager.darkTextPrimary,
-          ),
+          style: const TextStyle(color: ColorManager.darkTextPrimary),
           decoration: InputDecoration(
             prefixText: prefixText,
-            prefixStyle: const TextStyle(
-              color: ColorManager.darkTextMuted,
-            ),
+            prefixStyle: const TextStyle(color: ColorManager.darkTextMuted),
             filled: true,
             fillColor: ColorManager.darkSurface,
             border: OutlineInputBorder(
@@ -368,12 +377,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     context.read<EditProfileCubit>().saveProfile(
-          displayName: _nameController.text.trim(),
-          username: _usernameController.text.trim(),
-          bio: _bioController.text.trim(),
-          region: _region,
-          favoriteMode: _favoriteMode,
-          avatarUrl: _avatarUrl,
-        );
+      displayName: _nameController.text.trim(),
+      username: _usernameController.text.trim(),
+      bio: _bioController.text.trim(),
+      region: _region,
+      favoriteMode: _favoriteMode,
+      avatarUrl: _avatarUrl,
+    );
   }
 }

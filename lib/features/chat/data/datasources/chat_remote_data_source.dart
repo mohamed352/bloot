@@ -238,16 +238,25 @@ class ChatRemoteDataSource {
         trimmed[0].toUpperCase() + trimmed.substring(1).toLowerCase(),
       };
 
+      final futures = <Future<QuerySnapshot<Map<String, dynamic>>>>[];
       for (final field in ['username', 'displayName']) {
         for (final variant in variants) {
-          final snapshot = await _firestore
-              .collection('users')
-              .where(field, isGreaterThanOrEqualTo: variant)
-              .where(field, isLessThan: '$variant\uf8ff')
-              .limit(10)
-              .get();
-          collect(snapshot.docs);
+          futures.add(
+            _firestore
+                .collection('users')
+                .where(field, isGreaterThanOrEqualTo: variant)
+                .where(field, isLessThan: '$variant\uf8ff')
+                .limit(10)
+                .get(),
+          );
         }
+      }
+
+      final results = await Future.wait(
+        futures,
+      ).timeout(const Duration(seconds: 10));
+      for (final snapshot in results) {
+        collect(snapshot.docs);
       }
 
       return byId.values.take(20).toList();

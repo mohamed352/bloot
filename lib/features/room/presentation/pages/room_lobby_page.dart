@@ -96,9 +96,9 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
               // voluntary leave (which would emit another loaded state).
               _bypassLeaveHandling = true;
               context.goNamed(RouteNames.home);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('kicked_from_room'.tr())),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('kicked_from_room'.tr())));
             },
           );
         },
@@ -581,7 +581,11 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                             const SizedBox(width: AppSpacing.md),
                             Expanded(
                               child: AppButton(
-                                text: 'start_game'.tr(),
+                                text: isCreator
+                                    ? (allReady
+                                          ? 'start_game'.tr()
+                                          : '${'ready'.tr()} $readyCount/4')
+                                    : 'start_game'.tr(),
                                 onPressed: allReady && isCreator
                                     ? () => context.read<RoomCubit>().startGame(
                                         room!.id,

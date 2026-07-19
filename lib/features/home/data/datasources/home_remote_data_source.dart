@@ -70,7 +70,9 @@ class HomeRemoteDataSource {
   /// missing, not currently playing, has no players, or no longer points at
   /// this stream (e.g. the host left and the room's isStreaming flag was
   /// cleared) so stale lives never appear.
-  Future<List<HomeStream>> _filterActiveStreams(List<HomeStream> streams) async {
+  Future<List<HomeStream>> _filterActiveStreams(
+    List<HomeStream> streams,
+  ) async {
     if (streams.isEmpty) return streams;
 
     final roomIds = streams
@@ -96,7 +98,7 @@ class HomeRemoteDataSource {
       final isStreaming = data['isStreaming'] == true;
       final roomStreamId = data['streamId'] as String?;
       if (hasPlayers &&
-          status == 'playing' &&
+          (status == 'playing' || status == 'waiting') &&
           isStreaming &&
           roomStreamId != null &&
           roomStreamId.isNotEmpty) {

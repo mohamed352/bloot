@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:easy_localization/easy_localization.dart';
 
+import 'package:bloot/app/app.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
 import 'package:bloot/core/di/injection.dart';
 import 'package:bloot/core/services/notification_service.dart';
@@ -45,10 +48,22 @@ class LanguageSettingsPage extends StatelessWidget {
                     color: ColorManager.primary,
                   )
                 : null,
-            onTap: () {
-              context.setLocale(locale);
-              getIt<NotificationService>().syncLocale(locale.languageCode);
-              Navigator.pop(context);
+            onTap: () async {
+              final navigator = Navigator.of(context);
+              await context.setLocale(locale);
+              unawaited(
+                getIt<NotificationService>().syncLocale(locale.languageCode),
+              );
+              if (!context.mounted) return;
+              navigator.pop();
+              // Screens resolve strings through the context-less `.tr()`
+              // extension, which holds no dependency on Localizations — they
+              // would keep showing the previous language until coincidentally
+              // rebuilt. Rebuild the app shell on the next frame, after the
+              // new translations have been delivered.
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                BlootApp.restartApp();
+              });
             },
           );
         }).toList(),

@@ -11,10 +11,9 @@ import 'package:bloot/features/profile/presentation/cubit/edit_profile_state.dar
 
 @injectable
 class EditProfileCubit extends Cubit<EditProfileState> {
-  EditProfileCubit({
-    required ProfileRepository profileRepository,
-  }) : _profileRepository = profileRepository,
-       super(const EditProfileState.initial());
+  EditProfileCubit({required ProfileRepository profileRepository})
+    : _profileRepository = profileRepository,
+      super(const EditProfileState.initial());
 
   final ProfileRepository _profileRepository;
 
@@ -45,9 +44,8 @@ class EditProfileCubit extends Cubit<EditProfileState> {
 
   void markChanged() {
     state.whenOrNull(
-      loaded: (profile, _) => emit(
-        EditProfileState.loaded(profile: profile, hasChanges: true),
-      ),
+      loaded: (profile, _) =>
+          emit(EditProfileState.loaded(profile: profile, hasChanges: true)),
     );
   }
 
@@ -108,12 +106,44 @@ class EditProfileCubit extends Cubit<EditProfileState> {
       );
       if (picked == null) return null;
 
-      emit(const EditProfileState.saving());
       final url = await _profileRepository.uploadAvatar(File(picked.path));
+      if (_currentProfile != null) {
+        final updatedProfile = UserProfile(
+          uid: _currentProfile!.uid,
+          displayName: _currentProfile!.displayName,
+          username: _currentProfile!.username,
+          bio: _currentProfile!.bio,
+          avatarUrl: url,
+          region: _currentProfile!.region,
+          favoriteMode: _currentProfile!.favoriteMode,
+          level: _currentProfile!.level,
+          xp: _currentProfile!.xp,
+          xpToNextLevel: _currentProfile!.xpToNextLevel,
+          gamesPlayed: _currentProfile!.gamesPlayed,
+          gamesWon: _currentProfile!.gamesWon,
+          sunGamesPlayed: _currentProfile!.sunGamesPlayed,
+          sunGamesWon: _currentProfile!.sunGamesWon,
+          hokmGamesPlayed: _currentProfile!.hokmGamesPlayed,
+          hokmGamesWon: _currentProfile!.hokmGamesWon,
+          followersCount: _currentProfile!.followersCount,
+          followingCount: _currentProfile!.followingCount,
+          isOnline: _currentProfile!.isOnline,
+        );
+        _currentProfile = updatedProfile;
+        emit(
+          EditProfileState.loaded(profile: updatedProfile, hasChanges: true),
+        );
+      }
       return url;
     } catch (e) {
       AppLogger.error('Failed to upload avatar', error: e);
-      emit(EditProfileState.error(message: e.toString()));
+      if (_currentProfile != null) {
+        emit(
+          EditProfileState.loaded(profile: _currentProfile!, hasChanges: false),
+        );
+      } else {
+        emit(EditProfileState.error(message: e.toString()));
+      }
       return null;
     }
   }

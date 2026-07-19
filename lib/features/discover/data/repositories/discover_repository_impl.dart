@@ -54,6 +54,11 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
   }
 
   @override
+  Future<String?> findStreamIdByRoomName(String name) {
+    return _remoteDataSource.findStreamIdByRoomName(name);
+  }
+
+  @override
   Future<void> incrementViewerCount(String streamId) {
     return _remoteDataSource.incrementViewerCount(streamId);
   }

@@ -54,7 +54,7 @@ export function buildStreamPayload(params: {
     hostAvatar,
     title: room.name || `${hostName}'s Stream`,
     status: 'live',
-    viewerCount: 0,
+    viewerCount: roomPlayers.length,
     agoraChannelName: room.agoraChannelName || `room_${roomId}`,
     players,
     playerUids: roomPlayers.map((p) => p.uid),

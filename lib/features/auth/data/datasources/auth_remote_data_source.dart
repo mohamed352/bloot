@@ -338,8 +338,14 @@ class AuthRemoteDataSource {
     }
 
     try {
-      final ref = _storage.ref().child('avatars/${user.uid}.jpg');
-      final uploadTask = await ref.putFile(file);
+      // Storage rules only allow writes under avatars/{uid}/... with an
+      // image/* content type — avatars/{uid}.jpg is rejected with
+      // firebase_storage/unauthorized.
+      final ref = _storage.ref().child('avatars/${user.uid}/avatar.jpg');
+      final uploadTask = await ref.putFile(
+        file,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
       return uploadTask.ref.getDownloadURL();
     } on FirebaseException catch (e) {
       AppLogger.error('Failed to upload avatar', error: e, tag: 'Auth');

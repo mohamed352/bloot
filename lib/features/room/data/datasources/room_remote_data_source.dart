@@ -481,7 +481,16 @@ class RoomRemoteDataSource {
         case 'resource-exhausted':
           throw const RoomFullException();
         case 'permission-denied':
+          final message = e.message ?? '';
+          if (message.contains('removed from this room')) {
+            throw RoomException(message);
+          }
           throw const WrongPasswordException();
+        case 'invalid-argument':
+          if (e.message == 'Wrong password') {
+            throw const WrongPasswordException();
+          }
+          throw RoomException(e.message ?? 'Failed to join room.');
         case 'unauthenticated':
           throw const UnauthenticatedException();
         default:

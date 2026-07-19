@@ -39,6 +39,16 @@ class _AppScrollBehavior extends ScrollBehavior {
 class BlootApp extends StatefulWidget {
   const BlootApp({super.key});
 
+  /// Rebuilds the app shell from the root on the next frame.
+  ///
+  /// Needed after a runtime locale switch: strings resolved through the
+  /// context-less `.tr()` extension hold no dependency on [Localizations],
+  /// so already-built screens keep the previous language until they happen
+  /// to rebuild for another reason. Bumping the app key forces every screen
+  /// to rebuild against the freshly loaded translations.
+  static void restartApp() => _restartAppCallback?.call();
+  static VoidCallback? _restartAppCallback;
+
   @override
   State<BlootApp> createState() => _BlootAppState();
 }
@@ -48,10 +58,14 @@ class _BlootAppState extends State<BlootApp> {
   StreamSubscription<dynamic>? _fcmSub;
   DeepLinkService? _deepLinkService;
   NotificationService? _notificationService;
+  Key _appKey = const ValueKey('bloot-app');
 
   @override
   void initState() {
     super.initState();
+    BlootApp._restartAppCallback = () {
+      if (mounted) setState(() => _appKey = UniqueKey());
+    };
     _initDeepLinks();
     _initFcmNavigation();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -129,6 +143,7 @@ class _BlootAppState extends State<BlootApp> {
 
   @override
   void dispose() {
+    BlootApp._restartAppCallback = null;
     _deepLinkSub?.cancel();
     _fcmSub?.cancel();
     _deepLinkService?.dispose();
@@ -146,6 +161,7 @@ class _BlootAppState extends State<BlootApp> {
         BlocProvider(create: (_) => getIt<AuthCubit>()),
       ],
       child: MaterialApp.router(
+        key: _appKey,
         title: LocaleKeys.appName.tr(),
         debugShowCheckedModeBanner: false,
         theme: ThemeManager.darkTheme,

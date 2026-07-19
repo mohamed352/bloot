@@ -89,8 +89,14 @@ class ProfileRemoteDataSource {
     final user = _firebaseAuth.currentUser;
     if (user == null) throw Exception('No authenticated user');
 
-    final ref = _storage.ref().child('avatars/${user.uid}.jpg');
-    final uploadTask = await ref.putFile(file);
+    // Storage rules only allow writes under avatars/{uid}/... with an image/*
+    // content type — writing to avatars/{uid}.jpg is rejected with
+    // firebase_storage/unauthorized.
+    final ref = _storage.ref().child('avatars/${user.uid}/avatar.jpg');
+    final uploadTask = await ref.putFile(
+      file,
+      SettableMetadata(contentType: 'image/jpeg'),
+    );
     return uploadTask.ref.getDownloadURL();
   }
 

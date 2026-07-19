@@ -52,11 +52,6 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
     if (_agoraService.currentChannelId == channelName) return;
     try {
       await _agoraService.joinAsAudience(channelName: channelName);
-      // Increment viewer count once when we successfully join the channel.
-      if (!_viewerCountIncremented) {
-        _viewerCountIncremented = true;
-        _discoverRepository.incrementViewerCount(widget.id);
-      }
     } catch (e) {
       debugPrint('Failed to join Agora stream: $e');
     }
@@ -140,6 +135,13 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
       return;
     }
     _accessGranted = true;
+    // Count the viewer as soon as access is granted. Tying the increment to
+    // a successful Agora join under-counted viewers whenever the media join
+    // failed or the channel was missing, while the user was still watching.
+    if (!_viewerCountIncremented) {
+      _viewerCountIncremented = true;
+      _discoverRepository.incrementViewerCount(widget.id);
+    }
     _joinAgoraChannel(stream.agoraChannelName);
     _subscribeToGameId();
   }
@@ -319,10 +321,20 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
                     if (_gameId != null) ...[
                       const SizedBox(width: 8),
                       GestureDetector(
-                        onTap: () => context.pushNamed(
-                          RouteNames.spectate,
-                          pathParameters: {'id': _gameId!},
-                        ),
+                        onTap: () {
+                          try {
+                            context.pushNamed(
+                              RouteNames.spectate,
+                              pathParameters: {'id': _gameId!},
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Failed to open game'),
+                              ),
+                            );
+                          }
+                        },
                         child: Container(
                           padding: const EdgeInsetsDirectional.symmetric(
                             horizontal: 10,

@@ -226,7 +226,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final startButton = find.widgetWithText(ElevatedButton, 'Start Game');
+        final startButton = find.widgetWithText(ElevatedButton, 'Ready 0/4');
         expect(startButton, findsOneWidget);
         expect(tester.widget<ElevatedButton>(startButton).onPressed, isNull);
       });

@@ -481,18 +481,16 @@ class RoomCubit extends Cubit<RoomState> {
       // Real-time listener updates UI with isStreaming=false
     } catch (e) {
       AppLogger.error('Failed to end stream', error: e);
-      emit(
-        const RoomState.error(
-          message: 'Failed to end stream. Please try again.',
-        ),
-      );
+      emit(RoomState.error(message: e.toString()));
       emit(currentState);
     }
   }
 
   Future<bool> sendRoomInvite(String roomId, String friendUid) async {
     try {
-      await _roomRepository.sendRoomInvite(roomId, friendUid);
+      await _roomRepository
+          .sendRoomInvite(roomId, friendUid)
+          .timeout(const Duration(seconds: 15));
       return true;
     } on RoomException catch (e) {
       AppLogger.error('Failed to send room invite', error: e.message);

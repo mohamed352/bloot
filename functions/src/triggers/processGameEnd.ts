@@ -45,24 +45,29 @@ export const processGameEnd = onDocumentUpdated('games/{gameId}', async (event) 
       });
     }
 
-    // Update room status. If the room was streaming, end the stream in the
-    // same batch so finished games never linger in the live list.
+    // Update room status. For live stream rooms, set status back to 'waiting'
+    // and keep the stream alive so the host can start another game. For regular
+    // rooms, set status to 'finished' and end the stream.
     const roomRef = db.collection('rooms').doc(game.roomId);
     const roomDoc = await roomRef.get();
+    const isLiveRoom = roomDoc.exists && roomDoc.data()?.type === 'liveStream';
     const roomUpdate: Record<string, unknown> = {
-      status: 'finished',
+      status: isLiveRoom ? 'waiting' : 'finished',
+      gameId: admin.firestore.FieldValue.delete(),
       updatedAt: now,
     };
     if (roomDoc.exists) {
       const room = roomDoc.data()!;
       const streamId = room.streamId as string | undefined;
       if (room.isStreaming === true && streamId != null && streamId.length > 0) {
-        batch.update(db.collection('streams').doc(streamId), {
-          status: 'ended',
-          endedAt: now,
-        });
-        roomUpdate.isStreaming = false;
-        roomUpdate.streamId = null;
+        if (!isLiveRoom) {
+          batch.update(db.collection('streams').doc(streamId), {
+            status: 'ended',
+            endedAt: now,
+          });
+          roomUpdate.isStreaming = false;
+          roomUpdate.streamId = null;
+        }
       }
     }
     batch.update(roomRef, roomUpdate);

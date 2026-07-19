@@ -359,9 +359,7 @@ void main() {
       ),
       act: (cubit) => cubit.endStream('r1'),
       expect: () => [
-        const RoomState.error(
-          message: 'Failed to end stream. Please try again.',
-        ),
+        const RoomState.error(message: 'Exception: Stream error'),
         isA<RoomLoaded>(),
       ],
     );
@@ -472,13 +470,7 @@ void main() {
         when(() => roomRepository.watchRoom('r1')).thenAnswer(
           (_) => Stream.value(
             testRoom(
-              players: [
-                testPlayer(
-                  name: 'Me',
-                  isMe: true,
-                  agoraUid: 101,
-                ),
-              ],
+              players: [testPlayer(name: 'Me', isMe: true, agoraUid: 101)],
             ),
           ),
         );
@@ -662,7 +654,9 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         // A later snapshot no longer contains the local user: kicked.
         kickRoomController.add(
-          testRoom(players: [testPlayer(uid: 'u2', name: 'Host')]),
+          testRoom(
+            players: [testPlayer(uid: 'u2', name: 'Host')],
+          ),
         );
         await Future<void>.delayed(Duration.zero);
         await Future<void>.delayed(Duration.zero);
@@ -692,7 +686,9 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         // Spectator view: no isMe player in any snapshot.
         spectatorRoomController.add(
-          testRoom(players: [testPlayer(uid: 'u2', name: 'Host')]),
+          testRoom(
+            players: [testPlayer(uid: 'u2', name: 'Host')],
+          ),
         );
         await Future<void>.delayed(Duration.zero);
         spectatorRoomController.add(testRoom(players: const []));

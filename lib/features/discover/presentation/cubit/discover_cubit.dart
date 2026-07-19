@@ -21,6 +21,8 @@ class DiscoverCubit extends Cubit<DiscoverState> {
   List<StreamChatMessage> _latestMessages = const [];
 
   StreamSubscription<List<DiscoverStream>>? _streamsSubscription;
+  List<DiscoverStream> _allStreams = const [];
+  int _currentFilterIndex = 0;
 
   Future<void> loadStreams() async {
     emit(const DiscoverState.loading());
@@ -29,7 +31,8 @@ class DiscoverCubit extends Cubit<DiscoverState> {
       _streamsSubscription = _discoverRepository.watchStreams().listen(
         (streams) {
           if (isClosed) return;
-          emit(DiscoverState.streamsLoaded(streams: streams));
+          _allStreams = streams;
+          _emitFilteredStreams();
         },
         onError: (Object e) {
           AppLogger.error('Failed to watch streams', error: e);
@@ -45,9 +48,49 @@ class DiscoverCubit extends Cubit<DiscoverState> {
   }
 
   void selectFilter(int index) {
-    final currentState = state;
-    if (currentState is! DiscoverStreamsLoaded) return;
-    emit(currentState.copyWith(selectedFilterIndex: index));
+    _currentFilterIndex = index;
+    if (_allStreams.isEmpty) return;
+    _emitFilteredStreams();
+  }
+
+  void _emitFilteredStreams() {
+    final filtered = _applyFilter(_allStreams, _currentFilterIndex);
+    emit(
+      DiscoverState.streamsLoaded(
+        streams: filtered,
+        selectedFilterIndex: _currentFilterIndex,
+      ),
+    );
+  }
+
+  List<DiscoverStream> _applyFilter(
+    List<DiscoverStream> streams,
+    int filterIndex,
+  ) {
+    if (streams.isEmpty) return streams;
+    final list = List<DiscoverStream>.from(streams);
+    switch (filterIndex) {
+      case 0:
+        list.sort((a, b) => b.viewers.compareTo(a.viewers));
+        return list;
+      case 1:
+        return list.reversed.toList();
+      case 2:
+        list.sort((a, b) {
+          final aScore = (a.isPremium ? 1000 : 0) + a.viewers;
+          final bScore = (b.isPremium ? 1000 : 0) + b.viewers;
+          return bScore.compareTo(aScore);
+        });
+        return list;
+      case 3:
+        return list.where((s) {
+          return s.players.every((p) => !p.isCameraOn);
+        }).toList();
+      case 4:
+        return list;
+      default:
+        return list;
+    }
   }
 
   Future<void> loadStream(String id) async {
@@ -136,6 +179,12 @@ class DiscoverCubit extends Cubit<DiscoverState> {
   /// `null` when no live stream matches. Does not emit state changes.
   Future<String?> findStreamByCode(String code) {
     return _discoverRepository.findStreamIdByCode(code);
+  }
+
+  /// Resolves a live stream by room [name]. Returns the stream id, or `null`
+  /// when no live stream matches. Does not emit state changes.
+  Future<String?> findStreamByRoomName(String name) {
+    return _discoverRepository.findStreamIdByRoomName(name);
   }
 
   @override

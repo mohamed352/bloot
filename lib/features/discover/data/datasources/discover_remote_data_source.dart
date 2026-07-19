@@ -269,6 +269,47 @@ class DiscoverRemoteDataSource {
     }
   }
 
+  /// Finds a live stream by room name (case-insensitive prefix match).
+  /// Returns the stream document id, or `null` when no live stream matches.
+  Future<String?> findStreamIdByRoomName(String name) async {
+    try {
+      final trimmed = name.trim();
+      if (trimmed.isEmpty) return null;
+
+      final lower = trimmed.toLowerCase();
+      final upper = trimmed[0].toUpperCase() + trimmed.substring(1);
+
+      for (final variant in [trimmed, lower, upper]) {
+        final roomSnapshot = await _firestore
+            .collection('rooms')
+            .where('name', isGreaterThanOrEqualTo: variant)
+            .where('name', isLessThan: '$variant\uf8ff')
+            .limit(5)
+            .get();
+
+        for (final roomDoc in roomSnapshot.docs) {
+          final roomData = roomDoc.data();
+          if (roomData['status'] == 'finished') continue;
+
+          final streamSnapshot = await _firestore
+              .collection('streams')
+              .where('roomId', isEqualTo: roomDoc.id)
+              .where('status', isEqualTo: 'live')
+              .limit(1)
+              .get();
+          if (streamSnapshot.docs.isNotEmpty) {
+            return streamSnapshot.docs.first.id;
+          }
+        }
+      }
+
+      return null;
+    } catch (e) {
+      AppLogger.error('Failed to find stream by room name', error: e);
+      return null;
+    }
+  }
+
   DiscoverStreamModel _mapStreamDoc(
     DocumentSnapshot<Map<String, dynamic>> doc,
   ) {
@@ -355,7 +396,7 @@ class DiscoverRemoteDataSource {
       final isStreaming = data['isStreaming'] == true;
       final roomStreamId = data['streamId'] as String?;
       if (hasPlayers &&
-          status == 'playing' &&
+          (status == 'playing' || status == 'waiting') &&
           isStreaming &&
           roomStreamId != null &&
           roomStreamId.isNotEmpty) {

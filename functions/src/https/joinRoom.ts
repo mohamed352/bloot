@@ -79,7 +79,7 @@ export const joinRoom = functions.https.onCall(async (request) => {
       roomPassword !== '' &&
       roomPassword !== password
     ) {
-      throw new functions.https.HttpsError('permission-denied', 'Wrong password');
+      throw new functions.https.HttpsError('invalid-argument', 'Wrong password');
     }
     const players = Array.from(data.players as any[] ?? []);
     const playerUids = Array.from(data.playerUids as string[] ?? []);

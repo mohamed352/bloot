@@ -25,6 +25,10 @@ abstract class DiscoverRepository {
   /// Returns the stream document id, or `null` when no live stream matches.
   Future<String?> findStreamIdByCode(String code);
 
+  /// Finds a live stream by room name (case-insensitive prefix match).
+  /// Returns the stream document id, or `null` when no live stream matches.
+  Future<String?> findStreamIdByRoomName(String name);
+
   /// Increments the viewer count for [streamId].
   Future<void> incrementViewerCount(String streamId);
 

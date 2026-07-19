@@ -149,6 +149,7 @@ class AgoraService {
       ),
     );
     await _engine!.enableAudio();
+    await _engine!.enableVideo();
     await _engine!.setDefaultAudioRouteToSpeakerphone(true);
     await _engine!.setAudioProfile(
       profile: AudioProfileType.audioProfileMusicStandard,
