@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$NotificationItemModel {
 
- String get id; String get title; String get body; String get type; bool get read; DateTime? get createdAt;
+ String get id; String get title; String get body; String get type; String? get titleAr; String? get bodyAr; String? get roomId; bool get read; DateTime? get createdAt;
 /// Create a copy of NotificationItemModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $NotificationItemModelCopyWith<NotificationItemModel> get copyWith => _$Notifica
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NotificationItemModel&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&(identical(other.type, type) || other.type == type)&&(identical(other.read, read) || other.read == read)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NotificationItemModel&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&(identical(other.type, type) || other.type == type)&&(identical(other.titleAr, titleAr) || other.titleAr == titleAr)&&(identical(other.bodyAr, bodyAr) || other.bodyAr == bodyAr)&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.read, read) || other.read == read)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,body,type,read,createdAt);
+int get hashCode => Object.hash(runtimeType,id,title,body,type,titleAr,bodyAr,roomId,read,createdAt);
 
 @override
 String toString() {
-  return 'NotificationItemModel(id: $id, title: $title, body: $body, type: $type, read: $read, createdAt: $createdAt)';
+  return 'NotificationItemModel(id: $id, title: $title, body: $body, type: $type, titleAr: $titleAr, bodyAr: $bodyAr, roomId: $roomId, read: $read, createdAt: $createdAt)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $NotificationItemModelCopyWith<$Res>  {
   factory $NotificationItemModelCopyWith(NotificationItemModel value, $Res Function(NotificationItemModel) _then) = _$NotificationItemModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String title, String body, String type, bool read, DateTime? createdAt
+ String id, String title, String body, String type, String? titleAr, String? bodyAr, String? roomId, bool read, DateTime? createdAt
 });
 
 
@@ -65,13 +65,16 @@ class _$NotificationItemModelCopyWithImpl<$Res>
 
 /// Create a copy of NotificationItemModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? body = null,Object? type = null,Object? read = null,Object? createdAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? body = null,Object? type = null,Object? titleAr = freezed,Object? bodyAr = freezed,Object? roomId = freezed,Object? read = null,Object? createdAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,body: null == body ? _self.body : body // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String,read: null == read ? _self.read : read // ignore: cast_nullable_to_non_nullable
+as String,titleAr: freezed == titleAr ? _self.titleAr : titleAr // ignore: cast_nullable_to_non_nullable
+as String?,bodyAr: freezed == bodyAr ? _self.bodyAr : bodyAr // ignore: cast_nullable_to_non_nullable
+as String?,roomId: freezed == roomId ? _self.roomId : roomId // ignore: cast_nullable_to_non_nullable
+as String?,read: null == read ? _self.read : read // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
@@ -158,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String body,  String type,  bool read,  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String body,  String type,  String? titleAr,  String? bodyAr,  String? roomId,  bool read,  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _NotificationItemModel() when $default != null:
-return $default(_that.id,_that.title,_that.body,_that.type,_that.read,_that.createdAt);case _:
+return $default(_that.id,_that.title,_that.body,_that.type,_that.titleAr,_that.bodyAr,_that.roomId,_that.read,_that.createdAt);case _:
   return orElse();
 
 }
@@ -179,10 +182,10 @@ return $default(_that.id,_that.title,_that.body,_that.type,_that.read,_that.crea
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String body,  String type,  bool read,  DateTime? createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String body,  String type,  String? titleAr,  String? bodyAr,  String? roomId,  bool read,  DateTime? createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _NotificationItemModel():
-return $default(_that.id,_that.title,_that.body,_that.type,_that.read,_that.createdAt);case _:
+return $default(_that.id,_that.title,_that.body,_that.type,_that.titleAr,_that.bodyAr,_that.roomId,_that.read,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +202,10 @@ return $default(_that.id,_that.title,_that.body,_that.type,_that.read,_that.crea
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String body,  String type,  bool read,  DateTime? createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String body,  String type,  String? titleAr,  String? bodyAr,  String? roomId,  bool read,  DateTime? createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _NotificationItemModel() when $default != null:
-return $default(_that.id,_that.title,_that.body,_that.type,_that.read,_that.createdAt);case _:
+return $default(_that.id,_that.title,_that.body,_that.type,_that.titleAr,_that.bodyAr,_that.roomId,_that.read,_that.createdAt);case _:
   return null;
 
 }
@@ -214,13 +217,16 @@ return $default(_that.id,_that.title,_that.body,_that.type,_that.read,_that.crea
 @JsonSerializable()
 
 class _NotificationItemModel implements NotificationItemModel {
-  const _NotificationItemModel({required this.id, required this.title, required this.body, required this.type, this.read = false, this.createdAt});
+  const _NotificationItemModel({required this.id, required this.title, required this.body, required this.type, this.titleAr, this.bodyAr, this.roomId, this.read = false, this.createdAt});
   factory _NotificationItemModel.fromJson(Map<String, dynamic> json) => _$NotificationItemModelFromJson(json);
 
 @override final  String id;
 @override final  String title;
 @override final  String body;
 @override final  String type;
+@override final  String? titleAr;
+@override final  String? bodyAr;
+@override final  String? roomId;
 @override@JsonKey() final  bool read;
 @override final  DateTime? createdAt;
 
@@ -237,16 +243,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NotificationItemModel&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&(identical(other.type, type) || other.type == type)&&(identical(other.read, read) || other.read == read)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NotificationItemModel&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&(identical(other.type, type) || other.type == type)&&(identical(other.titleAr, titleAr) || other.titleAr == titleAr)&&(identical(other.bodyAr, bodyAr) || other.bodyAr == bodyAr)&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.read, read) || other.read == read)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,body,type,read,createdAt);
+int get hashCode => Object.hash(runtimeType,id,title,body,type,titleAr,bodyAr,roomId,read,createdAt);
 
 @override
 String toString() {
-  return 'NotificationItemModel(id: $id, title: $title, body: $body, type: $type, read: $read, createdAt: $createdAt)';
+  return 'NotificationItemModel(id: $id, title: $title, body: $body, type: $type, titleAr: $titleAr, bodyAr: $bodyAr, roomId: $roomId, read: $read, createdAt: $createdAt)';
 }
 
 
@@ -257,7 +263,7 @@ abstract mixin class _$NotificationItemModelCopyWith<$Res> implements $Notificat
   factory _$NotificationItemModelCopyWith(_NotificationItemModel value, $Res Function(_NotificationItemModel) _then) = __$NotificationItemModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String title, String body, String type, bool read, DateTime? createdAt
+ String id, String title, String body, String type, String? titleAr, String? bodyAr, String? roomId, bool read, DateTime? createdAt
 });
 
 
@@ -274,13 +280,16 @@ class __$NotificationItemModelCopyWithImpl<$Res>
 
 /// Create a copy of NotificationItemModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? body = null,Object? type = null,Object? read = null,Object? createdAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? body = null,Object? type = null,Object? titleAr = freezed,Object? bodyAr = freezed,Object? roomId = freezed,Object? read = null,Object? createdAt = freezed,}) {
   return _then(_NotificationItemModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,body: null == body ? _self.body : body // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String,read: null == read ? _self.read : read // ignore: cast_nullable_to_non_nullable
+as String,titleAr: freezed == titleAr ? _self.titleAr : titleAr // ignore: cast_nullable_to_non_nullable
+as String?,bodyAr: freezed == bodyAr ? _self.bodyAr : bodyAr // ignore: cast_nullable_to_non_nullable
+as String?,roomId: freezed == roomId ? _self.roomId : roomId // ignore: cast_nullable_to_non_nullable
+as String?,read: null == read ? _self.read : read // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));

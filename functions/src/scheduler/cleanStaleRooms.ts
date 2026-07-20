@@ -3,6 +3,10 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { db } from '../config/admin';
 import { isPlayingRoomAbandoned } from '../utils/streaming';
 
+/** How old the host's stream heartbeat may be before the stream is
+ * considered dead (clients beat every minute). */
+const HEARTBEAT_STALE_MS = 5 * 60 * 1000;
+
 export const cleanStaleRooms = onSchedule(
   { schedule: 'every 10 minutes', timeZone: 'UTC' },
   async () => {
@@ -133,6 +137,33 @@ export const cleanStaleRooms = onSchedule(
             room.streamId !== streamDoc.id;
           if (shouldEnd && room.isStreaming === true) {
             roomRef = roomDoc.ref;
+          }
+
+          // Host heartbeat: streaming clients touch lastHeartbeatAt every
+          // minute. A stale heartbeat means the host's app died without
+          // leaveGame (kill/crash/offline) — end the stream even if the
+          // room doc still looks consistent. Only enforced once the field
+          // exists so older clients are unaffected.
+          if (!shouldEnd) {
+            const lastBeat = stream.lastHeartbeatAt;
+            let beatMillis: number | null = null;
+            if (lastBeat instanceof Date) {
+              beatMillis = lastBeat.getTime();
+            } else if (
+              lastBeat != null &&
+              typeof (lastBeat as { toMillis?: unknown }).toMillis === 'function'
+            ) {
+              beatMillis = (lastBeat as { toMillis: () => number }).toMillis();
+            }
+            if (
+              beatMillis != null &&
+              now.getTime() - beatMillis > HEARTBEAT_STALE_MS
+            ) {
+              shouldEnd = true;
+              if (room.isStreaming === true) {
+                roomRef = roomDoc.ref;
+              }
+            }
           }
         }
       }

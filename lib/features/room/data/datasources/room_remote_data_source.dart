@@ -89,6 +89,11 @@ class RoomRemoteDataSource {
     final displayName = userData?['displayName'] as String? ?? 'Player';
     final avatarUrl = userData?['avatarUrl'] as String?;
     final level = (userData?['level'] as num?)?.toInt() ?? 1;
+    // Prefer the server-assigned Agora UID (matches what joinRoom assigns to
+    // other players); the hash-based fallback must match AgoraService's
+    // derivation for the same user.
+    final agoraUid =
+        (userData?['agoraUid'] as num?)?.toInt() ?? user.uid.hashCode.abs();
 
     final inviteCode = _generateInviteCode();
 
@@ -96,6 +101,9 @@ class RoomRemoteDataSource {
     final roomData = <String, dynamic>{
       'id': roomRef.id,
       'name': name,
+      // Lowercase copy for case-insensitive name search (works for Arabic
+      // and mixed-case names, unlike per-case-variant prefix queries).
+      'nameLower': name.trim().toLowerCase(),
       'type': type,
       'creatorUid': user.uid,
       'status': 'waiting',
@@ -115,7 +123,7 @@ class RoomRemoteDataSource {
           'isReady': false,
           'isMicOn': voiceEnabled,
           'isCameraOn': cameraEnabled,
-          'agoraUid': user.uid.hashCode.abs(),
+          'agoraUid': agoraUid,
           'joinedAt': DateTime.now(),
         },
       ],
@@ -334,6 +342,21 @@ class RoomRemoteDataSource {
     // both the room and the active game document atomically.
     final callable = _functions.httpsCallable('leaveGame');
     await callable.call<void>({'roomId': roomId});
+  }
+
+  /// Touches `streams/{streamId}.lastHeartbeatAt` so the server-side sweeper
+  /// can detect a dead broadcast (host app killed/crashed without leaving)
+  /// and end the stream instead of leaving it on the live list for ~30 min.
+  Future<void> sendStreamHeartbeat(String streamId) async {
+    try {
+      await _firestore.collection('streams').doc(streamId).update({
+        'lastHeartbeatAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      // Heartbeats are best-effort: a missed beat only means the sweeper
+      // cleans up the stream a bit later.
+      AppLogger.error('Failed to send stream heartbeat', error: e);
+    }
   }
 
   Future<RoomModel> startStream(String roomId) async {

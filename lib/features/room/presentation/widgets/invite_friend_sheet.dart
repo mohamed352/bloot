@@ -78,8 +78,13 @@ class _InviteFriendSheetState extends State<InviteFriendSheet> {
 
   Future<void> _sendInvite(ChatUser user) async {
     setState(() => _sendingToUid = user.id);
-    final cubit = context.read<RoomCubit>();
-    final success = await cubit.sendRoomInvite(widget.roomId, user.id);
+    var success = false;
+    try {
+      final cubit = context.read<RoomCubit>();
+      success = await cubit.sendRoomInvite(widget.roomId, user.id);
+    } catch (_) {
+      success = false;
+    }
     if (!mounted) return;
     setState(() => _sendingToUid = null);
     ScaffoldMessenger.of(context).showSnackBar(

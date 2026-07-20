@@ -367,9 +367,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Future<void> _onPickAvatar() async {
     final cubit = context.read<EditProfileCubit>();
     final url = await cubit.pickAndUploadAvatar();
+    if (!mounted) return;
     if (url != null) {
       setState(() => _avatarUrl = url);
       cubit.markChanged();
+    } else {
+      // pickAndUploadAvatar swallows upload errors and returns null — tell
+      // the user instead of silently keeping the old avatar.
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('failed_to_send'.tr())),
+      );
     }
   }
 

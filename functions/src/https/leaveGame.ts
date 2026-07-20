@@ -47,8 +47,13 @@ export const leaveGame = functions.https.onCall(async (request) => {
     }
 
     players.splice(playerIndex, 1);
-    playerUids.splice(playerUids.indexOf(currentUid), 1);
-    readyPlayers.splice(readyPlayers.indexOf(currentUid), 1);
+    // Guard every splice: indexOf returns -1 when the uid is absent, and
+    // splice(-1, 1) would silently remove the LAST element, corrupting the
+    // arrays (this made subsequent leave attempts fail for everyone).
+    const playerUidsIndex = playerUids.indexOf(currentUid);
+    if (playerUidsIndex !== -1) playerUids.splice(playerUidsIndex, 1);
+    const readyPlayersIndex = readyPlayers.indexOf(currentUid);
+    if (readyPlayersIndex !== -1) readyPlayers.splice(readyPlayersIndex, 1);
     const teamAIndex = teamA.indexOf(currentUid);
     if (teamAIndex !== -1) teamA.splice(teamAIndex, 1);
     const teamBIndex = teamB.indexOf(currentUid);
@@ -61,48 +66,64 @@ export const leaveGame = functions.https.onCall(async (request) => {
       newCreatorUid = playerUids[0];
     }
 
+    // Read the stream doc up-front: Firestore transactions require all reads
+    // to happen before any writes.
+    const streamId = data.streamId as string | undefined;
+    const hasActiveStream =
+      data.isStreaming === true && streamId != null && streamId.length > 0;
+    let streamRef: FirebaseFirestore.DocumentReference | null = null;
+    let streamDoc: FirebaseFirestore.DocumentSnapshot | null = null;
+    if (hasActiveStream) {
+      streamRef = db.collection('streams').doc(streamId!);
+      streamDoc = await transaction.get(streamRef);
+    }
+
+    // Also read the game doc up-front (all reads before all writes).
+    const gameId = data.gameId as string | undefined;
+    const hasActiveGame = gameId != null && data.status === 'playing';
+    let gameRef: FirebaseFirestore.DocumentReference | null = null;
+    let gameDoc: FirebaseFirestore.DocumentSnapshot | null = null;
+    if (hasActiveGame) {
+      gameRef = db.collection('games').doc(gameId!);
+      gameDoc = await transaction.get(gameRef);
+    }
+
     // If the creator is leaving and the room is streaming, end the stream
     // so it doesn't stay live after the host is gone.
-    if (isCreatorLeaving && data.isStreaming === true) {
-      const streamId = data.streamId as string | undefined;
-      if (streamId != null && streamId.length > 0) {
-        const streamRef = db.collection('streams').doc(streamId);
-        transaction.update(streamRef, {
-          status: 'ended',
-          endedAt: FieldValue.serverTimestamp(),
-        });
-      }
+    let streamContinues = false;
+    if (isCreatorLeaving && hasActiveStream && streamRef != null) {
+      transaction.update(streamRef, {
+        status: 'ended',
+        endedAt: FieldValue.serverTimestamp(),
+      });
+    } else if (hasActiveStream && playerUids.length > 0) {
+      // A non-creator player left: keep the stream doc's roster and viewer
+      // count in sync with the room.
+      streamContinues = true;
     }
 
     // Mark player as disconnected in the active game document.
-    const gameId = data.gameId as string | undefined;
-    if (gameId != null && data.status === 'playing') {
-      const gameRef = db.collection('games').doc(gameId);
-      const gameDoc = await transaction.get(gameRef);
-      if (gameDoc.exists) {
-        const gameData = gameDoc.data()!;
-        const gamePlayers = { ...(gameData.players as Record<string, any> ?? {}) };
-        for (const entry of Object.entries(gamePlayers)) {
-          const p = entry[1] as Record<string, any>;
-          if (p.uid === currentUid) {
-            gamePlayers[entry[0]] = {
-              ...p,
-              isConnected: false,
-              leftAt: FieldValue.serverTimestamp(),
-            };
-            break;
-          }
+    if (gameRef != null && gameDoc != null && gameDoc.exists) {
+      const gameData = gameDoc.data()!;
+      const gamePlayers = { ...(gameData.players as Record<string, any> ?? {}) };
+      for (const entry of Object.entries(gamePlayers)) {
+        const p = entry[1] as Record<string, any>;
+        if (p.uid === currentUid) {
+          gamePlayers[entry[0]] = {
+            ...p,
+            isConnected: false,
+            leftAt: FieldValue.serverTimestamp(),
+          };
+          break;
         }
-        transaction.update(gameRef, { players: gamePlayers });
       }
+      transaction.update(gameRef, { players: gamePlayers });
     }
 
     if (playerUids.length === 0) {
       // If this room was streaming, end the stream so it doesn't stay live
       // after the room is gone.
-      const streamId = data.streamId as string | undefined;
-      if (streamId != null && streamId.length > 0) {
-        const streamRef = db.collection('streams').doc(streamId);
+      if (hasActiveStream && streamRef != null && !isCreatorLeaving) {
         transaction.update(streamRef, {
           status: 'ended',
           endedAt: FieldValue.serverTimestamp(),
@@ -127,6 +148,24 @@ export const leaveGame = functions.https.onCall(async (request) => {
         updateData.streamId = null;
       }
       transaction.update(roomRef, updateData);
+
+      if (streamContinues && streamRef != null && streamDoc != null && streamDoc.exists) {
+        const spectatorCount =
+          (streamDoc.data()?.spectatorCount as number | undefined) ?? 0;
+        transaction.update(streamRef, {
+          players: players.map((p: any) => ({
+            uid: p.uid,
+            name: p.displayName ?? p.name ?? 'Player',
+            avatarUrl: p.avatarUrl ?? '',
+            agoraUid: p.agoraUid ?? 0,
+            team: p.team ?? 'A',
+            isCameraOn: p.isCameraOn === true,
+            isMicOn: p.isMicOn !== false,
+          })),
+          playerUids,
+          viewerCount: playerUids.length + spectatorCount,
+        });
+      }
     }
 
     return { success: true };

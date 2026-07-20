@@ -71,10 +71,15 @@ service cloud.firestore {
         (request.auth.uid == resource.data.hostUid || isAdmin(request.auth.uid));
       // Allow players listed in the stream's playerUids array to update the
       // document so they can sync their camera/mic state for watchers.
+      // Also allow ANY authenticated user to touch only the spectator/viewer
+      // counters — spectators are by definition not in playerUids, so without
+      // this their join/leave counter updates were silently denied.
       allow update: if request.auth != null &&
         (request.auth.uid == resource.data.hostUid ||
          isAdmin(request.auth.uid) ||
-         request.auth.uid in resource.data.playerUids);
+         request.auth.uid in resource.data.playerUids ||
+         request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['spectatorCount', 'viewerCount']));
 
       // Stream chat: readable by any authenticated user; viewers can post
       // only under their own uid. Sub-collection rules do not inherit from

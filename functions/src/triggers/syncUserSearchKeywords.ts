@@ -7,9 +7,14 @@ function buildKeywords(data: Record<string, unknown>): string[] {
     if (typeof value === 'string' && value.trim()) {
       const normalized = value.trim().toLowerCase();
       tokens.push(normalized);
-      // Also add each word for partial matching.
+      // Also add each word for partial matching, plus prefix n-grams so a
+      // query like "med" matches "mohamed" (Firestore has no contains query).
       normalized.split(/\s+/).forEach((word) => {
         if (word.length > 1) tokens.push(word);
+        const maxPrefix = Math.min(word.length, 10);
+        for (let i = 2; i <= maxPrefix; i++) {
+          tokens.push(word.substring(0, i));
+        }
       });
     }
   };

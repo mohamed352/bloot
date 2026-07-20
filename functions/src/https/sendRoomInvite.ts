@@ -76,10 +76,16 @@ export const sendRoomInvite = functions.https.onCall(async (request) => {
     .collection('notifications')
     .doc();
 
+  const roomName = (roomData.name as string | undefined) ?? '';
+
   await notifRef.set({
     type: 'roomInvite',
+    title: 'Room Invitation',
+    titleAr: 'دعوة غرفة',
+    body: '$inviterName invited you to play in "$roomName"',
+    bodyAr: 'دعاك $inviterName للعب في "$roomName"',
     roomId,
-    roomName: roomData.name ?? '',
+    roomName,
     inviterName,
     inviterUid: currentUid,
     createdAt: FieldValue.serverTimestamp(),

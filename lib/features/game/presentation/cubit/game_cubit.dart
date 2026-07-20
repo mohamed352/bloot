@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_core/firebase_core.dart' show FirebaseException;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -66,10 +67,23 @@ class GameCubit extends Cubit<GameState> {
     _gameSubscription = stream.listen(
       (game) => _emitStateForGame(game),
       onError: (Object error) {
-        AppLogger.error('Game stream error', error: error);
-        emit(const GameState.error(message: 'Failed to load game.'));
+        AppLogger.error('Game stream error (gameId: $id)', error: error);
+        emit(GameState.error(message: _describeGameLoadError(error)));
       },
     );
+  }
+
+  /// Maps low-level stream failures to user-meaningful messages instead of
+  /// the previous generic "Failed to load game." for every cause.
+  String _describeGameLoadError(Object error) {
+    if (error is FirebaseException && error.code == 'permission-denied') {
+      return 'You don\'t have access to watch this game.';
+    }
+    final text = error.toString();
+    if (text.contains('Game not found') || text.contains('Game data is null')) {
+      return 'This game has ended.';
+    }
+    return 'Failed to load game.';
   }
 
   String? _previousStatus;
@@ -505,9 +519,10 @@ class GameCubit extends Cubit<GameState> {
     );
   }
 
-  Future<void> leaveGame() async {
+  /// Returns `true` when the leave succeeded on the backend.
+  Future<bool> leaveGame() async {
     final roomId = _getCurrentRoomId();
-    if (roomId == null || roomId.isEmpty) return;
+    if (roomId == null || roomId.isEmpty) return false;
     _emitActionInProgress();
     try {
       await _gameSubscription?.cancel();
@@ -524,9 +539,11 @@ class GameCubit extends Cubit<GameState> {
       await _agoraService.leaveChannel();
       _joinedAgoraChannelName = null;
       emit(const GameState.initial());
+      return true;
     } catch (e) {
       AppLogger.error('Failed to leave game', error: e);
       _emitActionError('Failed to leave game. Please try again.');
+      return false;
     }
   }
 
@@ -623,10 +640,17 @@ class GameCubit extends Cubit<GameState> {
     // (e.g. from WatchStreamPage), AgoraService returns early — no conflict.
     // Players join as broadcaster with subscribeVideo disabled (audio only
     // in the game screen to save GPU/CPU).
+    //
+    // IMPORTANT: spectators must NOT reuse a player's agoraUid — for a
+    // spectator `mySeatIndex` resolves to the first player (the host), and
+    // joining with the host's UID kicks the host out of the channel,
+    // killing their audio/video for everyone. Passing null makes the
+    // service derive a UID from the spectator's own Firebase UID instead.
     final pendingJoin = _isSpectator
+        // (no agoraUid passed — the service derives one from the spectator's
+        // own Firebase UID)
         ? _agoraService.joinAsAudience(
             channelName: channelName,
-            agoraUid: localPlayer.agoraUid,
           )
         : _agoraService.joinChannel(
             channelName: channelName,
@@ -635,9 +659,21 @@ class GameCubit extends Cubit<GameState> {
           );
     _pendingAgoraJoin = pendingJoin;
     pendingJoin
-        .then((_) {
+        .then((_) async {
           if (_isClosed) return;
           _joinedAgoraChannelName = channelName;
+          // Re-apply the player's mute state after a fresh join (the SDK
+          // resets mute/publish state on join).
+          if (!_isSpectator) {
+            try {
+              await _agoraService.setMediaState(
+                micOn: !localPlayer.isMuted,
+                cameraOn: false,
+              );
+            } catch (e) {
+              AppLogger.error('Failed to sync media state', error: e);
+            }
+          }
         })
         .catchError((Object e) {
           AppLogger.error('Failed to join Agora from game', error: e);

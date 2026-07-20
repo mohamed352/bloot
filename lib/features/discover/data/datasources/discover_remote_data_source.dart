@@ -130,9 +130,14 @@ class DiscoverRemoteDataSource {
   }
 
   /// Increments the viewer count for [streamId] when a spectator joins.
+  ///
+  /// Spectators are tracked in a dedicated `spectatorCount` field; the
+  /// backend recomputes `viewerCount = players + spectatorCount` whenever the
+  /// roster changes, so the two never drift apart.
   Future<void> incrementViewerCount(String streamId) async {
     try {
       await _firestore.collection('streams').doc(streamId).update({
+        'spectatorCount': FieldValue.increment(1),
         'viewerCount': FieldValue.increment(1),
       });
     } catch (e) {
@@ -144,6 +149,7 @@ class DiscoverRemoteDataSource {
   Future<void> decrementViewerCount(String streamId) async {
     try {
       await _firestore.collection('streams').doc(streamId).update({
+        'spectatorCount': FieldValue.increment(-1),
         'viewerCount': FieldValue.increment(-1),
       });
     } catch (e) {
@@ -269,25 +275,22 @@ class DiscoverRemoteDataSource {
     }
   }
 
-  /// Finds a live stream by room name (case-insensitive prefix match).
+  /// Finds a live stream by room name (case-insensitive prefix match on the
+  /// `nameLower` field, falling back to the legacy per-case-variant prefix
+  /// queries for rooms created before `nameLower` existed).
   /// Returns the stream document id, or `null` when no live stream matches.
   Future<String?> findStreamIdByRoomName(String name) async {
     try {
       final trimmed = name.trim();
       if (trimmed.isEmpty) return null;
 
-      final lower = trimmed.toLowerCase();
-      final upper = trimmed[0].toUpperCase() + trimmed.substring(1);
+      final seenRoomIds = <String>{};
 
-      for (final variant in [trimmed, lower, upper]) {
-        final roomSnapshot = await _firestore
-            .collection('rooms')
-            .where('name', isGreaterThanOrEqualTo: variant)
-            .where('name', isLessThan: '$variant\uf8ff')
-            .limit(5)
-            .get();
-
-        for (final roomDoc in roomSnapshot.docs) {
+      Future<String?> findLiveStreamFor(
+        List<QueryDocumentSnapshot<Map<String, dynamic>>> roomDocs,
+      ) async {
+        for (final roomDoc in roomDocs) {
+          if (!seenRoomIds.add(roomDoc.id)) continue;
           final roomData = roomDoc.data();
           if (roomData['status'] == 'finished') continue;
 
@@ -301,6 +304,37 @@ class DiscoverRemoteDataSource {
             return streamSnapshot.docs.first.id;
           }
         }
+        return null;
+      }
+
+      // Primary: case-insensitive prefix on nameLower (Arabic/mixed-case safe).
+      final lower = trimmed.toLowerCase();
+      try {
+        final lowerSnapshot = await _firestore
+            .collection('rooms')
+            .where('nameLower', isGreaterThanOrEqualTo: lower)
+            .where('nameLower', isLessThan: '$lower\uf8ff')
+            .limit(5)
+            .get();
+        final found = await findLiveStreamFor(lowerSnapshot.docs);
+        if (found != null) return found;
+      } catch (e) {
+        // nameLower may not be indexed yet on older data — fall through.
+        AppLogger.error('nameLower search failed', error: e);
+      }
+
+      // Fallback for rooms created before nameLower existed: legacy
+      // per-case-variant prefix queries on the raw name field.
+      final upper = trimmed[0].toUpperCase() + trimmed.substring(1);
+      for (final variant in [trimmed, lower, upper]) {
+        final roomSnapshot = await _firestore
+            .collection('rooms')
+            .where('name', isGreaterThanOrEqualTo: variant)
+            .where('name', isLessThan: '$variant\uf8ff')
+            .limit(5)
+            .get();
+        final found = await findLiveStreamFor(roomSnapshot.docs);
+        if (found != null) return found;
       }
 
       return null;

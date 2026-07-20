@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
@@ -14,21 +16,26 @@ class NotificationsCubit extends Cubit<NotificationsState> {
        super(const NotificationsState.initial());
 
   final NotificationsRepository _notificationsRepository;
+  StreamSubscription<List<NotificationItem>>? _subscription;
 
+  /// Subscribes to the real-time notifications stream so new notifications
+  /// (e.g. room invites) appear without a manual refresh.
   Future<void> loadNotifications() async {
     emit(const NotificationsState.loading());
-    try {
-      final notifications =
-          await _notificationsRepository.getNotifications();
-      if (notifications.isEmpty) {
-        emit(const NotificationsState.empty());
-      } else {
-        emit(NotificationsState.loaded(notifications: notifications));
-      }
-    } catch (e) {
-      AppLogger.error('Failed to load notifications', error: e);
-      emit(NotificationsState.error(message: e.toString()));
-    }
+    await _subscription?.cancel();
+    _subscription = _notificationsRepository.watchNotifications().listen(
+      (notifications) {
+        if (notifications.isEmpty) {
+          emit(const NotificationsState.empty());
+        } else {
+          emit(NotificationsState.loaded(notifications: notifications));
+        }
+      },
+      onError: (Object error) {
+        AppLogger.error('Failed to load notifications', error: error);
+        emit(NotificationsState.error(message: error.toString()));
+      },
+    );
   }
 
   Future<void> markAsRead(String notificationId) async {
@@ -55,6 +62,12 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     } catch (e) {
       AppLogger.error('Failed to mark notification as read', error: e);
     }
+  }
+
+  @override
+  Future<void> close() {
+    _subscription?.cancel();
+    return super.close();
   }
 
   Future<void> markAllAsRead() async {

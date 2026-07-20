@@ -73,8 +73,10 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
         // The cubit may already be closed if the user double-pressed back.
         if (cubit.isClosed) return;
         final router = GoRouter.of(context);
-        await cubit.leaveRoom(widget.id);
-        if (mounted) router.goNamed(RouteNames.home);
+        final left = await cubit.leaveRoom(widget.id);
+        // Only navigate away when the leave succeeded; on failure an error
+        // snackbar is shown and the user stays to retry.
+        if (mounted && left) router.goNamed(RouteNames.home);
       },
       child: BlocConsumer<RoomCubit, RoomState>(
         listener: (context, state) {
@@ -170,18 +172,26 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                   onPressed: room == null
                       ? null
                       : () {
+                          // Capture the cubit BEFORE opening the sheet: the
+                          // modal bottom sheet is a new route whose context
+                          // cannot see this route's BlocProvider, so calling
+                          // context.read<RoomCubit>() from inside the sheet
+                          // throws ProviderNotFoundException and the leave
+                          // silently does nothing.
+                          final roomCubit = context.read<RoomCubit>();
+                          final router = GoRouter.of(context);
                           showModalBottomSheet<void>(
                             context: context,
                             backgroundColor: Colors.transparent,
                             isScrollControlled: true,
-                            builder: (context) => RoomSettingsBottomSheet(
+                            builder: (_) => RoomSettingsBottomSheet(
                               room: room,
                               onLeave: () async {
-                                await context.read<RoomCubit>().leaveRoom(
+                                final left = await roomCubit.leaveRoom(
                                   room.id,
                                 );
-                                if (context.mounted) {
-                                  context.goNamed(RouteNames.home);
+                                if (left) {
+                                  router.goNamed(RouteNames.home);
                                 }
                               },
                             ),
@@ -626,12 +636,15 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                               text: 'invite_friend'.tr(),
                               icon: Icons.person_add_rounded,
                               onPressed: () {
+                                final roomCubit = context.read<RoomCubit>();
                                 showModalBottomSheet<void>(
                                   context: context,
                                   backgroundColor: Colors.transparent,
                                   isScrollControlled: true,
-                                  builder: (_) =>
-                                      InviteFriendSheet(roomId: room.id),
+                                  builder: (_) => BlocProvider.value(
+                                    value: roomCubit,
+                                    child: InviteFriendSheet(roomId: room.id),
+                                  ),
                                 );
                               },
                             ),

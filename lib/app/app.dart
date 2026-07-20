@@ -36,6 +36,11 @@ class _AppScrollBehavior extends ScrollBehavior {
   }
 }
 
+/// Global messenger key so foreground FCM messages can surface as in-app
+/// banners regardless of which route is currently visible.
+final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
+
 class BlootApp extends StatefulWidget {
   const BlootApp({super.key});
 
@@ -56,6 +61,7 @@ class BlootApp extends StatefulWidget {
 class _BlootAppState extends State<BlootApp> {
   StreamSubscription<dynamic>? _deepLinkSub;
   StreamSubscription<dynamic>? _fcmSub;
+  StreamSubscription<dynamic>? _fcmForegroundSub;
   DeepLinkService? _deepLinkService;
   NotificationService? _notificationService;
   Key _appKey = const ValueKey('bloot-app');
@@ -87,6 +93,51 @@ class _BlootAppState extends State<BlootApp> {
     _fcmSub = _notificationService!.onMessageOpenedApp.listen(
       _handleFcmMessage,
     );
+    // Foreground messages don't show a system banner on Android — surface
+    // them as an in-app snackbar with an action to open the content.
+    _fcmForegroundSub = _notificationService!.onMessage.listen(
+      _handleForegroundFcmMessage,
+    );
+  }
+
+  void _handleForegroundFcmMessage(dynamic message) {
+    final notification = message.notification;
+    final title = notification?.title as String?;
+    final body = notification?.body as String?;
+    if (title == null && body == null) return;
+
+    rootScaffoldMessengerKey.currentState
+      ?..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 6),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (title != null)
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              if (body != null) Text(body),
+            ],
+          ),
+          action: SnackBarAction(
+            label: _foregroundActionLabel(message),
+            onPressed: () => _handleFcmMessage(message),
+          ),
+        ),
+      );
+  }
+
+  String _foregroundActionLabel(dynamic message) {
+    final data = message.data as Map<String, dynamic>?;
+    return switch (data?['type']) {
+      'chatMessage' => 'open_chat'.tr(),
+      _ => 'join'.tr(),
+    };
   }
 
   void _handleDeepLink(Uri uri) {
@@ -146,6 +197,7 @@ class _BlootAppState extends State<BlootApp> {
     BlootApp._restartAppCallback = null;
     _deepLinkSub?.cancel();
     _fcmSub?.cancel();
+    _fcmForegroundSub?.cancel();
     _deepLinkService?.dispose();
     _notificationService?.dispose();
     super.dispose();
@@ -170,6 +222,7 @@ class _BlootAppState extends State<BlootApp> {
         supportedLocales: LanguageManager.supportedLocales,
         locale: context.locale,
         routerConfig: appRouter,
+        scaffoldMessengerKey: rootScaffoldMessengerKey,
         scrollBehavior: const _AppScrollBehavior(),
         builder: (context, child) {
           final colors = context.appColors;

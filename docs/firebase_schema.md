@@ -157,13 +157,14 @@ Written only by the `blockUser`/`unblockUser` Cloud Functions; readable only by 
 |-------|------|----------|-------------|
 | `id` | string | yes | Document ID (auto) |
 | `name` | string | yes | Room display name (max 30 chars) |
+| `nameLower` | string | yes | Lowercase copy of `name` for case-insensitive prefix search |
 | `type` | string | yes | "private", "public", or "stream" |
 | `creatorUid` | string | yes | UID of room creator |
 | `status` | string | yes | "waiting", "playing", "finished" |
 | `password` | string | no | Hashed password for private rooms |
 | `voiceEnabled` | bool | yes | Voice chat enabled (default: true) |
 | `cameraEnabled` | bool | yes | Camera enabled (default: false) |
-| `allowSpectators` | bool | yes | Allow spectators (default: false) |
+| `allowSpectators` | bool | yes | Allow spectators (default: true). Enforced server-side by `generateAgoraToken` (subscriber tokens) and the `games` read rule (`canSpectateGame`). |
 | `minLevel` | int | yes | Minimum player level (default: 0) |
 | `gameSpeed` | string | yes | "normal" (30s), "fast" (15s), "relaxed" (60s) |
 | `players` | array | yes | Array of player objects (max 4) |
@@ -330,13 +331,13 @@ Written only by the `blockUser`/`unblockUser` Cloud Functions; readable only by 
 
 ## 5. `streams` Collection
 
-**Document ID:** Same as associated room ID
+**Document ID:** Auto-generated (NOT the room ID — rooms link to their stream via `rooms.streamId`)
 
 ### Fields
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `id` | string | yes | Document ID (same as room ID) |
+| `id` | string | yes | Document ID (auto-generated) |
 | `roomId` | string | yes | Reference to rooms collection |
 | `hostUid` | string | yes | UID of stream host |
 | `hostName` | string | yes | Display name of stream host |
@@ -345,7 +346,9 @@ Written only by the `blockUser`/`unblockUser` Cloud Functions; readable only by 
 | `description` | string | no | Stream description (max 500 chars) |
 | `type` | string | yes | "baloot" (game stream), "casual" (social) |
 | `status` | string | yes | "live", "paused", "ended" |
-| `viewerCount` | int | yes | Current viewer count (default: 0) |
+| `viewerCount` | int | yes | Current viewer count = players + spectatorCount (kept in sync by joinRoom/leaveGame and updateViewerCount) |
+| `spectatorCount` | int | yes | Non-player watchers (incremented client-side on join/leave; default: 0) |
+| `lastHeartbeatAt` | timestamp | no | Touched every minute by the host while streaming; cleanStaleRooms ends streams whose heartbeat is stale (>5 min) |
 | `peakViewerCount` | int | yes | Peak viewer count (default: 0) |
 | `totalLikes` | int | yes | Total likes received (default: 0) |
 | `totalGifts` | int | yes | Total gifts received (default: 0) |
@@ -608,6 +611,14 @@ Written only by the `blockUser`/`unblockUser` Cloud Functions; readable only by 
 ---
 
 ## 11. `notifications` Collection
+
+> **Implementation note:** the app currently stores notifications as a
+> per-user subcollection `users/{uid}/notifications/{autoId}` (the top-level
+> collection below is the original design and is unused). Documents written
+> by `sendRoomInvite` have: `type` ("roomInvite"), `title`, `titleAr`,
+> `body`, `bodyAr`, `roomId`, `roomName`, `inviterName`, `inviterUid`,
+> `createdAt`, `read`. The `sendRoomInviteNotification` trigger delivers the
+> FCM push; the app listens to the subcollection in real time.
 
 **Document ID:** Auto-generated
 

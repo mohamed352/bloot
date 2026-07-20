@@ -7,6 +7,7 @@ import 'package:bloot/core/logger/app_logger.dart';
 import 'package:bloot/features/home/domain/entities/home_stream.dart';
 import 'package:bloot/features/home/domain/repositories/home_repository.dart';
 import 'package:bloot/features/home/presentation/cubit/home_state.dart';
+import 'package:bloot/features/notifications/domain/entities/notification_item.dart';
 import 'package:bloot/features/notifications/domain/repositories/notifications_repository.dart';
 import 'package:bloot/features/profile/domain/entities/user_profile.dart';
 import 'package:bloot/features/profile/domain/repositories/profile_repository.dart';
@@ -27,6 +28,7 @@ class HomeCubit extends Cubit<HomeState> {
   final NotificationsRepository _notificationsRepository;
   StreamSubscription<List<HomeStream>>? _streamsSubscription;
   StreamSubscription<UserProfile?>? _profileSubscription;
+  StreamSubscription<List<NotificationItem>>? _unreadSubscription;
 
   UserProfile? _currentProfile;
   List<HomeStream> _currentStreams = [];
@@ -36,7 +38,20 @@ class HomeCubit extends Cubit<HomeState> {
     emit(const HomeState.loading());
     _cancelSubscriptions();
 
-    _loadUnreadNotifications().then((_) => _emitCombinedState());
+    _unreadSubscription = _notificationsRepository
+        .watchUnreadNotifications()
+        .listen(
+          (notifications) {
+            _unreadNotificationsCount = notifications.length;
+            _emitCombinedState();
+          },
+          onError: (Object error) {
+            AppLogger.error(
+              'Failed to watch unread notifications',
+              error: error,
+            );
+          },
+        );
 
     _profileSubscription = _profileRepository.watchCurrentUserProfile().listen(
       (profile) {
@@ -107,6 +122,8 @@ class HomeCubit extends Cubit<HomeState> {
     _streamsSubscription = null;
     _profileSubscription?.cancel();
     _profileSubscription = null;
+    _unreadSubscription?.cancel();
+    _unreadSubscription = null;
   }
 
   @override

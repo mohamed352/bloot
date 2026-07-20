@@ -3,9 +3,9 @@ default_platform(:android)
 # Firebase App Distribution uploads of large APKs can exceed the Google API
 # client's default HTTP send/read timeouts. Extend them before the plugin runs.
 require 'google/apis/options'
-Google::Apis::ClientOptions.default.send_timeout_sec = 1800  # 30 minutes
-Google::Apis::ClientOptions.default.read_timeout_sec = 1800  # 30 minutes
-Google::Apis::ClientOptions.default.open_timeout_sec = 300   # 5 minutes
+Google::Apis::ClientOptions.default.send_timeout_sec = 3600  # 60 minutes
+Google::Apis::ClientOptions.default.read_timeout_sec = 3600  # 60 minutes
+Google::Apis::ClientOptions.default.open_timeout_sec = 600   # 10 minutes
 
 platform :android do
   desc "Submit a new Beta Build to Firebase App Distribution"

@@ -32,5 +32,10 @@
 # Keep your application class
 -keep class com.bloot.app.** { *; }
 
+# Agora RTC Engine (release builds enable R8 minification; without these
+# keeps the engine classes can be stripped/obfuscated and video goes black)
+-keep class io.agora.** { *; }
+-dontwarn io.agora.**
+
 # Suppress R8 warning for missing Firebase KTX class (used by firebase-appdistribution Kotlin extensions)
 -dontwarn com.google.firebase.ktx.Firebase

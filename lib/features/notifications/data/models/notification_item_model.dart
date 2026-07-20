@@ -12,6 +12,9 @@ abstract class NotificationItemModel with _$NotificationItemModel {
     required String title,
     required String body,
     required String type,
+    String? titleAr,
+    String? bodyAr,
+    String? roomId,
     @Default(false) bool read,
     DateTime? createdAt,
   }) = _NotificationItemModel;
@@ -26,6 +29,9 @@ extension NotificationItemModelX on NotificationItemModel {
         title: title,
         body: body,
         type: type,
+        titleAr: titleAr,
+        bodyAr: bodyAr,
+        roomId: roomId,
         read: read,
         createdAt: createdAt,
       );

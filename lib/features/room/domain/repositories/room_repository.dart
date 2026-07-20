@@ -48,6 +48,10 @@ abstract class RoomRepository {
   /// Removes the current user from [roomId].
   Future<void> leaveRoom(String roomId);
 
+  /// Best-effort heartbeat for an active stream; called periodically by the
+  /// host while streaming so dead broadcasts can be swept server-side.
+  Future<void> sendStreamHeartbeat(String streamId);
+
   /// Removes [targetUid] from [roomId] (host only).
   Future<void> kickPlayer(String roomId, String targetUid);
 

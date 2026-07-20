@@ -415,8 +415,10 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
   Future<void> _onPop() async {
     final cubit = context.read<GameCubit>();
     final router = GoRouter.of(context);
-    await cubit.leaveGame();
-    if (mounted) router.goNamed(RouteNames.home);
+    final left = await cubit.leaveGame();
+    // Only navigate away when the leave succeeded; on failure the cubit
+    // emits an error that the WebView overlay surfaces to the user.
+    if (mounted && left) router.goNamed(RouteNames.home);
   }
 
   @override

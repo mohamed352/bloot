@@ -96,6 +96,18 @@ export const joinRoom = functions.https.onCall(async (request) => {
     const teamA = Array.from(data.teamA as string[] ?? []);
     const teamB = Array.from(data.teamB as string[] ?? []);
 
+    // Read the stream doc up-front if the room is streaming: Firestore
+    // transactions require all reads before all writes.
+    const streamId = data.streamId as string | undefined;
+    const hasActiveStream =
+      data.isStreaming === true && streamId != null && streamId.length > 0;
+    let streamRef: FirebaseFirestore.DocumentReference | null = null;
+    let streamDoc: FirebaseFirestore.DocumentSnapshot | null = null;
+    if (hasActiveStream) {
+      streamRef = db.collection('streams').doc(streamId!);
+      streamDoc = await transaction.get(streamRef);
+    }
+
     // Allocate a free parity seat for the assigned team (A: 0/2, B: 1/3) so
     // seat/team parity always matches the engine (teamOf(seat) = seat % 2).
     const allocation = allocateParitySeat(players);
@@ -138,6 +150,27 @@ export const joinRoom = functions.https.onCall(async (request) => {
       currentPlayerCount: players.length,
       updatedAt: FieldValue.serverTimestamp(),
     });
+
+    // Keep the stream doc's roster and viewer count in sync with the room,
+    // otherwise the live card keeps showing the player count from stream
+    // creation time (e.g. stuck at 1 while 2+ players are in).
+    if (hasActiveStream && streamRef != null && streamDoc != null && streamDoc.exists) {
+      const spectatorCount =
+        (streamDoc.data()?.spectatorCount as number | undefined) ?? 0;
+      transaction.update(streamRef, {
+        players: players.map((p: any) => ({
+          uid: p.uid,
+          name: p.displayName ?? p.name ?? 'Player',
+          avatarUrl: p.avatarUrl ?? '',
+          agoraUid: p.agoraUid ?? 0,
+          team: p.team ?? 'A',
+          isCameraOn: p.isCameraOn === true,
+          isMicOn: p.isMicOn !== false,
+        })),
+        playerUids,
+        viewerCount: playerUids.length + spectatorCount,
+      });
+    }
 
     return { roomId: roomRef.id };
   });

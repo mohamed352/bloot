@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+
+import 'package:bloot/config/routes/routes.dart';
 
 import 'package:bloot/core/components/app_scaffold.dart';
 import 'package:bloot/core/components/custom_app_bar.dart';
@@ -98,6 +101,17 @@ class _NotificationsList extends StatelessWidget {
             if (!item.read) {
               context.read<NotificationsCubit>().markAsRead(item.id);
             }
+            // Room invites are actionable: open the invitation screen so the
+            // user can accept and join the room.
+            if (item.type == 'roomInvite' &&
+                item.roomId != null &&
+                item.roomId!.isNotEmpty) {
+              context.pushNamed(
+                RouteNames.roomInvitation,
+                pathParameters: {'id': item.roomId!},
+              );
+              return;
+            }
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(LocaleKeys.notificationOpened.tr())),
             );
@@ -120,6 +134,21 @@ class _NotificationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
+    // Prefer the Arabic localization written by the backend when the device
+    // locale is Arabic; fall back gracefully for older documents that only
+    // have a body or no text at all.
+    final isArabic = context.locale.languageCode == 'ar';
+    var title = item.title;
+    var body = item.body;
+    if (isArabic) {
+      if (item.titleAr != null && item.titleAr!.isNotEmpty) {
+        title = item.titleAr!;
+      }
+      if (item.bodyAr != null && item.bodyAr!.isNotEmpty) {
+        body = item.bodyAr!;
+      }
+    }
+    if (title.isEmpty) title = body;
 
     return InkWell(
       onTap: onTap,
@@ -152,23 +181,25 @@ class _NotificationTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.title,
+                    title,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: item.read ? FontWeight.w600 : FontWeight.w700,
                       color: colors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    item.body,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: colors.textSecondary,
+                  if (body.isNotEmpty && body != title) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      body,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: colors.textSecondary,
+                      ),
                     ),
-                  ),
+                  ],
                   const SizedBox(height: 4),
                   Text(
                     _formatTime(item.createdAt),
@@ -199,6 +230,7 @@ class _NotificationTile extends StatelessWidget {
   IconData _iconForType(String type) {
     switch (type) {
       case 'room_invite':
+      case 'roomInvite':
         return Icons.videogame_asset_rounded;
       case 'follow':
         return Icons.person_add_rounded;

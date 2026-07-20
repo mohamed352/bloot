@@ -29,6 +29,45 @@ class RoomCubit extends Cubit<RoomState> {
   Future<void>? _pendingAgoraJoin;
   bool _gameStartedEmitted = false;
 
+  /// Host-side stream heartbeat: while the local user hosts an active
+  /// stream, this timer touches `lastHeartbeatAt` every minute so the
+  /// server sweeper can end the broadcast if the app dies unexpectedly.
+  Timer? _streamHeartbeatTimer;
+  String? _streamHeartbeatId;
+
+  void _syncStreamHeartbeat(Room room) {
+    final isHost =
+        room.creatorUid != null &&
+        room.players.any((p) => p.isMe && p.uid == room.creatorUid);
+    final streamId = room.streamId;
+    final shouldBeat =
+        room.isStreaming && isHost && streamId != null && streamId.isNotEmpty;
+
+    if (!shouldBeat) {
+      _streamHeartbeatTimer?.cancel();
+      _streamHeartbeatTimer = null;
+      _streamHeartbeatId = null;
+      return;
+    }
+    if (_streamHeartbeatId == streamId) return; // already beating
+    _streamHeartbeatId = streamId;
+    _streamHeartbeatTimer?.cancel();
+    // First beat immediately, then once a minute. Best-effort: failures are
+    // swallowed so a heartbeat can never crash the room session.
+    unawaited(_safeHeartbeat(streamId));
+    _streamHeartbeatTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      unawaited(_safeHeartbeat(streamId));
+    });
+  }
+
+  Future<void> _safeHeartbeat(String streamId) async {
+    try {
+      await _roomRepository.sendStreamHeartbeat(streamId);
+    } catch (e) {
+      AppLogger.error('Stream heartbeat failed', error: e);
+    }
+  }
+
   /// Whether the local user was a participant in the last room snapshot.
   /// Used to detect that the host removed (kicked) the local user.
   bool _wasLocalParticipant = false;
@@ -154,6 +193,7 @@ class RoomCubit extends Cubit<RoomState> {
             }
             _wasLocalParticipant = isParticipant;
             _currentRoom = room;
+            _syncStreamHeartbeat(room);
 
             // Auto-navigate when game starts, but only once per room session.
             if (room.status == RoomStatus.playing &&
@@ -184,12 +224,26 @@ class RoomCubit extends Cubit<RoomState> {
               );
               _pendingAgoraJoin = pendingJoin;
               pendingJoin
-                  .then((_) {
+                  .then((_) async {
                     // A kick/reload can clear the current room while the join
                     // is in flight; never mark that stale join as active.
                     if (isClosed || _currentRoom == null) return;
                     _joinedAgoraChannelName = agoraChannelName;
                     _listenToAudioVolume(room);
+                    // Sync the Agora engine with the Firestore media flags.
+                    // The room doc defaults isCameraOn=true for camera rooms,
+                    // but the engine starts with the camera off and never
+                    // publishes a video track unless explicitly enabled,
+                    // which showed a black screen to everyone.
+                    try {
+                      await _agoraService.setMediaState(
+                        micOn: localPlayer.isMicOn,
+                        cameraOn:
+                            room.cameraEnabled && localPlayer.isCameraOn,
+                      );
+                    } catch (e) {
+                      AppLogger.error('Failed to sync media state', error: e);
+                    }
                   })
                   .catchError((Object e) {
                     AppLogger.error('Failed to join Agora', error: e);
@@ -388,9 +442,13 @@ class RoomCubit extends Cubit<RoomState> {
     }
   }
 
-  Future<void> leaveRoom(String roomId) async {
+  /// Returns `true` when the leave actually succeeded on the backend, so
+  /// callers can decide whether to navigate away or stay and let the user
+  /// retry (previously the UI popped even when the leave call failed,
+  /// leaving the player stuck in the room server-side).
+  Future<bool> leaveRoom(String roomId) async {
     final currentState = state;
-    if (currentState is! RoomLoaded) return;
+    if (currentState is! RoomLoaded) return false;
 
     try {
       // Stop listening first so a late room update does not re-trigger Agora join.
@@ -413,13 +471,18 @@ class RoomCubit extends Cubit<RoomState> {
       await _agoraService.leaveChannel();
       _joinedAgoraChannelName = null;
       _currentRoom = null;
+      _streamHeartbeatTimer?.cancel();
+      _streamHeartbeatTimer = null;
+      _streamHeartbeatId = null;
       if (!isClosed) emit(const RoomState.initial());
+      return true;
     } on RoomException catch (e) {
       AppLogger.error('Failed to leave room', error: e.message);
       if (!isClosed) {
         emit(RoomState.error(message: e.message));
         emit(currentState);
       }
+      return false;
     } catch (e) {
       AppLogger.error('Failed to leave room', error: e);
       if (!isClosed) {
@@ -430,6 +493,7 @@ class RoomCubit extends Cubit<RoomState> {
         );
         emit(currentState);
       }
+      return false;
     }
   }
 
@@ -503,6 +567,9 @@ class RoomCubit extends Cubit<RoomState> {
 
   @override
   Future<void> close() async {
+    _streamHeartbeatTimer?.cancel();
+    _streamHeartbeatTimer = null;
+    _streamHeartbeatId = null;
     await _roomSubscription?.cancel();
     await _publicRoomsSubscription?.cancel();
     await _audioVolumeSubscription?.cancel();

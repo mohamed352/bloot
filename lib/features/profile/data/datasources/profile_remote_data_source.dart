@@ -92,7 +92,12 @@ class ProfileRemoteDataSource {
     // Storage rules only allow writes under avatars/{uid}/... with an image/*
     // content type — writing to avatars/{uid}.jpg is rejected with
     // firebase_storage/unauthorized.
-    final ref = _storage.ref().child('avatars/${user.uid}/avatar.jpg');
+    //
+    // Use a unique object name per upload: overwriting avatar.jpg kept the
+    // SAME download URL, so CachedNetworkImage (keyed by URL) kept serving
+    // the old image from disk cache and the new avatar never appeared.
+    final objectName = 'avatar_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final ref = _storage.ref().child('avatars/${user.uid}/$objectName');
     final uploadTask = await ref.putFile(
       file,
       SettableMetadata(contentType: 'image/jpeg'),

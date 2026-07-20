@@ -107,6 +107,10 @@ class RoomRepositoryImpl implements RoomRepository {
   Future<void> leaveRoom(String roomId) => _remoteDataSource.leaveRoom(roomId);
 
   @override
+  Future<void> sendStreamHeartbeat(String streamId) =>
+      _remoteDataSource.sendStreamHeartbeat(streamId);
+
+  @override
   Future<void> kickPlayer(String roomId, String targetUid) =>
       _remoteDataSource.kickPlayer(roomId, targetUid);
 

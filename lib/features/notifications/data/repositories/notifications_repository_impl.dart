@@ -20,6 +20,20 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   }
 
   @override
+  Stream<List<NotificationItem>> watchNotifications() {
+    return _remoteDataSource
+        .watchNotifications()
+        .map((models) => models.map((m) => m.toEntity()).toList());
+  }
+
+  @override
+  Stream<List<NotificationItem>> watchUnreadNotifications() {
+    return _remoteDataSource
+        .watchUnreadNotifications()
+        .map((models) => models.map((m) => m.toEntity()).toList());
+  }
+
+  @override
   Future<List<NotificationItem>> getUnreadNotifications() async {
     final models = await _remoteDataSource.getUnreadNotifications();
     return models.map((m) => m.toEntity()).toList();

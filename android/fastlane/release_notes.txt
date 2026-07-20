@@ -1,13 +1,14 @@
-Bloot v1.0.0 (build 7) — QA Release
+Bloot v1.0.0 (build 10) — QA Release
 
-Fixes from build 5/6 feedback:
-• Fixed join failures: joining public rooms and joining by code now works (server crash fixed)
-• Joining with a code or invitation now seats you as a player (only full/in-progress rooms open as spectator)
-• Fixed "Player not in room" error when tapping Ready
-• Live streams now close automatically when the host leaves; stale lives no longer appear in home/discover
-• Playing with bots no longer kills an ongoing live
-• Watchers: "Watch Game" button appears when the game starts; no more black camera squares for bots; mic/audio state fixes
-• Rooms that disallow spectators can no longer be watched
-• Create room: name is now required and fields reset for each new room
-• Invite-a-friend search: keyboard no longer closes while typing; account search finds users reliably
-• Direct messages to players now work (no more "Failed to start conversation")
+Fixes from build 7/8/9 feedback (all 15 tester reports addressed):
+• Invite a friend: fixed infinite loading spinner; invites now arrive in the notifications inbox in real time with title/text, and tapping opens the invitation
+• Foreground push notifications now show an in-app banner with a Join action
+• Leave button now works reliably (fixed server crash when leaving a streaming room); failed leaves show an error instead of silently doing nothing
+• Live streams now close when the host leaves or their app dies (host heartbeat + server sweep); ended lives disappear from home/discover
+• Viewer counts on lives now include all players, not just the host
+• Public tables: Join button now works — waiting tables seat you as a player, live tables open as a spectator; no more "table is not live" error
+• Rooms no longer vanish when the game starts — public/live games stay visible as streams
+• Watch Game: fixed "Failed to load game" for spectators; errors now explain the real cause
+• Camera black screen fixed: the camera actually starts when the room has camera enabled
+• Profile picture changes now appear everywhere (rooms, chats, streams)
+• Account search works again and matches partial names (e.g. "med" finds "mohamed"); room search by name is now case-insensitive

@@ -13,6 +13,9 @@ _NotificationItemModel _$NotificationItemModelFromJson(
   title: json['title'] as String,
   body: json['body'] as String,
   type: json['type'] as String,
+  titleAr: json['titleAr'] as String?,
+  bodyAr: json['bodyAr'] as String?,
+  roomId: json['roomId'] as String?,
   read: json['read'] as bool? ?? false,
   createdAt: json['createdAt'] == null
       ? null
@@ -26,6 +29,9 @@ Map<String, dynamic> _$NotificationItemModelToJson(
   'title': instance.title,
   'body': instance.body,
   'type': instance.type,
+  'titleAr': instance.titleAr,
+  'bodyAr': instance.bodyAr,
+  'roomId': instance.roomId,
   'read': instance.read,
   'createdAt': instance.createdAt?.toIso8601String(),
 };

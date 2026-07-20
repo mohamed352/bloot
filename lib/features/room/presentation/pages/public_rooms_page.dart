@@ -41,9 +41,13 @@ class _PublicRoomsPageState extends State<PublicRoomsPage> {
     super.dispose();
   }
 
-  /// Tapping a public room card opens its live stream as a viewer when the
-  /// room is broadcasting. Cards never join the room as a player — joining
-  /// as a player is only done through the search-by-code field below.
+  /// Role depends on the entry path:
+  /// - Streaming rooms open the watch page — the user joins as a SPECTATOR.
+  /// - Waiting (not yet live) rooms join the lobby as a PLAYER via the
+  ///   room's invite code, instead of the previous dead-end "not live"
+  ///   error.
+  /// - Joining as a player by code is always possible through the
+  ///   search-by-code field below.
   void _openRoom(BuildContext context, Room room) {
     final streamId = room.streamId;
     if (room.isStreaming && streamId != null && streamId.isNotEmpty) {
@@ -51,6 +55,16 @@ class _PublicRoomsPageState extends State<PublicRoomsPage> {
         RouteNames.watchStream,
         pathParameters: {'id': streamId},
       );
+      return;
+    }
+    final inviteCode = room.inviteCode;
+    if (!room.isStreaming &&
+        room.status == RoomStatus.waiting &&
+        inviteCode != null &&
+        inviteCode.isNotEmpty &&
+        !_joining) {
+      setState(() => _joining = true);
+      context.read<RoomCubit>().joinRoomByCode(inviteCode);
       return;
     }
     ScaffoldMessenger.of(

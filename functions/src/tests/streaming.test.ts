@@ -50,10 +50,12 @@ describe('buildStreamPayload', () => {
 });
 
 describe('shouldAutoCreateStream', () => {
-  it('auto-creates only for liveStream rooms not already streaming', () => {
+  it('auto-creates for liveStream and public rooms not already streaming', () => {
     expect(shouldAutoCreateStream({ type: 'liveStream' })).toBe(true);
     expect(shouldAutoCreateStream({ type: 'liveStream', isStreaming: false })).toBe(true);
     expect(shouldAutoCreateStream({ type: 'liveStream', isStreaming: true })).toBe(false);
+    expect(shouldAutoCreateStream({ type: 'public' })).toBe(true);
+    expect(shouldAutoCreateStream({ type: 'public', isStreaming: true })).toBe(false);
     expect(shouldAutoCreateStream({ type: 'private' })).toBe(false);
     expect(shouldAutoCreateStream({})).toBe(false);
   });

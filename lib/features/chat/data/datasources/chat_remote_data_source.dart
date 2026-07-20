@@ -261,8 +261,10 @@ class ChatRemoteDataSource {
 
       return byId.values.take(20).toList();
     } catch (e) {
+      // Surface failures instead of returning an empty list, which looked
+      // exactly like "no results" and made search appear completely dead.
       AppLogger.error('Failed to search users', error: e);
-      return [];
+      rethrow;
     }
   }
 

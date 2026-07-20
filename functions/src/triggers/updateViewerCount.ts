@@ -32,6 +32,7 @@ export const updateViewerCount = onDocumentWritten(
         );
 
         transaction.update(streamRef, {
+          spectatorCount,
           viewerCount,
           peakViewerCount,
           updatedAt: new Date(),

@@ -210,9 +210,7 @@ void main() {
       });
     });
 
-    testWidgets('card join does not join as player when room is not live', (
-      tester,
-    ) async {
+    testWidgets('card join joins a waiting room as a player', (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -229,6 +227,12 @@ void main() {
             ),
           ]),
         );
+        when(
+          () => roomRepository.joinRoomByCode(
+            'PUB001',
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => testRoom());
 
         await tester.pumpWidget(
           buildTestableWidgetWithRouter(
@@ -243,14 +247,15 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 100));
 
-        // The card never joins the room as a player; it shows a localized
-        // not-live message instead.
-        expect(find.byType(SnackBar), findsOneWidget);
-        expect(
-          find.text('This table is not live right now.'),
-          findsOneWidget,
-        );
-        verifyNever(() => roomRepository.joinRoomByCode('PUB001'));
+        // Waiting rooms join as a player via the room's invite code; only
+        // streaming rooms join as a spectator (watch page).
+        verify(
+          () => roomRepository.joinRoomByCode(
+            'PUB001',
+            password: any(named: 'password'),
+          ),
+        ).called(1);
+        expect(find.byType(SnackBar), findsNothing);
       });
     });
 

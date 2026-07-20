@@ -55,6 +55,7 @@ export function buildStreamPayload(params: {
     title: room.name || `${hostName}'s Stream`,
     status: 'live',
     viewerCount: roomPlayers.length,
+    spectatorCount: 0,
     agoraChannelName: room.agoraChannelName || `room_${roomId}`,
     players,
     playerUids: roomPlayers.map((p) => p.uid),
@@ -65,12 +66,18 @@ export function buildStreamPayload(params: {
 /**
  * Whether a game start should also auto-create a stream doc for the room.
  * Never duplicates an existing stream.
+ *
+ * `liveStream` and `public` rooms must stay visible to other users after the
+ * game starts (the public-rooms list only shows `waiting` rooms, so without
+ * a stream doc the room would vanish from every screen once `playing`).
+ * Private rooms are intentionally excluded.
  */
 export function shouldAutoCreateStream(room: {
   type?: string;
   isStreaming?: boolean;
 }): boolean {
-  return room.type === 'liveStream' && room.isStreaming !== true;
+  const isPubliclyVisible = room.type === 'liveStream' || room.type === 'public';
+  return isPubliclyVisible && room.isStreaming !== true;
 }
 
 /** How long a playing room's game may go without a write before the room is

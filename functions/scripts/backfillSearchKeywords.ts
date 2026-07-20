@@ -17,6 +17,11 @@ function buildKeywords(data: Record<string, unknown>): string[] {
       tokens.push(normalized);
       normalized.split(/\s+/).forEach((word) => {
         if (word.length > 1) tokens.push(word);
+        // Prefix n-grams so partial queries ("med") match ("mohamed").
+        const maxPrefix = Math.min(word.length, 10);
+        for (let i = 2; i <= maxPrefix; i++) {
+          tokens.push(word.substring(0, i));
+        }
       });
     }
   };

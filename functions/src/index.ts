@@ -63,6 +63,7 @@ export { sendChatMessageNotification } from './triggers/sendChatMessageNotificat
 export { sendGameStartingNotification } from './triggers/sendGameStartingNotification';
 export { updateViewerCount } from './triggers/updateViewerCount';
 export { syncUserSearchKeywords } from './triggers/syncUserSearchKeywords';
+export { syncUserAvatar } from './triggers/syncUserAvatar';
 export { syncReportSearchKeywords } from './triggers/syncReportSearchKeywords';
 export { assignUserAgoraUid } from './triggers/assignUserAgoraUid';
 export { cleanStaleRooms } from './scheduler/cleanStaleRooms';

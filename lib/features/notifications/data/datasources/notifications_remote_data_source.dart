@@ -26,6 +26,35 @@ class NotificationsRemoteDataSource {
     return _firestore.collection('users').doc(uid).collection('notifications');
   }
 
+  /// Real-time stream of all notifications, newest first.
+  Stream<List<NotificationItemModel>> watchNotifications() {
+    try {
+      return _collection
+          .orderBy('createdAt', descending: true)
+          .limit(50)
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map(_mapDocToModel).toList());
+    } catch (e) {
+      AppLogger.error('Failed to watch notifications', error: e);
+      return Stream.value(const []);
+    }
+  }
+
+  /// Real-time stream of unread notifications.
+  Stream<List<NotificationItemModel>> watchUnreadNotifications() {
+    try {
+      return _collection
+          .where('read', isEqualTo: false)
+          .orderBy('createdAt', descending: true)
+          .limit(50)
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map(_mapDocToModel).toList());
+    } catch (e) {
+      AppLogger.error('Failed to watch unread notifications', error: e);
+      return Stream.value(const []);
+    }
+  }
+
   Future<List<NotificationItemModel>> getNotifications() async {
     try {
       final snapshot = await _collection
@@ -92,6 +121,9 @@ class NotificationsRemoteDataSource {
       title: data['title'] as String? ?? '',
       body: data['body'] as String? ?? '',
       type: data['type'] as String? ?? 'system',
+      titleAr: data['titleAr'] as String?,
+      bodyAr: data['bodyAr'] as String?,
+      roomId: data['roomId'] as String?,
       read: data['read'] == true,
       createdAt: createdAt is Timestamp ? createdAt.toDate() : null,
     );

@@ -5,6 +5,12 @@ abstract class NotificationsRepository {
   /// Returns all notifications for the current user, newest first.
   Future<List<NotificationItem>> getNotifications();
 
+  /// Real-time stream of all notifications, newest first.
+  Stream<List<NotificationItem>> watchNotifications();
+
+  /// Real-time stream of unread notifications.
+  Stream<List<NotificationItem>> watchUnreadNotifications();
+
   /// Returns only unread notifications.
   Future<List<NotificationItem>> getUnreadNotifications();
 

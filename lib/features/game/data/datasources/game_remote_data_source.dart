@@ -125,6 +125,14 @@ class GameRemoteDataSource {
     }
   }
 
+  /// Tolerates malformed fields (e.g. a hand stored as a Map by an older
+  /// backend version) instead of throwing inside the stream, which used to
+  /// surface as a generic "Failed to load game" for spectators.
+  static List<String> _stringList(dynamic value) {
+    if (value is List) return value.map((e) => e.toString()).toList();
+    return const [];
+  }
+
   GameModel _mapDocToModel(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data();
     if (data == null) throw Exception('Game data is null');
@@ -140,9 +148,9 @@ class GameRemoteDataSource {
         avatarUrl: p['avatarUrl'] as String? ?? '',
         team: p['team'] as String? ?? 'A',
         seatIndex: seatIndex,
-        hand: (p['hand'] as List<dynamic>?)?.cast<String>() ?? [],
-        takenCards: (p['takenCards'] as List<dynamic>?)?.cast<String>() ?? [],
-        tricksWon: p['tricksWon'] as int? ?? 0,
+        hand: _stringList(p['hand']),
+        takenCards: _stringList(p['takenCards']),
+        tricksWon: (p['tricksWon'] as num?)?.toInt() ?? 0,
         bid: p['bid'] as String?,
         isConnected: p['isConnected'] as bool? ?? true,
         isMuted: p['isMuted'] as bool? ?? false,
@@ -177,8 +185,8 @@ class GameRemoteDataSource {
           )
         : null;
 
-    final teamAScore = data['teamAScore'] as int? ?? 0;
-    final teamBScore = data['teamBScore'] as int? ?? 0;
+    final teamAScore = (data['teamAScore'] as num?)?.toInt() ?? 0;
+    final teamBScore = (data['teamBScore'] as num?)?.toInt() ?? 0;
     final localTeam = players
         .firstWhere((p) => p.seatIndex == mySeat, orElse: () => players.first)
         .team;
@@ -207,11 +215,11 @@ class GameRemoteDataSource {
       teamBScore: teamBScore,
       trump: data['trumpSuit'] as String? ?? '',
       status: data['status'] as String? ?? 'dealing',
-      turnIndex: data['turnIndex'] as int? ?? 0,
-      currentRound: data['currentRound'] as int? ?? 1,
-      targetScore: data['targetScore'] as int? ?? 152,
+      turnIndex: (data['turnIndex'] as num?)?.toInt() ?? 0,
+      currentRound: (data['currentRound'] as num?)?.toInt() ?? 1,
+      targetScore: (data['targetScore'] as num?)?.toInt() ?? 152,
       gameType: data['gameType'] as String?,
-      dealerIndex: data['dealerIndex'] as int? ?? 0,
+      dealerIndex: (data['dealerIndex'] as num?)?.toInt() ?? 0,
       faceUpCard: data['faceUpCard'] as String?,
       biddingTeam: data['biddingTeam'] as String?,
       fellTeam: data['fellTeam'] as String?,

@@ -94,6 +94,12 @@ void stubAgoraServiceDefaults(MockAgoraService service) {
   when(() => service.toggleMic()).thenAnswer((_) async => false);
   when(() => service.toggleCamera()).thenAnswer((_) async => false);
   when(
+    () => service.setMediaState(
+      micOn: any(named: 'micOn'),
+      cameraOn: any(named: 'cameraOn'),
+    ),
+  ).thenAnswer((_) async {});
+  when(
     () => service.onAudioVolumeIndication,
   ).thenAnswer((_) => const Stream.empty());
   when(() => service.onUserJoined).thenAnswer((_) => const Stream.empty());
