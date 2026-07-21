@@ -89,8 +89,8 @@ class LoginPage extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: AppSpacing.xxxl),
-                            // Apple button — iOS only
                             if (Platform.isIOS) ...[
+                              // Apple button — iOS only
                               _SocialButton(
                                 icon: Icons.apple,
                                 label: 'Apple',
@@ -99,16 +99,16 @@ class LoginPage extends StatelessWidget {
                                 onTap: () =>
                                     context.read<AuthCubit>().signInWithApple(),
                               ),
-                              const SizedBox(height: AppSpacing.md),
+                            ] else ...[
+                              // Google button — Android only
+                              _SocialButton(
+                                icon: Icons.g_mobiledata_rounded,
+                                label: 'Google',
+                                isLoading: isLoading,
+                                onTap: () =>
+                                    context.read<AuthCubit>().signInWithGoogle(),
+                              ),
                             ],
-                            // Google button
-                            _SocialButton(
-                              icon: Icons.g_mobiledata_rounded,
-                              label: 'Google',
-                              isLoading: isLoading,
-                              onTap: () =>
-                                  context.read<AuthCubit>().signInWithGoogle(),
-                            ),
                             const SizedBox(height: AppSpacing.xxl),
                             // Terms hint
                             Center(

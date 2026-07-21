@@ -1,0 +1,16 @@
+name: firebase_app_distribution_ios
+description: A dummy package for firebase_app_distribution_ios without the iOS platform to fix CocoaPods conflicts.
+version: 1.3.0
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.0.0"
+
+dependencies:
+  firebase_app_distribution_platform_interface: ^1.3.0
+  flutter:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms: {}

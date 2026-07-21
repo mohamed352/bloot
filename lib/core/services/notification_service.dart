@@ -52,9 +52,13 @@ class NotificationService {
     );
 
     // Get and save token.
-    final token = await getToken();
-    if (token != null) {
-      await _saveToken(token);
+    try {
+      final token = await getToken();
+      if (token != null) {
+        await _saveToken(token);
+      }
+    } catch (e) {
+      AppLogger.warning('Failed to get FCM token (common on iOS Simulator): $e', tag: 'FCM');
     }
 
     // Listen to token refresh

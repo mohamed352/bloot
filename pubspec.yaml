@@ -59,7 +59,7 @@ dependencies:
   firebase_crashlytics: ^5.0.0
   firebase_performance: ^0.11.0
   firebase_remote_config: ^6.0.0
-  firebase_app_distribution: ^1.1.1
+  firebase_app_distribution: any
   google_sign_in: ^7.2.0
   sign_in_with_apple: ^6.1.4
 
@@ -131,3 +131,8 @@ flutter_launcher_icons:
     image_path: assets/images/logo.png
     background_color: "#FFFFFF"
     theme_color: "#FFFFFF"
+
+dependency_overrides:
+  firebase_app_distribution_ios:
+    path: ./packages/dummy_firebase_app_distribution_ios
+
