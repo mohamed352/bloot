@@ -87,6 +87,15 @@ class RoomRepositoryImpl implements RoomRepository {
   }
 
   @override
+  Future<Room> joinRoomById(String roomId, {String? password}) async {
+    final model = await _remoteDataSource.joinRoomById(
+      roomId,
+      password: password,
+    );
+    return model.toEntity(currentUserUid: _currentUid);
+  }
+
+  @override
   Future<String> startGame(String roomId) async {
     return _remoteDataSource.startGame(roomId);
   }
@@ -107,7 +116,7 @@ class RoomRepositoryImpl implements RoomRepository {
   Future<void> leaveRoom(String roomId) => _remoteDataSource.leaveRoom(roomId);
 
   @override
-  Future<void> sendStreamHeartbeat(String streamId) =>
+  Future<bool> sendStreamHeartbeat(String streamId) =>
       _remoteDataSource.sendStreamHeartbeat(streamId);
 
   @override

@@ -29,6 +29,7 @@ abstract class RouteNames {
   static const String notifications = 'notifications';
   static const String newMessage = 'newMessage';
   static const String spectate = 'spectate';
+  static const String spectatorRoom = 'spectatorRoom';
   static const String publicRooms = 'publicRooms';
   static const String forceUpdate = 'forceUpdate';
   static const String maintenance = 'maintenance';
@@ -74,6 +75,7 @@ abstract class RoutePaths {
   static const String notifications = '/notifications';
   static const String newMessage = '/new-message';
   static const String spectate = '/spectate/:id';
+  static const String spectatorRoom = '/spectate-room/:id';
   static const String publicRooms = '/public-rooms';
   static const String forceUpdate = '/force-update';
   static const String maintenance = '/maintenance';

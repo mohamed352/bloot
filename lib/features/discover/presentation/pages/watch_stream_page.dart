@@ -127,8 +127,8 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
     if (!mounted) return;
     if (!allowed) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Spectators are not allowed in this room'),
+        SnackBar(
+          content: Text('spectators_not_allowed'.tr()),
         ),
       );
       context.pop();
@@ -318,7 +318,7 @@ class _WatchStreamPageState extends State<WatchStreamPage> {
                         ),
                       ),
                     ),
-                    if (_gameId != null) ...[
+                    if (_gameId != null && _accessGranted) ...[
                       const SizedBox(width: 8),
                       GestureDetector(
                         onTap: () {

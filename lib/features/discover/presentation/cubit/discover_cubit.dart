@@ -74,20 +74,16 @@ class DiscoverCubit extends Cubit<DiscoverState> {
         list.sort((a, b) => b.viewers.compareTo(a.viewers));
         return list;
       case 1:
-        return list.reversed.toList();
-      case 2:
         list.sort((a, b) {
           final aScore = (a.isPremium ? 1000 : 0) + a.viewers;
           final bScore = (b.isPremium ? 1000 : 0) + b.viewers;
           return bScore.compareTo(aScore);
         });
         return list;
-      case 3:
+      case 2:
         return list.where((s) {
           return s.players.every((p) => !p.isCameraOn);
         }).toList();
-      case 4:
-        return list;
       default:
         return list;
     }

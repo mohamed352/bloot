@@ -202,6 +202,8 @@
   "off": "Off",
   "offline_message": "You are currently offline",
   "online": "Online",
+  "offline": "Offline",
+  "last_seen_at": "Last seen {time}",
   "open_chat": "Open Chat",
   "opponent_1": "Opponent 1",
   "opponent_2": "Opponent 2",
@@ -341,6 +343,7 @@
   "search_for_players": "Search for players to message",
   "search_messages": "Search for users...",
   "no_players_found": "No players found",
+  "failed_to_start_conversation": "Failed to start conversation. Please try again.",
   "send": "Send",
   "messageSent": "Message sent",
   "shareRoomMessage": "Join my Baloot room! Code: {code}\n{link}",
@@ -417,5 +420,12 @@
   "invite_friend": "Invite Friend",
   "invite_sent_to": "Invite sent to {name}",
   "failed_to_send_invite": "Failed to send invite. Please try again.",
-  "login_to_join": "Login to Join"
+  "login_to_join": "Login to Join",
+  "game_watch_no_access": "You don't have access to watch this game.",
+  "game_ended": "This game has ended.",
+  "game_load_failed": "Failed to load game.",
+  "starting_game": "Starting game…",
+  "spectators_not_allowed": "Spectators are not allowed in this room",
+  "waiting_for_game_to_start": "Waiting for the game to start…",
+  "spectator_auto_open_note": "The live stream will open automatically when the game starts."
 }

@@ -1011,7 +1011,7 @@ void main() {
       act: (cubit) => cubit.watchGame('g1'),
       expect: () => [
         const GameState.loading(),
-        const GameState.error(message: 'Failed to load game.'),
+        const GameState.error(message: 'game_load_failed'),
       ],
     );
 

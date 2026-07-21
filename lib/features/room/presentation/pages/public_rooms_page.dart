@@ -41,30 +41,32 @@ class _PublicRoomsPageState extends State<PublicRoomsPage> {
     super.dispose();
   }
 
-  /// Role depends on the entry path:
+  /// Role depends on the entry path (per product requirement):
   /// - Streaming rooms open the watch page — the user joins as a SPECTATOR.
-  /// - Waiting (not yet live) rooms join the lobby as a PLAYER via the
-  ///   room's invite code, instead of the previous dead-end "not live"
-  ///   error.
-  /// - Joining as a player by code is always possible through the
-  ///   search-by-code field below.
+  /// - Waiting rooms open a spectator holding page that auto-opens the live
+  ///   stream once the game starts — still a SPECTATOR.
+  /// - Joining as a PLAYER is always possible through the search-by-code
+  ///   field below.
   void _openRoom(BuildContext context, Room room) {
     final streamId = room.streamId;
-    if (room.isStreaming && streamId != null && streamId.isNotEmpty) {
-      context.pushNamed(
-        RouteNames.watchStream,
-        pathParameters: {'id': streamId},
-      );
+    if (room.isStreaming) {
+      if (streamId != null && streamId.isNotEmpty) {
+        context.pushNamed(
+          RouteNames.watchStream,
+          pathParameters: {'id': streamId},
+        );
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('room_not_live'.tr())));
+      }
       return;
     }
-    final inviteCode = room.inviteCode;
-    if (!room.isStreaming &&
-        room.status == RoomStatus.waiting &&
-        inviteCode != null &&
-        inviteCode.isNotEmpty &&
-        !_joining) {
-      setState(() => _joining = true);
-      context.read<RoomCubit>().joinRoomByCode(inviteCode);
+    if (room.status == RoomStatus.waiting) {
+      context.pushNamed(
+        RouteNames.spectatorRoom,
+        pathParameters: {'id': room.id},
+      );
       return;
     }
     ScaffoldMessenger.of(

@@ -139,60 +139,77 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     children: [
                       _buildAvatarPicker(context),
                       const SizedBox(height: AppSpacing.xxl),
-                      _buildTextField(
-                        label: 'display_name'.tr(),
-                        controller: _nameController,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'validationNameRequired'.tr();
-                          }
-                          if (value.trim().length < 3) {
-                            return 'validationNameMinLength'.tr();
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      _buildTextField(
-                        label: 'username'.tr(),
-                        controller: _usernameController,
-                        prefixText: '@',
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'validationFieldRequired'.tr();
-                          }
-                          if (value.trim().length < 3) {
-                            return 'validationNameMinLength'.tr();
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      _buildTextField(
-                        label: 'bio'.tr(),
-                        controller: _bioController,
-                        maxLines: 3,
-                        maxLength: 150,
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      _buildDropdown(
-                        label: 'region'.tr(),
-                        value: _region,
-                        items: _regions,
-                        onChanged: (value) {
-                          setState(() => _region = value);
-                          context.read<EditProfileCubit>().markChanged();
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      _buildDropdown(
-                        label: 'favorite_mode'.tr(),
-                        value: _favoriteMode,
-                        items: _favoriteModes,
-                        onChanged: (value) {
-                          setState(() => _favoriteMode = value);
-                          context.read<EditProfileCubit>().markChanged();
-                        },
+                      Container(
+                        padding: const EdgeInsetsDirectional.all(
+                          AppSpacing.cardInternal,
+                        ),
+                        decoration: BoxDecoration(
+                          color: ColorManager.darkSurface,
+                          borderRadius: BorderRadius.circular(AppRadius.card),
+                          border: Border.all(
+                            color: ColorManager.darkBorderSoft,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildTextField(
+                              label: 'display_name'.tr(),
+                              controller: _nameController,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'validationNameRequired'.tr();
+                                }
+                                if (value.trim().length < 3) {
+                                  return 'validationNameMinLength'.tr();
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            _buildTextField(
+                              label: 'username'.tr(),
+                              controller: _usernameController,
+                              prefixText: '@',
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'validationFieldRequired'.tr();
+                                }
+                                if (value.trim().length < 3) {
+                                  return 'validationNameMinLength'.tr();
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            _buildTextField(
+                              label: 'bio'.tr(),
+                              controller: _bioController,
+                              maxLines: 3,
+                              maxLength: 150,
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            _buildDropdown(
+                              label: 'region'.tr(),
+                              value: _region,
+                              items: _regions,
+                              onChanged: (value) {
+                                setState(() => _region = value);
+                                context.read<EditProfileCubit>().markChanged();
+                              },
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            _buildDropdown(
+                              label: 'favorite_mode'.tr(),
+                              value: _favoriteMode,
+                              items: _favoriteModes,
+                              onChanged: (value) {
+                                setState(() => _favoriteMode = value);
+                                context.read<EditProfileCubit>().markChanged();
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.xxxl),
                       AppButton(
@@ -295,10 +312,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
             prefixText: prefixText,
             prefixStyle: const TextStyle(color: ColorManager.darkTextMuted),
             filled: true,
-            fillColor: ColorManager.darkSurface,
+            fillColor: ColorManager.darkCanvas,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(AppRadius.input),
+              borderSide: const BorderSide(
+                color: ColorManager.darkBorderSoft,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppRadius.input),
+              borderSide: const BorderSide(
+                color: ColorManager.darkBorderSoft,
+              ),
             ),
             contentPadding: const EdgeInsetsDirectional.symmetric(
               horizontal: AppSpacing.lg,
@@ -337,8 +362,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
             horizontal: AppSpacing.lg,
           ),
           decoration: BoxDecoration(
-            color: ColorManager.darkSurface,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
+            color: ColorManager.darkCanvas,
+            borderRadius: BorderRadius.circular(AppRadius.input),
+            border: Border.all(color: ColorManager.darkBorderSoft),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(

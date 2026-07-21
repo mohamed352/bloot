@@ -202,6 +202,8 @@
   "off": "إيقاف",
   "offline_message": "رسالة بدون اتصال",
   "online": "متصل",
+  "offline": "غير متصل",
+  "last_seen_at": "آخر ظهور {time}",
   "open_chat": "فتح الدردشة",
   "opponent_1": "الخصم ١",
   "opponent_2": "الخصم ٢",
@@ -341,6 +343,7 @@
   "search_for_players": "ابحث عن لاعبين لمراسلتهم",
   "search_messages": "ابحث عن مستخدمين...",
   "no_players_found": "لم يتم العثور على لاعبين",
+  "failed_to_start_conversation": "فشل بدء المحادثة. حاول مرة أخرى.",
   "send": "إرسال",
   "messageSent": "تم إرسال الرسالة",
   "shareRoomMessage": "انضم لطاولة بلوتي! الكود: {code}\n{link}",
@@ -417,5 +420,12 @@
   "invite_friend": "دعوة صديق",
   "invite_sent_to": "تم إرسال دعوة إلى {name}",
   "failed_to_send_invite": "فشل إرسال الدعوة. حاول مرة أخرى.",
-  "login_to_join": "سجل الدخول للانضمام"
+  "login_to_join": "سجل الدخول للانضمام",
+  "game_watch_no_access": "ليس لديك صلاحية لمشاهدة هذه اللعبة.",
+  "game_ended": "انتهت هذه اللعبة.",
+  "game_load_failed": "فشل تحميل اللعبة.",
+  "starting_game": "جارٍ بدء اللعبة…",
+  "spectators_not_allowed": "المشاهدة غير مسموحة في هذه الغرفة",
+  "waiting_for_game_to_start": "في انتظار بدء اللعبة…",
+  "spectator_auto_open_note": "سيتم فتح البث المباشر تلقائيًا عند بدء اللعبة."
 }

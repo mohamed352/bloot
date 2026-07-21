@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
@@ -489,8 +490,8 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
                           const SizedBox(height: 16),
                           Text(
                             _lastError != null
-                                ? 'Failed to load game'
-                                : 'Starting game…',
+                                ? 'game_load_failed'.tr()
+                                : 'starting_game'.tr(),
                             style: const TextStyle(
                               color: ColorManager.darkTextSecondary,
                             ),

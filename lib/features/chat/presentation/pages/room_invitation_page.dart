@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -32,6 +34,7 @@ class _RoomInvitationPageState extends State<RoomInvitationPage> {
   bool _joining = false;
   String? _error;
   bool _isAuthenticated = false;
+  StreamSubscription<Room>? _roomSubscription;
 
   @override
   void initState() {
@@ -40,19 +43,36 @@ class _RoomInvitationPageState extends State<RoomInvitationPage> {
     _loadRoom();
   }
 
+  @override
+  void dispose() {
+    _roomSubscription?.cancel();
+    super.dispose();
+  }
+
   Future<void> _loadRoom() async {
-    try {
-      final room = await getIt<RoomRepository>().getRoomById(widget.id);
-      setState(() {
-        _room = room;
-        _loading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _error = 'room_not_found'.tr();
-        _loading = false;
-      });
-    }
+    await _roomSubscription?.cancel();
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    // Listen to the room live so a full/started room updates the UI instead
+    // of leaving a dead join button.
+    _roomSubscription = getIt<RoomRepository>().watchRoom(widget.id).listen(
+      (room) {
+        if (!mounted) return;
+        setState(() {
+          _room = room;
+          _loading = false;
+        });
+      },
+      onError: (Object e) {
+        if (!mounted) return;
+        setState(() {
+          _error = 'room_not_found'.tr();
+          _loading = false;
+        });
+      },
+    );
   }
 
   @override
@@ -248,7 +268,8 @@ class _RoomInvitationPageState extends State<RoomInvitationPage> {
           GradientButton(
             text: _isAuthenticated ? 'join_room'.tr() : 'login_to_join'.tr(),
             gradient: GradientButton.goldGradient,
-            onPressed: _joining || room.inviteCode == null
+            isLoading: _joining,
+            onPressed: _joining
                 ? null
                 : () {
                     if (!_isAuthenticated) {
@@ -256,7 +277,14 @@ class _RoomInvitationPageState extends State<RoomInvitationPage> {
                       return;
                     }
                     setState(() => _joining = true);
-                    context.read<RoomCubit>().joinRoomByCode(room.inviteCode!);
+                    final inviteCode = room.inviteCode;
+                    if (inviteCode != null && inviteCode.isNotEmpty) {
+                      context.read<RoomCubit>().joinRoomByCode(inviteCode);
+                    } else {
+                      // Rooms created before invite codes existed have no
+                      // code — join directly by room id.
+                      context.read<RoomCubit>().joinRoomById(room.id);
+                    }
                   },
           ),
         const SizedBox(height: AppSpacing.md),

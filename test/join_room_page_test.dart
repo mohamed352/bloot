@@ -23,6 +23,15 @@ void main() {
       routes: [
         GoRoute(path: '/', builder: (context, state) => home),
         GoRoute(
+          path: '/spectate-room/:id',
+          name: 'spectatorRoom',
+          builder: (context, state) => Scaffold(
+            body: Center(
+              child: Text('Spectate room ${state.pathParameters['id']}'),
+            ),
+          ),
+        ),
+        GoRoute(
           path: '/room/:id',
           name: 'roomLobby',
           builder: (context, state) =>
@@ -210,7 +219,9 @@ void main() {
       });
     });
 
-    testWidgets('card join joins a waiting room as a player', (tester) async {
+    testWidgets('card join opens the spectator gate for a waiting room', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -227,12 +238,6 @@ void main() {
             ),
           ]),
         );
-        when(
-          () => roomRepository.joinRoomByCode(
-            'PUB001',
-            password: any(named: 'password'),
-          ),
-        ).thenAnswer((_) async => testRoom());
 
         await tester.pumpWidget(
           buildTestableWidgetWithRouter(
@@ -247,14 +252,14 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 100));
 
-        // Waiting rooms join as a player via the room's invite code; only
-        // streaming rooms join as a spectator (watch page).
-        verify(
+        // Public-table join is always as a SPECTATOR; joining as a player is
+        // done through the search-by-code field.
+        verifyNever(
           () => roomRepository.joinRoomByCode(
-            'PUB001',
+            any(),
             password: any(named: 'password'),
           ),
-        ).called(1);
+        );
         expect(find.byType(SnackBar), findsNothing);
       });
     });

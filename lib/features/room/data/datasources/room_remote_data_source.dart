@@ -347,15 +347,26 @@ class RoomRemoteDataSource {
   /// Touches `streams/{streamId}.lastHeartbeatAt` so the server-side sweeper
   /// can detect a dead broadcast (host app killed/crashed without leaving)
   /// and end the stream instead of leaving it on the live list for ~30 min.
-  Future<void> sendStreamHeartbeat(String streamId) async {
+  ///
+  /// Returns `false` when the stream doc is gone or no longer `live` (the
+  /// caller should stop heartbeating), `true` when the beat was delivered or
+  /// failed transiently (network hiccups shouldn't stop the heartbeat).
+  Future<bool> sendStreamHeartbeat(String streamId) async {
     try {
-      await _firestore.collection('streams').doc(streamId).update({
+      final docRef = _firestore.collection('streams').doc(streamId);
+      final snap = await docRef.get();
+      if (!snap.exists || snap.data()?['status'] != 'live') {
+        return false;
+      }
+      await docRef.update({
         'lastHeartbeatAt': FieldValue.serverTimestamp(),
       });
+      return true;
     } catch (e) {
       // Heartbeats are best-effort: a missed beat only means the sweeper
       // cleans up the stream a bit later.
       AppLogger.error('Failed to send stream heartbeat', error: e);
+      return true;
     }
   }
 
@@ -470,21 +481,28 @@ class RoomRemoteDataSource {
     String inviteCode, {
     String? password,
   }) async {
+    return _joinRoom({'inviteCode': inviteCode, 'password': password});
+  }
+
+  /// Joins a room directly by its document id. Used by room invitations for
+  /// rooms that predate invite codes.
+  Future<RoomModel> joinRoomById(String roomId, {String? password}) async {
+    return _joinRoom({'roomId': roomId, 'password': password});
+  }
+
+  Future<RoomModel> _joinRoom(Map<String, dynamic> payload) async {
     final currentUid = _currentUid;
     if (currentUid.isEmpty) throw const UnauthenticatedException();
 
     try {
       AppLogger.info(
-        'Joining room via Cloud Function with invite code: ${inviteCode.toUpperCase()}',
+        'Joining room via Cloud Function: $payload',
         tag: 'RoomRemote',
       );
 
       final result = await _functions
           .httpsCallable('joinRoom')
-          .call<Map<String, dynamic>>({
-            'inviteCode': inviteCode,
-            'password': password,
-          })
+          .call<Map<String, dynamic>>(payload)
           .timeout(const Duration(seconds: 15));
 
       final roomId = result.data['roomId'] as String?;
@@ -514,6 +532,8 @@ class RoomRemoteDataSource {
             throw const WrongPasswordException();
           }
           throw RoomException(e.message ?? 'Failed to join room.');
+        case 'failed-precondition':
+          throw const RoomException('This room is no longer open for joining.');
         case 'unauthenticated':
           throw const UnauthenticatedException();
         default:

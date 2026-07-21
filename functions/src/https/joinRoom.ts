@@ -20,28 +20,39 @@ export const joinRoom = functions.https.onCall(async (request) => {
 
   requireAppCheck(request);
 
-  const { inviteCode, password } = request.data;
-  if (!inviteCode || typeof inviteCode !== 'string') {
-    throw new functions.https.HttpsError('invalid-argument', 'Missing inviteCode');
+  const { inviteCode, password, roomId } = request.data;
+  const hasCode = inviteCode != null && typeof inviteCode === 'string' && inviteCode !== '';
+  const hasRoomId = roomId != null && typeof roomId === 'string' && roomId !== '';
+  if (!hasCode && !hasRoomId) {
+    throw new functions.https.HttpsError(
+      'invalid-argument',
+      'Missing inviteCode or roomId',
+    );
   }
 
   const currentUid = request.auth.uid;
-  const normalizedCode = inviteCode.toUpperCase();
 
-  // Look up the room by invite code. We do this outside the transaction because
-  // inviteCode is not the document id.
-  const roomQuery = await db
-    .collection('rooms')
-    .where('inviteCode', '==', normalizedCode)
-    .where('status', '==', 'waiting')
-    .limit(1)
-    .get();
+  let roomRef: FirebaseFirestore.DocumentReference;
+  if (hasRoomId) {
+    // Direct join by room id (used by room invitations for rooms that predate
+    // invite codes). Status is enforced inside the transaction below.
+    roomRef = db.collection('rooms').doc(roomId as string);
+  } else {
+    const normalizedCode = (inviteCode as string).toUpperCase();
+    // Look up the room by invite code. We do this outside the transaction
+    // because inviteCode is not the document id.
+    const roomQuery = await db
+      .collection('rooms')
+      .where('inviteCode', '==', normalizedCode)
+      .where('status', '==', 'waiting')
+      .limit(1)
+      .get();
 
-  if (roomQuery.empty) {
-    throw new functions.https.HttpsError('not-found', 'Room not found');
+    if (roomQuery.empty) {
+      throw new functions.https.HttpsError('not-found', 'Room not found');
+    }
+    roomRef = roomQuery.docs[0].ref;
   }
-
-  const roomRef = roomQuery.docs[0].ref;
   // Fetch caller profile once.
   const userDoc = await db.collection('users').doc(currentUid).get();
   const userData = userDoc.data();
@@ -60,6 +71,15 @@ export const joinRoom = functions.https.onCall(async (request) => {
     }
 
     const data = doc.data()!;
+
+    // Only waiting rooms can be joined (enforced here for the roomId path and
+    // to close the race between the invite-code query and this transaction).
+    if (data.status !== 'waiting') {
+      throw new functions.https.HttpsError(
+        'failed-precondition',
+        'Room is not open for joining',
+      );
+    }
 
     // Kicked players are not allowed back in.
     const kickedPlayerUids = (data.kickedPlayerUids as string[] | undefined) ?? [];

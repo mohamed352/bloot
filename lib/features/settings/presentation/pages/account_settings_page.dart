@@ -27,23 +27,6 @@ class AccountSettingsPage extends StatelessWidget {
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(
-              Icons.person_rounded,
-              color: ColorManager.primary,
-            ),
-            title: Text(
-              'edit_profile'.tr(),
-              style: const TextStyle(color: ColorManager.darkTextPrimary),
-            ),
-            trailing: const Icon(
-              Icons.chevron_right_rounded,
-              color: ColorManager.darkTextMuted,
-            ),
-            onTap: () => context.pushNamed(RouteNames.editProfile),
-          ),
-          const Divider(color: ColorManager.darkBorderSoft),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(
               Icons.logout_rounded,
               color: ColorManager.error,
             ),

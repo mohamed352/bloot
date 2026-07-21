@@ -76,6 +76,33 @@ void main() {
     );
   });
 
+  group('markAsRead', () {
+    blocTest<ChatCubit, ChatState>(
+      'delegates to repository without emitting states',
+      build: buildCubit,
+      setUp: () {
+        when(() => chatRepository.markConversationRead('c1'))
+            .thenAnswer((_) async {});
+      },
+      act: (cubit) => cubit.markAsRead('c1'),
+      expect: () => const <ChatState>[],
+      verify: (_) {
+        verify(() => chatRepository.markConversationRead('c1')).called(1);
+      },
+    );
+
+    blocTest<ChatCubit, ChatState>(
+      'swallows repository errors without emitting states',
+      build: buildCubit,
+      setUp: () {
+        when(() => chatRepository.markConversationRead('c1'))
+            .thenThrow(Exception('network'));
+      },
+      act: (cubit) => cubit.markAsRead('c1'),
+      expect: () => const <ChatState>[],
+    );
+  });
+
   group('selectFilter', () {
     blocTest<ChatCubit, ChatState>(
       'updates selected filter index',
@@ -107,6 +134,8 @@ void main() {
         when(() => chatRepository.watchMessages('c1')).thenAnswer(
           (_) => Stream.value([message]),
         );
+        when(() => chatRepository.markConversationRead('c1'))
+            .thenAnswer((_) async {});
         return buildCubit();
       },
       act: (cubit) => cubit.watchMessages('c1'),

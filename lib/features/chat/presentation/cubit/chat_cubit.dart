@@ -28,6 +28,15 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
+  /// Clears the unread badge for [conversationId].
+  Future<void> markAsRead(String conversationId) async {
+    try {
+      await _chatRepository.markConversationRead(conversationId);
+    } catch (e) {
+      AppLogger.error('Failed to mark conversation as read', error: e);
+    }
+  }
+
   void selectFilter(int index) {
     final currentState = state;
     if (currentState is! ChatConversationsLoaded) return;
@@ -56,6 +65,12 @@ class ChatCubit extends Cubit<ChatState> {
                 messages: messages,
               ),
             );
+            // The conversation is open: incoming messages are seen
+            // immediately, so keep the unread badge cleared. Own sends
+            // already reset it server-side, so skip the extra write.
+            if (messages.isNotEmpty && !messages.first.isMe) {
+              unawaited(_chatRepository.markConversationRead(conversationId));
+            }
           },
           onError: (Object e) {
             AppLogger.error('Failed to watch messages', error: e);

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +17,7 @@ import 'package:bloot/core/services/agora_service.dart';
 import 'package:bloot/core/services/audio_service.dart';
 import 'package:bloot/core/services/deep_link_service.dart';
 import 'package:bloot/core/services/notification_service.dart';
+import 'package:bloot/core/services/presence_service.dart';
 import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/core/style/theme_manager.dart';
 import 'package:bloot/features/auth/presentation/cubit/auth_cubit.dart';
@@ -62,6 +64,7 @@ class _BlootAppState extends State<BlootApp> {
   StreamSubscription<dynamic>? _deepLinkSub;
   StreamSubscription<dynamic>? _fcmSub;
   StreamSubscription<dynamic>? _fcmForegroundSub;
+  StreamSubscription<firebase_auth.User?>? _authSub;
   DeepLinkService? _deepLinkService;
   NotificationService? _notificationService;
   Key _appKey = const ValueKey('bloot-app');
@@ -74,11 +77,27 @@ class _BlootAppState extends State<BlootApp> {
     };
     _initDeepLinks();
     _initFcmNavigation();
+    _initPresence();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _notificationService?.syncLocale(context.locale.languageCode);
       }
     });
+  }
+
+  /// Starts/stops online-presence tracking with the auth session so a user
+  /// is "online" exactly while signed in and connected.
+  void _initPresence() {
+    final presence = getIt<PresenceService>();
+    _authSub = getIt<firebase_auth.FirebaseAuth>()
+        .authStateChanges()
+        .listen((user) {
+          if (user != null) {
+            presence.start(user.uid);
+          } else {
+            presence.stop();
+          }
+        });
   }
 
   void _initDeepLinks() {
@@ -198,6 +217,8 @@ class _BlootAppState extends State<BlootApp> {
     _deepLinkSub?.cancel();
     _fcmSub?.cancel();
     _fcmForegroundSub?.cancel();
+    _authSub?.cancel();
+    getIt<PresenceService>().stop();
     _deepLinkService?.dispose();
     _notificationService?.dispose();
     super.dispose();

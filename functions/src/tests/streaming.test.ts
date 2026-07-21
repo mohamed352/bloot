@@ -50,14 +50,26 @@ describe('buildStreamPayload', () => {
 });
 
 describe('shouldAutoCreateStream', () => {
-  it('auto-creates for liveStream and public rooms not already streaming', () => {
+  it('auto-creates for every room type not already streaming', () => {
+    // All rooms (including private) must stay visible once the game starts;
+    // spectating is gated separately by allowSpectators on the stream doc.
     expect(shouldAutoCreateStream({ type: 'liveStream' })).toBe(true);
     expect(shouldAutoCreateStream({ type: 'liveStream', isStreaming: false })).toBe(true);
     expect(shouldAutoCreateStream({ type: 'liveStream', isStreaming: true })).toBe(false);
     expect(shouldAutoCreateStream({ type: 'public' })).toBe(true);
     expect(shouldAutoCreateStream({ type: 'public', isStreaming: true })).toBe(false);
-    expect(shouldAutoCreateStream({ type: 'private' })).toBe(false);
-    expect(shouldAutoCreateStream({})).toBe(false);
+    expect(shouldAutoCreateStream({ type: 'private' })).toBe(true);
+    expect(shouldAutoCreateStream({ type: 'private', isStreaming: true })).toBe(false);
+    expect(shouldAutoCreateStream({})).toBe(true);
+  });
+});
+
+describe('buildStreamPayload allowSpectators', () => {
+  it('mirrors the room allowSpectators flag, defaulting to true', () => {
+    const base = { roomId: 'r1', hostUid: 'h', roomPlayers: [] };
+    expect(buildStreamPayload({ ...base, room: {} }).allowSpectators).toBe(true);
+    expect(buildStreamPayload({ ...base, room: { allowSpectators: true } }).allowSpectators).toBe(true);
+    expect(buildStreamPayload({ ...base, room: { allowSpectators: false } }).allowSpectators).toBe(false);
   });
 });
 

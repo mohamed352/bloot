@@ -65,6 +65,7 @@ export { updateViewerCount } from './triggers/updateViewerCount';
 export { syncUserSearchKeywords } from './triggers/syncUserSearchKeywords';
 export { syncUserAvatar } from './triggers/syncUserAvatar';
 export { syncReportSearchKeywords } from './triggers/syncReportSearchKeywords';
+export { syncPresence } from './triggers/syncPresence';
 export { assignUserAgoraUid } from './triggers/assignUserAgoraUid';
 export { cleanStaleRooms } from './scheduler/cleanStaleRooms';
 export { startStream } from './https/startStream';

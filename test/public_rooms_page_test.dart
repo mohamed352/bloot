@@ -28,6 +28,15 @@ void main() {
           ),
         ),
         GoRoute(
+          path: '/spectate-room/:id',
+          name: 'spectatorRoom',
+          builder: (context, state) => Scaffold(
+            body: Center(
+              child: Text('Spectate room ${state.pathParameters['id']}'),
+            ),
+          ),
+        ),
+        GoRoute(
           path: '/room/:id',
           name: 'roomLobby',
           builder: (context, state) =>
@@ -106,20 +115,13 @@ void main() {
       });
     });
 
-    testWidgets('tapping a waiting room card joins the room as a player', (
+    testWidgets('tapping a waiting room card opens the spectator gate', (
       tester,
     ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
       await runWithFakeHttp(() async {
-        when(
-          () => roomRepository.joinRoomByCode(
-            'ABC123',
-            password: any(named: 'password'),
-          ),
-        ).thenAnswer((_) async => testRoom());
-
         await pumpPage(
           tester,
           rooms: [
@@ -133,17 +135,18 @@ void main() {
         );
 
         await tester.tap(find.widgetWithText(ElevatedButton, 'Join Table'));
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pumpAndSettle();
 
-        // A waiting (not yet live) room joins the lobby as a player through
-        // the room's invite code instead of showing a not-live error.
-        verify(
+        // A waiting (not yet live) room is joined as a SPECTATOR via the
+        // gate page — never seated as a player. Joining as a player is done
+        // through the search-by-code field.
+        expect(find.text('Spectate room r2'), findsOneWidget);
+        verifyNever(
           () => roomRepository.joinRoomByCode(
-            'ABC123',
+            any(),
             password: any(named: 'password'),
           ),
-        ).called(1);
+        );
         expect(find.byType(SnackBar), findsNothing);
       });
     });

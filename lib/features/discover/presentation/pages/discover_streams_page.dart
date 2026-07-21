@@ -12,7 +12,6 @@ import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/features/discover/domain/entities/discover_stream.dart';
 import 'package:bloot/features/room/domain/exceptions/room_exception.dart';
 import 'package:bloot/features/room/domain/repositories/room_repository.dart';
-import 'package:bloot/generated/locale_keys.g.dart';
 import 'package:bloot/features/discover/presentation/cubit/discover_cubit.dart';
 import 'package:bloot/features/discover/presentation/cubit/discover_state.dart';
 import 'package:bloot/features/discover/presentation/widgets/stream_card.dart';
@@ -139,10 +138,8 @@ class _DiscoverStreamsPageState extends State<DiscoverStreamsPage> {
             : 0;
         final filters = [
           'popular'.tr(),
-          LocaleKeys.labelNew.tr(),
           'top_rated'.tr(),
           'voice_only'.tr(),
-          'following'.tr(),
         ];
 
         return Scaffold(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -11,6 +13,8 @@ import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
 import 'package:bloot/core/constants/app_radius.dart';
 import 'package:bloot/features/chat/domain/entities/chat.dart';
+import 'package:bloot/features/chat/domain/entities/chat_user.dart';
+import 'package:bloot/features/chat/domain/repositories/chat_repository.dart';
 import 'package:bloot/features/chat/presentation/cubit/chat_cubit.dart';
 import 'package:bloot/features/chat/presentation/cubit/chat_state.dart';
 import 'package:bloot/features/moderation/domain/repositories/moderation_repository.dart';
@@ -27,11 +31,75 @@ class _ChatListPageState extends State<ChatListPage> {
   final TextEditingController _searchController = TextEditingController();
   bool _searchVisible = false;
   String _searchQuery = '';
+  Timer? _searchDebounce;
+  List<ChatUser> _accountResults = [];
+  bool _searchingAccounts = false;
 
   @override
   void initState() {
     super.initState();
     _blockedUserIdsStream = getIt<ModerationRepository>().watchBlockedUserIds();
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() => _searchQuery = value.toLowerCase());
+    _searchDebounce?.cancel();
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) {
+      setState(() {
+        _accountResults = [];
+        _searchingAccounts = false;
+      });
+      return;
+    }
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      _searchAccounts(trimmed);
+    });
+  }
+
+  /// Searches Firestore for user accounts so the search field works even
+  /// when there is no existing conversation with the queried name.
+  Future<void> _searchAccounts(String query) async {
+    setState(() => _searchingAccounts = true);
+    try {
+      final users = await getIt<ChatRepository>().searchUsers(query);
+      if (!mounted) return;
+      setState(() {
+        _accountResults = users;
+        _searchingAccounts = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _accountResults = [];
+        _searchingAccounts = false;
+      });
+    }
+  }
+
+  Future<void> _openConversationWith(String userId) async {
+    try {
+      final conversation = await getIt<ChatRepository>()
+          .createDirectConversation(userId);
+      if (!mounted) return;
+      context.pushNamed(
+        RouteNames.directMessage,
+        pathParameters: {'conversationId': conversation.id},
+        extra: conversation,
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('failed_to_start_conversation'.tr())),
+      );
+    }
   }
 
   /// Returns the other participant UID for `dm_<uidA>_<uidB>` conversations.
@@ -140,9 +208,7 @@ class _ChatListPageState extends State<ChatListPage> {
                           borderSide: BorderSide.none,
                         ),
                       ),
-                      onChanged: (value) {
-                        setState(() => _searchQuery = value.toLowerCase());
-                      },
+                      onChanged: _onSearchChanged,
                     ),
                   ),
                 const SizedBox(height: AppSpacing.md),
@@ -166,20 +232,68 @@ class _ChatListPageState extends State<ChatListPage> {
                             .toList();
                       }
 
+                      // Account results that don't already have a visible
+                      // conversation match (avoid duplicate rows).
+                      final accountResults = _searchQuery.isEmpty
+                          ? <ChatUser>[]
+                          : _accountResults
+                                .where(
+                                  (u) => !visibleConversations.any(
+                                    (c) => _otherUserId(c.id) == u.id,
+                                  ),
+                                )
+                                .toList();
+
+                      final showSpinner =
+                          _searchQuery.isNotEmpty && _searchingAccounts;
+                      final showEmptyState =
+                          _searchQuery.isNotEmpty &&
+                          !_searchingAccounts &&
+                          visibleConversations.isEmpty &&
+                          accountResults.isEmpty;
+
+                      if (showSpinner) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      if (showEmptyState) {
+                        return Center(
+                          child: Text(
+                            'no_players_found'.tr(),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: ColorManager.darkTextMuted,
+                            ),
+                          ),
+                        );
+                      }
+
                       return ListView.builder(
                         padding: const EdgeInsetsDirectional.symmetric(
                           horizontal: AppSpacing.screenHorizontal,
                         ),
-                        itemCount: visibleConversations.length,
+                        itemCount:
+                            visibleConversations.length +
+                            accountResults.length,
                         itemBuilder: (context, index) {
-                          final chat = visibleConversations[index];
-                          return _ChatListItem(
-                            chat: chat,
-                            onTap: () => context.pushNamed(
-                              RouteNames.directMessage,
-                              pathParameters: {'conversationId': chat.id},
-                              extra: chat,
-                            ),
+                          if (index < visibleConversations.length) {
+                            final chat = visibleConversations[index];
+                            return _ChatListItem(
+                              chat: chat,
+                              onTap: () => context.pushNamed(
+                                RouteNames.directMessage,
+                                pathParameters: {'conversationId': chat.id},
+                                extra: chat,
+                              ),
+                            );
+                          }
+                          final user =
+                              accountResults[index -
+                                  visibleConversations.length];
+                          return _AccountListItem(
+                            user: user,
+                            onTap: () => _openConversationWith(user.id),
                           );
                         },
                       );
@@ -310,6 +424,98 @@ class _ChatListItem extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A user account search result row; tapping opens (or creates) the DM.
+class _AccountListItem extends StatelessWidget {
+  const _AccountListItem({required this.user, required this.onTap});
+
+  final ChatUser user;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasAvatar = user.avatarUrl != null && user.avatarUrl!.isNotEmpty;
+    final fallbackLetter = user.name.isNotEmpty ? user.name[0].toUpperCase() : '?';
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: ColorManager.darkSurface,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: ColorManager.darkBorderSoft),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: ColorManager.darkSectionGray,
+                shape: BoxShape.circle,
+                border: Border.all(color: ColorManager.darkBorderSoft),
+              ),
+              child: hasAvatar
+                  ? ClipOval(
+                      child: Image.network(
+                        user.avatarUrl!,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Center(
+                      child: Text(
+                        fallbackLetter,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: ColorManager.primary,
+                        ),
+                      ),
+                    ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    user.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: ColorManager.darkTextPrimary,
+                    ),
+                  ),
+                  if (user.handle != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      user.handle!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: ColorManager.darkTextMuted,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.chat_bubble_outline_rounded,
+              size: 18,
+              color: ColorManager.primary,
             ),
           ],
         ),

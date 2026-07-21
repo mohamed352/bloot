@@ -48,4 +48,9 @@ class ChatRepositoryImpl implements ChatRepository {
     final model = await _remoteDataSource.createDirectConversation(otherUserId);
     return model.toEntity();
   }
+
+  @override
+  Future<void> markConversationRead(String conversationId) {
+    return _remoteDataSource.markConversationRead(conversationId);
+  }
 }

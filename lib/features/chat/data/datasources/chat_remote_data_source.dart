@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:injectable/injectable.dart';
 
 import 'package:bloot/core/logger/app_logger.dart';
+import 'package:bloot/core/utils/riyadh_time.dart';
 import 'package:bloot/features/chat/data/models/chat_model.dart';
 import 'package:bloot/features/chat/data/models/chat_user_model.dart';
 
@@ -65,15 +66,21 @@ class ChatRemoteDataSource {
     if (diff.inMinutes < 60) return '${diff.inMinutes}m';
     if (diff.inHours < 24) return '${diff.inHours}h';
     if (diff.inDays < 7) return '${diff.inDays}d';
-    return '${dateTime.day}/${dateTime.month}';
+    final riyadh = toRiyadh(dateTime);
+    return '${riyadh.day}/${riyadh.month}';
   }
 
   /// Returns a real-time stream of messages for [conversationId].
   Stream<List<ChatMessageModel>> watchMessages(String conversationId) {
+    final uid = _uid;
     return _firestore
         .collection('conversations')
         .doc(conversationId)
         .collection('messages')
+        // Required by Firestore security rules: the read rule checks
+        // `uid in resource.data.participantUids`, which is only provable
+        // for list queries when the query carries the same constraint.
+        .where('participantUids', arrayContains: uid)
         .orderBy('createdAt', descending: true)
         .limit(100)
         .snapshots()
@@ -103,11 +110,8 @@ class ChatRemoteDataSource {
     );
   }
 
-  String _formatMessageTime(DateTime dateTime) {
-    final hour = dateTime.hour.toString().padLeft(2, '0');
-    final minute = dateTime.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
-  }
+  String _formatMessageTime(DateTime dateTime) =>
+      formatRiyadhDateClock(dateTime);
 
   /// Sends a text [message] to [conversationId] and updates the conversation
   /// metadata for the list view.
@@ -142,19 +146,24 @@ class ChatRemoteDataSource {
 
     final messageRef = conversationRef.collection('messages').doc();
 
+    // participantUids are copied onto every message so Firestore security
+    // rules can authorize reads/writes without a cross-document get()
+    // (which is not evaluated for list queries and blocked all DM access).
+    final participantUids = List<String>.from(
+      (conversationDoc.data()?['participantUids'] as List<dynamic>?) ??
+          (conversationId.split('_').length == 3
+              ? conversationId.split('_').sublist(1)
+              : [uid]),
+    );
+
     await messageRef.set({
       'senderId': uid,
       'text': message,
       'type': 'text',
+      'participantUids': participantUids,
       'createdAt': FieldValue.serverTimestamp(),
       'readBy': [uid],
     });
-
-    // Re-read to get participantUids (may have just been created).
-    final updatedDoc = await conversationRef.get();
-    final participantUids = List<String>.from(
-      (updatedDoc.data()?['participantUids'] as List<dynamic>?) ?? [],
-    );
 
     final batch = _firestore.batch();
     batch.set(conversationRef, {
@@ -183,6 +192,25 @@ class ChatRemoteDataSource {
     }
 
     await batch.commit();
+  }
+
+  /// Resets the unread counter of [conversationId] for the current user.
+  Future<void> markConversationRead(String conversationId) async {
+    final uid = _uid;
+    if (uid == null) return;
+    try {
+      await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('conversations')
+          .doc(conversationId)
+          .set({'unread': 0}, SetOptions(merge: true));
+    } catch (e) {
+      AppLogger.error(
+        'Failed to mark conversation $conversationId as read',
+        error: e,
+      );
+    }
   }
 
   /// Searches users by [query] across displayName and username using
@@ -366,6 +394,7 @@ class ChatRemoteDataSource {
           .collection('conversations')
           .doc(conversationId)
           .collection('messages')
+          .where('participantUids', arrayContains: _uid)
           .orderBy('createdAt', descending: true)
           .limit(100)
           .get();

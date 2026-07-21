@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -8,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:bloot/core/components/cached_avatar.dart';
 import 'package:bloot/core/di/injection.dart';
 import 'package:bloot/core/style/colors.dart';
+import 'package:bloot/core/utils/riyadh_time.dart';
 import 'package:bloot/core/constants/app_spacing.dart';
 import 'package:bloot/core/constants/app_radius.dart';
 import 'package:bloot/features/chat/domain/entities/chat.dart';
@@ -59,19 +61,6 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _inputFocusNode.unfocus();
     });
-  }
-
-  final List<String> _quickActions = [
-    'good_game'.tr(),
-    'nice_move'.tr(),
-    'gg'.tr(),
-    'ready'.tr(),
-  ];
-
-  void _showComingSoon(BuildContext context) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Coming soon')));
   }
 
   void _sendMessage() {
@@ -178,40 +167,14 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: const BoxDecoration(
-                                  color: ColorManager.success,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'online'.tr(),
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: ColorManager.success,
-                                ),
-                              ),
-                            ],
-                          ),
+                          if (otherUserId != null)
+                            _OnlineStatus(userId: otherUserId),
                         ],
                       ),
                     ),
                   ],
                 ),
                 actions: [
-                  IconButton(
-                    icon: const Icon(Icons.phone_rounded),
-                    onPressed: () => _showComingSoon(context),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.videocam_rounded),
-                    onPressed: () => _showComingSoon(context),
-                  ),
                   if (otherUserId != null)
                     PopupMenuButton<String>(
                       icon: const Icon(Icons.more_vert_rounded),
@@ -268,7 +231,7 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
                           );
                         }
 
-                        final msg = messages[messages.length - 1 - index];
+                        final msg = messages[index];
                         final isImage = msg.type == 'image';
 
                         return Align(
@@ -383,52 +346,6 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
                       },
                     ),
                   ),
-                  // Quick actions
-                  if (!isBlocked)
-                    Container(
-                      padding: const EdgeInsetsDirectional.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      color: ColorManager.darkSurface,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: _quickActions.map((action) {
-                            return GestureDetector(
-                              onTap: () => context
-                                  .read<ChatCubit>()
-                                  .sendMessage(widget.conversationId, action),
-                              child: Container(
-                                margin: const EdgeInsetsDirectional.only(
-                                  end: 8,
-                                ),
-                                padding: const EdgeInsetsDirectional.symmetric(
-                                  horizontal: 14,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: ColorManager.darkSectionGray,
-                                  borderRadius: BorderRadius.circular(
-                                    AppRadius.full,
-                                  ),
-                                  border: Border.all(
-                                    color: ColorManager.darkBorderSoft,
-                                  ),
-                                ),
-                                child: Text(
-                                  action,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: ColorManager.darkTextSecondary,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
                   // Input
                   if (isBlocked)
                     Container(
@@ -465,20 +382,6 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
                         top: false,
                         child: Row(
                           children: [
-                            IconButton(
-                              icon: const Icon(
-                                Icons.image_rounded,
-                                color: ColorManager.darkTextMuted,
-                              ),
-                              onPressed: () => _showComingSoon(context),
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.emoji_emotions_outlined,
-                                color: ColorManager.darkTextMuted,
-                              ),
-                              onPressed: () => _showComingSoon(context),
-                            ),
                             Expanded(
                               child: Container(
                                 decoration: BoxDecoration(
@@ -539,4 +442,80 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
       },
     );
   }
+}
+
+/// Real-time online/offline indicator for the DM app bar.
+///
+/// Watches `users/{userId}` and shows:
+/// - a green dot + "Online" while the user is connected (see
+///   `PresenceService` which keeps `isOnline` fresh via RTDB onDisconnect),
+/// - a gray dot + "Last seen <time>" otherwise.
+/// Honors the user's `settings.showOnlineStatus` privacy flag.
+class _OnlineStatus extends StatelessWidget {
+  const _OnlineStatus({required this.userId});
+
+  final String userId;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: getIt<FirebaseFirestore>()
+          .collection('users')
+          .doc(userId)
+          .snapshots(),
+      builder: (context, snapshot) {
+        final data = snapshot.data?.data();
+        if (data == null) return const SizedBox.shrink();
+
+        final settings = data['settings'];
+        final showStatus =
+            !(settings is Map && settings['showOnlineStatus'] == false);
+        if (!showStatus) return const SizedBox.shrink();
+
+        final isOnline = data['isOnline'] == true;
+        final color = isOnline
+            ? ColorManager.success
+            : ColorManager.darkTextMuted;
+        final label = isOnline
+            ? 'online'.tr()
+            : 'last_seen_at'.tr(
+                namedArgs: {'time': formatLastSeen(data['lastSeen'])},
+              );
+
+        return Row(
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(fontSize: 12, color: color),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Formats a Firestore `lastSeen` value (Timestamp, millis int, or DateTime)
+/// in Saudi Arabia time: HH:mm for today, dd/MM HH:mm otherwise.
+@visibleForTesting
+String formatLastSeen(Object? lastSeen, {DateTime? now}) {
+  DateTime? time;
+  if (lastSeen is Timestamp) {
+    time = lastSeen.toDate();
+  } else if (lastSeen is int) {
+    time = DateTime.fromMillisecondsSinceEpoch(lastSeen);
+  } else if (lastSeen is DateTime) {
+    time = lastSeen;
+  }
+  if (time == null) return '—';
+  return formatRiyadhDateClock(time, now: now);
 }

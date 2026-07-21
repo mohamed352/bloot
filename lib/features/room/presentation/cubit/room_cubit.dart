@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 
 import 'package:bloot/core/logger/app_logger.dart';
 import 'package:bloot/core/services/agora_service.dart';
+import 'package:bloot/core/services/stream_heartbeat_service.dart';
 import 'package:bloot/features/room/domain/entities/room.dart';
 import 'package:bloot/features/room/domain/exceptions/room_exception.dart';
 import 'package:bloot/features/room/domain/repositories/room_repository.dart';
@@ -15,12 +16,17 @@ class RoomCubit extends Cubit<RoomState> {
   RoomCubit({
     required RoomRepository roomRepository,
     required AgoraService agoraService,
+    StreamHeartbeatService? heartbeatService,
   }) : _roomRepository = roomRepository,
        _agoraService = agoraService,
+       _heartbeatService =
+           heartbeatService ??
+           StreamHeartbeatService(roomRepository: roomRepository),
        super(const RoomState.initial());
 
   final RoomRepository _roomRepository;
   final AgoraService _agoraService;
+  final StreamHeartbeatService _heartbeatService;
   StreamSubscription<Room>? _roomSubscription;
   StreamSubscription<List<Room>>? _publicRoomsSubscription;
   StreamSubscription<AgoraAudioVolumeIndicationEvent>? _audioVolumeSubscription;
@@ -30,11 +36,10 @@ class RoomCubit extends Cubit<RoomState> {
   bool _gameStartedEmitted = false;
 
   /// Host-side stream heartbeat: while the local user hosts an active
-  /// stream, this timer touches `lastHeartbeatAt` every minute so the
-  /// server sweeper can end the broadcast if the app dies unexpectedly.
-  Timer? _streamHeartbeatTimer;
-  String? _streamHeartbeatId;
-
+  /// stream, the app-level [StreamHeartbeatService] touches
+  /// `lastHeartbeatAt` every minute so the server sweeper can end the
+  /// broadcast if the app dies unexpectedly. The service outlives this cubit
+  /// so the beat continues while the host is on the game page.
   void _syncStreamHeartbeat(Room room) {
     final isHost =
         room.creatorUid != null &&
@@ -43,28 +48,10 @@ class RoomCubit extends Cubit<RoomState> {
     final shouldBeat =
         room.isStreaming && isHost && streamId != null && streamId.isNotEmpty;
 
-    if (!shouldBeat) {
-      _streamHeartbeatTimer?.cancel();
-      _streamHeartbeatTimer = null;
-      _streamHeartbeatId = null;
-      return;
-    }
-    if (_streamHeartbeatId == streamId) return; // already beating
-    _streamHeartbeatId = streamId;
-    _streamHeartbeatTimer?.cancel();
-    // First beat immediately, then once a minute. Best-effort: failures are
-    // swallowed so a heartbeat can never crash the room session.
-    unawaited(_safeHeartbeat(streamId));
-    _streamHeartbeatTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      unawaited(_safeHeartbeat(streamId));
-    });
-  }
-
-  Future<void> _safeHeartbeat(String streamId) async {
-    try {
-      await _roomRepository.sendStreamHeartbeat(streamId);
-    } catch (e) {
-      AppLogger.error('Stream heartbeat failed', error: e);
+    if (shouldBeat) {
+      _heartbeatService.start(streamId);
+    } else {
+      _heartbeatService.stop();
     }
   }
 
@@ -357,6 +344,28 @@ class RoomCubit extends Cubit<RoomState> {
     }
   }
 
+  /// Joins a room directly by its document id (room invitations for rooms
+  /// without an invite code).
+  Future<void> joinRoomById(String roomId, {String? password}) async {
+    emit(const RoomState.loading());
+    try {
+      final room = await _roomRepository.joinRoomById(
+        roomId,
+        password: password,
+      );
+      emit(RoomState.created(room: room));
+    } on RoomException catch (e) {
+      emit(RoomState.error(message: e.message));
+    } catch (e) {
+      AppLogger.error('Failed to join room by id', error: e);
+      emit(
+        const RoomState.error(
+          message: 'Failed to join room. Please try again.',
+        ),
+      );
+    }
+  }
+
   Future<void> startGame(String roomId) async {
     final currentState = state;
     emit(const RoomState.loading());
@@ -471,9 +480,7 @@ class RoomCubit extends Cubit<RoomState> {
       await _agoraService.leaveChannel();
       _joinedAgoraChannelName = null;
       _currentRoom = null;
-      _streamHeartbeatTimer?.cancel();
-      _streamHeartbeatTimer = null;
-      _streamHeartbeatId = null;
+      _heartbeatService.stop();
       if (!isClosed) emit(const RoomState.initial());
       return true;
     } on RoomException catch (e) {
@@ -567,9 +574,9 @@ class RoomCubit extends Cubit<RoomState> {
 
   @override
   Future<void> close() async {
-    _streamHeartbeatTimer?.cancel();
-    _streamHeartbeatTimer = null;
-    _streamHeartbeatId = null;
+    // NOTE: the stream heartbeat is intentionally NOT stopped here — it is
+    // owned by the app-level StreamHeartbeatService so it keeps running
+    // while the host plays on the game page.
     await _roomSubscription?.cancel();
     await _publicRoomsSubscription?.cancel();
     await _audioVolumeSubscription?.cancel();

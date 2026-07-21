@@ -17,6 +17,7 @@ export interface StreamRoomData {
   name?: string;
   creatorUid?: string;
   agoraChannelName?: string;
+  allowSpectators?: boolean;
 }
 
 /**
@@ -59,6 +60,9 @@ export function buildStreamPayload(params: {
     agoraChannelName: room.agoraChannelName || `room_${roomId}`,
     players,
     playerUids: roomPlayers.map((p) => p.uid),
+    // Mirrored from the room so live lists can filter/badge no-spectator
+    // rooms without an extra room fetch.
+    allowSpectators: room.allowSpectators !== false,
     createdAt: now,
   };
 }
@@ -67,17 +71,18 @@ export function buildStreamPayload(params: {
  * Whether a game start should also auto-create a stream doc for the room.
  * Never duplicates an existing stream.
  *
- * `liveStream` and `public` rooms must stay visible to other users after the
- * game starts (the public-rooms list only shows `waiting` rooms, so without
- * a stream doc the room would vanish from every screen once `playing`).
- * Private rooms are intentionally excluded.
+ * All room types must stay visible to other users after the game starts (the
+ * public-rooms list only shows `waiting` rooms, so without a stream doc the
+ * room would vanish from every screen once `playing`). Rooms that disallow
+ * spectators are still listed so players/friends can see the game is live;
+ * spectating itself is gated by `allowSpectators` on the stream payload and
+ * the client/server spectator checks.
  */
 export function shouldAutoCreateStream(room: {
   type?: string;
   isStreaming?: boolean;
 }): boolean {
-  const isPubliclyVisible = room.type === 'liveStream' || room.type === 'public';
-  return isPubliclyVisible && room.isStreaming !== true;
+  return room.isStreaming !== true;
 }
 
 /** How long a playing room's game may go without a write before the room is

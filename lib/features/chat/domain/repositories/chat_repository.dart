@@ -22,4 +22,7 @@ abstract class ChatRepository {
 
   /// Creates or retrieves an existing direct conversation with [otherUserId].
   Future<ChatConversation> createDirectConversation(String otherUserId);
+
+  /// Marks [conversationId] as read (clears the unread badge).
+  Future<void> markConversationRead(String conversationId);
 }

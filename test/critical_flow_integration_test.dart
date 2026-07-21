@@ -657,7 +657,7 @@ void main() {
       },
       expect: () => [
         const GameState.loading(),
-        const GameState.error(message: 'Failed to load game.'),
+        const GameState.error(message: 'game_load_failed'),
         isA<GamePlaying>(),
       ],
     );

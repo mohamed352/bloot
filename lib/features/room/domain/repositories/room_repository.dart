@@ -34,6 +34,10 @@ abstract class RoomRepository {
   /// [password] is required when the room is private and has a password.
   Future<Room> joinRoomByCode(String inviteCode, {String? password});
 
+  /// Joins a room directly by its document id (invitation links for rooms
+  /// without an invite code).
+  Future<Room> joinRoomById(String roomId, {String? password});
+
   /// Starts the game for [roomId]. Returns the created game ID.
   Future<String> startGame(String roomId);
 
@@ -50,7 +54,8 @@ abstract class RoomRepository {
 
   /// Best-effort heartbeat for an active stream; called periodically by the
   /// host while streaming so dead broadcasts can be swept server-side.
-  Future<void> sendStreamHeartbeat(String streamId);
+  /// Returns `false` when the stream is gone/ended and beating should stop.
+  Future<bool> sendStreamHeartbeat(String streamId);
 
   /// Removes [targetUid] from [roomId] (host only).
   Future<void> kickPlayer(String roomId, String targetUid);

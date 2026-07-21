@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:injectable/injectable.dart';
@@ -37,19 +39,55 @@ class DiscoverRemoteDataSource {
   /// Returns a real-time stream of live streams so the discover page
   /// updates automatically when new streams go live or existing ones end.
   Stream<List<DiscoverStreamModel>> watchStreams() {
-    return _firestore
-        .collection('streams')
-        .where('status', isEqualTo: 'live')
-        .snapshots()
-        .asyncMap((snapshot) async {
-          final streams = snapshot.docs
-              .map((doc) => _mapStreamDoc(doc))
-              .toList();
-          return _filterActiveStreams(streams);
-        })
-        .handleError((Object error) {
-          AppLogger.error('Failed to watch discover streams', error: error);
-        });
+    late StreamController<List<DiscoverStreamModel>> controller;
+    StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? snapshotSub;
+    Timer? revalidationTimer;
+    List<DiscoverStreamModel> lastStreams = [];
+    var filterPending = false;
+
+    Future<void> refilter() async {
+      if (filterPending) return;
+      filterPending = true;
+      try {
+        final filtered = await _filterActiveStreams(lastStreams);
+        if (!controller.isClosed) controller.add(filtered);
+      } catch (e) {
+        AppLogger.error('Failed to filter discover streams', error: e);
+      } finally {
+        filterPending = false;
+      }
+    }
+
+    controller = StreamController<List<DiscoverStreamModel>>(
+      onListen: () {
+        snapshotSub = _firestore
+            .collection('streams')
+            .where('status', isEqualTo: 'live')
+            .snapshots()
+            .listen(
+              (snapshot) {
+                lastStreams = snapshot.docs.map(_mapStreamDoc).toList();
+                unawaited(refilter());
+              },
+              onError: (Object error) {
+                AppLogger.error('Failed to watch discover streams', error: error);
+              },
+            );
+        // Re-validate room state periodically: when a room finishes or is
+        // deleted without a streams write in the same batch, its card would
+        // otherwise linger until some unrelated stream write occurs.
+        revalidationTimer = Timer.periodic(
+          const Duration(minutes: 1),
+          (_) => unawaited(refilter()),
+        );
+      },
+      onCancel: () async {
+        await snapshotSub?.cancel();
+        revalidationTimer?.cancel();
+        await controller.close();
+      },
+    );
+    return controller.stream;
   }
 
   Future<DiscoverStreamModel> getStreamById(String id) => loadStream(id);
@@ -401,7 +439,8 @@ class DiscoverRemoteDataSource {
   /// Filters out streams that have no parent room, or whose parent room is
   /// missing, not currently playing, has no players, or no longer points at
   /// this stream (e.g. the host left and the room's isStreaming flag was
-  /// cleared) so stale lives never appear.
+  /// cleared) so stale lives never appear. Also hides rooms that disallow
+  /// spectators from users who are not players in them.
   Future<List<DiscoverStreamModel>> _filterActiveStreams(
     List<DiscoverStreamModel> streams,
   ) async {
@@ -421,6 +460,9 @@ class DiscoverRemoteDataSource {
 
     // Maps a valid room id to the stream id it currently broadcasts.
     final activeStreamByRoom = <String, String>{};
+    // Rooms the current user may not spectate (and isn't a player in).
+    final hiddenRooms = <String>{};
+    final uid = _uid;
     for (final doc in roomDocs) {
       if (!doc.exists) continue;
       final data = doc.data()!;
@@ -429,6 +471,12 @@ class DiscoverRemoteDataSource {
       final hasPlayers = playerUids is List && playerUids.isNotEmpty;
       final isStreaming = data['isStreaming'] == true;
       final roomStreamId = data['streamId'] as String?;
+      final allowSpectators = data['allowSpectators'] != false;
+      final isPlayer =
+          uid != null && playerUids is List && playerUids.contains(uid);
+      if (!allowSpectators && !isPlayer) {
+        hiddenRooms.add(doc.id);
+      }
       if (hasPlayers &&
           (status == 'playing' || status == 'waiting') &&
           isStreaming &&
@@ -442,7 +490,8 @@ class DiscoverRemoteDataSource {
       final roomId = s.roomId;
       return roomId != null &&
           roomId.isNotEmpty &&
-          activeStreamByRoom[roomId] == s.id;
+          activeStreamByRoom[roomId] == s.id &&
+          !hiddenRooms.contains(roomId);
     }).toList();
   }
 }

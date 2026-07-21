@@ -123,6 +123,8 @@ void main() {
             .thenAnswer((_) => Stream.value([message]));
         when(() => chatRepository.watchMessages('c2'))
             .thenAnswer((_) => Stream.value([message2]));
+        when(() => chatRepository.markConversationRead(any()))
+            .thenAnswer((_) async {});
         return buildCubit();
       },
       act: (cubit) async {

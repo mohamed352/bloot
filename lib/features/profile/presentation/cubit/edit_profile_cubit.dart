@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
@@ -19,8 +20,15 @@ class EditProfileCubit extends Cubit<EditProfileState> {
 
   UserProfile? _currentProfile;
 
+  /// Snapshot of the profile as originally loaded. Used as the diff
+  /// baseline in [saveProfile] so that an avatar uploaded during editing
+  /// (which updates [_currentProfile] for preview) is still detected as a
+  /// change and written to Firestore.
+  UserProfile? _originalProfile;
+
   void loadProfile(UserProfile profile) {
     _currentProfile = profile;
+    _originalProfile = profile;
     emit(EditProfileState.loaded(profile: profile, hasChanges: false));
   }
 
@@ -35,6 +43,7 @@ class EditProfileCubit extends Cubit<EditProfileState> {
         return;
       }
       _currentProfile = profile;
+      _originalProfile = profile;
       emit(EditProfileState.loaded(profile: profile, hasChanges: false));
     } catch (e) {
       AppLogger.error('Failed to load current user profile', error: e);
@@ -80,12 +89,13 @@ class EditProfileCubit extends Cubit<EditProfileState> {
           favoriteMode != _currentProfile!.favoriteMode) {
         data['favoriteMode'] = favoriteMode;
       }
-      if (avatarUrl != null && avatarUrl != _currentProfile!.avatarUrl) {
+      if (avatarUrl != null && avatarUrl != _originalProfile!.avatarUrl) {
         data['avatarUrl'] = avatarUrl;
       }
 
       if (data.isNotEmpty) {
         await _profileRepository.updateProfile(data);
+        _originalProfile = _currentProfile;
       }
 
       emit(const EditProfileState.saved());
@@ -93,6 +103,39 @@ class EditProfileCubit extends Cubit<EditProfileState> {
       AppLogger.error('Failed to save profile', error: e);
       emit(EditProfileState.error(message: e.toString()));
     }
+  }
+
+  /// Applies a successfully uploaded avatar URL to the in-memory profile so
+  /// the edit page can preview it. Deliberately does NOT touch
+  /// [_originalProfile] — [saveProfile] diffs against that baseline, so the
+  /// new URL is still detected as a change and persisted.
+  @visibleForTesting
+  void applyUploadedAvatar(String url) {
+    final current = _currentProfile;
+    if (current == null) return;
+    final updatedProfile = UserProfile(
+      uid: current.uid,
+      displayName: current.displayName,
+      username: current.username,
+      bio: current.bio,
+      avatarUrl: url,
+      region: current.region,
+      favoriteMode: current.favoriteMode,
+      level: current.level,
+      xp: current.xp,
+      xpToNextLevel: current.xpToNextLevel,
+      gamesPlayed: current.gamesPlayed,
+      gamesWon: current.gamesWon,
+      sunGamesPlayed: current.sunGamesPlayed,
+      sunGamesWon: current.sunGamesWon,
+      hokmGamesPlayed: current.hokmGamesPlayed,
+      hokmGamesWon: current.hokmGamesWon,
+      followersCount: current.followersCount,
+      followingCount: current.followingCount,
+      isOnline: current.isOnline,
+    );
+    _currentProfile = updatedProfile;
+    emit(EditProfileState.loaded(profile: updatedProfile, hasChanges: true));
   }
 
   Future<String?> pickAndUploadAvatar() async {
@@ -107,33 +150,7 @@ class EditProfileCubit extends Cubit<EditProfileState> {
       if (picked == null) return null;
 
       final url = await _profileRepository.uploadAvatar(File(picked.path));
-      if (_currentProfile != null) {
-        final updatedProfile = UserProfile(
-          uid: _currentProfile!.uid,
-          displayName: _currentProfile!.displayName,
-          username: _currentProfile!.username,
-          bio: _currentProfile!.bio,
-          avatarUrl: url,
-          region: _currentProfile!.region,
-          favoriteMode: _currentProfile!.favoriteMode,
-          level: _currentProfile!.level,
-          xp: _currentProfile!.xp,
-          xpToNextLevel: _currentProfile!.xpToNextLevel,
-          gamesPlayed: _currentProfile!.gamesPlayed,
-          gamesWon: _currentProfile!.gamesWon,
-          sunGamesPlayed: _currentProfile!.sunGamesPlayed,
-          sunGamesWon: _currentProfile!.sunGamesWon,
-          hokmGamesPlayed: _currentProfile!.hokmGamesPlayed,
-          hokmGamesWon: _currentProfile!.hokmGamesWon,
-          followersCount: _currentProfile!.followersCount,
-          followingCount: _currentProfile!.followingCount,
-          isOnline: _currentProfile!.isOnline,
-        );
-        _currentProfile = updatedProfile;
-        emit(
-          EditProfileState.loaded(profile: updatedProfile, hasChanges: true),
-        );
-      }
+      applyUploadedAvatar(url);
       return url;
     } catch (e) {
       AppLogger.error('Failed to upload avatar', error: e);

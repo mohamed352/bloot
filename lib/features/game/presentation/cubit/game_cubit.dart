@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart' show FirebaseException;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +10,7 @@ import 'package:injectable/injectable.dart';
 import 'package:bloot/core/logger/app_logger.dart';
 import 'package:bloot/core/services/agora_service.dart';
 import 'package:bloot/core/services/audio_service.dart';
+import 'package:bloot/core/services/stream_heartbeat_service.dart';
 import 'package:bloot/features/game/domain/entities/game.dart';
 import 'package:bloot/features/game/domain/repositories/game_repository.dart';
 import 'package:bloot/features/game/presentation/cubit/game_state.dart';
@@ -21,16 +23,21 @@ class GameCubit extends Cubit<GameState> {
     required RoomRepository roomRepository,
     required AgoraService agoraService,
     required AudioService audioService,
+    StreamHeartbeatService? heartbeatService,
   }) : _gameRepository = gameRepository,
        _roomRepository = roomRepository,
        _agoraService = agoraService,
        _audioService = audioService,
+       _heartbeatService =
+           heartbeatService ??
+           StreamHeartbeatService(roomRepository: roomRepository),
        super(const GameState.initial());
 
   final GameRepository _gameRepository;
   final RoomRepository _roomRepository;
   final AgoraService _agoraService;
   final AudioService _audioService;
+  final StreamHeartbeatService _heartbeatService;
   StreamSubscription<Game>? _gameSubscription;
   String? _joinedAgoraChannelName;
   Future<void>? _pendingAgoraJoin;
@@ -77,13 +84,15 @@ class GameCubit extends Cubit<GameState> {
   /// the previous generic "Failed to load game." for every cause.
   String _describeGameLoadError(Object error) {
     if (error is FirebaseException && error.code == 'permission-denied') {
-      return 'You don\'t have access to watch this game.';
+      return 'game_watch_no_access'.tr();
     }
     final text = error.toString();
-    if (text.contains('Game not found') || text.contains('Game data is null')) {
-      return 'This game has ended.';
+    if (text.contains('Game not found') ||
+        text.contains('Game data is null') ||
+        text.contains('Game has no players')) {
+      return 'game_ended'.tr();
     }
-    return 'Failed to load game.';
+    return 'game_load_failed'.tr();
   }
 
   String? _previousStatus;
@@ -114,6 +123,7 @@ class GameCubit extends Cubit<GameState> {
     _lastEmittedSignature = signature;
 
     _joinAgoraIfNeeded(game);
+    _syncStreamHeartbeat(game);
     _playSoundsForTransition(previousStatus, game);
 
     final controlsVisible = current.maybeMap(
@@ -212,6 +222,38 @@ class GameCubit extends Cubit<GameState> {
             selectedCardIndex: selectedIndex,
           ),
         );
+    }
+  }
+
+  bool _heartbeatSynced = false;
+
+  /// Keeps the host's stream heartbeat alive while on the game page. The
+  /// lobby's RoomCubit (which used to own the timer) is closed when the game
+  /// starts, so without this the server sweeper would kill healthy live
+  /// streams ~5–15 minutes into every game.
+  Future<void> _syncStreamHeartbeat(Game game) async {
+    if (game.status == 'gameEnd') {
+      _heartbeatService.stop();
+      return;
+    }
+    if (_isSpectator || _heartbeatSynced) return;
+    _heartbeatSynced = true;
+    try {
+      final roomId = game.roomId;
+      if (roomId == null || roomId.isEmpty) return;
+      final room = await _roomRepository.getRoomById(roomId);
+      final isHost =
+          room.creatorUid != null &&
+          room.players.any((p) => p.isMe && p.uid == room.creatorUid);
+      final streamId = room.streamId;
+      if (room.isStreaming &&
+          isHost &&
+          streamId != null &&
+          streamId.isNotEmpty) {
+        _heartbeatService.start(streamId);
+      }
+    } catch (e) {
+      AppLogger.error('Failed to sync stream heartbeat from game', error: e);
     }
   }
 
@@ -528,6 +570,7 @@ class GameCubit extends Cubit<GameState> {
       await _gameSubscription?.cancel();
       _gameSubscription = null;
       await _roomRepository.leaveRoom(roomId);
+      _heartbeatService.stop();
       if (_pendingAgoraJoin != null) {
         try {
           await _pendingAgoraJoin!.timeout(const Duration(seconds: 3));

@@ -99,7 +99,9 @@ import '../services/agora_service.dart' as _i890;
 import '../services/audio_service.dart' as _i15;
 import '../services/deep_link_service.dart' as _i391;
 import '../services/notification_service.dart' as _i941;
+import '../services/presence_service.dart' as _i219;
 import '../services/remote_config_service.dart' as _i858;
+import '../services/stream_heartbeat_service.dart' as _i19;
 import 'third_party_module.dart' as _i811;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -181,6 +183,13 @@ extension GetItInjectableX on _i174.GetIt {
         auth: gh<_i59.FirebaseAuth>(),
       ),
     );
+    gh.lazySingleton<_i219.PresenceService>(
+      () => _i219.PresenceService(
+        firestore: gh<_i974.FirebaseFirestore>(),
+        database: gh<_i345.FirebaseDatabase>(),
+      ),
+      dispose: (i) => i.dispose(),
+    );
     gh.lazySingleton<_i106.ModerationRepository>(
       () => _i378.ModerationRepositoryImpl(
         remoteDataSource: gh<_i200.ModerationRemoteDataSource>(),
@@ -190,10 +199,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i334.ProfileRepositoryImpl(
         remoteDataSource: gh<_i847.ProfileRemoteDataSource>(),
       ),
-    );
-    gh.lazySingleton<_i362.HomeRemoteDataSource>(
-      () =>
-          _i362.HomeRemoteDataSource(firestore: gh<_i974.FirebaseFirestore>()),
     );
     gh.lazySingleton<_i391.DeepLinkService>(
       () => _i391.DeepLinkService(appLinks: gh<_i327.AppLinks>()),
@@ -224,6 +229,12 @@ extension GetItInjectableX on _i174.GetIt {
         firebaseAuth: gh<_i59.FirebaseAuth>(),
       ),
     );
+    gh.lazySingleton<_i362.HomeRemoteDataSource>(
+      () => _i362.HomeRemoteDataSource(
+        firestore: gh<_i974.FirebaseFirestore>(),
+        firebaseAuth: gh<_i59.FirebaseAuth>(),
+      ),
+    );
     gh.lazySingleton<_i951.NotificationsRemoteDataSource>(
       () => _i951.NotificationsRemoteDataSource(
         firestore: gh<_i974.FirebaseFirestore>(),
@@ -246,12 +257,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i166.RoomRepositoryImpl(
         remoteDataSource: gh<_i918.RoomRemoteDataSource>(),
         firebaseAuth: gh<_i59.FirebaseAuth>(),
-      ),
-    );
-    gh.factory<_i131.RoomCubit>(
-      () => _i131.RoomCubit(
-        roomRepository: gh<_i855.RoomRepository>(),
-        agoraService: gh<_i890.AgoraService>(),
       ),
     );
     gh.lazySingleton<_i0.HomeRepository>(
@@ -293,6 +298,13 @@ extension GetItInjectableX on _i174.GetIt {
         notificationsRepository: gh<_i563.NotificationsRepository>(),
       ),
     );
+    gh.factory<_i131.RoomCubit>(
+      () => _i131.RoomCubit(
+        roomRepository: gh<_i855.RoomRepository>(),
+        agoraService: gh<_i890.AgoraService>(),
+        heartbeatService: gh<_i19.StreamHeartbeatService>(),
+      ),
+    );
     gh.lazySingleton<_i420.ChatRepository>(
       () => _i504.ChatRepositoryImpl(
         remoteDataSource: gh<_i980.ChatRemoteDataSource>(),
@@ -308,6 +320,12 @@ extension GetItInjectableX on _i174.GetIt {
         discoverRepository: gh<_i302.DiscoverRepository>(),
       ),
     );
+    gh.lazySingleton<_i19.StreamHeartbeatService>(
+      () => _i19.StreamHeartbeatService(
+        roomRepository: gh<_i855.RoomRepository>(),
+      ),
+      dispose: (i) => i.dispose(),
+    );
     gh.factory<_i405.NotificationsCubit>(
       () => _i405.NotificationsCubit(
         notificationsRepository: gh<_i563.NotificationsRepository>(),
@@ -318,19 +336,20 @@ extension GetItInjectableX on _i174.GetIt {
         settingsRepository: gh<_i674.SettingsRepository>(),
       ),
     );
+    gh.factory<_i305.ChatCubit>(
+      () => _i305.ChatCubit(chatRepository: gh<_i420.ChatRepository>()),
+    );
+    gh.factory<_i22.NewMessageCubit>(
+      () => _i22.NewMessageCubit(chatRepository: gh<_i420.ChatRepository>()),
+    );
     gh.factory<_i192.GameCubit>(
       () => _i192.GameCubit(
         gameRepository: gh<_i32.GameRepository>(),
         roomRepository: gh<_i855.RoomRepository>(),
         agoraService: gh<_i890.AgoraService>(),
         audioService: gh<_i15.AudioService>(),
+        heartbeatService: gh<_i19.StreamHeartbeatService>(),
       ),
-    );
-    gh.factory<_i305.ChatCubit>(
-      () => _i305.ChatCubit(chatRepository: gh<_i420.ChatRepository>()),
-    );
-    gh.factory<_i22.NewMessageCubit>(
-      () => _i22.NewMessageCubit(chatRepository: gh<_i420.ChatRepository>()),
     );
     return this;
   }

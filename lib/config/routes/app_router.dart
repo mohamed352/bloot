@@ -45,6 +45,7 @@ import 'package:bloot/features/room/presentation/pages/create_room_page.dart';
 import 'package:bloot/features/room/presentation/pages/join_room_page.dart';
 import 'package:bloot/features/room/presentation/pages/public_rooms_page.dart';
 import 'package:bloot/features/room/presentation/pages/room_lobby_page.dart';
+import 'package:bloot/features/room/presentation/pages/spectator_room_gate_page.dart';
 import 'package:bloot/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:bloot/features/settings/presentation/pages/about_settings_page.dart';
 import 'package:bloot/features/settings/presentation/pages/account_settings_page.dart';
@@ -206,13 +207,23 @@ final GoRouter appRouter = GoRouter(
       },
     ),
     GoRoute(
+      path: RoutePaths.spectatorRoom,
+      name: RouteNames.spectatorRoom,
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        return SpectatorRoomGatePage(roomId: id);
+      },
+    ),
+    GoRoute(
       path: RoutePaths.directMessage,
       name: RouteNames.directMessage,
       builder: (context, state) {
         final conversationId = state.pathParameters['conversationId']!;
         final conversation = state.extra as ChatConversation?;
         return BlocProvider(
-          create: (_) => getIt<ChatCubit>()..watchMessages(conversationId),
+          create: (_) => getIt<ChatCubit>()
+            ..watchMessages(conversationId)
+            ..markAsRead(conversationId),
           child: DirectMessagePage(
             conversationId: conversationId,
             conversation: conversation,

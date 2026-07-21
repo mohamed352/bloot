@@ -1,14 +1,12 @@
-Bloot v1.0.0 (build 10) — QA Release
+Bloot v1.0.0 (build 12) — QA Release
 
-Fixes from build 7/8/9 feedback (all 15 tester reports addressed):
-• Invite a friend: fixed infinite loading spinner; invites now arrive in the notifications inbox in real time with title/text, and tapping opens the invitation
-• Foreground push notifications now show an in-app banner with a Join action
-• Leave button now works reliably (fixed server crash when leaving a streaming room); failed leaves show an error instead of silently doing nothing
-• Live streams now close when the host leaves or their app dies (host heartbeat + server sweep); ended lives disappear from home/discover
-• Viewer counts on lives now include all players, not just the host
-• Public tables: Join button now works — waiting tables seat you as a player, live tables open as a spectator; no more "table is not live" error
-• Rooms no longer vanish when the game starts — public/live games stay visible as streams
-• Watch Game: fixed "Failed to load game" for spectators; errors now explain the real cause
-• Camera black screen fixed: the camera actually starts when the room has camera enabled
-• Profile picture changes now appear everywhere (rooms, chats, streams)
-• Account search works again and matches partial names (e.g. "med" finds "mohamed"); room search by name is now case-insensitive
+Fixes from build 11 feedback:
+• Settings: Game and Privacy sections removed; Edit Profile entry removed from Settings
+• Account screen: Edit Profile entry removed (edit your profile from the Profile page instead)
+• Edit Profile: redesigned profile card UI
+• Discover: Following and New tabs removed
+• Chat: new messages now appear at the bottom of the conversation
+• Chat: the red unread dot is now cleared after opening a conversation
+• Game invitation: Join button no longer shows an infinite loading indicator (server update deployed)
+• Live shows: Watch Game error fixed for older rooms (Firestore rules update deployed)
+• Rooms no longer vanish for other users when the game starts — they now appear as live cards (server update deployed)

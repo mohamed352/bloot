@@ -187,19 +187,21 @@ class GradientButton extends StatelessWidget {
       );
     }
 
+    final isDisabled = isLoading || onPressed == null;
+
     return SizedBox(
       width: width ?? double.infinity,
       height: height,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: isLoading ? null : (gradient ?? purpleGradient),
+          gradient: isDisabled ? null : (gradient ?? purpleGradient),
           borderRadius: BorderRadius.circular(borderRadius),
-          color: isLoading ? ColorManager.darkTextDisabled : null,
+          color: isDisabled ? ColorManager.darkTextDisabled : null,
         ),
         child: Material(
           color: const Color(0x00000000),
           child: InkWell(
-            onTap: isLoading ? null : onPressed,
+            onTap: isDisabled ? null : onPressed,
             borderRadius: BorderRadius.circular(borderRadius),
             child: Center(child: child),
           ),
