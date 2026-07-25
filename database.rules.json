@@ -2,7 +2,7 @@
   "rules": {
     "games": {
       "$gameId": {
-        ".read": "auth != null && root.child('games/' + $gameId + '/playerUids/' + auth.uid).exists()",
+        ".read": "auth != null",
         ".write": "false"
       }
     },

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:injectable/injectable.dart';
 
 import 'package:bloot/core/logger/app_logger.dart';
@@ -9,16 +8,10 @@ import 'package:bloot/features/home/domain/entities/home_stream.dart';
 
 @lazySingleton
 class HomeRemoteDataSource {
-  HomeRemoteDataSource({
-    required FirebaseFirestore firestore,
-    required firebase_auth.FirebaseAuth firebaseAuth,
-  }) : _firestore = firestore,
-       _firebaseAuth = firebaseAuth;
+  HomeRemoteDataSource({required FirebaseFirestore firestore})
+    : _firestore = firestore;
 
   final FirebaseFirestore _firestore;
-  final firebase_auth.FirebaseAuth _firebaseAuth;
-
-  String? get _uid => _firebaseAuth.currentUser?.uid;
 
   Stream<List<HomeStream>> watchLiveStreams() {
     late StreamController<List<HomeStream>> controller;
@@ -115,8 +108,8 @@ class HomeRemoteDataSource {
   /// Filters out streams that have no parent room, or whose parent room is
   /// missing, not currently playing, has no players, or no longer points at
   /// this stream (e.g. the host left and the room's isStreaming flag was
-  /// cleared) so stale lives never appear. Also hides rooms that disallow
-  /// spectators from users who are not players in them.
+  /// cleared) so stale lives never appear. Rooms that disallow spectators
+  /// stay listed (spectating itself is gated separately).
   Future<List<HomeStream>> _filterActiveStreams(
     List<HomeStream> streams,
   ) async {
@@ -136,9 +129,6 @@ class HomeRemoteDataSource {
 
     // Maps a valid room id to the stream id it currently broadcasts.
     final activeStreamByRoom = <String, String>{};
-    // Rooms the current user may not spectate (and isn't a player in).
-    final hiddenRooms = <String>{};
-    final uid = _uid;
     for (final doc in roomDocs) {
       if (!doc.exists) continue;
       final data = doc.data()!;
@@ -147,12 +137,6 @@ class HomeRemoteDataSource {
       final hasPlayers = playerUids is List && playerUids.isNotEmpty;
       final isStreaming = data['isStreaming'] == true;
       final roomStreamId = data['streamId'] as String?;
-      final allowSpectators = data['allowSpectators'] != false;
-      final isPlayer =
-          uid != null && playerUids is List && playerUids.contains(uid);
-      if (!allowSpectators && !isPlayer) {
-        hiddenRooms.add(doc.id);
-      }
       if (hasPlayers &&
           (status == 'playing' || status == 'waiting') &&
           isStreaming &&
@@ -166,8 +150,7 @@ class HomeRemoteDataSource {
       final roomId = s.roomId;
       return roomId != null &&
           roomId.isNotEmpty &&
-          activeStreamByRoom[roomId] == s.id &&
-          !hiddenRooms.contains(roomId);
+          activeStreamByRoom[roomId] == s.id;
     }).toList();
   }
 }

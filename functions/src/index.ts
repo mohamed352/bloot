@@ -220,7 +220,7 @@ async function canSpectateStream(data: Record<string, unknown>): Promise<boolean
   const roomId = data.roomId;
   if (typeof roomId !== 'string' || roomId.length === 0) return false;
   const roomDoc = await db.collection('rooms').doc(roomId).get();
-  return roomDoc.exists && roomDoc.data()?.allowSpectators === true;
+  return roomDoc.exists && roomDoc.data()?.allowSpectators !== false;
 }
 
 function parseUid(raw: number | string | undefined): number {

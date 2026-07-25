@@ -189,6 +189,10 @@ class RoomRemoteDataSource {
         })
         .handleError((Object error) {
           AppLogger.error('Failed to watch room', error: error, tag: 'Room');
+          // Propagate so listeners' onError runs (e.g. the invitation page
+          // can leave its loading state instead of spinning forever).
+          // ignore: only_throw_errors
+          throw error;
         });
   }
 
@@ -511,7 +515,9 @@ class RoomRemoteDataSource {
       }
 
       AppLogger.info('Joined room: $roomId', tag: 'RoomRemote');
-      return getRoomById(roomId);
+      // Bounded await: without a timeout a stalled Firestore get() leaves
+      // the invitation page's Join button loading forever.
+      return getRoomById(roomId).timeout(const Duration(seconds: 10));
     } on RoomException {
       rethrow;
     } on FirebaseFunctionsException catch (e) {

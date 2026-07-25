@@ -196,8 +196,10 @@ class DiscoverRemoteDataSource {
   }
 
   /// Returns true if the room associated with [streamId] allows spectators.
-  /// Fails closed: any error (offline, missing docs) means "not allowed",
-  /// otherwise spectators could bypass rooms that disabled them.
+  /// Rooms created before the flag existed (field missing) stay watchable;
+  /// only an explicit `allowSpectators == false` blocks spectators.
+  /// Fails closed on read errors (offline, missing docs) so a broken room
+  /// can't be spectated by accident.
   Future<bool> isSpectatorsAllowed(String streamId) async {
     try {
       final streamDoc = await _firestore
@@ -209,7 +211,7 @@ class DiscoverRemoteDataSource {
       if (roomId == null || roomId.isEmpty) return false;
       final roomDoc = await _firestore.collection('rooms').doc(roomId).get();
       if (!roomDoc.exists) return false;
-      return roomDoc.data()?['allowSpectators'] == true;
+      return roomDoc.data()?['allowSpectators'] != false;
     } catch (e) {
       AppLogger.error('Failed to check spectator access', error: e);
       return false;
@@ -439,8 +441,8 @@ class DiscoverRemoteDataSource {
   /// Filters out streams that have no parent room, or whose parent room is
   /// missing, not currently playing, has no players, or no longer points at
   /// this stream (e.g. the host left and the room's isStreaming flag was
-  /// cleared) so stale lives never appear. Also hides rooms that disallow
-  /// spectators from users who are not players in them.
+  /// cleared) so stale lives never appear. Rooms that disallow spectators
+  /// stay listed (spectating itself is gated separately).
   Future<List<DiscoverStreamModel>> _filterActiveStreams(
     List<DiscoverStreamModel> streams,
   ) async {
@@ -460,9 +462,6 @@ class DiscoverRemoteDataSource {
 
     // Maps a valid room id to the stream id it currently broadcasts.
     final activeStreamByRoom = <String, String>{};
-    // Rooms the current user may not spectate (and isn't a player in).
-    final hiddenRooms = <String>{};
-    final uid = _uid;
     for (final doc in roomDocs) {
       if (!doc.exists) continue;
       final data = doc.data()!;
@@ -471,12 +470,6 @@ class DiscoverRemoteDataSource {
       final hasPlayers = playerUids is List && playerUids.isNotEmpty;
       final isStreaming = data['isStreaming'] == true;
       final roomStreamId = data['streamId'] as String?;
-      final allowSpectators = data['allowSpectators'] != false;
-      final isPlayer =
-          uid != null && playerUids is List && playerUids.contains(uid);
-      if (!allowSpectators && !isPlayer) {
-        hiddenRooms.add(doc.id);
-      }
       if (hasPlayers &&
           (status == 'playing' || status == 'waiting') &&
           isStreaming &&
@@ -490,8 +483,7 @@ class DiscoverRemoteDataSource {
       final roomId = s.roomId;
       return roomId != null &&
           roomId.isNotEmpty &&
-          activeStreamByRoom[roomId] == s.id &&
-          !hiddenRooms.contains(roomId);
+          activeStreamByRoom[roomId] == s.id;
     }).toList();
   }
 }

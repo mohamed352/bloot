@@ -89,11 +89,15 @@ class _ChatListPageState extends State<ChatListPage> {
       final conversation = await getIt<ChatRepository>()
           .createDirectConversation(userId);
       if (!mounted) return;
-      context.pushNamed(
+      await context.pushNamed(
         RouteNames.directMessage,
         pathParameters: {'conversationId': conversation.id},
         extra: conversation,
       );
+      // Refresh the list so the unread badge clears after the conversation
+      // was opened (the DM page marks it read with its own cubit instance).
+      if (!mounted) return;
+      context.read<ChatCubit>().loadConversations();
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -281,11 +285,20 @@ class _ChatListPageState extends State<ChatListPage> {
                             final chat = visibleConversations[index];
                             return _ChatListItem(
                               chat: chat,
-                              onTap: () => context.pushNamed(
-                                RouteNames.directMessage,
-                                pathParameters: {'conversationId': chat.id},
-                                extra: chat,
-                              ),
+                              onTap: () async {
+                                await context.pushNamed(
+                                  RouteNames.directMessage,
+                                  pathParameters: {'conversationId': chat.id},
+                                  extra: chat,
+                                );
+                                // Refresh so the unread badge clears after
+                                // the conversation was opened.
+                                if (context.mounted) {
+                                  context
+                                      .read<ChatCubit>()
+                                      .loadConversations();
+                                }
+                              },
                             );
                           }
                           final user =

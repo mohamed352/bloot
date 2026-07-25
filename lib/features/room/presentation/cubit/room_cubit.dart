@@ -331,11 +331,14 @@ class RoomCubit extends Cubit<RoomState> {
         inviteCode,
         password: password,
       );
+      if (isClosed) return;
       emit(RoomState.created(room: room));
     } on RoomException catch (e) {
+      if (isClosed) return;
       emit(RoomState.error(message: e.message));
     } catch (e) {
       AppLogger.error('Failed to join room', error: e);
+      if (isClosed) return;
       emit(
         const RoomState.error(
           message: 'Failed to join room. Please check the code and try again.',
@@ -353,11 +356,14 @@ class RoomCubit extends Cubit<RoomState> {
         roomId,
         password: password,
       );
+      if (isClosed) return;
       emit(RoomState.created(room: room));
     } on RoomException catch (e) {
+      if (isClosed) return;
       emit(RoomState.error(message: e.message));
     } catch (e) {
       AppLogger.error('Failed to join room by id', error: e);
+      if (isClosed) return;
       emit(
         const RoomState.error(
           message: 'Failed to join room. Please try again.',

@@ -230,10 +230,7 @@ extension GetItInjectableX on _i174.GetIt {
       ),
     );
     gh.lazySingleton<_i362.HomeRemoteDataSource>(
-      () => _i362.HomeRemoteDataSource(
-        firestore: gh<_i974.FirebaseFirestore>(),
-        firebaseAuth: gh<_i59.FirebaseAuth>(),
-      ),
+      () => _i362.HomeRemoteDataSource(firestore: gh<_i974.FirebaseFirestore>()),
     );
     gh.lazySingleton<_i951.NotificationsRemoteDataSource>(
       () => _i951.NotificationsRemoteDataSource(
