@@ -232,6 +232,8 @@ class TestAssetLoader extends AssetLoader {
     'room_not_live': 'This table is not live right now.',
     'kicked_from_room': 'You were removed from the room by the host.',
     'join_table': 'Join Table',
+    'spectate': 'Spectate',
+    'liveBadge': 'LIVE',
     'no_live_streams': 'No live streams',
     'discover_streams': 'Discover Streams',
     'waiting_for_players': 'Waiting for players',

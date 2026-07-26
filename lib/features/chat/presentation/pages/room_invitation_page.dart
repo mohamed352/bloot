@@ -81,9 +81,13 @@ class _RoomInvitationPageState extends State<RoomInvitationPage> {
       create: (_) => getIt<RoomCubit>(),
       child: BlocListener<RoomCubit, RoomState>(
         listener: (context, state) {
+          // Any state other than loading/initial means the join attempt
+          // settled — never leave the Join button spinning forever.
+          if (_joining && state is! RoomLoading && state is! RoomInitial) {
+            setState(() => _joining = false);
+          }
           state.whenOrNull(
             created: (room) {
-              setState(() => _joining = false);
               context.pushNamed(
                 RouteNames.roomLobby,
                 pathParameters: {'id': room.id},

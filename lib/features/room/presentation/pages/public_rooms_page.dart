@@ -43,8 +43,8 @@ class _PublicRoomsPageState extends State<PublicRoomsPage> {
 
   /// Role depends on the entry path (per product requirement):
   /// - Streaming rooms open the watch page — the user joins as a SPECTATOR.
-  /// - Waiting rooms open a spectator holding page that auto-opens the live
-  ///   stream once the game starts — still a SPECTATOR.
+  /// - Waiting/playing rooms open a spectator holding page that opens the
+  ///   live stream (or the game directly) — still a SPECTATOR.
   /// - Joining as a PLAYER is always possible through the search-by-code
   ///   field below.
   void _openRoom(BuildContext context, Room room) {
@@ -62,7 +62,8 @@ class _PublicRoomsPageState extends State<PublicRoomsPage> {
       }
       return;
     }
-    if (room.status == RoomStatus.waiting) {
+    if (room.status == RoomStatus.waiting ||
+        room.status == RoomStatus.playing) {
       context.pushNamed(
         RouteNames.spectatorRoom,
         pathParameters: {'id': room.id},
@@ -187,6 +188,7 @@ class _RoomCard extends StatelessWidget {
       (p) => p.uid == room.creatorUid,
       orElse: () => room.players.first,
     );
+    final isPlaying = room.status == RoomStatus.playing;
 
     return GestureDetector(
       onTap: onTap,
@@ -255,6 +257,13 @@ class _RoomCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
+                if (isPlaying) ...[
+                  _Badge(
+                    icon: Icons.play_circle_filled_rounded,
+                    label: 'liveBadge'.tr(),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                ],
                 if (room.voiceEnabled)
                   _Badge(icon: Icons.mic_rounded, label: 'voice_chat'.tr()),
                 if (room.cameraEnabled) ...[
@@ -265,8 +274,8 @@ class _RoomCard extends StatelessWidget {
                 SizedBox(
                   height: 32,
                   child: AppButton(
-                    text: 'join_table'.tr(),
-                    width: 100,
+                    text: isPlaying ? 'spectate'.tr() : 'join_table'.tr(),
+                    width: 110,
                     onPressed: joining ? null : onTap,
                   ),
                 ),

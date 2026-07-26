@@ -267,6 +267,62 @@ void main() {
       ],
     );
 
+    blocTest<GameCubit, GameState>(
+      'retries when the game doc is not created yet, then loads',
+      build: () {
+        var calls = 0;
+        when(() => mockRepository.watchGame('g1')).thenAnswer((_) {
+          calls++;
+          if (calls == 1) {
+            return Stream<Game>.error(Exception('Game not found'));
+          }
+          return Stream.value(testGame);
+        });
+        return GameCubit(
+          gameRepository: mockRepository,
+          roomRepository: mockRoomRepository,
+          agoraService: mockAgoraService,
+          audioService: mockAudioService,
+          notFoundRetryDelay: const Duration(milliseconds: 50),
+        );
+      },
+      act: (cubit) => cubit.watchGame('g1'),
+      wait: const Duration(milliseconds: 300),
+      expect: () => [
+        const GameState.loading(),
+        isA<GameBidding>(),
+      ],
+      verify: (_) {
+        verify(() => mockRepository.watchGame('g1')).called(2);
+      },
+    );
+
+    blocTest<GameCubit, GameState>(
+      'emits error after exhausting not-found retries',
+      build: () {
+        when(() => mockRepository.watchGame('g1')).thenAnswer(
+          (_) => Stream<Game>.error(Exception('Game not found')),
+        );
+        return GameCubit(
+          gameRepository: mockRepository,
+          roomRepository: mockRoomRepository,
+          agoraService: mockAgoraService,
+          audioService: mockAudioService,
+          notFoundRetryDelay: const Duration(milliseconds: 50),
+          maxNotFoundRetries: 2,
+        );
+      },
+      act: (cubit) => cubit.watchGame('g1'),
+      wait: const Duration(milliseconds: 400),
+      expect: () => [
+        const GameState.loading(),
+        isA<GameError>(),
+      ],
+      verify: (_) {
+        verify(() => mockRepository.watchGame('g1')).called(3);
+      },
+    );
+
     test('GameModel.toEntity remaps team scores to local perspective', () {
       const model = GameModel(
         id: 'g1',

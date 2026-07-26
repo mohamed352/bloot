@@ -30,17 +30,24 @@ class RoomRemoteDataSource {
     // NOTE: Intentionally no orderBy() here — a compound query with orderBy
     // needs a composite index, and when that index is missing Firestore
     // fails the whole listener (previously swallowed, showing a permanent
-    // empty list). Two equality filters work with automatic single-field
-    // indexes; we sort client-side by createdAt instead.
+    // empty list). We sort client-side instead.
+    //
+    // 'playing' rooms are included so an in-progress public table stays
+    // discoverable (spectatable) instead of vanishing from the list the
+    // moment its game starts.
     return _firestore
         .collection('rooms')
         .where('type', isEqualTo: 'public')
-        .where('status', isEqualTo: 'waiting')
+        .where('status', whereIn: ['waiting', 'playing'])
         .limit(50)
         .snapshots()
         .map((snapshot) {
           final docs = snapshot.docs.toList()
             ..sort((a, b) {
+              // Joinable (waiting) rooms first, in-progress games after.
+              final aPlaying = a.data()['status'] == 'playing' ? 1 : 0;
+              final bPlaying = b.data()['status'] == 'playing' ? 1 : 0;
+              if (aPlaying != bPlaying) return aPlaying.compareTo(bPlaying);
               final aTime = a.data()['createdAt'];
               final bTime = b.data()['createdAt'];
               final aMillis = aTime is Timestamp

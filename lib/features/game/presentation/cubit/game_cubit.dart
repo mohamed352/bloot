@@ -24,6 +24,10 @@ class GameCubit extends Cubit<GameState> {
     required AgoraService agoraService,
     required AudioService audioService,
     StreamHeartbeatService? heartbeatService,
+    // Retry policy for the 'Game not found' race (see below). Injectable so
+    // tests don't wait on real delays.
+    Duration notFoundRetryDelay = const Duration(seconds: 2),
+    int maxNotFoundRetries = 5,
   }) : _gameRepository = gameRepository,
        _roomRepository = roomRepository,
        _agoraService = agoraService,
@@ -31,6 +35,8 @@ class GameCubit extends Cubit<GameState> {
        _heartbeatService =
            heartbeatService ??
            StreamHeartbeatService(roomRepository: roomRepository),
+       _notFoundRetryDelay = notFoundRetryDelay,
+       _maxNotFoundRetries = maxNotFoundRetries,
        super(const GameState.initial());
 
   final GameRepository _gameRepository;
@@ -58,22 +64,46 @@ class GameCubit extends Cubit<GameState> {
 
   /// Starts watching the game in real-time.
   void watchGame(String id) =>
-      _startWatching(id, _gameRepository.watchGame(id));
+      _startWatching(id, () => _gameRepository.watchGame(id));
 
   /// Starts watching the game as a spectator.
   void watchGameAsSpectator(String id) {
     _isSpectator = true;
-    _startWatching(id, _gameRepository.watchGameAsSpectator(id));
+    _startWatching(id, () => _gameRepository.watchGameAsSpectator(id));
   }
 
-  void _startWatching(String id, Stream<Game> stream) {
+  /// The room document flips to 'playing' (exposing its gameId) before the
+  /// server finishes writing the game document, so a watcher can hit
+  /// 'Game not found' on a game that is about to exist. Retry a few times
+  /// with a short delay instead of showing a permanent error.
+  final int _maxNotFoundRetries;
+  final Duration _notFoundRetryDelay;
+  int _notFoundRetries = 0;
+
+  void _startWatching(String id, Stream<Game> Function() streamFactory) {
     emit(const GameState.loading());
     _gameSubscription?.cancel();
     _joinedAgoraChannelName = null;
+    _notFoundRetries = 0;
+    _subscribeToGame(id, streamFactory);
+  }
 
-    _gameSubscription = stream.listen(
+  void _subscribeToGame(String id, Stream<Game> Function() streamFactory) {
+    _gameSubscription = streamFactory().listen(
       (game) => _emitStateForGame(game),
       onError: (Object error) {
+        if (error.toString().contains('Game not found') &&
+            _notFoundRetries < _maxNotFoundRetries) {
+          _notFoundRetries++;
+          AppLogger.warning(
+            'Game doc not ready yet (gameId: $id), retry $_notFoundRetries/$_maxNotFoundRetries',
+          );
+          Future<void>.delayed(_notFoundRetryDelay, () {
+            if (_isClosed) return;
+            _subscribeToGame(id, streamFactory);
+          });
+          return;
+        }
         AppLogger.error('Game stream error (gameId: $id)', error: error);
         emit(GameState.error(message: _describeGameLoadError(error)));
       },

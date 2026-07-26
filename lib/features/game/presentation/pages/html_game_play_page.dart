@@ -81,9 +81,14 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
           onPageFinished: (_) => _onWebViewReady(),
           onWebResourceError: (error) {
             debugPrint(
-              'WebView error: ${error.description} (errorCode=${error.errorCode}, type=${error.errorType})',
+              'WebView error: ${error.description} (errorCode=${error.errorCode}, type=${error.errorType}, mainFrame=${error.isForMainFrame})',
             );
-            setState(() => _lastError = error.description);
+            // Only surface failures of the game page itself. Subresource
+            // errors (images, fonts, CDN hiccups) must not replace the game
+            // with a full-screen error overlay.
+            if (error.isForMainFrame ?? true) {
+              setState(() => _lastError = error.description);
+            }
           },
         ),
       );

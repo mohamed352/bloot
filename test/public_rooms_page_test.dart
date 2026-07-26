@@ -185,6 +185,45 @@ void main() {
       });
     });
 
+    testWidgets('a playing room shows a Spectate button and opens the gate', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await runWithFakeHttp(() async {
+        await pumpPage(
+          tester,
+          rooms: [
+            testRoom(
+              id: 'r3',
+              name: 'Playing Room',
+              type: RoomType.public,
+              status: RoomStatus.playing,
+              gameId: 'g3',
+              players: [testPlayer(name: 'Host')],
+            ),
+          ],
+        );
+
+        // In-progress rooms stay visible with a Spectate CTA instead of
+        // disappearing once their game starts.
+        expect(find.text('Spectate'), findsOneWidget);
+        expect(find.text('LIVE'), findsOneWidget);
+
+        await tester.tap(find.widgetWithText(ElevatedButton, 'Spectate'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Spectate room r3'), findsOneWidget);
+        verifyNever(
+          () => roomRepository.joinRoomByCode(
+            any(),
+            password: any(named: 'password'),
+          ),
+        );
+      });
+    });
+
     testWidgets('search-by-code joins the room as a player', (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;

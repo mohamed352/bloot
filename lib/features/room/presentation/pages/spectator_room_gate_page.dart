@@ -13,12 +13,14 @@ import 'package:bloot/core/style/colors.dart';
 import 'package:bloot/features/room/domain/entities/room.dart';
 import 'package:bloot/features/room/domain/repositories/room_repository.dart';
 
-/// Spectator holding page for a public room whose game has not started yet.
+/// Spectator holding page for a public room.
 ///
 /// Joining from the public tables list is always as a SPECTATOR (joining as
-/// a player is done via the room-code search). This page watches the room
-/// and automatically opens the live stream as soon as the game starts and
-/// the stream doc appears (game start auto-creates it).
+/// a player is done via the room-code search). This page watches the room:
+/// - If the game already started, it opens the live stream (or the game
+///   directly when the room is not streaming).
+/// - Otherwise it waits and automatically opens the live stream as soon as
+///   the game starts and the stream doc appears (game start auto-creates it).
 class SpectatorRoomGatePage extends StatefulWidget {
   const SpectatorRoomGatePage({super.key, required this.roomId});
 
@@ -41,15 +43,25 @@ class _SpectatorRoomGatePageState extends State<SpectatorRoomGatePage> {
       (room) {
         if (!mounted) return;
         setState(() => _room = room);
+        if (_navigated) return;
         final streamId = room.streamId;
-        if (!_navigated &&
-            room.isStreaming &&
-            streamId != null &&
-            streamId.isNotEmpty) {
+        if (room.isStreaming && streamId != null && streamId.isNotEmpty) {
           _navigated = true;
           context.pushReplacementNamed(
             RouteNames.watchStream,
             pathParameters: {'id': streamId},
+          );
+          return;
+        }
+        // In-progress room without a stream: go straight to the game view.
+        final gameId = room.gameId;
+        if (room.status == RoomStatus.playing &&
+            gameId != null &&
+            gameId.isNotEmpty) {
+          _navigated = true;
+          context.pushReplacementNamed(
+            RouteNames.spectate,
+            pathParameters: {'id': gameId},
           );
         }
       },
