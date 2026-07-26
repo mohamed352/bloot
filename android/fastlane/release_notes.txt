@@ -1,12 +1,6 @@
-Bloot v1.0.0 (build 12) — QA Release
+Bloot v1.0.0 (build 16) — QA Release
 
-Fixes from build 11 feedback:
-• Settings: Game and Privacy sections removed; Edit Profile entry removed from Settings
-• Account screen: Edit Profile entry removed (edit your profile from the Profile page instead)
-• Edit Profile: redesigned profile card UI
-• Discover: Following and New tabs removed
-• Chat: new messages now appear at the bottom of the conversation
-• Chat: the red unread dot is now cleared after opening a conversation
-• Game invitation: Join button no longer shows an infinite loading indicator (server update deployed)
-• Live shows: Watch Game error fixed for older rooms (Firestore rules update deployed)
-• Rooms no longer vanish for other users when the game starts — they now appear as live cards (server update deployed)
+Fixes from tester feedback (builds 9-11):
+• Game invitation: Join button can no longer get stuck loading forever
+• Live shows: "no access to watch this game" error fixed (Firestore rules deployed) and watching a just-started game now retries instead of failing
+• Public rooms no longer disappear when the game starts — in-progress games stay in the list with a LIVE badge and a Spectate button
