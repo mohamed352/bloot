@@ -39,7 +39,7 @@ class _RoomInvitationPageState extends State<RoomInvitationPage> {
   @override
   void initState() {
     super.initState();
-    _isAuthenticated = FirebaseAuth.instance.currentUser != null;
+    _isAuthenticated = getIt<FirebaseAuth>().currentUser != null;
     _loadRoom();
   }
 
@@ -127,7 +127,7 @@ class _RoomInvitationPageState extends State<RoomInvitationPage> {
                           : _error != null
                           ? _buildErrorState()
                           : room != null
-                          ? _buildContent(room)
+                          ? _buildContent(context, room)
                           : _buildErrorState(),
                     ),
                   ),
@@ -161,7 +161,11 @@ class _RoomInvitationPageState extends State<RoomInvitationPage> {
     );
   }
 
-  Widget _buildContent(Room room) {
+  // [context] must come from below the page's own BlocProvider (the Builder
+  // in [build]) — using the State's context here resolves providers above the
+  // page, where no RoomCubit exists, so the join call threw and the Join
+  // button stayed in its loading state forever (tester ticket, build 11).
+  Widget _buildContent(BuildContext context, Room room) {
     final creator = room.players.firstWhere(
       (p) => p.uid == room.creatorUid,
       orElse: () => room.players.first,

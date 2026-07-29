@@ -1,6 +1,6 @@
-Bloot v1.0.0 (build 16) — QA Release
+Bloot v1.0.0 (build 17) — QA Release
 
-Fixes from tester feedback (builds 9-11):
-• Game invitation: Join button can no longer get stuck loading forever
-• Live shows: "no access to watch this game" error fixed (Firestore rules deployed) and watching a just-started game now retries instead of failing
-• Public rooms no longer disappear when the game starts — in-progress games stay in the list with a LIVE badge and a Spectate button
+Fixes from tester feedback (builds 10-11):
+• Game invitation: Join button actually joins now — fixed a hidden tap error that blocked every join and left the spinner running forever
+• Live shows: watching a game from a live show verified working on a real device; a true access denial now shows a clear message instantly instead of hanging
+• Both fixes verified with automated on-device tests
