@@ -60,6 +60,20 @@ abstract class RoomRepository {
   /// Removes [targetUid] from [roomId] (host only).
   Future<void> kickPlayer(String roomId, String targetUid);
 
+  /// Swaps the teams of two seated players in [roomId] (host only).
+  Future<void> swapPlayerTeams(
+    String roomId,
+    String firstUid,
+    String secondUid,
+  );
+
+  /// Moves a seated player to [targetTeam] in [roomId] (host only).
+  Future<void> movePlayerToTeam(
+    String roomId,
+    String playerUid,
+    String targetTeam,
+  );
+
   /// Starts streaming [roomId] to the discover page (host only).
   Future<Room> startStream(String roomId);
 

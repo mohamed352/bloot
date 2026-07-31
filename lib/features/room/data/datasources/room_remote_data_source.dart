@@ -468,6 +468,151 @@ class RoomRemoteDataSource {
     });
   }
 
+  /// Swaps the teams of two seated players (host only).
+  ///
+  /// Exchanges `team` and `seatIndex` between the two players so the seat
+  /// parity invariant (team A on seats 0/2, team B on 1/3) is preserved, and
+  /// rebuilds the redundant `teamA`/`teamB` uid arrays. Both players are
+  /// marked not-ready so the host cannot rearrange teams and instantly start
+  /// with stale ready flags.
+  Future<void> swapPlayerTeams(
+    String roomId,
+    String firstUid,
+    String secondUid,
+  ) async {
+    final currentUid = _currentUid;
+    if (currentUid.isEmpty) throw const UnauthenticatedException();
+
+    final roomRef = _firestore.collection('rooms').doc(roomId);
+
+    await _firestore.runTransaction((transaction) async {
+      final doc = await transaction.get(roomRef);
+      if (!doc.exists) throw const RoomNotFoundException();
+
+      final data = doc.data()!;
+      if (data['creatorUid'] != currentUid) {
+        throw const RoomException('Only the host can change teams');
+      }
+
+      final players = List<Map<String, dynamic>>.from(data['players'] as List);
+      final readyPlayers = List<String>.from(
+        data['readyPlayers'] as List? ?? [],
+      );
+
+      final firstIndex = players.indexWhere((p) => p['uid'] == firstUid);
+      final secondIndex = players.indexWhere((p) => p['uid'] == secondUid);
+      if (firstIndex == -1 || secondIndex == -1) {
+        throw const PlayerNotInRoomException();
+      }
+
+      final first = Map<String, dynamic>.from(players[firstIndex]);
+      final second = Map<String, dynamic>.from(players[secondIndex]);
+      if (first['team'] == second['team']) return;
+
+      final firstTeam = first['team'];
+      first['team'] = second['team'];
+      second['team'] = firstTeam;
+      final firstSeat = first['seatIndex'];
+      first['seatIndex'] = second['seatIndex'];
+      second['seatIndex'] = firstSeat;
+      first['isReady'] = false;
+      second['isReady'] = false;
+      players[firstIndex] = first;
+      players[secondIndex] = second;
+      players.sort(
+        (a, b) => (a['seatIndex'] as int).compareTo(b['seatIndex'] as int),
+      );
+      readyPlayers.remove(firstUid);
+      readyPlayers.remove(secondUid);
+
+      transaction.update(roomRef, {
+        'players': players,
+        'readyPlayers': readyPlayers,
+        'teamA': players
+            .where((p) => p['team'] == 'A')
+            .map((p) => p['uid'] as String)
+            .toList(),
+        'teamB': players
+            .where((p) => p['team'] == 'B')
+            .map((p) => p['uid'] as String)
+            .toList(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    });
+  }
+
+  /// Moves a seated player to the other team (host only).
+  ///
+  /// Assigns the lowest free parity seat of [targetTeam] (A: 0/2, B: 1/3) so
+  /// the seat/team parity invariant is preserved, and moves the uid between
+  /// the redundant `teamA`/`teamB` arrays. The player is marked not-ready.
+  /// No-op when the player is already on [targetTeam].
+  Future<void> movePlayerToTeam(
+    String roomId,
+    String playerUid,
+    String targetTeam,
+  ) async {
+    final currentUid = _currentUid;
+    if (currentUid.isEmpty) throw const UnauthenticatedException();
+
+    final roomRef = _firestore.collection('rooms').doc(roomId);
+
+    await _firestore.runTransaction((transaction) async {
+      final doc = await transaction.get(roomRef);
+      if (!doc.exists) throw const RoomNotFoundException();
+
+      final data = doc.data()!;
+      if (data['creatorUid'] != currentUid) {
+        throw const RoomException('Only the host can change teams');
+      }
+
+      final players = List<Map<String, dynamic>>.from(data['players'] as List);
+      final readyPlayers = List<String>.from(
+        data['readyPlayers'] as List? ?? [],
+      );
+
+      final playerIndex = players.indexWhere((p) => p['uid'] == playerUid);
+      if (playerIndex == -1) throw const PlayerNotInRoomException();
+
+      final player = Map<String, dynamic>.from(players[playerIndex]);
+      if (player['team'] == targetTeam) return;
+
+      final takenSeats = players
+          .map((p) => p['seatIndex'] as int)
+          .toSet();
+      final paritySeats = targetTeam == 'A' ? const [0, 2] : const [1, 3];
+      final freeSeat = paritySeats
+          .where((seat) => !takenSeats.contains(seat))
+          .firstOrNull;
+      if (freeSeat == null) {
+        throw const RoomException('Team is full');
+      }
+
+      player['team'] = targetTeam;
+      player['seatIndex'] = freeSeat;
+      player['isReady'] = false;
+      players[playerIndex] = player;
+      players.sort(
+        (a, b) => (a['seatIndex'] as int).compareTo(b['seatIndex'] as int),
+      );
+      readyPlayers.remove(playerUid);
+
+      transaction.update(roomRef, {
+        'players': players,
+        'readyPlayers': readyPlayers,
+        'teamA': players
+            .where((p) => p['team'] == 'A')
+            .map((p) => p['uid'] as String)
+            .toList(),
+        'teamB': players
+            .where((p) => p['team'] == 'B')
+            .map((p) => p['uid'] as String)
+            .toList(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    });
+  }
+
   /// Returns true if the waiting room with [inviteCode] is private and has a
   /// non-empty password.
   Future<bool> isPasswordRequired(String inviteCode) async {

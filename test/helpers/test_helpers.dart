@@ -231,6 +231,13 @@ class TestAssetLoader extends AssetLoader {
     'no_public_rooms': 'No public rooms',
     'room_not_live': 'This table is not live right now.',
     'kicked_from_room': 'You were removed from the room by the host.',
+    'swap_players': 'Swap Players',
+    'swap_players_confirm': 'Swap {nameA} with {nameB}?',
+    'move_to_team': 'Move to Team',
+    'move_to_your_team_confirm': 'Move {name} to your team?',
+    'move_to_opposing_team_confirm': 'Move {name} to the opposing team?',
+    'tap_seat_to_move_hint':
+        'Tap another seat to swap or move the selected player',
     'join_table': 'Join Table',
     'spectate': 'Spectate',
     'liveBadge': 'LIVE',

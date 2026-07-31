@@ -124,6 +124,20 @@ class RoomRepositoryImpl implements RoomRepository {
       _remoteDataSource.kickPlayer(roomId, targetUid);
 
   @override
+  Future<void> swapPlayerTeams(
+    String roomId,
+    String firstUid,
+    String secondUid,
+  ) => _remoteDataSource.swapPlayerTeams(roomId, firstUid, secondUid);
+
+  @override
+  Future<void> movePlayerToTeam(
+    String roomId,
+    String playerUid,
+    String targetTeam,
+  ) => _remoteDataSource.movePlayerToTeam(roomId, playerUid, targetTeam);
+
+  @override
   Future<Room> startStream(String roomId) async {
     final model = await _remoteDataSource.startStream(roomId);
     return model.toEntity(currentUserUid: _currentUid);

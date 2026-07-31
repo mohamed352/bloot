@@ -118,14 +118,8 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(
-          find.widgetWithIcon(GestureDetector, Icons.mic_rounded),
-          findsOneWidget,
-        );
-        expect(
-          find.widgetWithIcon(GestureDetector, Icons.videocam_off_rounded),
-          findsOneWidget,
-        );
+        expect(find.byKey(const Key('media_toggle_mic')), findsOneWidget);
+        expect(find.byKey(const Key('media_toggle_camera')), findsOneWidget);
       });
     });
 
@@ -155,18 +149,8 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(
-          find.widgetWithIcon(GestureDetector, Icons.mic_rounded),
-          findsNothing,
-        );
-        expect(
-          find.widgetWithIcon(GestureDetector, Icons.mic_off_rounded),
-          findsNothing,
-        );
-        expect(
-          find.widgetWithIcon(GestureDetector, Icons.videocam_off_rounded),
-          findsNothing,
-        );
+        expect(find.byKey(const Key('media_toggle_mic')), findsNothing);
+        expect(find.byKey(const Key('media_toggle_camera')), findsNothing);
       });
     });
 
@@ -305,9 +289,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        await tester.tap(
-          find.widgetWithIcon(GestureDetector, Icons.mic_rounded),
-        );
+        await tester.tap(find.byKey(const Key('media_toggle_mic')));
         await tester.pump();
 
         verify(() => agoraService.toggleMic()).called(1);
@@ -506,6 +488,157 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Go Live'), findsOneWidget);
+      });
+    });
+
+    testWidgets('creator swaps two players by tapping their seats', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await runWithFakeHttp(() async {
+        when(() => roomRepository.watchRoom('r1')).thenAnswer(
+          (_) => Stream.value(
+            testRoom(
+              players: [
+                testPlayer(name: 'Me', isMe: true),
+                testPlayer(uid: 'u2', name: 'Partner'),
+                testPlayer(uid: 'u3', name: 'Opp1', team: 'B'),
+                testPlayer(uid: 'u4', name: 'Opp2', team: 'B'),
+              ],
+            ),
+          ),
+        );
+        when(
+          () => roomRepository.swapPlayerTeams(any(), any(), any()),
+        ).thenAnswer((_) async {});
+
+        cubit.loadRoom('r1');
+        await tester.pumpWidget(
+          buildTestableWidgetWithRouter(
+            router: router,
+            roomCubit: cubit,
+            agoraService: agoraService,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // First tap selects the seat and shows the hint.
+        await tester.tap(find.text('Me'));
+        await tester.pump();
+        expect(
+          find.text('Tap another seat to swap or move the selected player'),
+          findsOneWidget,
+        );
+
+        // Second tap on an opposing seat opens the swap confirmation.
+        await tester.tap(find.text('Opp1'));
+        await tester.pumpAndSettle();
+        expect(find.text('Swap Me with Opp1?'), findsOneWidget);
+
+        await tester.tap(find.widgetWithText(TextButton, 'Swap Players'));
+        await tester.pumpAndSettle();
+
+        verify(() => roomRepository.swapPlayerTeams('r1', 'u1', 'u3'))
+            .called(1);
+      });
+    });
+
+    testWidgets('creator moves a player by tapping an empty seat', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await runWithFakeHttp(() async {
+        when(() => roomRepository.watchRoom('r1')).thenAnswer(
+          (_) => Stream.value(
+            testRoom(
+              players: [
+                testPlayer(name: 'Me', isMe: true),
+                testPlayer(uid: 'u3', name: 'Opp1', team: 'B'),
+              ],
+            ),
+          ),
+        );
+        when(
+          () => roomRepository.movePlayerToTeam(any(), any(), any()),
+        ).thenAnswer((_) async {});
+
+        cubit.loadRoom('r1');
+        await tester.pumpWidget(
+          buildTestableWidgetWithRouter(
+            router: router,
+            roomCubit: cubit,
+            agoraService: agoraService,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Select the opponent, then tap the empty partner seat (local team).
+        await tester.tap(find.text('Opp1'));
+        await tester.pump();
+        final emptyPartnerSeat = find.byWidgetPredicate(
+          (w) => w is SeatWidget && w.position == SeatPosition.top,
+        );
+        // Tap a corner of the seat so the inner Invite button is not hit.
+        await tester.tapAt(
+          tester.getTopLeft(emptyPartnerSeat) + const Offset(12, 12),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Move Opp1 to your team?'), findsOneWidget);
+
+        await tester.tap(find.widgetWithText(TextButton, 'Move to Team'));
+        await tester.pumpAndSettle();
+
+        verify(() => roomRepository.movePlayerToTeam('r1', 'u3', 'A'))
+            .called(1);
+      });
+    });
+
+    testWidgets('non-creator seat taps do nothing', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await runWithFakeHttp(() async {
+        when(() => roomRepository.watchRoom('r1')).thenAnswer(
+          (_) => Stream.value(
+            testRoom(
+              creatorUid: 'u2',
+              players: [
+                testPlayer(name: 'Me', isMe: true),
+                testPlayer(uid: 'u2', name: 'Host'),
+                testPlayer(uid: 'u3', name: 'Opp1', team: 'B'),
+              ],
+            ),
+          ),
+        );
+
+        cubit.loadRoom('r1');
+        await tester.pumpWidget(
+          buildTestableWidgetWithRouter(
+            router: router,
+            roomCubit: cubit,
+            agoraService: agoraService,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Opp1'));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('Tap another seat to swap or move the selected player'),
+          findsNothing,
+        );
+        expect(find.byType(AlertDialog), findsNothing);
+        verifyNever(
+          () => roomRepository.swapPlayerTeams(any(), any(), any()),
+        );
+        verifyNever(
+          () => roomRepository.movePlayerToTeam(any(), any(), any()),
+        );
       });
     });
   });

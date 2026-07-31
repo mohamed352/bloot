@@ -31,6 +31,10 @@ class SeatWidget extends StatefulWidget {
     this.isCreator = false,
     this.inviteCode,
     this.onKick,
+    this.onSeatTap,
+    this.onEmptySeatTap,
+    this.isSelected = false,
+    this.selectionActive = false,
   });
 
   final RoomPlayer? player;
@@ -39,6 +43,19 @@ class SeatWidget extends StatefulWidget {
   final bool isCreator;
   final String? inviteCode;
   final ValueChanged<String>? onKick;
+
+  /// Called with the seated player's uid when the seat is tapped. Null for
+  /// non-creators (team management is host-only).
+  final ValueChanged<String>? onSeatTap;
+
+  /// Called when an empty seat is tapped while [selectionActive] is true.
+  final VoidCallback? onEmptySeatTap;
+
+  /// Whether this seat is the currently selected one (highlighted).
+  final bool isSelected;
+
+  /// Whether the creator has a seat selected and is picking a target.
+  final bool selectionActive;
 
   @override
   State<SeatWidget> createState() => _SeatWidgetState();
@@ -99,23 +116,33 @@ class _SeatWidgetState extends State<SeatWidget> {
     final level = player?.level;
     final isSpeaking = player?.isSpeaking ?? false;
     final isCameraOn = player?.isCameraOn ?? false;
-    return Container(
+    final seat = Container(
       height: 160,
       decoration: BoxDecoration(
         color: colors.cardBackground,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
-          color: isEmpty
+          color: widget.isSelected
+              ? ColorManager.info
+              : isEmpty
               ? colors.border
               : isSpeaking
               ? ColorManager.success.withValues(alpha: 0.8)
               : teamColor.withValues(alpha: isReady ? 0.6 : 0.3),
-          width: isSpeaking ? 3 : (isReady ? 2.5 : 1.5),
+          width: widget.isSelected ? 3 : (isSpeaking ? 3 : (isReady ? 2.5 : 1.5)),
         ),
         boxShadow: isSpeaking
             ? [
                 BoxShadow(
                   color: ColorManager.success.withValues(alpha: 0.4),
+                  blurRadius: 12,
+                  spreadRadius: 2,
+                ),
+              ]
+            : widget.isSelected
+            ? [
+                BoxShadow(
+                  color: ColorManager.info.withValues(alpha: 0.4),
                   blurRadius: 12,
                   spreadRadius: 2,
                 ),
@@ -320,6 +347,25 @@ class _SeatWidgetState extends State<SeatWidget> {
               ],
             ),
     );
+
+    // Team management taps (host-only): an occupied seat reports its player,
+    // an empty seat acts as a move target while a selection is active. The
+    // empty seat's inner Invite button still wins the tap gesture on itself.
+    // InkWell (not GestureDetector) keeps `widgetWithIcon(GestureDetector, …)`
+    // test finders targeted at other controls unambiguous.
+    if (isEmpty) {
+      if (widget.selectionActive && widget.onEmptySeatTap != null) {
+        return InkWell(onTap: widget.onEmptySeatTap, child: seat);
+      }
+      return seat;
+    }
+    if (widget.onSeatTap != null) {
+      return InkWell(
+        onTap: () => widget.onSeatTap!(player.uid),
+        child: seat,
+      );
+    }
+    return seat;
   }
 
   void _showKickDialog(BuildContext context, RoomPlayer player) {

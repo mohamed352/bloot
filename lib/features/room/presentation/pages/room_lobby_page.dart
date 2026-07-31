@@ -33,6 +33,10 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
   AgoraService? _agoraService;
   bool _bypassLeaveHandling = false;
 
+  /// Uid of the seat the creator has selected for a team swap/move. Null when
+  /// no team-management selection is active.
+  String? _selectedSeatUid;
+
   @override
   void initState() {
     super.initState();
@@ -316,6 +320,20 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                             ),
                           ],
                         ),
+                        // Hint shown while the creator is picking a swap/move
+                        // target for the selected seat.
+                        if (isCreator && _selectedSeatUid != null) ...[
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            LocaleKeys.tap_seat_to_move_hint.tr(),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: ColorManager.info,
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: AppSpacing.xxl),
                         // Diamond seat layout
                         // Partner (other player on the local team) at top
@@ -329,6 +347,17 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                             room!.id,
                             uid,
                           ),
+                          onSeatTap: isCreator && room != null
+                              ? (uid) => _onOccupiedSeatTap(room, uid)
+                              : null,
+                          // Empty top seat = a free spot on the local team.
+                          onEmptySeatTap: isCreator && room != null
+                              ? () => _onEmptySeatTap(room, localTeam ?? 'A')
+                              : null,
+                          isSelected:
+                              _selectedSeatUid != null &&
+                              partner?.uid == _selectedSeatUid,
+                          selectionActive: _selectedSeatUid != null,
                         ),
                         const SizedBox(height: AppSpacing.lg),
                         // VS indicator
@@ -371,6 +400,21 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                                 onKick: (uid) => context
                                     .read<RoomCubit>()
                                     .kickPlayer(room!.id, uid),
+                                onSeatTap: isCreator && room != null
+                                    ? (uid) => _onOccupiedSeatTap(room, uid)
+                                    : null,
+                                // Empty side seat = a free spot on the
+                                // opposing team.
+                                onEmptySeatTap: isCreator && room != null
+                                    ? () => _onEmptySeatTap(
+                                        room,
+                                        localTeam == 'A' ? 'B' : 'A',
+                                      )
+                                    : null,
+                                isSelected:
+                                    _selectedSeatUid != null &&
+                                    opponentLeft?.uid == _selectedSeatUid,
+                                selectionActive: _selectedSeatUid != null,
                               ),
                             ),
                             const SizedBox(width: AppSpacing.lg),
@@ -384,6 +428,19 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                                 onKick: (uid) => context
                                     .read<RoomCubit>()
                                     .kickPlayer(room!.id, uid),
+                                onSeatTap: isCreator && room != null
+                                    ? (uid) => _onOccupiedSeatTap(room, uid)
+                                    : null,
+                                onEmptySeatTap: isCreator && room != null
+                                    ? () => _onEmptySeatTap(
+                                        room,
+                                        localTeam == 'A' ? 'B' : 'A',
+                                      )
+                                    : null,
+                                isSelected:
+                                    _selectedSeatUid != null &&
+                                    opponentRight?.uid == _selectedSeatUid,
+                                selectionActive: _selectedSeatUid != null,
                               ),
                             ),
                           ],
@@ -401,6 +458,13 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                             room!.id,
                             uid,
                           ),
+                          onSeatTap: isCreator && room != null
+                              ? (uid) => _onOccupiedSeatTap(room, uid)
+                              : null,
+                          isSelected:
+                              _selectedSeatUid != null &&
+                              localPlayer?.uid == _selectedSeatUid,
+                          selectionActive: _selectedSeatUid != null,
                         ),
                         const SizedBox(height: AppSpacing.xxl),
                         // Room Settings section
@@ -485,6 +549,7 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                             children: [
                               if (room?.voiceEnabled == true) ...[
                                 _MediaToggleButton(
+                                  key: const Key('media_toggle_mic'),
                                   icon:
                                       room?.players.any(
                                             (p) => p.isMe && p.isMicOn,
@@ -509,6 +574,7 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
                               ],
                               if (room?.cameraEnabled == true)
                                 _MediaToggleButton(
+                                  key: const Key('media_toggle_camera'),
                                   icon:
                                       room?.players.any(
                                             (p) => p.isMe && p.isCameraOn,
@@ -691,6 +757,134 @@ class _RoomLobbyPageState extends State<RoomLobbyPage>
       ],
     );
   }
+
+  /// Creator team management: first tap selects a seat, second tap on an
+  /// occupied seat of the other team asks to swap the two players.
+  void _onOccupiedSeatTap(Room room, String tappedUid) {
+    final selectedUid = _selectedSeatUid;
+    if (selectedUid == null) {
+      setState(() => _selectedSeatUid = tappedUid);
+      return;
+    }
+    if (selectedUid == tappedUid) {
+      setState(() => _selectedSeatUid = null);
+      return;
+    }
+    RoomPlayer? first;
+    RoomPlayer? second;
+    for (final p in room.players) {
+      if (p.uid == selectedUid) first = p;
+      if (p.uid == tappedUid) second = p;
+    }
+    // Selected player left the room, or the tapped seat is on the same team
+    // (swap would be a no-op) — just move the selection instead.
+    if (first == null || second == null || first.team == second.team) {
+      setState(() => _selectedSeatUid = tappedUid);
+      return;
+    }
+    setState(() => _selectedSeatUid = null);
+    _showSwapConfirm(room, first, second);
+  }
+
+  /// Creator team management: tapping an empty seat while a player is
+  /// selected asks to move that player to the seat's team.
+  void _onEmptySeatTap(Room room, String targetTeam) {
+    final selectedUid = _selectedSeatUid;
+    if (selectedUid == null) return;
+    RoomPlayer? selected;
+    for (final p in room.players) {
+      if (p.uid == selectedUid) {
+        selected = p;
+        break;
+      }
+    }
+    setState(() => _selectedSeatUid = null);
+    if (selected == null || selected.team == targetTeam) return;
+    _showMoveConfirm(room, selected, targetTeam);
+  }
+
+  void _showSwapConfirm(Room room, RoomPlayer first, RoomPlayer second) {
+    final roomCubit = context.read<RoomCubit>();
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: ColorManager.darkSurface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          LocaleKeys.swap_players.tr(),
+          style: const TextStyle(color: ColorManager.darkTextPrimary),
+        ),
+        content: Text(
+          LocaleKeys.swap_players_confirm.tr(
+            namedArgs: {'nameA': first.name, 'nameB': second.name},
+          ),
+          style: const TextStyle(color: ColorManager.darkTextSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => dialogContext.pop(),
+            child: Text('cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () {
+              dialogContext.pop();
+              roomCubit.swapPlayerTeams(room.id, first.uid, second.uid);
+            },
+            child: Text(
+              LocaleKeys.swap_players.tr(),
+              style: const TextStyle(color: ColorManager.info),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMoveConfirm(Room room, RoomPlayer player, String targetTeam) {
+    final roomCubit = context.read<RoomCubit>();
+    RoomPlayer? localPlayer;
+    for (final p in room.players) {
+      if (p.isMe) {
+        localPlayer = p;
+        break;
+      }
+    }
+    final isYourTeam = localPlayer?.team == targetTeam;
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: ColorManager.darkSurface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          LocaleKeys.move_to_team.tr(),
+          style: const TextStyle(color: ColorManager.darkTextPrimary),
+        ),
+        content: Text(
+          (isYourTeam
+                  ? LocaleKeys.move_to_your_team_confirm
+                  : LocaleKeys.move_to_opposing_team_confirm)
+              .tr(namedArgs: {'name': player.name}),
+          style: const TextStyle(color: ColorManager.darkTextSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => dialogContext.pop(),
+            child: Text('cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () {
+              dialogContext.pop();
+              roomCubit.movePlayerToTeam(room.id, player.uid, targetTeam);
+            },
+            child: Text(
+              LocaleKeys.move_to_team.tr(),
+              style: const TextStyle(color: ColorManager.info),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _IconButton extends StatelessWidget {
@@ -718,6 +912,7 @@ class _IconButton extends StatelessWidget {
 
 class _MediaToggleButton extends StatelessWidget {
   const _MediaToggleButton({
+    super.key,
     required this.icon,
     required this.color,
     required this.onTap,

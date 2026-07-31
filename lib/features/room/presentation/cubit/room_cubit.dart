@@ -531,6 +531,56 @@ class RoomCubit extends Cubit<RoomState> {
     }
   }
 
+  Future<void> swapPlayerTeams(
+    String roomId,
+    String firstUid,
+    String secondUid,
+  ) async {
+    final currentState = state;
+    if (currentState is! RoomLoaded) return;
+
+    try {
+      await _roomRepository.swapPlayerTeams(roomId, firstUid, secondUid);
+      // Real-time listener updates UI
+    } on RoomException catch (e) {
+      emit(RoomState.error(message: e.message));
+      emit(currentState);
+    } catch (e) {
+      AppLogger.error('Failed to swap player teams', error: e);
+      emit(
+        const RoomState.error(
+          message: 'Failed to swap teams. Please try again.',
+        ),
+      );
+      emit(currentState);
+    }
+  }
+
+  Future<void> movePlayerToTeam(
+    String roomId,
+    String playerUid,
+    String targetTeam,
+  ) async {
+    final currentState = state;
+    if (currentState is! RoomLoaded) return;
+
+    try {
+      await _roomRepository.movePlayerToTeam(roomId, playerUid, targetTeam);
+      // Real-time listener updates UI
+    } on RoomException catch (e) {
+      emit(RoomState.error(message: e.message));
+      emit(currentState);
+    } catch (e) {
+      AppLogger.error('Failed to move player to team', error: e);
+      emit(
+        const RoomState.error(
+          message: 'Failed to move player. Please try again.',
+        ),
+      );
+      emit(currentState);
+    }
+  }
+
   Future<void> startStream(String roomId) async {
     final currentState = state;
     if (currentState is! RoomLoaded) return;
@@ -548,7 +598,6 @@ class RoomCubit extends Cubit<RoomState> {
       emit(currentState);
     }
   }
-
   Future<void> endStream(String roomId) async {
     final currentState = state;
     if (currentState is! RoomLoaded) return;

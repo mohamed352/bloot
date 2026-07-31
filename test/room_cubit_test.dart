@@ -221,6 +221,86 @@ void main() {
     );
   });
 
+  group('swapPlayerTeams', () {
+    blocTest<RoomCubit, RoomState>(
+      'does nothing when not loaded',
+      build: buildCubit,
+      act: (cubit) => cubit.swapPlayerTeams('r1', 'u1', 'u2'),
+      expect: () => const <RoomState>[],
+    );
+
+    blocTest<RoomCubit, RoomState>(
+      'calls repository when loaded',
+      build: buildCubit,
+      setUp: () {
+        when(() => roomRepository.swapPlayerTeams('r1', 'u1', 'u2'))
+            .thenAnswer((_) async {});
+      },
+      seed: () => const RoomState.loaded(room: room),
+      act: (cubit) => cubit.swapPlayerTeams('r1', 'u1', 'u2'),
+      expect: () => const <RoomState>[],
+      verify: (_) {
+        verify(() => roomRepository.swapPlayerTeams('r1', 'u1', 'u2'))
+            .called(1);
+      },
+    );
+
+    blocTest<RoomCubit, RoomState>(
+      'emits error then restores loaded state on RoomException',
+      build: buildCubit,
+      setUp: () {
+        when(() => roomRepository.swapPlayerTeams('r1', 'u1', 'u2'))
+            .thenThrow(const RoomException('Only the host can change teams'));
+      },
+      seed: () => const RoomState.loaded(room: room),
+      act: (cubit) => cubit.swapPlayerTeams('r1', 'u1', 'u2'),
+      expect: () => [
+        const RoomState.error(message: 'Only the host can change teams'),
+        const RoomState.loaded(room: room),
+      ],
+    );
+  });
+
+  group('movePlayerToTeam', () {
+    blocTest<RoomCubit, RoomState>(
+      'does nothing when not loaded',
+      build: buildCubit,
+      act: (cubit) => cubit.movePlayerToTeam('r1', 'u2', 'A'),
+      expect: () => const <RoomState>[],
+    );
+
+    blocTest<RoomCubit, RoomState>(
+      'calls repository when loaded',
+      build: buildCubit,
+      setUp: () {
+        when(() => roomRepository.movePlayerToTeam('r1', 'u2', 'A'))
+            .thenAnswer((_) async {});
+      },
+      seed: () => const RoomState.loaded(room: room),
+      act: (cubit) => cubit.movePlayerToTeam('r1', 'u2', 'A'),
+      expect: () => const <RoomState>[],
+      verify: (_) {
+        verify(() => roomRepository.movePlayerToTeam('r1', 'u2', 'A'))
+            .called(1);
+      },
+    );
+
+    blocTest<RoomCubit, RoomState>(
+      'emits error then restores loaded state on RoomException',
+      build: buildCubit,
+      setUp: () {
+        when(() => roomRepository.movePlayerToTeam('r1', 'u2', 'A'))
+            .thenThrow(const RoomException('Team is full'));
+      },
+      seed: () => const RoomState.loaded(room: room),
+      act: (cubit) => cubit.movePlayerToTeam('r1', 'u2', 'A'),
+      expect: () => [
+        const RoomState.error(message: 'Team is full'),
+        const RoomState.loaded(room: room),
+      ],
+    );
+  });
+
   group('isPasswordRequired', () {
     test('returns true when repository returns true', () async {
       when(() => roomRepository.isPasswordRequired('CODE12'))
