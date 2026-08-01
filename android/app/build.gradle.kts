@@ -41,8 +41,8 @@ android {
 
     signingConfigs {
         create("release") {
-            // TODO: Replace with your production keystore details.
-            // Run: keytool -genkey -v -keystore android/app/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+            // Reads the upload-key credentials from key.properties (gitignored).
+            // See docs/release_checklist.md for how to recreate the keystore.
             val keystoreProperties = Properties()
             val keyPropsFile = rootProject.file("key.properties")
             if (keyPropsFile.exists()) {
@@ -82,9 +82,15 @@ android {
 }
 
 dependencies {
-    // Firebase App Distribution Feedback SDK
+    // Firebase App Distribution Feedback SDK.
+    // The API artifact is a no-op stub required in all builds so MainActivity
+    // and the Flutter plugin compile and run safely. The full SDK stays
+    // debug-only: it adds REQUEST_INSTALL_PACKAGES, which Play Console
+    // rejects for apps that are not installers/updaters, so it must not ship
+    // in release builds. Dart-side calls degrade gracefully (failures are
+    // caught in AppInitializer.initAppDistribution).
     implementation("com.google.firebase:firebase-appdistribution-api:16.0.0-beta14")
-    implementation("com.google.firebase:firebase-appdistribution:16.0.0-beta14")
+    debugImplementation("com.google.firebase:firebase-appdistribution:16.0.0-beta14")
 }
 
 flutter {
