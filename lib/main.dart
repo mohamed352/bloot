@@ -24,7 +24,6 @@ void main() {
           supportedLocales: LanguageManager.supportedLocales,
           path: LanguageManager.translationsPath,
           fallbackLocale: LanguageManager.fallbackLocale,
-          startLocale: LanguageManager.arabic,
           child: const BlootApp(),
         ),
       );

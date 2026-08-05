@@ -1,13 +1,25 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <!-- The Agora full-screen-sharing artifact declares a media-projection
+         foreground service, but Bloot has no screen-sharing feature. Strip the
+         permission and its service: Play Console rejects declared-but-unused
+         foreground service permissions. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"
+        tools:node="remove"/>
     <application
         android:label="bloot"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true"
         android:usesCleartextTraffic="true">
+        <!-- Stripped together with FOREGROUND_SERVICE_MEDIA_PROJECTION above;
+             the app never starts Agora's screen-sharing service. -->
+        <service
+            android:name="io.agora.rtc2.extensions.MediaProjectionMgr$LocalScreenSharingService"
+            tools:node="remove" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
