@@ -131,12 +131,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function()?  profileRequired,TResult Function( User user)?  authenticated,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( String? prefilledDisplayName)?  profileRequired,TResult Function( User user)?  authenticated,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case AuthInitial() when initial != null:
 return initial();case AuthLoading() when loading != null:
 return loading();case AuthProfileRequired() when profileRequired != null:
-return profileRequired();case AuthAuthenticated() when authenticated != null:
+return profileRequired(_that.prefilledDisplayName);case AuthAuthenticated() when authenticated != null:
 return authenticated(_that.user);case AuthError() when error != null:
 return error(_that.message);case _:
   return orElse();
@@ -156,12 +156,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function()  profileRequired,required TResult Function( User user)  authenticated,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( String? prefilledDisplayName)  profileRequired,required TResult Function( User user)  authenticated,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case AuthInitial():
 return initial();case AuthLoading():
 return loading();case AuthProfileRequired():
-return profileRequired();case AuthAuthenticated():
+return profileRequired(_that.prefilledDisplayName);case AuthAuthenticated():
 return authenticated(_that.user);case AuthError():
 return error(_that.message);case _:
   throw StateError('Unexpected subclass');
@@ -180,12 +180,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function()?  profileRequired,TResult? Function( User user)?  authenticated,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( String? prefilledDisplayName)?  profileRequired,TResult? Function( User user)?  authenticated,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case AuthInitial() when initial != null:
 return initial();case AuthLoading() when loading != null:
 return loading();case AuthProfileRequired() when profileRequired != null:
-return profileRequired();case AuthAuthenticated() when authenticated != null:
+return profileRequired(_that.prefilledDisplayName);case AuthAuthenticated() when authenticated != null:
 return authenticated(_that.user);case AuthError() when error != null:
 return error(_that.message);case _:
   return null;
@@ -263,33 +263,67 @@ String toString() {
 
 
 class AuthProfileRequired implements AuthState {
-  const AuthProfileRequired();
+  const AuthProfileRequired({this.prefilledDisplayName});
   
 
+ final  String? prefilledDisplayName;
 
-
+/// Create a copy of AuthState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$AuthProfileRequiredCopyWith<AuthProfileRequired> get copyWith => _$AuthProfileRequiredCopyWithImpl<AuthProfileRequired>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthProfileRequired);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthProfileRequired&&(identical(other.prefilledDisplayName, prefilledDisplayName) || other.prefilledDisplayName == prefilledDisplayName));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,prefilledDisplayName);
 
 @override
 String toString() {
-  return 'AuthState.profileRequired()';
+  return 'AuthState.profileRequired(prefilledDisplayName: $prefilledDisplayName)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class $AuthProfileRequiredCopyWith<$Res> implements $AuthStateCopyWith<$Res> {
+  factory $AuthProfileRequiredCopyWith(AuthProfileRequired value, $Res Function(AuthProfileRequired) _then) = _$AuthProfileRequiredCopyWithImpl;
+@useResult
+$Res call({
+ String? prefilledDisplayName
+});
 
 
+
+
+}
+/// @nodoc
+class _$AuthProfileRequiredCopyWithImpl<$Res>
+    implements $AuthProfileRequiredCopyWith<$Res> {
+  _$AuthProfileRequiredCopyWithImpl(this._self, this._then);
+
+  final AuthProfileRequired _self;
+  final $Res Function(AuthProfileRequired) _then;
+
+/// Create a copy of AuthState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? prefilledDisplayName = freezed,}) {
+  return _then(AuthProfileRequired(
+prefilledDisplayName: freezed == prefilledDisplayName ? _self.prefilledDisplayName : prefilledDisplayName // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
 
 /// @nodoc
 

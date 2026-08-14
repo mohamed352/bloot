@@ -40,16 +40,25 @@ class NotificationService {
     if (_initialized) return;
     _initialized = true;
 
-    // Request permissions
-    await requestPermission();
+    // NOTE: the notification permission request is intentionally NOT done
+    // here. initialize() runs before runApp(), and the Android 13+ system
+    // permission dialog would pop over the blank native splash before any
+    // app UI exists. BlootApp requests it after the first frame instead.
 
     // iOS: show notifications as banners/sound/badge while app is in foreground.
     // Without this, foreground FCM notifications are silently swallowed on iOS.
-    await _messaging.setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+    try {
+      await _messaging.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    } catch (e) {
+      AppLogger.warning(
+        'Failed to set foreground presentation options: $e',
+        tag: 'FCM',
+      );
+    }
 
     // Get and save token.
     try {
@@ -87,18 +96,26 @@ class NotificationService {
     });
 
     // Check if app was opened from terminated state via notification
-    final initialMessage = await _messaging.getInitialMessage();
-    if (initialMessage != null) {
-      _onMessageOpenedAppController.add(initialMessage);
+    try {
+      final initialMessage = await _messaging.getInitialMessage();
+      if (initialMessage != null) {
+        _onMessageOpenedAppController.add(initialMessage);
+      }
+    } catch (e) {
+      AppLogger.warning('Failed to get initial FCM message: $e', tag: 'FCM');
     }
   }
 
   Future<void> requestPermission() async {
-    final settings = await _messaging.requestPermission();
-    AppLogger.info(
-      'FCM permission: ${settings.authorizationStatus}',
-      tag: 'FCM',
-    );
+    try {
+      final settings = await _messaging.requestPermission();
+      AppLogger.info(
+        'FCM permission: ${settings.authorizationStatus}',
+        tag: 'FCM',
+      );
+    } catch (e) {
+      AppLogger.warning('Failed to request FCM permission: $e', tag: 'FCM');
+    }
   }
 
   Future<String?> getToken() async {

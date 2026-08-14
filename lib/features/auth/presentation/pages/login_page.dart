@@ -20,7 +20,7 @@ class LoginPage extends StatelessWidget {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
         state.whenOrNull(
-          profileRequired: () => context.pushNamed(RouteNames.completeProfile),
+          profileRequired: (_) => context.pushNamed(RouteNames.completeProfile),
           authenticated: (_) => context.goNamed(RouteNames.home),
           error: (message) {
             ScaffoldMessenger.of(
@@ -109,6 +109,15 @@ class LoginPage extends StatelessWidget {
                                     context.read<AuthCubit>().signInWithGoogle(),
                               ),
                             ],
+                            const SizedBox(height: AppSpacing.md),
+                            // Email button — available on all platforms
+                            _SocialButton(
+                              icon: Icons.mail_outline_rounded,
+                              label: 'sign_in_with_email'.tr(),
+                              isLoading: isLoading,
+                              onTap: () =>
+                                  context.pushNamed(RouteNames.emailSignIn),
+                            ),
                             const SizedBox(height: AppSpacing.xxl),
                             // Terms hint
                             Center(

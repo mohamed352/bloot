@@ -50,7 +50,7 @@ bloot/
 │   │   ├── services/           # Agora service, push notifications, etc.
 │   │   └── utils/              # Helpers, validators, formatters
 │   ├── features/
-│   │   ├── auth/               # Authentication (phone OTP, profile setup)
+│   │   ├── auth/               # Authentication (Apple/Google/email sign-in, profile setup)
 │   │   ├── home/               # Home feed, live streams, quick actions
 │   │   ├── discover/           # Stream discovery, search, filters
 │   │   ├── rooms/              # Room creation, lobby, private rooms

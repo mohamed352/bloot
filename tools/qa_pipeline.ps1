@@ -120,7 +120,9 @@ if (-not $SkipIntegration) {
 Invoke-Step "Step 3/4: Build Release APK" {
     Push-Location $ProjectRoot
     flutter clean
-    flutter build apk --release
+    # google_sign_in v7 on Android fails immediately without a serverClientId;
+    # the web OAuth client ID is not a secret (also in env/endpoints.json).
+    flutter build apk --release --dart-define=GOOGLE_SERVER_CLIENT_ID=738592764893-mkmgsfs9l833olurohk5ct2p9e1q0mir.apps.googleusercontent.com
     Pop-Location
 }
 

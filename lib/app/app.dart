@@ -81,6 +81,10 @@ class _BlootAppState extends State<BlootApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _notificationService?.syncLocale(context.locale.languageCode);
+        // Deferred from AppInitializer (which runs before runApp) so the
+        // Android 13+ permission dialog appears over real app UI instead of
+        // the blank native splash screen.
+        _notificationService?.requestPermission();
       }
     });
   }

@@ -3,6 +3,7 @@ abstract class RouteNames {
   static const String splash = 'splash';
   static const String welcome = 'welcome';
   static const String login = 'login';
+  static const String emailSignIn = 'emailSignIn';
   static const String completeProfile = 'completeProfile';
 
   // Main Shell Tabs
@@ -52,6 +53,7 @@ abstract class RoutePaths {
   static const String splash = '/splash';
   static const String welcome = '/welcome';
   static const String login = '/login';
+  static const String emailSignIn = '/email-sign-in';
   static const String completeProfile = '/complete-profile';
 
   static const String home = '/home';

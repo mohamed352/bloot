@@ -76,7 +76,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       authenticated: (_) {
         if (mounted) context.goNamed(RouteNames.home);
       },
-      profileRequired: () {
+      profileRequired: (_) {
         if (mounted) context.goNamed(RouteNames.completeProfile);
       },
       initial: () {

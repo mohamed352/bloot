@@ -27,6 +27,22 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<User?> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    final model = await _remoteDataSource.signInWithEmailPassword(
+      email: email,
+      password: password,
+    );
+    return model?.toEntity();
+  }
+
+  @override
+  String? consumePrefillDisplayName() =>
+      _remoteDataSource.consumePrefillDisplayName();
+
+  @override
   Future<bool> isProfileComplete() => _remoteDataSource.isProfileComplete();
 
   @override

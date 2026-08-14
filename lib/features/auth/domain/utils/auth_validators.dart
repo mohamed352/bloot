@@ -51,4 +51,29 @@ class AuthValidators {
     }
     return trimmed.toLowerCase();
   }
+
+  /// Validates an email address.
+  /// Returns `null` if valid, otherwise an error message key.
+  static String? validateEmail(String? email) {
+    if (email == null || email.trim().isEmpty) {
+      return 'email_required';
+    }
+    final trimmed = email.trim();
+    if (!RegExp(r'^[\w.+-]+@[\w-]+(\.[\w-]+)+$').hasMatch(trimmed)) {
+      return 'email_invalid';
+    }
+    return null;
+  }
+
+  /// Validates a password for email sign-in.
+  /// Returns `null` if valid, otherwise an error message key.
+  static String? validatePassword(String? password) {
+    if (password == null || password.isEmpty) {
+      return 'password_required';
+    }
+    if (password.length < 6) {
+      return 'password_too_short';
+    }
+    return null;
+  }
 }

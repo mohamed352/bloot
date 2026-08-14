@@ -67,6 +67,22 @@ void main() {
     );
 
     blocTest<AuthCubit, AuthState>(
+      'emits profileRequired with prefilled display name when provided',
+      build: buildCubit,
+      act: (cubit) => cubit.signInWithGoogle(),
+      setUp: () {
+        when(() => authRepository.signInWithGoogle())
+            .thenAnswer((_) async => const User(uid: 'u1'));
+        when(() => authRepository.consumePrefillDisplayName())
+            .thenReturn('Ali Ahmed');
+      },
+      expect: () => [
+        const AuthState.loading(),
+        const AuthState.profileRequired(prefilledDisplayName: 'Ali Ahmed'),
+      ],
+    );
+
+    blocTest<AuthCubit, AuthState>(
       'emits initial when user cancels',
       build: buildCubit,
       act: (cubit) => cubit.signInWithGoogle(),
@@ -125,6 +141,24 @@ void main() {
     );
 
     blocTest<AuthCubit, AuthState>(
+      'emits profileRequired with Apple-provided name when incomplete',
+      build: buildCubit,
+      act: (cubit) => cubit.signInWithApple(),
+      setUp: () {
+        when(() => authRepository.signInWithApple())
+            .thenAnswer((_) async => const User(uid: 'u1'));
+        when(() => authRepository.consumePrefillDisplayName())
+            .thenReturn('Mohamed El Sayed');
+      },
+      expect: () => [
+        const AuthState.loading(),
+        const AuthState.profileRequired(
+          prefilledDisplayName: 'Mohamed El Sayed',
+        ),
+      ],
+    );
+
+    blocTest<AuthCubit, AuthState>(
       'emits error on failure',
       build: buildCubit,
       act: (cubit) => cubit.signInWithApple(),
@@ -135,6 +169,96 @@ void main() {
       expect: () => [
         const AuthState.loading(),
         const AuthState.error(message: 'Apple sign in failed'),
+      ],
+    );
+  });
+
+  group('signInWithEmail', () {
+    const email = 'reviewer@bloot.app';
+    const password = 'secret123';
+
+    blocTest<AuthCubit, AuthState>(
+      'emits error for invalid email without calling repository',
+      build: buildCubit,
+      act: (cubit) =>
+          cubit.signInWithEmail(email: 'not-an-email', password: password),
+      expect: () => [
+        const AuthState.error(message: 'email_invalid'),
+      ],
+      verify: (_) {
+        verifyNever(
+          () => authRepository.signInWithEmail(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        );
+      },
+    );
+
+    blocTest<AuthCubit, AuthState>(
+      'emits error for short password without calling repository',
+      build: buildCubit,
+      act: (cubit) => cubit.signInWithEmail(email: email, password: '123'),
+      expect: () => [
+        const AuthState.error(message: 'password_too_short'),
+      ],
+    );
+
+    blocTest<AuthCubit, AuthState>(
+      'emits authenticated when profile is complete',
+      build: buildCubit,
+      act: (cubit) => cubit.signInWithEmail(email: email, password: password),
+      setUp: () {
+        when(
+          () => authRepository.signInWithEmail(
+            email: email,
+            password: password,
+          ),
+        ).thenAnswer((_) async => user);
+      },
+      expect: () => [
+        const AuthState.loading(),
+        const AuthState.authenticated(user: user),
+      ],
+    );
+
+    blocTest<AuthCubit, AuthState>(
+      'emits profileRequired when profile is incomplete',
+      build: buildCubit,
+      act: (cubit) => cubit.signInWithEmail(email: email, password: password),
+      setUp: () {
+        when(
+          () => authRepository.signInWithEmail(
+            email: email,
+            password: password,
+          ),
+        ).thenAnswer((_) async => const User(uid: 'u1'));
+      },
+      expect: () => [
+        const AuthState.loading(),
+        const AuthState.profileRequired(),
+      ],
+    );
+
+    blocTest<AuthCubit, AuthState>(
+      'emits error on wrong credentials',
+      build: buildCubit,
+      act: (cubit) => cubit.signInWithEmail(email: email, password: password),
+      setUp: () {
+        when(
+          () => authRepository.signInWithEmail(
+            email: email,
+            password: password,
+          ),
+        ).thenThrow(
+          const AuthException('Incorrect email or password. Please try again.'),
+        );
+      },
+      expect: () => [
+        const AuthState.loading(),
+        const AuthState.error(
+          message: 'Incorrect email or password. Please try again.',
+        ),
       ],
     );
   });

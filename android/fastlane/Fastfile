@@ -19,9 +19,14 @@ platform :android do
       "../../env/bloot-89b2b-firebase-adminsdk-fbsvc-b70047e82d.json"
     )
 
+    # google_sign_in v7 on Android (Credential Manager) fails immediately
+    # without a serverClientId, so release builds must always carry the web
+    # OAuth client ID. It is not a secret (also in env/endpoints.json).
+    google_server_client_id = ENV['GOOGLE_SERVER_CLIENT_ID'] || '738592764893-mkmgsfs9l833olurohk5ct2p9e1q0mir.apps.googleusercontent.com'
+
     apk_path = Dir.chdir("../..") do
       sh("flutter clean")
-      sh("flutter build apk --release")
+      sh("flutter build apk --release --dart-define=GOOGLE_SERVER_CLIENT_ID=#{google_server_client_id}")
       File.expand_path("build/app/outputs/flutter-apk/app-release.apk")
     end
 

@@ -97,9 +97,10 @@ App Distribution using the service account in `env/bloot-89b2b-firebase-adminsdk
 ### Manual builds
 
 ```bash
-# Flutter
-flutter build apk --release
-flutter build appbundle --release
+# Flutter (the dart-define is required: google_sign_in v7 fails on Android
+# without a serverClientId — Play rejected a build over this)
+flutter build apk --release --dart-define=GOOGLE_SERVER_CLIENT_ID=738592764893-mkmgsfs9l833olurohk5ct2p9e1q0mir.apps.googleusercontent.com
+flutter build appbundle --release --dart-define=GOOGLE_SERVER_CLIENT_ID=738592764893-mkmgsfs9l833olurohk5ct2p9e1q0mir.apps.googleusercontent.com
 
 # iOS (macOS only)
 flutter build ios --release

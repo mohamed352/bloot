@@ -10,6 +10,13 @@ abstract class AuthRepository {
   /// Signs in with Apple and returns the authenticated user.
   Future<User?> signInWithApple();
 
+  /// Signs in with email and password and returns the authenticated user.
+  Future<User?> signInWithEmail({required String email, required String password});
+
+  /// Returns the display name provided by the identity provider during the
+  /// last sign-in (if any), then clears it. Used to pre-fill the profile form.
+  String? consumePrefillDisplayName();
+
   /// Returns whether the current user has a complete profile.
   Future<bool> isProfileComplete();
 

@@ -35,6 +35,21 @@ class _CompleteProfilePageState extends State<CompleteProfilePage> {
   Timer? _usernameDebounce;
 
   @override
+  void initState() {
+    super.initState();
+    // Pre-fill the display name provided by the identity provider (Sign in
+    // with Apple / Google) so the user is not asked to re-enter information
+    // the provider already supplied (App Store guideline 4).
+    final authState = context.read<AuthCubit>().state;
+    if (authState is AuthProfileRequired) {
+      final prefill = authState.prefilledDisplayName;
+      if (prefill != null && prefill.trim().isNotEmpty) {
+        _displayNameController.text = prefill.trim();
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _displayNameController.dispose();
     _usernameController.dispose();

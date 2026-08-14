@@ -41,7 +41,11 @@ class AuthCubit extends Cubit<AuthState> {
         AppLogger.setCustomKey('username', user.username);
         emit(AuthState.authenticated(user: user));
       } else {
-        emit(const AuthState.profileRequired());
+        emit(
+          AuthState.profileRequired(
+            prefilledDisplayName: _authRepository.consumePrefillDisplayName(),
+          ),
+        );
       }
     } on AuthException catch (e) {
       emit(AuthState.error(message: e.message));
@@ -74,7 +78,11 @@ class AuthCubit extends Cubit<AuthState> {
         AppLogger.setCustomKey('username', user.username);
         emit(AuthState.authenticated(user: user));
       } else {
-        emit(const AuthState.profileRequired());
+        emit(
+          AuthState.profileRequired(
+            prefilledDisplayName: _authRepository.consumePrefillDisplayName(),
+          ),
+        );
       }
     } on AuthException catch (e) {
       emit(AuthState.error(message: e.message));
@@ -83,6 +91,59 @@ class AuthCubit extends Cubit<AuthState> {
       emit(
         const AuthState.error(
           message: 'Failed to sign in with Apple. Please try again.',
+        ),
+      );
+    }
+  }
+
+  Future<void> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    final emailError = AuthValidators.validateEmail(email);
+    if (emailError != null) {
+      emit(AuthState.error(message: emailError));
+      return;
+    }
+    final passwordError = AuthValidators.validatePassword(password);
+    if (passwordError != null) {
+      emit(AuthState.error(message: passwordError));
+      return;
+    }
+
+    emit(const AuthState.loading());
+    try {
+      final user = await _authRepository.signInWithEmail(
+        email: email,
+        password: password,
+      );
+      if (user == null) {
+        emit(const AuthState.initial());
+        return;
+      }
+      AppLogger.info(
+        'Email sign-in returned uid=${user.uid}, '
+        'isProfileComplete=${user.isProfileComplete}',
+        tag: 'AuthCubit',
+      );
+      if (user.isProfileComplete) {
+        AppLogger.setUserId(user.uid);
+        AppLogger.setCustomKey('username', user.username);
+        emit(AuthState.authenticated(user: user));
+      } else {
+        emit(
+          AuthState.profileRequired(
+            prefilledDisplayName: _authRepository.consumePrefillDisplayName(),
+          ),
+        );
+      }
+    } on AuthException catch (e) {
+      emit(AuthState.error(message: e.message));
+    } catch (e) {
+      AppLogger.error('Failed to sign in with email', error: e);
+      emit(
+        const AuthState.error(
+          message: 'Failed to sign in. Please try again.',
         ),
       );
     }

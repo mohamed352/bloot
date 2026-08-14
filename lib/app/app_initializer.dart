@@ -155,7 +155,18 @@ abstract class AppInitializer {
   static Future<void> _initializeGoogleSignIn() async {
     try {
       if (kIsWeb) return;
-      const googleClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
+      // The web OAuth client ID is not a secret (it is bundled in every
+      // client app and also lives in env/endpoints.json), so it is safe as a
+      // default. google_sign_in v7 on Android fails immediately with
+      // MISSING_SERVER_CLIENT_ID when this is empty, so the defaultValue
+      // guarantees release builds always have it even if the dart-define is
+      // forgotten. The build scripts (fastlane, qa_pipeline.ps1) also pass
+      // --dart-define=GOOGLE_SERVER_CLIENT_ID explicitly.
+      const googleClientId = String.fromEnvironment(
+        'GOOGLE_SERVER_CLIENT_ID',
+        defaultValue:
+            '738592764893-mkmgsfs9l833olurohk5ct2p9e1q0mir.apps.googleusercontent.com',
+      );
       await GoogleSignIn.instance.initialize(
         serverClientId: googleClientId.isNotEmpty ? googleClientId : null,
       );
@@ -164,6 +175,15 @@ abstract class AppInitializer {
           'GOOGLE_SERVER_CLIENT_ID missing from environment. Google Sign-In might fail on some platforms.',
           tag: LogTags.init,
         );
+        if (!kDebugMode) {
+          try {
+            FirebaseCrashlytics.instance.recordError(
+              StateError('GOOGLE_SERVER_CLIENT_ID empty at build time'),
+              null,
+              reason: 'Google Sign-In will fail on Android',
+            );
+          } catch (_) {}
+        }
       } else {
         AppLogger.info('Google Sign-In initialized', tag: LogTags.init);
       }

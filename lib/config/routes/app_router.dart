@@ -10,6 +10,7 @@ import 'package:bloot/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:bloot/features/auth/presentation/cubit/auth_state.dart';
 import 'package:bloot/config/routes/routes.dart';
 import 'package:bloot/features/auth/presentation/pages/complete_profile_page.dart';
+import 'package:bloot/features/auth/presentation/pages/email_sign_in_page.dart';
 import 'package:bloot/features/auth/presentation/pages/login_page.dart';
 import 'package:bloot/features/chat/presentation/cubit/chat_cubit.dart';
 import 'package:bloot/features/chat/presentation/cubit/new_message_cubit.dart';
@@ -86,6 +87,11 @@ final GoRouter appRouter = GoRouter(
       path: RoutePaths.completeProfile,
       name: RouteNames.completeProfile,
       builder: (context, state) => const CompleteProfilePage(),
+    ),
+    GoRoute(
+      path: RoutePaths.emailSignIn,
+      name: RouteNames.emailSignIn,
+      builder: (context, state) => const EmailSignInPage(),
     ),
 
     // Main Shell with Bottom Navigation

@@ -16,8 +16,35 @@ void main() {
 
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-      await AppInitializer.initialize();
-      await EasyLocalization.ensureInitialized();
+      // Never let an initialization failure strand the app on the native
+      // splash screen: always call runApp, even in a degraded state.
+      // (Play rejected a build for "app doesn't open or load" because any
+      // throw here skipped runApp and left the splash up forever.)
+      try {
+        await AppInitializer.initialize();
+      } catch (error, stack) {
+        if (kDebugMode) {
+          // ignore: avoid_print
+          print('App initialization failed; starting degraded: $error\n$stack');
+        }
+        try {
+          FirebaseCrashlytics.instance.recordError(error, stack);
+        } catch (_) {
+          // Crashlytics itself may be unavailable if Firebase init failed.
+        }
+      }
+
+      try {
+        await EasyLocalization.ensureInitialized();
+      } catch (error, stack) {
+        if (kDebugMode) {
+          // ignore: avoid_print
+          print('Localization init failed; using fallback locale: $error');
+        }
+        try {
+          FirebaseCrashlytics.instance.recordError(error, stack);
+        } catch (_) {}
+      }
 
       runApp(
         EasyLocalization(

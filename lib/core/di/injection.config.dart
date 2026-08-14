@@ -200,6 +200,10 @@ extension GetItInjectableX on _i174.GetIt {
         remoteDataSource: gh<_i847.ProfileRemoteDataSource>(),
       ),
     );
+    gh.lazySingleton<_i362.HomeRemoteDataSource>(
+      () =>
+          _i362.HomeRemoteDataSource(firestore: gh<_i974.FirebaseFirestore>()),
+    );
     gh.lazySingleton<_i391.DeepLinkService>(
       () => _i391.DeepLinkService(appLinks: gh<_i327.AppLinks>()),
     );
@@ -228,9 +232,6 @@ extension GetItInjectableX on _i174.GetIt {
         firestore: gh<_i974.FirebaseFirestore>(),
         firebaseAuth: gh<_i59.FirebaseAuth>(),
       ),
-    );
-    gh.lazySingleton<_i362.HomeRemoteDataSource>(
-      () => _i362.HomeRemoteDataSource(firestore: gh<_i974.FirebaseFirestore>()),
     );
     gh.lazySingleton<_i951.NotificationsRemoteDataSource>(
       () => _i951.NotificationsRemoteDataSource(
@@ -333,12 +334,6 @@ extension GetItInjectableX on _i174.GetIt {
         settingsRepository: gh<_i674.SettingsRepository>(),
       ),
     );
-    gh.factory<_i305.ChatCubit>(
-      () => _i305.ChatCubit(chatRepository: gh<_i420.ChatRepository>()),
-    );
-    gh.factory<_i22.NewMessageCubit>(
-      () => _i22.NewMessageCubit(chatRepository: gh<_i420.ChatRepository>()),
-    );
     gh.factory<_i192.GameCubit>(
       () => _i192.GameCubit(
         gameRepository: gh<_i32.GameRepository>(),
@@ -346,7 +341,15 @@ extension GetItInjectableX on _i174.GetIt {
         agoraService: gh<_i890.AgoraService>(),
         audioService: gh<_i15.AudioService>(),
         heartbeatService: gh<_i19.StreamHeartbeatService>(),
+        notFoundRetryDelay: gh<Duration>(),
+        maxNotFoundRetries: gh<int>(),
       ),
+    );
+    gh.factory<_i305.ChatCubit>(
+      () => _i305.ChatCubit(chatRepository: gh<_i420.ChatRepository>()),
+    );
+    gh.factory<_i22.NewMessageCubit>(
+      () => _i22.NewMessageCubit(chatRepository: gh<_i420.ChatRepository>()),
     );
     return this;
   }

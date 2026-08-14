@@ -63,5 +63,40 @@ void main() {
         expect(AuthValidators.normalizeUsername('USER123'), 'user123');
       });
     });
+
+    group('validateEmail', () {
+      test('returns email_required for null or empty input', () {
+        expect(AuthValidators.validateEmail(null), 'email_required');
+        expect(AuthValidators.validateEmail('   '), 'email_required');
+      });
+
+      test('returns email_invalid for malformed addresses', () {
+        expect(AuthValidators.validateEmail('not-an-email'), 'email_invalid');
+        expect(AuthValidators.validateEmail('a@b'), 'email_invalid');
+        expect(AuthValidators.validateEmail('a@.com'), 'email_invalid');
+        expect(AuthValidators.validateEmail('@bloot.app'), 'email_invalid');
+      });
+
+      test('returns null for valid addresses', () {
+        expect(AuthValidators.validateEmail('reviewer@bloot.app'), isNull);
+        expect(AuthValidators.validateEmail('  a.b+tag@example.co  '), isNull);
+      });
+    });
+
+    group('validatePassword', () {
+      test('returns password_required for null or empty input', () {
+        expect(AuthValidators.validatePassword(null), 'password_required');
+        expect(AuthValidators.validatePassword(''), 'password_required');
+      });
+
+      test('returns password_too_short for short passwords', () {
+        expect(AuthValidators.validatePassword('12345'), 'password_too_short');
+      });
+
+      test('returns null for valid passwords', () {
+        expect(AuthValidators.validatePassword('123456'), isNull);
+        expect(AuthValidators.validatePassword('BlootReview2026!'), isNull);
+      });
+    });
   });
 }

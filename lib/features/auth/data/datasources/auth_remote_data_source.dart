@@ -29,6 +29,19 @@ class AuthRemoteDataSource {
   final FirebaseFunctions _functions;
   final FirebaseStorage _storage;
 
+  /// Display name provided by the identity provider during the last sign-in
+  /// (Sign in with Apple returns it only on the first authorization). Used to
+  /// pre-fill the complete-profile form so users are not asked to re-enter
+  /// information the provider already supplied (App Store guideline 4).
+  String? _pendingPrefillDisplayName;
+
+  /// Returns the pending pre-fill display name once, then clears it.
+  String? consumePrefillDisplayName() {
+    final value = _pendingPrefillDisplayName;
+    _pendingPrefillDisplayName = null;
+    return value;
+  }
+
   Future<UserModel?> signInWithGoogle() async {
     try {
       AppLogger.info('Starting Google Sign In', tag: 'Auth');
@@ -48,6 +61,10 @@ class AuthRemoteDataSource {
 
       await _firebaseAuth.signInWithCredential(credential);
       AppLogger.info('Google Sign In successful', tag: 'Auth');
+      _pendingPrefillDisplayName =
+          _firebaseAuth.currentUser?.displayName?.trim().isNotEmpty == true
+              ? _firebaseAuth.currentUser!.displayName!.trim()
+              : null;
       // Force a server read so we never decide profile completeness from stale
       // local cache after a logout/re-login cycle.
       return getCurrentUser(forceServer: true);
@@ -93,6 +110,17 @@ class AuthRemoteDataSource {
 
       await _firebaseAuth.signInWithCredential(oauthCredential);
       AppLogger.info('Apple Sign In successful', tag: 'Auth');
+      // Apple only returns the user's name on the very first authorization,
+      // so fall back to the Firebase profile name when it is absent.
+      final appleName = [credential.givenName, credential.familyName]
+          .where((part) => part != null && part.trim().isNotEmpty)
+          .map((part) => part!.trim())
+          .join(' ');
+      _pendingPrefillDisplayName = appleName.isNotEmpty
+          ? appleName
+          : (_firebaseAuth.currentUser?.displayName?.trim().isNotEmpty == true
+              ? _firebaseAuth.currentUser!.displayName!.trim()
+              : null);
       // Force a server read so we never decide profile completeness from stale
       // local cache after a logout/re-login cycle.
       return getCurrentUser(forceServer: true);
@@ -116,6 +144,49 @@ class AuthRemoteDataSource {
       throw const AuthException(
         'Apple sign in failed. Please try again.',
         code: 'APPLE_SIGN_IN_ERROR',
+      );
+    }
+  }
+
+  Future<UserModel?> signInWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      AppLogger.info('Starting Email Sign In', tag: 'Auth');
+      await _firebaseAuth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+      AppLogger.info('Email Sign In successful', tag: 'Auth');
+      _pendingPrefillDisplayName =
+          _firebaseAuth.currentUser?.displayName?.trim().isNotEmpty == true
+              ? _firebaseAuth.currentUser!.displayName!.trim()
+              : null;
+      // Force a server read so we never decide profile completeness from stale
+      // local cache after a logout/re-login cycle.
+      return getCurrentUser(forceServer: true);
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      AppLogger.error('Email sign in failed', error: e, tag: 'Auth');
+      final message = switch (e.code) {
+        'user-not-found' ||
+        'wrong-password' ||
+        'invalid-credential' =>
+          'Incorrect email or password. Please try again.',
+        'invalid-email' => 'Please enter a valid email address.',
+        'user-disabled' => 'This account has been disabled.',
+        'too-many-requests' =>
+          'Too many attempts. Please try again later.',
+        'network-request-failed' =>
+          'No internet connection. Please try again.',
+        _ => e.message ?? 'Email sign in failed. Please try again.',
+      };
+      throw AuthException(message, code: e.code);
+    } catch (e) {
+      AppLogger.error('Email sign in failed', error: e, tag: 'Auth');
+      throw const AuthException(
+        'Email sign in failed. Please try again.',
+        code: 'EMAIL_SIGN_IN_ERROR',
       );
     }
   }

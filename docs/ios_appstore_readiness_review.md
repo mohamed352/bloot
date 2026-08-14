@@ -4,6 +4,8 @@
 **Verdict: ❌ NOT ready for iOS production / App Store submission.**
 There are **3 launch-crash blockers**, **1 guaranteed rejection issue**, and several required fixes before upload.
 
+> **Update 2026-08-14:** see "Rejection round 2 (2026-08-14)" at the bottom for the latest App Review rejection and its resolution.
+
 ---
 
 ## 🔴 CRITICAL — App will crash or fail to build on iOS
@@ -118,3 +120,29 @@ Your app has live streams, voice/video rooms and chat = user-generated content. 
 10. [ ] Test full flow on a real iPhone: Apple sign-in, Google sign-in, voice room (background test), push, account deletion
 11. [ ] App Store Connect: 17+ rating, privacy policy URL, privacy nutrition label
 12. [ ] Deploy new backend: `firebase deploy --only firestore:rules,functions` (block feature + new rules)
+
+
+---
+
+## Rejection round 2 (2026-08-14) — App Review on build 1.0 (19)
+
+Apple rejected the resubmission with three issues. Resolution implemented on 2026-08-14:
+
+### 1. Guideline 4 (Design) — Sign in with Apple re-asks for the user's name
+- **Issue:** The app requested `fullName`/`email` scopes but discarded them; first-time Apple users had to type a display name on the complete-profile screen.
+- **Fix (code):** `auth_remote_data_source.dart` now captures `givenName`/`familyName` from the Apple credential (with a Firebase profile-name fallback for Google/Apple re-auths), exposes it via `consumePrefillDisplayName()`, and `AuthCubit` carries it in `AuthState.profileRequired.prefilledDisplayName`. `CompleteProfilePage` pre-fills the display-name field from it. Username and the ToS checkbox are still asked — Apple does not provide a username and the app requires one for chat/search, so this is compliant.
+
+### 2. Guideline 2.5.4 (Performance) — `audio` in UIBackgroundModes
+- **Issue:** Reviewers found no audible content in the background.
+- **Decision:** KEEP the mode — Agora voice chat in game rooms/streams intentionally continues in background (`agora_service.dart enterBackgroundMode()`), which is a legitimate use.
+- **Fix (code):** Removed the `AVAudioSession.setActive(true)` at app launch from `AppDelegate.swift` (it made the declaration look speculative and showed the mic indicator early). Agora activates its own audio session on channel join. Also switched `aps-environment` to `production` in `Runner.entitlements`.
+- **Fix (manual, App Review reply):** Attach a physical-device screen recording showing voice continuing while the app is backgrounded (two accounts in a room; navigate to Home Screen in the recording) and reference it in the App Review Information notes.
+
+### 3. Guideline 2.1(a) (Information Needed) — demo account
+- **Issue:** No username+password demo account; the app only had social sign-in.
+- **Fix (code):** Added a visible "Sign in with Email" button on the login page → new `EmailSignInPage` (`/email-sign-in`, public route) backed by `signInWithEmailAndPassword` through `AuthRemoteDataSource.signInWithEmailPassword` → `AuthRepository.signInWithEmail` → `AuthCubit.signInWithEmail`.
+- **Fix (backend scripts):**
+  - `functions/scripts/createDemoReviewer.ts` (`npm run seed:reviewer`) — creates `reviewer@bloot.app` with a complete Firestore profile (`isProfileComplete: true`, stats, coins).
+  - `functions/scripts/seedDemoContent.ts` (`npm run seed:demo`) — seeds 3 bot users, DM conversations/messages, followers/following, and game history for the reviewer.
+- **Fix (manual, App Store Connect):** Add the demo credentials to App Review Information → Demo Account, and notes: sign in with email → Home → "Play with Bots" for a full 4-player game with live voice/chat; a live stream appears in Discover.
+- **Watch out:** verify App Check (App Attest/DeviceCheck) works on the release build so `createRoomWithBots` succeeds for the reviewer.
