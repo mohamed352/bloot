@@ -86,7 +86,7 @@ class HomeRemoteDataSource {
         final data = doc.data();
         return _mapDocToEntity(doc.id, data);
       }).toList();
-      return _filterActiveStreams(streams);
+      return await _filterActiveStreams(streams);
     } catch (e) {
       AppLogger.error('Failed to get live streams', error: e, tag: 'Home');
       return [];

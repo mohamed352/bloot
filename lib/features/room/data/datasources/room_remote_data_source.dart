@@ -669,7 +669,7 @@ class RoomRemoteDataSource {
       AppLogger.info('Joined room: $roomId', tag: 'RoomRemote');
       // Bounded await: without a timeout a stalled Firestore get() leaves
       // the invitation page's Join button loading forever.
-      return getRoomById(roomId).timeout(const Duration(seconds: 10));
+      return await getRoomById(roomId).timeout(const Duration(seconds: 10));
     } on RoomException {
       rethrow;
     } on FirebaseFunctionsException catch (e) {

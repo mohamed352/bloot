@@ -19,10 +19,10 @@ class AuthRemoteDataSource {
     required FirebaseFirestore firestore,
     required FirebaseFunctions functions,
     required FirebaseStorage storage,
-  })  : _firebaseAuth = firebaseAuth,
-        _firestore = firestore,
-        _functions = functions,
-        _storage = storage;
+  }) : _firebaseAuth = firebaseAuth,
+       _firestore = firestore,
+       _functions = functions,
+       _storage = storage;
 
   final firebase_auth.FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
@@ -46,8 +46,8 @@ class AuthRemoteDataSource {
     try {
       AppLogger.info('Starting Google Sign In', tag: 'Auth');
 
-      final GoogleSignInAccount googleUser =
-          await GoogleSignIn.instance.authenticate();
+      final GoogleSignInAccount googleUser = await GoogleSignIn.instance
+          .authenticate();
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final GoogleSignInClientAuthorization? authz = await googleUser
           .authorizationClient
@@ -55,19 +55,19 @@ class AuthRemoteDataSource {
 
       final firebase_auth.OAuthCredential credential =
           firebase_auth.GoogleAuthProvider.credential(
-        idToken: googleAuth.idToken,
-        accessToken: authz?.accessToken,
-      );
+            idToken: googleAuth.idToken,
+            accessToken: authz?.accessToken,
+          );
 
       await _firebaseAuth.signInWithCredential(credential);
       AppLogger.info('Google Sign In successful', tag: 'Auth');
       _pendingPrefillDisplayName =
           _firebaseAuth.currentUser?.displayName?.trim().isNotEmpty == true
-              ? _firebaseAuth.currentUser!.displayName!.trim()
-              : null;
+          ? _firebaseAuth.currentUser!.displayName!.trim()
+          : null;
       // Force a server read so we never decide profile completeness from stale
       // local cache after a logout/re-login cycle.
-      return getCurrentUser(forceServer: true);
+      return await getCurrentUser(forceServer: true);
     } on firebase_auth.FirebaseAuthException catch (e) {
       AppLogger.error('Google sign in failed', error: e, tag: 'Auth');
       throw AuthException(
@@ -103,10 +103,11 @@ class AuthRemoteDataSource {
         ],
       );
 
-      final oauthCredential = firebase_auth.OAuthProvider('apple.com').credential(
-        idToken: credential.identityToken,
-        accessToken: credential.authorizationCode,
-      );
+      final oauthCredential = firebase_auth.OAuthProvider('apple.com')
+          .credential(
+            idToken: credential.identityToken,
+            accessToken: credential.authorizationCode,
+          );
 
       await _firebaseAuth.signInWithCredential(oauthCredential);
       AppLogger.info('Apple Sign In successful', tag: 'Auth');
@@ -119,11 +120,11 @@ class AuthRemoteDataSource {
       _pendingPrefillDisplayName = appleName.isNotEmpty
           ? appleName
           : (_firebaseAuth.currentUser?.displayName?.trim().isNotEmpty == true
-              ? _firebaseAuth.currentUser!.displayName!.trim()
-              : null);
+                ? _firebaseAuth.currentUser!.displayName!.trim()
+                : null);
       // Force a server read so we never decide profile completeness from stale
       // local cache after a logout/re-login cycle.
-      return getCurrentUser(forceServer: true);
+      return await getCurrentUser(forceServer: true);
     } on firebase_auth.FirebaseAuthException catch (e) {
       AppLogger.error('Apple sign in failed', error: e, tag: 'Auth');
       throw AuthException(
@@ -135,10 +136,7 @@ class AuthRemoteDataSource {
       if (e.code == AuthorizationErrorCode.canceled) {
         return null;
       }
-      throw AuthException(
-        e.message,
-        code: e.code.name,
-      );
+      throw AuthException(e.message, code: e.code.name);
     } catch (e) {
       AppLogger.error('Apple sign in failed', error: e, tag: 'Auth');
       throw const AuthException(
@@ -161,24 +159,20 @@ class AuthRemoteDataSource {
       AppLogger.info('Email Sign In successful', tag: 'Auth');
       _pendingPrefillDisplayName =
           _firebaseAuth.currentUser?.displayName?.trim().isNotEmpty == true
-              ? _firebaseAuth.currentUser!.displayName!.trim()
-              : null;
+          ? _firebaseAuth.currentUser!.displayName!.trim()
+          : null;
       // Force a server read so we never decide profile completeness from stale
       // local cache after a logout/re-login cycle.
-      return getCurrentUser(forceServer: true);
+      return await getCurrentUser(forceServer: true);
     } on firebase_auth.FirebaseAuthException catch (e) {
       AppLogger.error('Email sign in failed', error: e, tag: 'Auth');
       final message = switch (e.code) {
-        'user-not-found' ||
-        'wrong-password' ||
-        'invalid-credential' =>
+        'user-not-found' || 'wrong-password' || 'invalid-credential' =>
           'Incorrect email or password. Please try again.',
         'invalid-email' => 'Please enter a valid email address.',
         'user-disabled' => 'This account has been disabled.',
-        'too-many-requests' =>
-          'Too many attempts. Please try again later.',
-        'network-request-failed' =>
-          'No internet connection. Please try again.',
+        'too-many-requests' => 'Too many attempts. Please try again later.',
+        'network-request-failed' => 'No internet connection. Please try again.',
         _ => e.message ?? 'Email sign in failed. Please try again.',
       };
       throw AuthException(message, code: e.code);
@@ -307,8 +301,9 @@ class AuthRemoteDataSource {
     if (user == null) return null;
 
     try {
-      final options =
-          forceServer ? const GetOptions(source: Source.server) : null;
+      final options = forceServer
+          ? const GetOptions(source: Source.server)
+          : null;
       final doc = await _firestore
           .collection('users')
           .doc(user.uid)
@@ -417,7 +412,7 @@ class AuthRemoteDataSource {
         file,
         SettableMetadata(contentType: 'image/jpeg'),
       );
-      return uploadTask.ref.getDownloadURL();
+      return await uploadTask.ref.getDownloadURL();
     } on FirebaseException catch (e) {
       AppLogger.error('Failed to upload avatar', error: e, tag: 'Auth');
       throw AuthException(

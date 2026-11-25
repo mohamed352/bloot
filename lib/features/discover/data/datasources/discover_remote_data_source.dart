@@ -30,7 +30,7 @@ class DiscoverRemoteDataSource {
           .get();
 
       final streams = snapshot.docs.map((doc) => _mapStreamDoc(doc)).toList();
-      return _filterActiveStreams(streams);
+      return await _filterActiveStreams(streams);
     } catch (e) {
       AppLogger.error('Failed to get discover streams', error: e);
       return [];
