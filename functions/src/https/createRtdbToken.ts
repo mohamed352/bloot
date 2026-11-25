@@ -7,7 +7,7 @@ import { requireAppCheck } from '../utils/appCheck';
  * Firebase JS SDK instance and read the low-latency Realtime Database game
  * mirror with the same UID as the native Flutter app.
  */
-export const createRtdbToken = functions.https.onCall(async (request) => {
+export const createRtdbToken = functions.https.onCall({ minInstances: 0 }, async (request) => {
   if (!request.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated');
   }

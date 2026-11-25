@@ -12,7 +12,7 @@ import {
 } from '../engine/gameAdapter';
 import { buildGameUpdate, deepCloneGame } from '../utils/gameUpdate';
 
-export const placeBid = functions.https.onCall(async (request) => {
+export const placeBid = functions.https.onCall({ minInstances: 0 }, async (request) => {
   if (!request.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated');
   }

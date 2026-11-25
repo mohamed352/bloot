@@ -17,6 +17,14 @@ abstract class GameRepository {
   /// Plays a card from the player's hand.
   Future<void> playCard(String gameId, String card);
 
+  /// Advances the game from the trickEnd pause to the next trick.
+  /// Returns the server's retry hint (ms) when called too early, else null.
+  Future<int?> advanceTrick(String gameId);
+
+  /// Asks the server to enforce a stalled turn (AFK/disconnect timeout).
+  /// Returns true when the server actually auto-played/advanced.
+  Future<bool> checkTurnTimeout(String gameId);
+
   /// Claims bonuses (Hokm only).
   Future<void> claimBonuses(String gameId, List<Map<String, dynamic>> bonuses);
 

@@ -165,7 +165,7 @@ abstract class AppInitializer {
       const googleClientId = String.fromEnvironment(
         'GOOGLE_SERVER_CLIENT_ID',
         defaultValue:
-            '738592764893-mkmgsfs9l833olurohk5ct2p9e1q0mir.apps.googleusercontent.com',
+            '920540020001-71l4ub62ro8ukt0m60eai3gpn704fg2l.apps.googleusercontent.com',
       );
       await GoogleSignIn.instance.initialize(
         serverClientId: googleClientId.isNotEmpty ? googleClientId : null,

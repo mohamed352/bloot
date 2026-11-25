@@ -28,6 +28,8 @@ class GameCubit extends Cubit<GameState> {
     // tests don't wait on real delays.
     Duration notFoundRetryDelay = const Duration(seconds: 2),
     int maxNotFoundRetries = 5,
+    Duration trickEndAdvanceDelay = const Duration(milliseconds: 2300),
+    Duration turnTimeoutGrace = const Duration(seconds: 3),
   }) : _gameRepository = gameRepository,
        _roomRepository = roomRepository,
        _agoraService = agoraService,
@@ -37,6 +39,8 @@ class GameCubit extends Cubit<GameState> {
            StreamHeartbeatService(roomRepository: roomRepository),
        _notFoundRetryDelay = notFoundRetryDelay,
        _maxNotFoundRetries = maxNotFoundRetries,
+       _trickEndAdvanceDelay = trickEndAdvanceDelay,
+       _turnTimeoutGrace = turnTimeoutGrace,
        super(const GameState.initial());
 
   final GameRepository _gameRepository;
@@ -128,20 +132,149 @@ class GameCubit extends Cubit<GameState> {
   String? _previousStatus;
   String? _lastEmittedSignature;
 
+  /// Event-driven replacement for the 1-minute autoPlay cron's trickEnd
+  /// advance: the next-to-play client's timer calls `advanceTrick` once the
+  /// trick-result pause has elapsed.
+  Timer? _trickAdvanceTimer;
+
+  /// Signature of the last turn for which a `checkTurnTimeout` call was
+  /// fired, so it goes out at most once per turn (per timer start).
+  String? _lastTurnTimeoutSignature;
+
+  /// Single-shot timer that fires `checkTurnTimeout` shortly after the
+  /// current turn exceeds its time limit, so a stalled turn is enforced even
+  /// when no further snapshots arrive.
+  Timer? _turnTimeoutTimer;
+
+  final Duration _trickEndAdvanceDelay;
+  final Duration _turnTimeoutGrace;
+
+  void _scheduleTrickAdvance(Game game) {
+    _trickAdvanceTimer?.cancel();
+    _trickAdvanceTimer = null;
+    if (_isSpectator || _isClosed || game.status != 'trickEnd') return;
+    // Only the next-to-play player's client triggers the advance; the server
+    // guards against duplicates and the cron remains a fallback.
+    if (game.mySeatIndex != game.turnIndex) return;
+    final gameId = game.id;
+    _trickAdvanceTimer = Timer(
+      _trickEndAdvanceDelay,
+      () => _fireAdvanceTrick(gameId, attempt: 0),
+    );
+  }
+
+  static const int _maxAdvanceAttempts = 3;
+
+  Future<void> _fireAdvanceTrick(String gameId, {required int attempt}) async {
+    if (_isClosed) return;
+    try {
+      final retryAfterMs = await _gameRepository.advanceTrick(gameId);
+      // Server says the trick-end pause hasn't fully elapsed (custom
+      // trickEndDelayMs longer than the client default): retry once per hint.
+      if (retryAfterMs != null &&
+          retryAfterMs > 0 &&
+          attempt + 1 < _maxAdvanceAttempts &&
+          !_isClosed) {
+        _trickAdvanceTimer = Timer(
+          Duration(milliseconds: retryAfterMs + 200),
+          () => _fireAdvanceTrick(gameId, attempt: attempt + 1),
+        );
+      }
+    } catch (e) {
+      AppLogger.warning('advanceTrick failed (cron fallback remains): $e');
+    }
+  }
+
+  /// Event-driven AFK enforcement: when a fresh snapshot shows the current
+  /// turn has already exceeded the server's turn time limit, fire ONE
+  /// `checkTurnTimeout` call instead of waiting for the 1-minute cron.
+  /// Deduped by (status, turnIndex, turnTimerStart) so it fires at most once
+  /// per turn; the server re-checks inside a transaction, so races with the
+  /// cron or other clients are harmless.
+  void _maybeCheckTurnTimeout(Game game) {
+    if (_isSpectator || _isClosed) return;
+    if (game.status != 'bidding' && game.status != 'playing') return;
+    final timerStart = game.turnTimerStart;
+    if (timerStart == null) return;
+    final limitSeconds = game.turnTimeLimit > 0 ? game.turnTimeLimit : 45;
+    final elapsed = DateTime.now().difference(timerStart);
+    if (elapsed < Duration(seconds: limitSeconds)) return;
+    final signature =
+        '${game.id}|${game.status}|${game.turnIndex}|'
+        '${timerStart.millisecondsSinceEpoch}';
+    if (_lastTurnTimeoutSignature == signature) return;
+    _lastTurnTimeoutSignature = signature;
+    _fireCheckTurnTimeout(game.id);
+  }
+
+  /// Schedules [_fireCheckTurnTimeout] for `turnTimeLimit + grace` measured
+  /// from `turnTimerStart`. Cancelled/rescheduled on every new state; if the
+  /// state has advanced in the meantime the signature no longer matches and
+  /// the fire is skipped. The server re-checks inside a transaction, so a
+  /// stale fire is harmless.
+  void _scheduleTurnTimeoutCheck(Game game) {
+    _turnTimeoutTimer?.cancel();
+    _turnTimeoutTimer = null;
+    if (_isSpectator || _isClosed) return;
+    if (game.status != 'bidding' && game.status != 'playing') return;
+    final timerStart = game.turnTimerStart;
+    if (timerStart == null) return;
+    final limitSeconds = game.turnTimeLimit > 0 ? game.turnTimeLimit : 45;
+    final deadline = Duration(seconds: limitSeconds) + _turnTimeoutGrace;
+    final elapsed = DateTime.now().difference(timerStart);
+    // Already overdue: _maybeCheckTurnTimeout handles it immediately.
+    if (elapsed >= deadline) return;
+    final signature =
+        '${game.id}|${game.status}|${game.turnIndex}|'
+        '${timerStart.millisecondsSinceEpoch}';
+    if (_lastTurnTimeoutSignature == signature) return;
+    final gameId = game.id;
+    _turnTimeoutTimer = Timer(deadline - elapsed, () {
+      if (_isClosed || _lastTurnTimeoutSignature == signature) return;
+      _lastTurnTimeoutSignature = signature;
+      _fireCheckTurnTimeout(gameId);
+    });
+  }
+
+  Future<void> _fireCheckTurnTimeout(String gameId) async {
+    if (_isClosed) return;
+    try {
+      await _gameRepository.checkTurnTimeout(gameId);
+    } catch (e) {
+      AppLogger.warning('checkTurnTimeout failed (cron fallback remains): $e');
+    }
+  }
+
   String _gameSignature(Game game) {
     final trick = game.currentTrick;
     final trickSig = trick == null
         ? ''
-        : trick.cards.entries.map((e) => '${e.key}:${e.value}').join(',');
+        : '${trick.trickNumber}|${trick.winnerSeat}|'
+              '${trick.cards.entries.map((e) => '${e.key}:${e.value}').join(',')}';
+    // Include bids, media and connection flags, and tricks won: snapshots
+    // where only these change used to be silently skipped, leaving the UI
+    // stale (e.g. mic/camera toggles or bids never rendering).
+    final playersSig = game.players
+        .map(
+          (p) =>
+              '${p.seatIndex}:${p.bid}|${p.isMuted}|${p.hasCamera}|${p.isConnected}|${p.tricksWon}',
+        )
+        .join(',');
     return '${game.status}|${game.turnIndex}|${game.scoreUs}|${game.scoreThem}|'
         '${game.teamAScore}|${game.teamBScore}|${game.currentRound}|'
-        '${game.myHand.join(',')}|$trickSig';
+        '${game.trump}|${game.dealerIndex}|${game.faceUpCard}|${game.biddingTeam}|'
+        '${game.myHand.join(',')}|$trickSig|$playersSig|${game.projects.length}';
   }
 
   void _emitStateForGame(Game game) {
     final current = state;
     final previousStatus = _previousStatus;
     _previousStatus = game.status;
+
+    // Runs before the signature dedup below: turnTimerStart changes are
+    // timer-only updates that must not trigger a re-emit, but a stalled turn
+    // should still be reported exactly once.
+    _maybeCheckTurnTimeout(game);
 
     // Skip emitting an identical game state to avoid rebuilding the WebView host
     // and re-encoding the engine state on every Firestore timestamp update.
@@ -152,6 +285,8 @@ class GameCubit extends Cubit<GameState> {
     }
     _lastEmittedSignature = signature;
 
+    _scheduleTrickAdvance(game);
+    _scheduleTurnTimeoutCheck(game);
     _joinAgoraIfNeeded(game);
     _syncStreamHeartbeat(game);
     _playSoundsForTransition(previousStatus, game);
@@ -761,6 +896,8 @@ class GameCubit extends Cubit<GameState> {
     if (_isClosed) return super.close();
     _isClosed = true;
 
+    _trickAdvanceTimer?.cancel();
+    _turnTimeoutTimer?.cancel();
     await _gameSubscription?.cancel();
     humanTurnSecondsLeft.dispose();
 

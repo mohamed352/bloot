@@ -51,6 +51,8 @@ export { claimSawa } from './https/claimSawa';
 export { dealNextRound } from './https/dealNextRound';
 export { createRtdbToken } from './https/createRtdbToken';
 export { autoPlay } from './https/autoPlay';
+export { advanceTrick } from './https/advanceTrick';
+export { checkTurnTimeout } from './https/checkTurnTimeout';
 export { rematch } from './https/rematch';
 export { createRoomWithBots, inviteBotsToRoom } from './https/botRoom';
 export { leaveGame } from './https/leaveGame';
@@ -150,7 +152,7 @@ async function verifyChannelAccess(
     derivedRoomId ? db.collection('rooms').doc(derivedRoomId).get() : Promise.resolve(null),
     db.collection('rooms').where('agoraChannelName', '==', channelName).limit(1).get(),
     db.collection('games').where('agoraChannelName', '==', channelName).limit(1).get(),
-    db.collection('streams').where('agoraChannelName', '==', channelName).get(),
+    db.collection('streams').where('agoraChannelName', '==', channelName).limit(1).get(),
   ]);
 
   if (roomById?.exists && isRoomParticipant(authUid, roomById.data()!)) {
@@ -246,6 +248,7 @@ export const generateAgoraToken = functions.https.onCall(
   {
     secrets: [APP_CERTIFICATE],
     cors: true,
+    minInstances: 0,
   },
   async (request) => {
     if (!request.auth) {

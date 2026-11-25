@@ -32,9 +32,23 @@ class NotificationService {
 
   bool _initialized = false;
 
+  /// Holds the notification that cold-started the app until a listener is
+  /// ready. [initialize] runs before `runApp`, so pushing this into the
+  /// broadcast stream would drop it (no subscribers yet) and an invite tap
+  /// on a killed app would do nothing.
+  RemoteMessage? _pendingInitialMessage;
+
   Stream<RemoteMessage> get onMessage => _onMessageController.stream;
   Stream<RemoteMessage> get onMessageOpenedApp =>
       _onMessageOpenedAppController.stream;
+
+  /// Returns the notification that launched the app from a terminated state,
+  /// exactly once. Call after subscribing to [onMessageOpenedApp].
+  RemoteMessage? takeInitialMessage() {
+    final message = _pendingInitialMessage;
+    _pendingInitialMessage = null;
+    return message;
+  }
 
   Future<void> initialize() async {
     if (_initialized) return;
@@ -95,12 +109,11 @@ class NotificationService {
       _onMessageOpenedAppController.add(message);
     });
 
-    // Check if app was opened from terminated state via notification
+    // Check if app was opened from terminated state via notification.
+    // Buffer it (instead of emitting) because subscribers only attach after
+    // runApp; a broadcast stream would silently drop this event.
     try {
-      final initialMessage = await _messaging.getInitialMessage();
-      if (initialMessage != null) {
-        _onMessageOpenedAppController.add(initialMessage);
-      }
+      _pendingInitialMessage = await _messaging.getInitialMessage();
     } catch (e) {
       AppLogger.warning('Failed to get initial FCM message: $e', tag: 'FCM');
     }
@@ -141,9 +154,19 @@ class NotificationService {
     if (user == null) return;
 
     try {
-      await _firestore.collection('users').doc(user.uid).update({
+      final userDoc = _firestore.collection('users').doc(user.uid);
+      // Legacy single-token field kept for backward compatibility with older
+      // app versions and any server code that still reads it.
+      await userDoc.update({
         'fcmToken': token,
         'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
+      });
+      // Multi-device support: one doc per device token so a user signed in on
+      // both Android and iOS receives pushes on all their devices. The token
+      // itself is a valid Firestore doc id (no '/'), so use it as the key.
+      await userDoc.collection('fcmTokens').doc(token).set({
+        'token': token,
+        'updatedAt': FieldValue.serverTimestamp(),
       });
       AppLogger.info('FCM token saved', tag: 'FCM');
     } catch (e) {

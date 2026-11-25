@@ -21,6 +21,9 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Stream<List<ChatMessage>> watchMessages(String conversationId) {
+    // Re-opening a conversation restarts "load older" paging from the live
+    // window, so drop any cursor left over from a previous session.
+    _remoteDataSource.resetMessageCursor(conversationId);
     return _remoteDataSource
         .watchMessages(conversationId)
         .map((models) => models.map((m) => m.toEntity()).toList());
@@ -29,6 +32,17 @@ class ChatRepositoryImpl implements ChatRepository {
   @override
   Future<List<ChatMessage>> getMessages(String conversationId) async {
     final models = await _remoteDataSource.getMessages(conversationId);
+    return models.map((m) => m.toEntity()).toList();
+  }
+
+  @override
+  Future<List<ChatMessage>> getOlderMessages(String conversationId) async {
+    final cursor = _remoteDataSource.oldestMessageDoc(conversationId);
+    if (cursor == null) return [];
+    final models = await _remoteDataSource.fetchOlderMessages(
+      conversationId,
+      startAfter: cursor,
+    );
     return models.map((m) => m.toEntity()).toList();
   }
 

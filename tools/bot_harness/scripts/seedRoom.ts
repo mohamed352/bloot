@@ -33,7 +33,7 @@ function positionalCode(): string | undefined {
 }
 
 const inviteCode = (parseArg('--code') || parseArg('-c') || positionalCode() || 'TEST12').toUpperCase();
-const projectId = parseArg('--project') || 'bloot-89b2b';
+const projectId = parseArg('--project') || 'bloot-42242';
 const apiKey = parseArg('--apiKey');
 const emulatorHost = parseArg('--host') || 'localhost';
 const useEmulator = args.includes('--emulator');

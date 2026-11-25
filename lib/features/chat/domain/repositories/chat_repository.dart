@@ -14,6 +14,10 @@ abstract class ChatRepository {
   /// Returns messages for the given [conversationId] (one-shot, mocked fallback).
   Future<List<ChatMessage>> getMessages(String conversationId);
 
+  /// Returns the next page of older messages for [conversationId]
+  /// (newest first), continuing from the live window's oldest message.
+  Future<List<ChatMessage>> getOlderMessages(String conversationId);
+
   /// Sends a [message] to [conversationId].
   Future<void> sendMessage(String conversationId, String message);
 

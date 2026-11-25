@@ -12,7 +12,7 @@ import * as admin from 'firebase-admin';
 //
 // Override with FUNCTIONS_SERVICE_ACCOUNT if the runtime identity ever changes.
 const DEFAULT_RUNTIME_SERVICE_ACCOUNT =
-  '738592764893-compute@developer.gserviceaccount.com';
+  '920540020001-compute@developer.gserviceaccount.com';
 
 admin.initializeApp({
   serviceAccountId:
@@ -21,5 +21,5 @@ admin.initializeApp({
 
 export const db = admin.firestore();
 export const auth = admin.auth();
-export const rtdb = admin.app().database('https://bloot-89b2b-default-rtdb.firebaseio.com/');
+export const rtdb = admin.app().database('https://bloot-42242-default-rtdb.firebaseio.com/');
 export { admin };

@@ -76,9 +76,9 @@ pass to ship a production-ready app and backend.
 
 1. In the Firebase Console, go to **Project settings > Service accounts**.
 2. Click **Generate new private key** for the `firebase-adminsdk` service account.
-3. Save the downloaded JSON as `env/bloot-89b2b-firebase-adminsdk-fbsvc-b70047e82d.json`.
+3. Save the downloaded JSON as `env/bloot-42242-firebase-adminsdk.json`.
    - This file is ignored by `.gitignore` and must never be committed.
-   - `env/bloot-89b2b-firebase-adminsdk.json.template` shows the expected shape.
+   - `env/bloot-42242-firebase-adminsdk.json.template` shows the expected shape.
 4. (Optional) Add the tester emails you want in `android/fastlane/Fastfile` under
    the `testers:` option.
 
@@ -92,15 +92,15 @@ bundle exec fastlane android distribute
 ```
 
 This lane runs `flutter clean`, builds a release APK, and uploads it to Firebase
-App Distribution using the service account in `env/bloot-89b2b-firebase-adminsdk.json`.
+App Distribution using the service account in `env/bloot-42242-firebase-adminsdk.json`.
 
 ### Manual builds
 
 ```bash
 # Flutter (the dart-define is required: google_sign_in v7 fails on Android
 # without a serverClientId — Play rejected a build over this)
-flutter build apk --release --dart-define=GOOGLE_SERVER_CLIENT_ID=738592764893-mkmgsfs9l833olurohk5ct2p9e1q0mir.apps.googleusercontent.com
-flutter build appbundle --release --dart-define=GOOGLE_SERVER_CLIENT_ID=738592764893-mkmgsfs9l833olurohk5ct2p9e1q0mir.apps.googleusercontent.com
+flutter build apk --release --dart-define=GOOGLE_SERVER_CLIENT_ID=920540020001-71l4ub62ro8ukt0m60eai3gpn704fg2l.apps.googleusercontent.com
+flutter build appbundle --release --dart-define=GOOGLE_SERVER_CLIENT_ID=920540020001-71l4ub62ro8ukt0m60eai3gpn704fg2l.apps.googleusercontent.com
 
 # iOS (macOS only)
 flutter build ios --release

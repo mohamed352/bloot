@@ -13,5 +13,10 @@
 	<!-- Push notifications -->
 	<key>aps-environment</key>
 	<string>production</string>
+	<!-- Universal Links: lets https://bloot.app/room-invite/<id> open the app -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:bloot.app</string>
+	</array>
 </dict>
 </plist>

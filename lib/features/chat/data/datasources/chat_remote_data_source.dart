@@ -20,6 +20,12 @@ class ChatRemoteDataSource {
 
   String? get _uid => _firebaseAuth.currentUser?.uid;
 
+  /// Pagination cursor for "load older": the oldest message document seen
+  /// per conversation. Seeded by the live [watchMessages] window and
+  /// advanced by [fetchOlderMessages].
+  final _oldestMessageDocs =
+      <String, DocumentSnapshot<Map<String, dynamic>>>{};
+
   Future<List<ChatConversationModel>> getConversations() async {
     try {
       final uid = _uid;
@@ -84,13 +90,68 @@ class ChatRemoteDataSource {
         .orderBy('createdAt', descending: true)
         .limit(100)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map(_mapMessageDoc).toList())
+        .map((snapshot) {
+          if (snapshot.docs.isNotEmpty) {
+            // Seed the pagination cursor from the live window only; once the
+            // user pages back, [fetchOlderMessages] owns the cursor.
+            _oldestMessageDocs.putIfAbsent(
+              conversationId,
+              () => snapshot.docs.last,
+            );
+          }
+          return snapshot.docs.map(_mapMessageDoc).toList();
+        })
         .handleError((Object e) {
           AppLogger.error(
             'Failed to watch messages for $conversationId',
             error: e,
           );
         });
+  }
+
+  /// Clears the "load older" pagination cursor for [conversationId].
+  /// Called when a conversation is (re)opened so paging always continues
+  /// from the live window, not from a stale cursor of a previous session.
+  void resetMessageCursor(String conversationId) {
+    _oldestMessageDocs.remove(conversationId);
+  }
+
+  /// The current "load older" pagination cursor for [conversationId], or
+  /// null when no messages have been loaded yet.
+  DocumentSnapshot<Map<String, dynamic>>? oldestMessageDoc(
+    String conversationId,
+  ) => _oldestMessageDocs[conversationId];
+
+  /// Fetches the page of messages older than [startAfter] for
+  /// [conversationId] (newest first, like [watchMessages]). Advances the
+  /// pagination cursor to the oldest fetched document.
+  Future<List<ChatMessageModel>> fetchOlderMessages(
+    String conversationId, {
+    required DocumentSnapshot<Map<String, dynamic>> startAfter,
+    int limit = 50,
+  }) async {
+    try {
+      final snapshot = await _firestore
+          .collection('conversations')
+          .doc(conversationId)
+          .collection('messages')
+          .where('participantUids', arrayContains: _uid)
+          .orderBy('createdAt', descending: true)
+          .startAfterDocument(startAfter)
+          .limit(limit)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        _oldestMessageDocs[conversationId] = snapshot.docs.last;
+      }
+      return snapshot.docs.map(_mapMessageDoc).toList();
+    } catch (e) {
+      AppLogger.error(
+        'Failed to fetch older messages for $conversationId',
+        error: e,
+      );
+      return [];
+    }
   }
 
   ChatMessageModel _mapMessageDoc(DocumentSnapshot<Map<String, dynamic>> doc) {

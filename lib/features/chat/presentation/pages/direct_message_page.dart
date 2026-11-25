@@ -36,6 +36,7 @@ class DirectMessagePage extends StatefulWidget {
 class _DirectMessagePageState extends State<DirectMessagePage> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _inputFocusNode = FocusNode();
+  final ScrollController _scrollController = ScrollController();
   late final Stream<Set<String>> _blockedUserIdsStream;
 
   String? get _currentUid =>
@@ -58,9 +59,20 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
   void initState() {
     super.initState();
     _blockedUserIdsStream = getIt<ModerationRepository>().watchBlockedUserIds();
+    _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _inputFocusNode.unfocus();
     });
+  }
+
+  /// The list is reversed, so approaching `maxScrollExtent` means the user
+  /// scrolled to the top of the loaded history: fetch the next older page.
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 200) {
+      context.read<ChatCubit>().loadOlderMessages(widget.conversationId);
+    }
   }
 
   void _sendMessage() {
@@ -105,6 +117,7 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
   void dispose() {
     _controller.dispose();
     _inputFocusNode.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -202,6 +215,7 @@ class _DirectMessagePageState extends State<DirectMessagePage> {
                   Expanded(
                     child: ListView.builder(
                       reverse: true,
+                      controller: _scrollController,
                       padding: const EdgeInsets.all(AppSpacing.lg),
                       itemCount: messages.length + 1,
                       itemBuilder: (context, index) {

@@ -2,7 +2,7 @@
   Seed the Firestore games/sim_1 document used for emulator smoke tests.
 
   Run from the functions directory with the service account env var set:
-    GOOGLE_APPLICATION_CREDENTIALS=../env/bloot-89b2b-firebase-adminsdk-fbsvc-b70047e82d.json \
+    GOOGLE_APPLICATION_CREDENTIALS=../env/bloot-42242-firebase-adminsdk.json \
       node scripts/seed_sim_1.js
 */
 

@@ -20,7 +20,7 @@ export function isTerminalGameForBotAutoPlay(game: {
 export const botAutoPlay = onDocumentWritten(
   {
     document: 'games/{gameId}',
-    maxInstances: 10,
+    maxInstances: 20,
   },
   async (event) => {
     const after = event.data?.after;
@@ -40,7 +40,9 @@ export const botAutoPlay = onDocumentWritten(
 
     if (!player?.isBot) return;
 
-    await sleep(1000);
+    // A short pause keeps bot moves readable for humans without adding a full
+    // second of dead time to every bot turn.
+    await sleep(250);
 
     try {
       await db.runTransaction(async (transaction) => {

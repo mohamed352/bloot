@@ -48,11 +48,35 @@ export function buildRtdbGameValue(game: GameDocument): RtdbGameValue {
 /**
  * Writes a game's current state to the RTDB mirror.
  * Admin SDK writes bypass RTDB security rules.
+ *
+ * When [previous] is provided (the Firestore before-image), only top-level
+ * keys that actually changed are written via update(), and the write is
+ * skipped entirely when nothing meaningful changed (e.g. media-flag-only
+ * updates that used to re-ship the full engineState to every client).
  */
-export async function mirrorGameToRtdb(game: GameDocument): Promise<void> {
+export async function mirrorGameToRtdb(
+  game: GameDocument,
+  previous?: GameDocument | null,
+): Promise<void> {
   if (!game?.id) return;
   try {
-    await rtdb.ref(`${GAMES_REF}/${game.id}`).set(buildRtdbGameValue(game));
+    const next = buildRtdbGameValue(game);
+    if (previous) {
+      const prev = buildRtdbGameValue(previous);
+      const diff: Record<string, unknown> = {};
+      for (const key of Object.keys(next) as (keyof RtdbGameValue)[]) {
+        if (key === 'updatedAt') continue;
+        if (JSON.stringify(next[key]) !== JSON.stringify(prev[key])) {
+          diff[key] = next[key];
+        }
+      }
+      // Nothing the WebView cares about changed; avoid a fan-out write.
+      if (Object.keys(diff).length === 0) return;
+      diff.updatedAt = next.updatedAt;
+      await rtdb.ref(`${GAMES_REF}/${game.id}`).update(diff);
+      return;
+    }
+    await rtdb.ref(`${GAMES_REF}/${game.id}`).set(next);
   } catch (e) {
     console.error(`[rtdbMirror] failed to mirror game ${game.id}:`, e);
   }

@@ -59,6 +59,31 @@ class GameRemoteDataSource {
     await callable.call<Map<String, dynamic>>({'gameId': gameId, 'card': card});
   }
 
+  /// Calls the Cloud Function to enforce a stalled turn (AFK/disconnect)
+  /// or an overdue trickEnd advance. Event-driven replacement for waiting on
+  /// the 1-minute autoPlay cron; the server re-checks inside a transaction,
+  /// so duplicate calls are harmless. Returns true when the server acted.
+  Future<bool> checkTurnTimeout(String gameId) async {
+    final callable = _functions.httpsCallable('checkTurnTimeout');
+    final result = await callable.call<Map<String, dynamic>>({
+      'gameId': gameId,
+    });
+    return result.data['acted'] as bool? ?? false;
+  }
+
+  /// Calls the Cloud Function to advance from trickEnd to the next trick.
+  /// Used as an event-driven replacement for the slow 1-minute cron; the
+  /// server guards against duplicates, so failures here are safe to ignore.
+  /// Returns the server's retry hint (ms) when the trick-end pause has not
+  /// fully elapsed yet, otherwise null.
+  Future<int?> advanceTrick(String gameId) async {
+    final callable = _functions.httpsCallable('advanceTrick');
+    final result = await callable.call<Map<String, dynamic>>({
+      'gameId': gameId,
+    });
+    return (result.data['retryAfterMs'] as num?)?.toInt();
+  }
+
   /// Calls the Cloud Function to claim bonuses (Hokm only).
   Future<void> claimBonuses(
     String gameId,
@@ -229,6 +254,8 @@ class GameRemoteDataSource {
       voiceEnabled: data['voiceEnabled'] as bool? ?? false,
       cameraEnabled: data['cameraEnabled'] as bool? ?? false,
       engineState: data['engineState'] as Map<String, dynamic>?,
+      turnTimerStart: (data['turnTimerStart'] as Timestamp?)?.toDate(),
+      turnTimeLimit: (data['turnTimeLimit'] as num?)?.toInt() ?? 45,
     );
   }
 }

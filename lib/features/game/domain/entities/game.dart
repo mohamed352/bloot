@@ -92,6 +92,8 @@ class Game {
     this.voiceEnabled = false,
     this.cameraEnabled = false,
     this.engineState,
+    this.turnTimerStart,
+    this.turnTimeLimit = 45,
   });
 
   final String id;
@@ -133,6 +135,13 @@ class Game {
   final bool voiceEnabled;
   final bool cameraEnabled;
   final Map<String, dynamic>? engineState;
+
+  /// Server timestamp of when the current turn (or trickEnd pause) started.
+  /// Used by the client to detect a stalled turn and ping `checkTurnTimeout`.
+  final DateTime? turnTimerStart;
+
+  /// Turn time limit in seconds (server field; defaults to 45).
+  final int turnTimeLimit;
 
   /// Returns true if it's the local player's turn.
   bool get isMyTurn => turnIndex == mySeatIndex;
@@ -203,6 +212,8 @@ class Game {
     String? agoraChannelName,
     bool? voiceEnabled,
     bool? cameraEnabled,
+    DateTime? turnTimerStart,
+    int? turnTimeLimit,
   }) {
     return Game(
       id: id ?? this.id,
@@ -230,6 +241,8 @@ class Game {
       agoraChannelName: agoraChannelName ?? this.agoraChannelName,
       voiceEnabled: voiceEnabled ?? this.voiceEnabled,
       cameraEnabled: cameraEnabled ?? this.cameraEnabled,
+      turnTimerStart: turnTimerStart ?? this.turnTimerStart,
+      turnTimeLimit: turnTimeLimit ?? this.turnTimeLimit,
       // ignore: unnecessary_this
       engineState: engineState ?? this.engineState,
     );

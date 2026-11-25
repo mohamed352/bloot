@@ -40,7 +40,7 @@ interface RoomPlayerData {
  * 4-player flow against real Firestore data.
  */
 export const createRoomWithBots = functions.https.onCall(
-  { enforceAppCheck: false },
+  { enforceAppCheck: false, minInstances: 0 },
   async (request) => {
   console.log('[createRoomWithBots] invoked', { uid: request.auth?.uid });
 
@@ -135,7 +135,7 @@ export const createRoomWithBots = functions.https.onCall(
  * and all players are ready, the game starts automatically.
  */
 export const inviteBotsToRoom = functions.https.onCall(
-  { enforceAppCheck: false },
+  { enforceAppCheck: false, minInstances: 0 },
   async (request) => {
   console.log('[inviteBotsToRoom] invoked', { uid: request.auth?.uid });
 

@@ -52,7 +52,7 @@ const inviteCode =
   parseArg('-c', args) ||
   // Fallback for PowerShell/npm users where the --code flag is parsed by npm.
   args.find((a) => !a.startsWith('-'));
-const projectId = parseArg('--project', args) || 'bloot-89b2b';
+const projectId = parseArg('--project', args) || 'bloot-42242';
 const apiKey = parseArg('--apiKey', args);
 const emulatorHost = parseArg('--host', args) || 'localhost';
 const useEmulator = args.includes('--emulator');

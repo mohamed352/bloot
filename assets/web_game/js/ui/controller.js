@@ -316,6 +316,19 @@ export async function onHumanPlay(card) {
     if (S.awaitingServerAck) return;
     setAwaitingAck();
     pushAction(S.online.code, { type: "play", seat: S.mySeat, card });
+    // Optimistic render: place the card on the table immediately instead of
+    // waiting for the full server round-trip (the perceived "lag"). The next
+    // authoritative snapshot replaces this; if the server rejects the play
+    // the snapshot simply restores the previous state.
+    try {
+      const st = S.match && S.match.state;
+      if (st && Array.isArray(st.currentTrick)) {
+        renderTrickCards([...st.currentTrick, { seat: S.mySeat, card }], S.mySeat);
+        const zone = $("trick-zone");
+        const played = zone && zone.querySelector(".bt-played-card:last-child");
+        if (played) animatePlayedCard(played);
+      }
+    } catch (e) { /* optimistic render is best-effort only */ }
     return;
   }
   await playCardFlow(S.mySeat, card);

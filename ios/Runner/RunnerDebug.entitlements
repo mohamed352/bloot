@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Sign in with Apple capability -->
+	<key>com.apple.developer.applesignin</key>
+	<array>
+		<string>Default</string>
+	</array>
+	<!-- Push notifications: debug/dev-signed builds must use the APNs
+	     development environment, otherwise getToken() fails and the device
+	     never receives invites/notifications. -->
+	<key>aps-environment</key>
+	<string>development</string>
+	<!-- Universal Links: lets https://bloot.app/room-invite/<id> open the app -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:bloot.app</string>
+	</array>
+</dict>
+</plist>

@@ -5,9 +5,9 @@
 
 $ErrorActionPreference = "Stop"
 
-$ProjectId = "bloot-89b2b"
-$ProjectNumber = "738592764893"
-$AppId = "1:738592764893:android:e9cf7172926e3a227efc34"
+$ProjectId = "bloot-42242"
+$ProjectNumber = "920540020001"
+$AppId = "1:920540020001:android:ae6207b2cf12c108119260"
 $BaseApi = "https://firebaseappdistribution.googleapis.com/v1"
 $OutputFile = Join-Path $PSScriptRoot "..\app_distribution_report.html"
 
@@ -244,7 +244,7 @@ $html = @"
 @media(max-width:640px){.header-content{flex-direction:column;align-items:flex-start}.release-header{flex-direction:column;align-items:flex-start}.release-stats{width:100%;justify-content:space-around}}
 </style></head><body>
 <div class="header"><div class="header-content"><div class="logo-area"><div class="logo-icon">B</div><h1>Bloot <span>Firebase App Distribution Report</span></h1></div>
-<div class="header-badges"><span class="badge badge-p">bloot-89b2b</span><span class="badge badge-b">Blaze Plan</span><span class="badge badge-a">Android</span></div></div></div>
+<div class="header-badges"><span class="badge badge-p">bloot-42242</span><span class="badge badge-b">Blaze Plan</span><span class="badge badge-a">Android</span></div></div></div>
 <div class="container">
 <div class="stats-grid">
 <div class="stat-card r1"><div class="stat-icon">📦</div><div class="stat-value">$($releases.Count)</div><div class="stat-label">Total Releases</div></div>
@@ -253,7 +253,7 @@ $html = @"
 <div class="stat-card r4"><div class="stat-icon">🏷️</div><div class="stat-value">$totalGroups</div><div class="stat-label">Tester Groups</div></div>
 </div>
 <div class="ai-summary"><h2>Feedback Summary <span class="ai-badge">LIVE DATA</span></h2>
-<p>Report for <strong>Bloot</strong> Android app (<code>com.bloot.app</code>), project <code>bloot-89b2b</code>. Contact: mohamedmostafa5830@gmail.com</p>
+<p>Report for <strong>Bloot</strong> Android app (<code>com.bloot.app</code>), project <code>bloot-42242</code>. Contact: mohamedmostafa5830@gmail.com</p>
 <ul>
 $aiItems</ul></div>
 <div class="section"><div class="section-title"><span class="dot r1"></span> Releases ($($releases.Count))</div>
@@ -265,7 +265,7 @@ $testersHtml</div></div>
 <div class="groups-grid">
 $groupsHtml</div></div>
 </div>
-<div class="footer">Generated on $now — Firebase App Distribution Report for Bloot (bloot-89b2b)</div>
+<div class="footer">Generated on $now — Firebase App Distribution Report for Bloot (bloot-42242)</div>
 </body></html>
 "@
 

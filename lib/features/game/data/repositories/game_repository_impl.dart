@@ -41,6 +41,16 @@ class GameRepositoryImpl implements GameRepository {
   }
 
   @override
+  Future<int?> advanceTrick(String gameId) async {
+    return _remoteDataSource.advanceTrick(gameId);
+  }
+
+  @override
+  Future<bool> checkTurnTimeout(String gameId) async {
+    return _remoteDataSource.checkTurnTimeout(gameId);
+  }
+
+  @override
   Future<void> claimBonuses(
     String gameId,
     List<Map<String, dynamic>> bonuses,

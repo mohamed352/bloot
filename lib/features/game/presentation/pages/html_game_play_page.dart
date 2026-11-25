@@ -47,6 +47,12 @@ class HtmlGamePlayPage extends StatefulWidget {
 
 class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
     with WidgetsBindingObserver {
+  /// Release builds must not log on the bridge hot path — every console
+  /// message, bridge message, and state push crosses the platform channel,
+  /// and printing them measurably adds jank/lag during gameplay.
+  static void _dbg(String message) {
+    if (kDebugMode) debugPrint(message);
+  }
   late final WebViewController _controller;
   bool _webViewReady = false;
   bool _startSent = false;
@@ -75,12 +81,12 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
       ..addJavaScriptChannel('BlootNative', onMessageReceived: _onBridgeMessage)
       ..setNavigationDelegate(
         NavigationDelegate(
-          onPageStarted: (url) => debugPrint('WebView page started: $url'),
+          onPageStarted: (url) => _dbg('WebView page started: $url'),
           onProgress: (progress) =>
-              debugPrint('WebView load progress: $progress%'),
+              _dbg('WebView load progress: $progress%'),
           onPageFinished: (_) => _onWebViewReady(),
           onWebResourceError: (error) {
-            debugPrint(
+            _dbg(
               'WebView error: ${error.description} (errorCode=${error.errorCode}, type=${error.errorType}, mainFrame=${error.isForMainFrame})',
             );
             // Only surface failures of the game page itself. Subresource
@@ -149,7 +155,7 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
       );
       _controller.loadRequest(Uri.parse('about:blank'));
     } catch (e) {
-      debugPrint('[HtmlGame] dispose cleanup error: $e');
+      _dbg('[HtmlGame] dispose cleanup error: $e');
     }
     super.dispose();
   }
@@ -166,12 +172,12 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
   }
 
   void _onConsoleMessage(JavaScriptConsoleMessage message) {
-    debugPrint('[Bloot WebView ${message.level.name}] ${message.message}');
+    _dbg('[Bloot WebView ${message.level.name}] ${message.message}');
   }
 
   Future<void> _onWebViewReady() async {
     _webViewReady = true;
-    await _runDiagnostics();
+    if (kDebugMode) await _runDiagnostics();
     await _resumeWebAudio();
     if (!mounted) return;
     _pushStartIfNeeded();
@@ -186,7 +192,7 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
         'if (window.BalootVoice && BalootVoice.resumeAudio) BalootVoice.resumeAudio();',
       );
     } catch (e) {
-      debugPrint('[HtmlGame] resumeAudio error: $e');
+      _dbg('[HtmlGame] resumeAudio error: $e');
     }
   }
 
@@ -196,7 +202,7 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
         'if (window.__bloot_ui && __bloot_ui.resetAck) __bloot_ui.resetAck();',
       );
     } catch (e) {
-      debugPrint('[HtmlGame] resetAck error: $e');
+      _dbg('[HtmlGame] resetAck error: $e');
     }
   }
 
@@ -221,19 +227,19 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
             : 'no-el'
         })
         """);
-      debugPrint('WebView diagnostics: $result');
+      _dbg('WebView diagnostics: $result');
     } catch (e) {
-      debugPrint('WebView diagnostics error: $e');
+      _dbg('WebView diagnostics error: $e');
     }
   }
 
   void _onBridgeMessage(JavaScriptMessage message) {
-    debugPrint('[BlootNative] ${message.message}');
+    _dbg('[BlootNative] ${message.message}');
     final dynamic payload;
     try {
       payload = jsonDecode(message.message);
     } catch (e) {
-      debugPrint('Invalid bridge message: ${message.message}');
+      _dbg('Invalid bridge message: ${message.message}');
       return;
     }
 
@@ -253,7 +259,7 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
     }
 
     if (type == 'rtdbActive') {
-      debugPrint('[HtmlGame] RTDB fast path confirmed by WebView');
+      _dbg('[HtmlGame] RTDB fast path confirmed by WebView');
       _rtdbActive = true;
       return;
     }
@@ -263,7 +269,7 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
       return;
     }
 
-    debugPrint('Bridge message: $payload');
+    _dbg('Bridge message: $payload');
   }
 
   void _handleAction(Map<String, dynamic> payload) {
@@ -321,7 +327,7 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
       final repo = getIt<GameRepository>();
       _rtdbToken = await repo.createRtdbToken();
     } catch (e) {
-      debugPrint('[HtmlGame] failed to get RTDB token: $e');
+      _dbg('[HtmlGame] failed to get RTDB token: $e');
     } finally {
       _rtdbAuthInProgress = false;
     }
@@ -333,9 +339,9 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
     try {
       databaseURL =
           FirebaseDatabase.instance.databaseURL ??
-          'https://bloot-89b2b-default-rtdb.firebaseio.com';
+          'https://bloot-42242-default-rtdb.firebaseio.com';
     } catch (_) {
-      databaseURL = 'https://bloot-89b2b-default-rtdb.firebaseio.com';
+      databaseURL = 'https://bloot-42242-default-rtdb.firebaseio.com';
     }
     return <String, dynamic>{
       'firebaseConfig': <String, dynamic>{
@@ -355,7 +361,7 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
 
   void _sendStart(Game game) {
     _startSent = true;
-    debugPrint(
+    _dbg(
       '[HtmlGame] sending start for ${game.id}, seat ${game.mySeatIndex}',
     );
     _send('start', <String, dynamic>{
@@ -375,7 +381,7 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
     // state push is redundant and only burns CPU/battery. Keep audio resume
     // and error clearing so the UI stays responsive.
     if (_rtdbActive) {
-      debugPrint('[HtmlGame] RTDB active; skipping bridge state push');
+      _dbg('[HtmlGame] RTDB active; skipping bridge state push');
       _resumeWebAudio();
       if (mounted) setState(() => _lastError = null);
       return;
@@ -387,13 +393,13 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
     };
     final payloadJson = jsonEncode(payload);
     if (_lastPushedPayload == payloadJson) {
-      debugPrint('[HtmlGame] payload unchanged; skipping bridge state push');
+      _dbg('[HtmlGame] payload unchanged; skipping bridge state push');
       _resumeWebAudio();
       if (mounted) setState(() => _lastError = null);
       return;
     }
     _lastPushedPayload = payloadJson;
-    debugPrint('[HtmlGame] pushing state status=${game.status}');
+    _dbg('[HtmlGame] pushing state status=${game.status}');
     _send('state', payload);
     _resumeWebAudio();
     if (mounted) setState(() => _lastError = null);
@@ -401,7 +407,7 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
 
   void _send(String type, Map<String, dynamic> payload) {
     final msg = jsonEncode(<String, dynamic>{'type': type, ...payload});
-    debugPrint('[HtmlGame] JS >> $type');
+    _dbg('[HtmlGame] JS >> $type');
     _controller.runJavaScript('window.__bloot_bridge.receive($msg)');
   }
 
@@ -450,7 +456,7 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
               current.maybeMap(error: (_) => true, orElse: () => false) ||
               _extractGame(current) != null,
           listener: (context, state) {
-            debugPrint('[HtmlGame] cubit state: ${state.runtimeType}');
+            _dbg('[HtmlGame] cubit state: ${state.runtimeType}');
             state.mapOrNull(
               error: (s) {
                 _send('error', {'message': s.message});
@@ -541,54 +547,67 @@ class _HtmlGamePlayPageState extends State<HtmlGamePlayPage>
     // Spectators don't publish audio/video; no local toggles needed.
     if (widget.isSpectator) return const SizedBox.shrink();
 
-    // Media toggles only apply when the room was created with voice/camera
-    // enabled (bot matches and plain rooms have both flags off).
-    final game = _extractGame(context.watch<GameCubit>().state);
-    if (game == null || (!game.voiceEnabled && !game.cameraEnabled)) {
-      return const SizedBox.shrink();
-    }
+    // Scoped tightly around the media controls: the builder only rebuilds
+    // when the room's voice/camera flags change, so game state churn never
+    // rebuilds the whole page (incl. the WebView).
+    return BlocBuilder<GameCubit, GameState>(
+      buildWhen: (previous, current) {
+        final previousGame = _extractGame(previous);
+        final currentGame = _extractGame(current);
+        return previousGame?.voiceEnabled != currentGame?.voiceEnabled ||
+            previousGame?.cameraEnabled != currentGame?.cameraEnabled;
+      },
+      builder: (context, state) {
+        // Media toggles only apply when the room was created with voice/camera
+        // enabled (bot matches and plain rooms have both flags off).
+        final game = _extractGame(state);
+        if (game == null || (!game.voiceEnabled && !game.cameraEnabled)) {
+          return const SizedBox.shrink();
+        }
 
-    final agoraService = context.read<AgoraService>();
-    return SafeArea(
-      child: Align(
-        alignment: AlignmentDirectional.bottomEnd,
-        child: Padding(
-          padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (game.voiceEnabled) ...[
-                _MediaToggleButton(
-                  icon: agoraService.isMicOn
-                      ? Icons.mic_rounded
-                      : Icons.mic_off_rounded,
-                  color: agoraService.isMicOn
-                      ? ColorManager.success
-                      : ColorManager.error,
-                  onTap: () async {
-                    await context.read<GameCubit>().toggleMic();
-                    if (mounted) setState(() {});
-                  },
-                ),
-                const SizedBox(width: AppSpacing.md),
-              ],
-              if (game.cameraEnabled)
-                _MediaToggleButton(
-                  icon: agoraService.isCameraOn
-                      ? Icons.videocam_rounded
-                      : Icons.videocam_off_rounded,
-                  color: agoraService.isCameraOn
-                      ? ColorManager.success
-                      : ColorManager.darkTextMuted,
-                  onTap: () async {
-                    await context.read<GameCubit>().toggleCamera();
-                    if (mounted) setState(() {});
-                  },
-                ),
-            ],
+        final agoraService = context.read<AgoraService>();
+        return SafeArea(
+          child: Align(
+            alignment: AlignmentDirectional.bottomEnd,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (game.voiceEnabled) ...[
+                    _MediaToggleButton(
+                      icon: agoraService.isMicOn
+                          ? Icons.mic_rounded
+                          : Icons.mic_off_rounded,
+                      color: agoraService.isMicOn
+                          ? ColorManager.success
+                          : ColorManager.error,
+                      onTap: () async {
+                        await context.read<GameCubit>().toggleMic();
+                        if (mounted) setState(() {});
+                      },
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                  ],
+                  if (game.cameraEnabled)
+                    _MediaToggleButton(
+                      icon: agoraService.isCameraOn
+                          ? Icons.videocam_rounded
+                          : Icons.videocam_off_rounded,
+                      color: agoraService.isCameraOn
+                          ? ColorManager.success
+                          : ColorManager.darkTextMuted,
+                      onTap: () async {
+                        await context.read<GameCubit>().toggleCamera();
+                        if (mounted) setState(() {});
+                      },
+                    ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

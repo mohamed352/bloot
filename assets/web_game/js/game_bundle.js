@@ -1871,6 +1871,16 @@
       if (S.awaitingServerAck) return;
       setAwaitingAck();
       pushAction(S.online.code, { type: "play", seat: S.mySeat, card });
+      try {
+        const st = S.match && S.match.state;
+        if (st && Array.isArray(st.currentTrick)) {
+          renderTrickCards([...st.currentTrick, { seat: S.mySeat, card }], S.mySeat);
+          const zone = $("trick-zone");
+          const played = zone && zone.querySelector(".bt-played-card:last-child");
+          if (played) animatePlayedCard(played);
+        }
+      } catch (e) {
+      }
       return;
     }
     await playCardFlow(S.mySeat, card);

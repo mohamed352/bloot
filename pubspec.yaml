@@ -1,7 +1,7 @@
 name: bloot
 description: A new Flutter project.
 publish_to: 'none'
-version: 1.0.0+21
+version: 1.0.0+22
 
 environment:
   sdk: ^3.11.0
@@ -93,7 +93,6 @@ dev_dependencies:
   mocktail: ^1.0.5
   integration_test:
     sdk: flutter
-  test: ^1.29.0
   fake_async: ^1.3.1
   flutter_native_splash: ^2.4.6
   flutter_launcher_icons: ^0.14.3
@@ -104,10 +103,16 @@ flutter:
     - assets/translations/
     - assets/images/
     - assets/icons/
-    - assets/web_game/
+    # Web game runtime files only — excludes node_modules, package*.json,
+    # .gitignore and other build tooling that lives in assets/web_game/.
+    - assets/web_game/play.html
+    - assets/web_game/game.css
+    - assets/web_game/style.css
+    - assets/web_game/tokens.css
     - assets/web_game/js/
     - assets/web_game/js/engine/
     - assets/web_game/js/ui/
+    - assets/web_game/js/vendor/
     - assets/web_game/icons/
     - assets/web_game/assets/cards/
     - assets/sounds/

@@ -13,7 +13,7 @@ import { allocateParitySeat } from '../utils/roomPlayers';
  * function checks both playerUids and the players array and treats either as
  * "already in the room".
  */
-export const joinRoom = functions.https.onCall(async (request) => {
+export const joinRoom = functions.https.onCall({ minInstances: 0 }, async (request) => {
   if (!request.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated');
   }

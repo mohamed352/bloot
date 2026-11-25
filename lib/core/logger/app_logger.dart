@@ -5,7 +5,10 @@ import 'package:logger/logger.dart';
 export 'log_config.dart';
 
 abstract class AppLogger {
+  // In release builds only warnings/errors are printed (debug/info are the
+  // hot-path spam); everything still reaches Crashlytics as before.
   static final Logger _logger = Logger(
+    level: kReleaseMode ? Level.warning : Level.trace,
     printer: PrettyPrinter(methodCount: 0, errorMethodCount: 5, lineLength: 80),
   );
 

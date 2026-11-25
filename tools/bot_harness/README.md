@@ -73,7 +73,7 @@ npm run start -- "--code=ABCD12"
 |------|-------------|---------|
 | `--code`, `-c` | Room invite code (required) | — |
 | `--emulator` | Use the local Firebase Emulator Suite | false |
-| `--project` | Firebase project ID | `bloot-89b2b` |
+| `--project` | Firebase project ID | `bloot-42242` |
 | `--apiKey` | Firebase Web API key (required for production) | — |
 | `--host` | Emulator host | `localhost` |
 

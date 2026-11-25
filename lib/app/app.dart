@@ -121,6 +121,16 @@ class _BlootAppState extends State<BlootApp> {
     _fcmForegroundSub = _notificationService!.onMessage.listen(
       _handleForegroundFcmMessage,
     );
+
+    // Handle a notification tap that cold-started the app. It was buffered
+    // by NotificationService because this subscription didn't exist yet.
+    // Defer one frame so the router has a context to navigate from.
+    final initialMessage = _notificationService!.takeInitialMessage();
+    if (initialMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _handleFcmMessage(initialMessage);
+      });
+    }
   }
 
   void _handleForegroundFcmMessage(dynamic message) {

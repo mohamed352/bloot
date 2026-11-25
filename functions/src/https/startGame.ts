@@ -7,7 +7,7 @@ import { mirrorGameToRtdb } from '../utils/rtdbMirror';
 import { normalizeParitySeats } from '../utils/roomPlayers';
 import { buildStreamPayload, shouldAutoCreateStream } from '../utils/streaming';
 
-export const startGame = functions.https.onCall(async (request) => {
+export const startGame = functions.https.onCall({ minInstances: 0 }, async (request) => {
   console.log('[startGame] invoked', { uid: request.auth?.uid, roomId: request.data?.roomId });
 
   if (!request.auth) {

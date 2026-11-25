@@ -33,6 +33,8 @@ abstract class GameModel with _$GameModel {
     @Default(false) bool voiceEnabled,
     @Default(false) bool cameraEnabled,
     Map<String, dynamic>? engineState,
+    DateTime? turnTimerStart,
+    @Default(45) int turnTimeLimit,
   }) = _GameModel;
 
   factory GameModel.fromJson(Map<String, dynamic> json) =>
@@ -153,6 +155,8 @@ extension GameModelX on GameModel {
       voiceEnabled: voiceEnabled,
       cameraEnabled: cameraEnabled,
       engineState: engineState,
+      turnTimerStart: turnTimerStart,
+      turnTimeLimit: turnTimeLimit,
     );
   }
 }

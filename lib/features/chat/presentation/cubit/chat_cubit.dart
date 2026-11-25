@@ -17,6 +17,21 @@ class ChatCubit extends Cubit<ChatState> {
   final ChatRepository _chatRepository;
   StreamSubscription<List<ChatMessage>>? _messagesSubscription;
 
+  /// The live window of recent messages for the open conversation.
+  List<ChatMessage> _liveMessages = [];
+
+  /// Older messages appended via [loadOlderMessages], oldest page last.
+  List<ChatMessage> _olderMessages = [];
+  bool _hasMoreOlder = true;
+  bool _loadingOlder = false;
+
+  /// Whether another page of older messages may exist for the open
+  /// conversation.
+  bool get hasMoreOlder => _hasMoreOlder;
+
+  /// Whether a page of older messages is currently being fetched.
+  bool get isLoadingOlder => _loadingOlder;
+
   Future<void> loadConversations() async {
     emit(const ChatState.loading());
     try {
@@ -46,6 +61,10 @@ class ChatCubit extends Cubit<ChatState> {
   void watchMessages(String conversationId) {
     emit(const ChatState.loading());
     _messagesSubscription?.cancel();
+    _liveMessages = [];
+    _olderMessages = [];
+    _hasMoreOlder = true;
+    _loadingOlder = false;
     // Emit an empty loaded state immediately so empty conversations do not
     // stay stuck in loading.
     emit(
@@ -59,12 +78,8 @@ class ChatCubit extends Cubit<ChatState> {
         .listen(
           (messages) {
             if (isClosed) return;
-            emit(
-              ChatState.messagesLoaded(
-                conversationId: conversationId,
-                messages: messages,
-              ),
-            );
+            _liveMessages = messages;
+            _emitMessages(conversationId);
             // The conversation is open: incoming messages are seen
             // immediately, so keep the unread badge cleared. Own sends
             // already reset it server-side, so skip the extra write.
@@ -79,6 +94,52 @@ class ChatCubit extends Cubit<ChatState> {
             }
           },
         );
+  }
+
+  /// Emits the live window plus any paged older messages as one list.
+  void _emitMessages(String conversationId) {
+    if (isClosed) return;
+    emit(
+      ChatState.messagesLoaded(
+        conversationId: conversationId,
+        messages: [..._liveMessages, ..._olderMessages],
+      ),
+    );
+  }
+
+  /// Loads the next page of older messages for [conversationId] and appends
+  /// them after the live window. No-op while a page is in flight or when
+  /// the history has been fully loaded.
+  Future<void> loadOlderMessages(String conversationId) async {
+    if (_loadingOlder || !_hasMoreOlder) return;
+    final currentState = state;
+    if (currentState is! ChatMessagesLoaded ||
+        currentState.conversationId != conversationId) {
+      return;
+    }
+
+    _loadingOlder = true;
+    try {
+      final older = await _chatRepository.getOlderMessages(conversationId);
+      if (isClosed) return;
+      if (older.isEmpty) {
+        _hasMoreOlder = false;
+        return;
+      }
+      final knownIds = <String>{
+        ..._liveMessages.map((m) => m.id),
+        ..._olderMessages.map((m) => m.id),
+      };
+      _olderMessages = [
+        ..._olderMessages,
+        ...older.where((m) => !knownIds.contains(m.id)),
+      ];
+      _emitMessages(conversationId);
+    } catch (e) {
+      AppLogger.error('Failed to load older messages', error: e);
+    } finally {
+      _loadingOlder = false;
+    }
   }
 
   Future<void> loadMessages(String conversationId) async {

@@ -3,7 +3,7 @@ import { db } from '../config/admin';
 import { requireAppCheck } from '../utils/appCheck';
 import { removeGameFromRtdb } from '../utils/rtdbMirror';
 
-export const rematch = functions.https.onCall(async (request) => {
+export const rematch = functions.https.onCall({ minInstances: 0 }, async (request) => {
   if (!request.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated');
   }

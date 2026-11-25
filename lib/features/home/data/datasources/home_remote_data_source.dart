@@ -39,6 +39,7 @@ class HomeRemoteDataSource {
             .collection('streams')
             .where('status', isEqualTo: 'live')
             .orderBy('viewerCount', descending: true)
+            .limit(50)
             .snapshots()
             .listen(
               (snapshot) {
@@ -79,6 +80,7 @@ class HomeRemoteDataSource {
           .collection('streams')
           .where('status', isEqualTo: 'live')
           .orderBy('viewerCount', descending: true)
+          .limit(50)
           .get();
       final streams = snapshot.docs.map((doc) {
         final data = doc.data();
@@ -123,15 +125,12 @@ class HomeRemoteDataSource {
 
     if (roomIds.isEmpty) return [];
 
-    final roomDocs = await Future.wait(
-      roomIds.map((id) => _firestore.collection('rooms').doc(id).get()),
-    );
+    final roomsById = await _fetchRoomsById(roomIds);
 
     // Maps a valid room id to the stream id it currently broadcasts.
     final activeStreamByRoom = <String, String>{};
-    for (final doc in roomDocs) {
-      if (!doc.exists) continue;
-      final data = doc.data()!;
+    for (final entry in roomsById.entries) {
+      final data = entry.value;
       final playerUids = data['playerUids'];
       final status = data['status'] as String?;
       final hasPlayers = playerUids is List && playerUids.isNotEmpty;
@@ -142,7 +141,7 @@ class HomeRemoteDataSource {
           isStreaming &&
           roomStreamId != null &&
           roomStreamId.isNotEmpty) {
-        activeStreamByRoom[doc.id] = roomStreamId;
+        activeStreamByRoom[entry.key] = roomStreamId;
       }
     }
 
@@ -152,5 +151,27 @@ class HomeRemoteDataSource {
           roomId.isNotEmpty &&
           activeStreamByRoom[roomId] == s.id;
     }).toList();
+  }
+
+  /// Fetches room documents for [roomIds] with batched `whereIn` queries
+  /// (30 ids per chunk, the Firestore limit) instead of one read per room.
+  /// Returns a map of room id to its data; missing rooms are absent.
+  Future<Map<String, Map<String, dynamic>>> _fetchRoomsById(
+    Set<String> roomIds,
+  ) async {
+    final roomsById = <String, Map<String, dynamic>>{};
+    final ids = roomIds.toList();
+    const chunkSize = 30;
+    for (var i = 0; i < ids.length; i += chunkSize) {
+      final end = i + chunkSize > ids.length ? ids.length : i + chunkSize;
+      final snapshot = await _firestore
+          .collection('rooms')
+          .where(FieldPath.documentId, whereIn: ids.sublist(i, end))
+          .get();
+      for (final doc in snapshot.docs) {
+        roomsById[doc.id] = doc.data();
+      }
+    }
+    return roomsById;
   }
 }

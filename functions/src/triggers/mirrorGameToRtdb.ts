@@ -24,13 +24,16 @@ export const mirrorGameToRtdbTrigger = onDocumentWritten(
     }
 
     const game = after.data() as any;
+    const previous = event.data?.before?.exists
+      ? (event.data?.before?.data() as any)
+      : null;
     if (game.status === 'gameEnd' || game.endedAt) {
       // Keep the final state briefly available, then remove it. The final
       // score screen is rendered from the last snapshot before removal.
-      await mirrorGameToRtdb(game);
+      await mirrorGameToRtdb(game, previous);
       return;
     }
 
-    await mirrorGameToRtdb(game);
+    await mirrorGameToRtdb(game, previous);
   },
 );

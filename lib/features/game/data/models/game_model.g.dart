@@ -38,6 +38,10 @@ _GameModel _$GameModelFromJson(Map<String, dynamic> json) => _GameModel(
   voiceEnabled: json['voiceEnabled'] as bool? ?? false,
   cameraEnabled: json['cameraEnabled'] as bool? ?? false,
   engineState: json['engineState'] as Map<String, dynamic>?,
+  turnTimerStart: json['turnTimerStart'] == null
+      ? null
+      : DateTime.parse(json['turnTimerStart'] as String),
+  turnTimeLimit: (json['turnTimeLimit'] as num?)?.toInt() ?? 45,
 );
 
 Map<String, dynamic> _$GameModelToJson(_GameModel instance) =>
@@ -67,6 +71,8 @@ Map<String, dynamic> _$GameModelToJson(_GameModel instance) =>
       'voiceEnabled': instance.voiceEnabled,
       'cameraEnabled': instance.cameraEnabled,
       'engineState': instance.engineState,
+      'turnTimerStart': instance.turnTimerStart?.toIso8601String(),
+      'turnTimeLimit': instance.turnTimeLimit,
     };
 
 _GamePlayerModel _$GamePlayerModelFromJson(Map<String, dynamic> json) =>

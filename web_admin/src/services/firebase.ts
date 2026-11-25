@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
 import { getStorage } from 'firebase/storage';
 
@@ -24,7 +24,12 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+// Auto-detect long polling: if the realtime streaming (WebChannel) connection
+// is blocked/broken (ad blockers, antivirus HTTPS scanning, strict proxies),
+// the SDK automatically falls back to long polling instead of hanging forever.
+export const db = initializeFirestore(app, {
+  experimentalAutoDetectLongPolling: true,
+});
 export const functions = getFunctions(app);
 export const storage = getStorage(app);
 

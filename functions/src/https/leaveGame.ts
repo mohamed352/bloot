@@ -10,7 +10,7 @@ import { requireAppCheck } from '../utils/appCheck';
  * room and the active game document (marking the player disconnected) in a
  * single transaction.
  */
-export const leaveGame = functions.https.onCall(async (request) => {
+export const leaveGame = functions.https.onCall({ minInstances: 0 }, async (request) => {
   if (!request.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated');
   }

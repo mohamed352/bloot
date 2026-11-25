@@ -5,7 +5,7 @@ import { BalootEngine } from '../engine';
 import { GameDocument, loadMatch, saveMatch } from '../engine/gameAdapter';
 import { buildGameUpdate, deepCloneGame } from '../utils/gameUpdate';
 
-export const dealNextRound = functions.https.onCall(async (request) => {
+export const dealNextRound = functions.https.onCall({ minInstances: 0 }, async (request) => {
   if (!request.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated');
   }

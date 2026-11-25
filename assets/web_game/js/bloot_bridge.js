@@ -163,6 +163,15 @@
   // ── Realtime Database watcher ────────────────────────────────────────
   async function initRtdb(config) {
     if (!config || !config.gameId || !config.firebaseConfig) return false;
+    // Watchdog: if the fast path hasn't delivered its first snapshot within 3s
+    // (SDK failed to load, auth/connect failure, rules denied, etc.), stay on
+    // the slow Flutter bridge path and let Flutter know.
+    setTimeout(function () {
+      if (!rtdbActive) {
+        console.warn('[bloot] RTDB fast path unavailable, staying on bridge');
+        sendToFlutter({ type: 'rtdbUnavailable' });
+      }
+    }, 3000);
     if (!window.firebase || !firebase.database || !firebase.auth) {
       console.warn('[BlootBridge] Firebase SDK not loaded; using bridge fallback');
       return false;

@@ -351,5 +351,127 @@ void main() {
       expect(entity.teamAScore, 80);
       expect(entity.teamBScore, 120);
     });
+
+    blocTest<GameCubit, GameState>(
+      'calls advanceTrick after the trick-end pause when it is my turn',
+      build: () {
+        when(() => mockRepository.watchGame('g1')).thenAnswer(
+          (_) => Stream.value(
+            testGame.copyWith(status: 'trickEnd', turnIndex: 0),
+          ),
+        );
+        when(() => mockRepository.advanceTrick('g1'))
+            .thenAnswer((_) async => null);
+        return GameCubit(
+          gameRepository: mockRepository,
+          roomRepository: mockRoomRepository,
+          agoraService: mockAgoraService,
+          audioService: mockAudioService,
+          trickEndAdvanceDelay: const Duration(milliseconds: 10),
+        );
+      },
+      act: (cubit) => cubit.watchGame('g1'),
+      wait: const Duration(milliseconds: 200),
+      expect: () => [
+        const GameState.loading(),
+        isA<GameTrickEnd>(),
+      ],
+      verify: (_) {
+        verify(() => mockRepository.advanceTrick('g1')).called(1);
+      },
+    );
+
+    blocTest<GameCubit, GameState>(
+      'calls checkTurnTimeout when the turn exceeds its time limit',
+      build: () {
+        when(() => mockRepository.watchGame('g1')).thenAnswer(
+          (_) => Stream.value(
+            testGame.copyWith(
+              status: 'playing',
+              turnIndex: 1,
+              turnTimerStart: DateTime.now(),
+              turnTimeLimit: 1,
+            ),
+          ),
+        );
+        when(() => mockRepository.checkTurnTimeout('g1'))
+            .thenAnswer((_) async => true);
+        return GameCubit(
+          gameRepository: mockRepository,
+          roomRepository: mockRoomRepository,
+          agoraService: mockAgoraService,
+          audioService: mockAudioService,
+          turnTimeoutGrace: const Duration(milliseconds: 10),
+        );
+      },
+      act: (cubit) => cubit.watchGame('g1'),
+      wait: const Duration(milliseconds: 1500),
+      expect: () => [
+        const GameState.loading(),
+        isA<GamePlaying>(),
+      ],
+      verify: (_) {
+        verify(() => mockRepository.checkTurnTimeout('g1')).called(1);
+      },
+    );
+
+    blocTest<GameCubit, GameState>(
+      'does not call checkTurnTimeout before the time limit elapses',
+      build: () {
+        when(() => mockRepository.watchGame('g1')).thenAnswer(
+          (_) => Stream.value(
+            testGame.copyWith(
+              status: 'playing',
+              turnIndex: 1,
+              turnTimerStart: DateTime.now(),
+              turnTimeLimit: 45,
+            ),
+          ),
+        );
+        return GameCubit(
+          gameRepository: mockRepository,
+          roomRepository: mockRoomRepository,
+          agoraService: mockAgoraService,
+          audioService: mockAudioService,
+          turnTimeoutGrace: const Duration(milliseconds: 10),
+        );
+      },
+      act: (cubit) => cubit.watchGame('g1'),
+      wait: const Duration(milliseconds: 200),
+      expect: () => [
+        const GameState.loading(),
+        isA<GamePlaying>(),
+      ],
+      verify: (_) {
+        verifyNever(() => mockRepository.checkTurnTimeout(any()));
+      },
+    );
+
+    blocTest<GameCubit, GameState>(
+      'does not call advanceTrick when it is another player\'s turn',
+      build: () {
+        when(() => mockRepository.watchGame('g1')).thenAnswer(
+          (_) => Stream.value(
+            testGame.copyWith(status: 'trickEnd', turnIndex: 1),
+          ),
+        );
+        return GameCubit(
+          gameRepository: mockRepository,
+          roomRepository: mockRoomRepository,
+          agoraService: mockAgoraService,
+          audioService: mockAudioService,
+          trickEndAdvanceDelay: const Duration(milliseconds: 10),
+        );
+      },
+      act: (cubit) => cubit.watchGame('g1'),
+      wait: const Duration(milliseconds: 200),
+      expect: () => [
+        const GameState.loading(),
+        isA<GameTrickEnd>(),
+      ],
+      verify: (_) {
+        verifyNever(() => mockRepository.advanceTrick(any()));
+      },
+    );
   });
 }

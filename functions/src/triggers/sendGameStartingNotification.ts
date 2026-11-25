@@ -1,5 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import { sendFcmToUserDevices } from '../utils/messaging';
 
 /**
  * Sends an FCM push notification when a room's game starts.
@@ -28,12 +29,6 @@ export const sendGameStartingNotification = functions.firestore
       const settings = userData.settings as Record<string, any> | undefined;
       if (settings?.notifications?.gameStarts === false) continue;
 
-      const fcmToken = userData.fcmToken as string | undefined;
-      if (!fcmToken) {
-        functions.logger.info(`No FCM token for user ${playerUid}`);
-        continue;
-      }
-
       const locale = (userData.locale as string | undefined) ?? 'en';
       const isArabic = locale.startsWith('ar');
       const title = isArabic ? 'اللعبة تبدأ!' : 'Game Starting!';
@@ -45,8 +40,7 @@ export const sendGameStartingNotification = functions.firestore
           ? 'لعبتك في البلوت ستبدأ الآن.'
           : 'Your Baloot game is starting now.';
 
-      const payload: admin.messaging.Message = {
-        token: fcmToken,
+      const payload: Omit<admin.messaging.MulticastMessage, 'tokens'> = {
         notification: {
           title,
           body,
@@ -76,11 +70,11 @@ export const sendGameStartingNotification = functions.firestore
         },
       };
 
-      try {
-        await admin.messaging().send(payload);
+      const result = await sendFcmToUserDevices(playerUid, payload, userData);
+      if (result.success) {
         functions.logger.info(`Sent game starting notification to ${playerUid}`);
-      } catch (error) {
-        functions.logger.error(`Failed to send FCM to ${playerUid}`, error);
+      } else {
+        functions.logger.error(`Failed to send FCM to ${playerUid}: ${result.error}`);
       }
     }
   });
