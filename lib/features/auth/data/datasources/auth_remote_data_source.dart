@@ -77,6 +77,19 @@ class AuthRemoteDataSource {
     } on GoogleSignInException catch (e) {
       AppLogger.error('Google sign in failed', error: e, tag: 'Auth');
       if (e.code == GoogleSignInExceptionCode.canceled) {
+        // Android Credential Manager can misreport an OAuth configuration
+        // failure as "canceled" after an account is selected. Preserve the
+        // actual error instead of silently treating this known failure as a
+        // user dismissal.
+        if (e.description?.toLowerCase().contains('account reauth failed') ==
+            true) {
+          throw const AuthException(
+            'Google Sign-In is not configured for this Android signing key. '
+            'Add its SHA-1 fingerprint in Firebase and refresh '
+            'google-services.json.',
+            code: 'GOOGLE_SIGN_IN_CONFIGURATION_ERROR',
+          );
+        }
         return null;
       }
       throw AuthException(
